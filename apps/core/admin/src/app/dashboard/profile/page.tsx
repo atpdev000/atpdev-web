@@ -29,9 +29,11 @@ const COLOR_OPTIONS = [
   { key: "green",   label: "Verde claro"},
 ];
 
-const inputClass  = "bg-\[\#1A1A1A\] border border-gray-800 text-white px-3 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 transition-all text-sm w-full";
+const inputClass  = "bg-[#1A1A1A] border border-gray-800 text-white px-3 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 transition-all text-sm w-full";
 const labelClass  = "text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1.5 block";
-const selectClass = "bg-\[\#1A1A1A\] border border-gray-800 text-white px-3 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 transition-all text-sm w-full";
+const selectClass = "bg-[#1A1A1A] border border-gray-800 text-white px-3 py-2.5 rounded-xl focus:outline-none focus:border-blue-500 transition-all text-sm w-full";
+
+export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
   const [experiences, skills] = await Promise.all([getAllExperiences(), getAllSkills()]);

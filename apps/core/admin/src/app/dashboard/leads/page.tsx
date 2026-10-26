@@ -1,6 +1,8 @@
 import { getLeads } from "@atpdev/database";
 import LeadsClient from "./LeadsClient";
 
+export const dynamic = 'force-dynamic';
+
 export default async function LeadsPage() {
   const leads = await getLeads();
 

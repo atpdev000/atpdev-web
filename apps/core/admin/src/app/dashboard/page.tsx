@@ -4,6 +4,8 @@ import { TrafficChart } from "@/components/TrafficChart";
 import { DashboardActions } from "@/components/DashboardActions";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const projects = await getProjects();
   const leads = await getLeads();

@@ -1,6 +1,8 @@
 import { getProjects, getLeads } from "@atpdev/database";
 import { BarChart3, TrendingUp, Users, FolderKanban, AlertTriangle } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AnalyticsPage() {
   const projects = await getProjects();
   const leads = await getLeads();

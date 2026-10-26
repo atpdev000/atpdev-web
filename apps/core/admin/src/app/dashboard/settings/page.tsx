@@ -6,6 +6,8 @@ import { ThemeBuilder } from "./ThemeBuilder";
 import { SubmitButton } from "./SubmitButton";
 import { AvatarPicker } from "./AvatarPicker";
 
+export const dynamic = 'force-dynamic';
+
 export default async function SettingsPage() {
   const config = await getSiteConfig();
 
