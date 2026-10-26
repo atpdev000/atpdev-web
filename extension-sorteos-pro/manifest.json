@@ -1,0 +1,72 @@
+{
+  "manifest_version": 3,
+  "name": "Sorteos Pro — Extractor Oficial 1-Clic",
+  "version": "1.1.0",
+  "description": "Extrae el 100% de comentarios reales de publicaciones de X (Twitter), Instagram, TikTok y YouTube en 1 solo clic.",
+  "permissions": [
+    "tabs",
+    "scripting",
+    "activeTab",
+    "cookies"
+  ],
+  "host_permissions": [
+    "https://x.com/*",
+    "https://twitter.com/*",
+    "https://*.instagram.com/*",
+    "https://instagram.com/*",
+    "https://*.tiktok.com/*",
+    "https://tiktok.com/*",
+    "https://*.youtube.com/*",
+    "https://youtube.com/*",
+    "https://*.facebook.com/*",
+    "https://facebook.com/*",
+    "https://*.threads.net/*",
+    "http://localhost:3006/*",
+    "http://127.0.0.1:3006/*",
+    "https://*.sorteos.pro/*",
+    "https://sorteos.pro/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:3006/*",
+        "http://127.0.0.1:3006/*",
+        "https://*.sorteos.pro/*",
+        "https://sorteos.pro/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": ["x-extractor.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.instagram.com/*",
+        "https://instagram.com/*"
+      ],
+      "js": ["ig-extractor.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.tiktok.com/*",
+        "https://tiktok.com/*"
+      ],
+      "js": ["tiktok-extractor.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sorteos Pro Extractor Universal"
+  }
+}

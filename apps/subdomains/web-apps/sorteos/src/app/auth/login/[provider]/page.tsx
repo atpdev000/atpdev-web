@@ -658,20 +658,17 @@ export default function SocialLoginPage() {
                 <li>Haz clic en el marcador: ¡enviará los 34 comentarios a Sorteos Pro en 0.5s!</li>
               </ol>
 
-              {/* Botón Marcador Arrastrable */}
+              {/* Botón Extractor 1-Clic */}
               <div className="pt-2">
-                <a
-                  href={`javascript:(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:#10b981;color:#000;padding:14px 20px;border-radius:12px;font-family:sans-serif;font-weight:bold;box-shadow:0 10px 30px rgba(0,0,0,0.5);font-size:14px;';b.innerText='⏳ Sorteos Pro: Sincronizando...';document.body.appendChild(b);for(let s=0;s<4;s++){window.scrollBy(0,1200);await new Promise(r=>setTimeout(r,300));}window.scrollTo(0,0);const list=[];const seen=new Set();document.querySelectorAll('article').forEach(a=>{const u=a.querySelector('[data-testid="User-Name"]');const t=a.querySelector('[data-testid="tweetText"]');if(u){const m=u.innerText.match(/@([a-zA-Z0-9_]{1,15})/);const h=m?m[1]:'';const text=t?t.innerText.trim():'';if(h&&!seen.has(h.toLowerCase())){seen.add(h.toLowerCase());list.push({username:h,commentText:text||'Respuesta en X'});}}});fetch('http://localhost:3006/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:list,cookies:document.cookie,handle:'@NACHOAT00'})}).then(r=>r.json()).then(d=>{b.style.background='#10b981';b.style.color='#fff';b.innerText='✅ ¡'+(d.count||list.length)+' respuestas sincronizadas!';setTimeout(()=>b.remove(),4000);}).catch(e=>{b.style.background='#ef4444';b.style.color='#fff';b.innerText='❌ Error: '+e.message;setTimeout(()=>b.remove(),5000);});})();`}
-                  onClick={(e) => {
-                    // Si el usuario hace clic en vez de arrastrar, copiar el script para conveniencia
-                    handleCopyExtractor();
-                  }}
-                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-mono text-xs font-black shadow-lg flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing transition-all text-center"
-                  title="Arrastra este botón a tu barra de marcadores de Edge"
+                <button
+                  type="button"
+                  onClick={handleCopyExtractor}
+                  className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-mono text-xs font-black shadow-lg flex items-center justify-center gap-2 cursor-pointer transition-all text-center"
+                  title="Haz clic para copiar el script extractor"
                 >
                   <Sparkles className="w-4 h-4 shrink-0 fill-current" />
-                  <span>🎯 Arrastra este Marcador a Favoritos (o Clic para Copiar)</span>
-                </a>
+                  <span>🎯 Copiar Script Extractor 1-Clic</span>
+                </button>
               </div>
             </div>
 

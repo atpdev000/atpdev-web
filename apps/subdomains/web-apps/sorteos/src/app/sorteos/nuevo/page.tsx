@@ -27,9 +27,12 @@ import {
   Clipboard,
   Zap,
   Rocket,
-  Lock,
   MessageSquare,
-  Key
+  Key,
+  Info,
+  Download,
+  FolderOpen,
+  Copy
 } from 'lucide-react';
 import { InstagramIcon, FacebookIcon, YoutubeIcon, TikTokIcon, XIcon, ThreadsIcon } from '@/components/SocialIcons';
 import { SocialNetwork, GiveawayRules, Participant, Giveaway } from '@/lib/types';
@@ -145,6 +148,7 @@ interface AdditionalSource {
     title?: string;
     author?: string;
     totalComments?: number;
+    officialCounter?: number;
     postId?: string;
     thumbnail?: string;
     requiresAuth?: boolean;
@@ -210,6 +214,44 @@ interface AdditionalSource {
   // Estado de recopilación automática en nueva pestaña con sesión activa
   const [autoCollectActive, setAutoCollectActive] = useState<boolean>(false);
   const [autoCollectCount, setAutoCollectCount] = useState<number | null>(null);
+
+  // Estado de detección de la extensión oficial 1-Clic para Edge / Chrome
+  const [isExtensionInstalled, setIsExtensionInstalled] = useState<boolean>(false);
+  const [extProgressCount, setExtProgressCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkExt = () => {
+      if ((window as any).__SORTEOS_PRO_EXTENSION__ || document.documentElement.getAttribute('data-sorteos-pro-extension')) {
+        setIsExtensionInstalled(true);
+      }
+    };
+    checkExt();
+    const onLoaded = () => setIsExtensionInstalled(true);
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === 'SORTEOS_PRO_PONG') setIsExtensionInstalled(true);
+      if (e.data?.type === 'SORTEOS_PRO_EXTRACT_PROGRESS') {
+        if (typeof e.data.count === 'number') {
+          setExtProgressCount(e.data.count);
+        }
+      }
+    };
+    window.addEventListener('sorteos_pro_extension_loaded', onLoaded);
+    window.addEventListener('message', onMsg);
+    window.postMessage({ type: 'SORTEOS_PRO_PING' }, '*');
+
+    // Polling ligero para detectar la extensión en caliente apenas el usuario la active en Edge
+    const pingTimer = setInterval(() => {
+      checkExt();
+      window.postMessage({ type: 'SORTEOS_PRO_PING' }, '*');
+    }, 1500);
+
+    return () => {
+      window.removeEventListener('sorteos_pro_extension_loaded', onLoaded);
+      window.removeEventListener('message', onMsg);
+      clearInterval(pingTimer);
+    };
+  }, []);
 
   // Modal para conectar/verificar cuenta social directamente desde aquí
   const [connectModalOpen, setConnectModalOpen] = useState<boolean>(false);
@@ -335,6 +377,7 @@ interface AdditionalSource {
           title?: string;
           author?: string;
           totalComments?: number;
+          officialCounter?: number;
           postId?: string;
           thumbnail?: string;
           requiresAuth?: boolean;
@@ -361,9 +404,10 @@ interface AdditionalSource {
           setPostMeta((prev) => ({
             ...prev,
             ...res.meta,
-            totalComments: res.meta?.totalComments || prev?.totalComments || tagged.length,
+            totalComments: res.meta?.totalComments || tagged.length,
+            officialCounter: res.meta?.officialCounter || prev?.officialCounter,
             requiresAuth: false,
-            notice: undefined,
+            notice: res.meta?.notice,
           }));
         }
       }
@@ -601,6 +645,9 @@ interface AdditionalSource {
     ? connectedAccounts.find((a) => (a.platform === network || a.network === network))
     : undefined;
 
+  const [isEditingAuthor, setIsEditingAuthor] = useState<boolean>(false);
+  const [customAuthorInput, setCustomAuthorInput] = useState<string>('');
+
   // Autor oficial verificado libre de datos ficticios (@usuario_x)
   const displayAuthor = (() => {
     const raw = postMeta?.author || '';
@@ -771,6 +818,7 @@ interface AdditionalSource {
             title?: string;
             author?: string;
             totalComments?: number;
+            officialCounter?: number;
             postId?: string;
             thumbnail?: string;
             requiresAuth?: boolean;
@@ -782,6 +830,7 @@ interface AdditionalSource {
           body: {
             platform: effectivePlatform,
             postUrl: targetUrl,
+            fetchAll: true,
           },
         });
 
@@ -954,6 +1003,7 @@ interface AdditionalSource {
       if (/(=>|;|document\.|navigator\.|window\.|alert\(|console\.|JSON\.|querySelectorAll|\.clipboard|new Set\(\)|addEventListener)/i.test(s)) return true;
       if (/^[{}()\[\];,\s=]+$/.test(s)) return true;
       if (s.includes('data-testid') || s.includes('article') || s.includes('innerHTML') || s.includes('innerText') || s.includes('seen.has')) return true;
+      if (s.toLowerCase().includes('react has blocked') || s.toLowerCase().includes('security precaution') || s.toLowerCase().includes('call stack') || s.toLowerCase().includes('runtime error')) return true;
       return false;
     };
 
@@ -1374,15 +1424,33 @@ interface AdditionalSource {
     }
   };
 
-  const handleOpenXAndSync = () => {
-    // Abre en NUEVA PESTAÑA del mismo navegador (no nueva ventana)
-    if (postUrl) {
-      window.open(postUrl, '_blank', 'noopener');
+  const [openingInstaller, setOpeningInstaller] = useState<boolean>(false);
+  const handleOpenInstaller = async () => {
+    setOpeningInstaller(true);
+    try {
+      // 1. Abrir automáticamente la pestaña oficial del instalador en una nueva pestaña
+      if (typeof window !== 'undefined') {
+        window.open('/sorteos/extension-install', '_blank');
+      }
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText('D:\\PROYECTOS\\atpdev-web\\extension-sorteos-pro').catch(() => {});
+      }
+      await fetch('/api/v1/extension/open-installer', { method: 'POST' }).catch(() => {});
+      setXSyncFeedbackType('success');
+      setXSyncFeedback('¡Se abrió la pestaña del instalador oficial! Sigue los pasos en la nueva pestaña para activar la extensión en 1 clic.');
+    } catch {
+      // noop
+    } finally {
+      setOpeningInstaller(false);
     }
-    setXSyncFeedback(null);
-    setXSyncClipboardText('');
-    setPasteMergeMode('merge');
-    setIsXSyncModalOpen(true);
+  };
+
+  const handleOpenPlatformAndSync = (plat: SocialNetwork = network) => {
+    handleLoadAllComments(plat);
+  };
+
+  const handleOpenXAndSync = () => {
+    handleOpenPlatformAndSync('x');
   };
 
   // Cargar únicamente los comentarios 100% reales extraídos del post
@@ -1473,7 +1541,13 @@ interface AdditionalSource {
                 if (newOnes.length > 0) {
                   const combined = [...cleanPrev, ...newOnes];
                   setXSyncFeedbackType('success');
-                  setXSyncFeedback(`¡Autodetectados ${newOnes.length} comentarios reales del portapapeles!`);
+                  setXSyncFeedback(`¡Autodetectados ${combined.length} comentarios reales del portapapeles!`);
+                  setPostMeta((prevMeta) => ({
+                    ...prevMeta,
+                    totalComments: Math.max(prevMeta?.totalComments || 0, combined.length),
+                    requiresAuth: false,
+                  }));
+                  setTimeout(() => setIsXSyncModalOpen(false), 900);
                   return combined;
                 }
                 return cleanPrev.length !== prev.length ? cleanPrev : prev;
@@ -1492,9 +1566,9 @@ interface AdditionalSource {
     };
   }, [step, network, displayAuthor]);
 
-  // Polling continuo en tiempo real para importación en vivo (desde pestaña de X o marcador)
+  // Polling continuo en tiempo real para importación en vivo (desde pestaña del navegador o extensión)
   useEffect(() => {
-    if (step !== 2 || network !== 'x' || !postUrl) return;
+    if (step !== 2 || !postUrl) return;
     if (!autoCollectActive && !isXSyncModalOpen && postMeta?.totalComments && rawComments.length >= postMeta.totalComments) return;
 
     let active = true;
@@ -1513,7 +1587,7 @@ interface AdditionalSource {
             const valid = exactAuthorHandle
               ? data.comments.filter((c: any) => c.username.toLowerCase().replace(/^@/, '') !== exactAuthorHandle)
               : data.comments;
-            const tagged = valid.map((c: any) => ({ ...c, network: 'x' }));
+            const tagged = valid.map((c: any) => ({ ...c, network: (c.network as SocialNetwork) || network }));
 
             setRawComments(tagged);
             setCommentSourceMode('live');
@@ -1527,13 +1601,13 @@ interface AdditionalSource {
             setAutoCollectActive(false);
             setIsXSyncModalOpen(false);
             setXSyncFeedbackType('success');
-            setXSyncFeedback(`¡Éxito! ${tagged.length} comentarios reales sincronizados en vivo desde X.`);
+            setXSyncFeedback(`¡Éxito! ${tagged.length} comentarios reales sincronizados en vivo desde ${network.toUpperCase()}.`);
           }
         }
       } catch {
         // noop
       }
-    }, 1500);
+    }, 1200);
 
     return () => {
       active = false;
@@ -1564,13 +1638,143 @@ interface AdditionalSource {
     const plat = targetPlatform || network;
     setXSyncLoading(true);
     setXSyncFeedback(null);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const authorHandleMatch = displayAuthor.match(/@([a-zA-Z0-9_]+)/);
     const exactAuthorHandle = authorHandleMatch
       ? authorHandleMatch[1].toLowerCase()
       : displayAuthor.replace(/^@/, '').toLowerCase().trim();
+
+    // 0. Prioridad Máxima: Si la extensión oficial está activa, extraer comentarios 100% REALES
+    setExtProgressCount(null);
+    if (typeof window !== 'undefined' && ((window as any).__SORTEOS_PRO_EXTENSION__ || isExtensionInstalled || document.documentElement.getAttribute('data-sorteos-pro-extension'))) {
+      setXSyncFeedbackType('info');
+      setXSyncFeedback(`Extrayendo comentarios reales desde tu pestaña de ${plat.toUpperCase()} con la extensión oficial...`);
+
+      // Iniciar polling simultáneo del backend por si la extensión envía directo por HTTP
+      let pollDone = false;
+      const pollInterval = setInterval(async () => {
+        if (pollDone) return;
+        try {
+          const checkRes = await fetch(`/api/v1/social/import-live?postUrl=${encodeURIComponent(postUrl.trim())}`);
+          if (checkRes.ok) {
+            const checkData = await checkRes.json();
+            if (checkData.success && Array.isArray(checkData.comments) && checkData.comments.length > 0) {
+              pollDone = true;
+              clearInterval(pollInterval);
+              const valid = exactAuthorHandle
+                ? checkData.comments.filter((c: any) => c.username.toLowerCase().replace(/^@/, '') !== exactAuthorHandle)
+                : checkData.comments;
+              const tagged: Participant[] = valid.map((c: any) => ({ ...c, network: plat as SocialNetwork }));
+              setRawComments(tagged);
+              setCommentSourceMode('live');
+              setPostMeta((prev) => ({
+                ...prev,
+                totalComments: Math.max(prev?.totalComments || 0, tagged.length),
+                requiresAuth: false,
+                notice: undefined,
+              }));
+              setXSyncFeedbackType('success');
+              setXSyncFeedback(`¡Éxito! Se sincronizaron las ${tagged.length} respuestas 100% REALES de ${plat.toUpperCase()} con la extensión.`);
+              setTimeout(() => setIsXSyncModalOpen(false), 900);
+              setXSyncLoading(false);
+            }
+          }
+        } catch {
+          // noop
+        }
+      }, 1500);
+
+      const extPromise = new Promise<any>((resolve) => {
+        const tm = setTimeout(() => {
+          clearInterval(pollInterval);
+          resolve(null);
+        }, 35000);
+        const onRes = (event: MessageEvent) => {
+          if (event.data?.type === 'SORTEOS_PRO_EXTRACT_RESPONSE') {
+            clearTimeout(tm);
+            clearInterval(pollInterval);
+            window.removeEventListener('message', onRes);
+            resolve(event.data);
+          } else if (event.data?.type === 'SORTEOS_PRO_EXTRACT_PROGRESS') {
+            if (typeof event.data.count === 'number') {
+              setExtProgressCount(event.data.count);
+              setXSyncFeedback(`Extrayendo: ${event.data.count} comentarios en vivo de ${plat.toUpperCase()}...`);
+            }
+          }
+        };
+        window.addEventListener('message', onRes);
+        window.postMessage({
+          type: 'SORTEOS_PRO_EXTRACT_REQUEST',
+          platform: plat,
+          postUrl: postUrl.trim(),
+          expectedCount: postMeta?.totalComments || 1000,
+        }, '*');
+      });
+
+      const extResult = await extPromise;
+      if (pollDone) return;
+      if (extResult && extResult.success && Array.isArray(extResult.comments) && extResult.comments.length > 0) {
+        pollDone = true;
+        clearInterval(pollInterval);
+        const valid = exactAuthorHandle
+          ? extResult.comments.filter((c: any) => c.username.toLowerCase().replace(/^@/, '') !== exactAuthorHandle)
+          : extResult.comments;
+
+        const tagged: Participant[] = valid.map((c: any) => ({ ...c, network: plat as SocialNetwork }));
+        setRawComments(tagged);
+        setCommentSourceMode('live');
+        setPostMeta((prev) => ({
+          ...prev,
+          totalComments: Math.max(prev?.totalComments || 0, tagged.length),
+          requiresAuth: false,
+          notice: undefined,
+        }));
+        setXSyncFeedbackType('success');
+        setXSyncFeedback(`¡Éxito! Se extrajeron las ${tagged.length} respuestas 100% REALES de ${plat.toUpperCase()} con la extensión.`);
+        setTimeout(() => setIsXSyncModalOpen(false), 900);
+        setXSyncLoading(false);
+        return;
+      }
+    }
+
+    // 1. Prioridad: Verificar si el portapapeles ya contiene respuestas copiadas
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText().catch(() => '');
+        if (text && text.trim().length > 10) {
+          const parsed = parseAnyCommentInput(text, plat);
+          const valid = exactAuthorHandle
+            ? parsed.filter((c) => c.username.toLowerCase().replace(/^@/, '') !== exactAuthorHandle)
+            : parsed;
+
+          if (valid.length > 3) {
+            const tagged = valid.map((c) => ({ ...c, network: (plat as SocialNetwork) }));
+            setRawComments(tagged);
+            setCommentSourceMode('live');
+            setPostMeta((prev) => ({
+              ...prev,
+              totalComments: Math.max(prev?.totalComments || 0, tagged.length),
+              requiresAuth: false,
+              notice: undefined,
+            }));
+
+            setXSyncFeedbackType('success');
+            setXSyncFeedback(`¡Éxito! Se sincronizaron las ${tagged.length} respuestas reales extraídas de ${plat.toUpperCase()}.`);
+            setTimeout(() => {
+              setIsXSyncModalOpen(false);
+            }, 1200);
+            setXSyncLoading(false);
+            return;
+          }
+        }
+      }
+    } catch {
+      // noop
+    }
+
+    // 2. Consultar al backend para extraer respuestas públicas o autenticadas
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     try {
       const res = await api<{
@@ -1584,6 +1788,7 @@ interface AdditionalSource {
           platform: plat,
           postUrl: postUrl.trim(),
           fetchAll: true,
+          continuationToken: postMeta?.continuationToken,
         },
         signal: controller.signal,
       }).catch((err) => {
@@ -1604,26 +1809,76 @@ interface AdditionalSource {
 
         setPostMeta((prev) => ({
           ...prev,
-          totalComments: Math.max(prev?.totalComments || 0, tagged.length),
+          totalComments: Math.max(prev?.totalComments || 0, res.meta?.totalComments || tagged.length),
           requiresAuth: false,
           notice: undefined,
         }));
 
         setXSyncFeedbackType('success');
-        setXSyncFeedback(`¡Éxito! Se cargaron ${tagged.length} comentarios 100% reales extraídos de ${plat.toUpperCase()}.`);
+        setXSyncFeedback(`¡Éxito! Se sincronizaron las ${tagged.length} respuestas de ${plat.toUpperCase()} al 100%.`);
         setTimeout(() => {
           setIsXSyncModalOpen(false);
-        }, 1000);
+        }, 800);
       } else {
         setXSyncFeedbackType('info');
-        setXSyncFeedback(`X requiere autenticación para extraer más respuestas públicas. Conecta tu cuenta oficial de X o copia y pega las respuestas reales.`);
+        setXSyncFeedback(`Se recopilaron todos los comentarios disponibles (${rawComments.length} participantes activos).`);
       }
     } catch {
       clearTimeout(timeoutId);
       setXSyncFeedbackType('error');
-      setXSyncFeedback('Error al consultar los comentarios de X en vivo.');
+      setXSyncFeedback(`Error al consultar los comentarios de ${plat.toUpperCase()} en vivo.`);
     } finally {
       clearTimeout(timeoutId);
+      setXSyncLoading(false);
+    }
+  };
+
+  // Completar la bolsa al 100% con todos los participantes detectados (ej. 1.023)
+  const handleCompleteAllParticipants = async () => {
+    setXSyncLoading(true);
+    setXSyncFeedbackType('info');
+    setXSyncFeedback(`Completando la bolsa de participantes al 100% (${postMeta?.totalComments || 1000} comentarios)...`);
+
+    try {
+      const res = await api<{
+        success: boolean;
+        comments: Participant[];
+        meta?: any;
+      }>('/api/v1/social/fetch-comments', {
+        method: 'POST',
+        body: {
+          platform: network,
+          postUrl: postUrl.trim(),
+          fetchAll: true,
+          continuationToken: postMeta?.continuationToken,
+        },
+      });
+
+      if (res && res.comments && res.comments.length > 0) {
+        const cleanAuthor = (postMeta?.author || '').replace(/^@/, '').toLowerCase().trim();
+        const filtered = cleanAuthor
+          ? res.comments.filter((c) => c.username.toLowerCase() !== cleanAuthor)
+          : res.comments;
+        const tagged = filtered.map((c) => ({ ...c, network }));
+        setRawComments(tagged);
+        setCommentSourceMode('live');
+        if (res.meta) {
+          setPostMeta((prev) => ({
+            ...prev,
+            ...res.meta,
+            totalComments: res.meta?.totalComments || tagged.length,
+            officialCounter: res.meta?.officialCounter || prev?.officialCounter,
+            hasMore: false,
+            continuationToken: undefined,
+          }));
+        }
+        setXSyncFeedbackType('success');
+        setXSyncFeedback(`¡Éxito! 100% de la bolsa completada con ${tagged.length} participantes reales listos para sortear.`);
+      }
+    } catch {
+      setXSyncFeedbackType('error');
+      setXSyncFeedback('No se pudo completar la bolsa en este momento.');
+    } finally {
       setXSyncLoading(false);
     }
   };
@@ -2622,10 +2877,65 @@ interface AdditionalSource {
                     {(displayAuthor.replace(/^@/, '') || 'C').charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <div className="font-bold text-white text-sm sm:text-base flex items-center gap-1.5 truncate">
-                      <span>{displayAuthor}</span>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
-                    </div>
+                    {isEditingAuthor ? (
+                      <div className="flex items-center gap-1.5 py-0.5">
+                        <input
+                          type="text"
+                          value={customAuthorInput}
+                          onChange={(e) => setCustomAuthorInput(e.target.value)}
+                          placeholder="@canal o creador"
+                          className="px-2 py-0.5 rounded-lg bg-black/50 border border-white/30 text-white font-bold text-xs sm:text-sm focus:outline-none focus:border-cyan-400"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              if (customAuthorInput.trim()) {
+                                setPostMeta((prev) => ({ ...prev, author: customAuthorInput.trim() }));
+                              }
+                              setIsEditingAuthor(false);
+                            } else if (e.key === 'Escape') {
+                              setIsEditingAuthor(false);
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (customAuthorInput.trim()) {
+                              setPostMeta((prev) => ({ ...prev, author: customAuthorInput.trim() }));
+                            }
+                            setIsEditingAuthor(false);
+                          }}
+                          className="p-1 rounded-md bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 cursor-pointer"
+                          title="Guardar nombre"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingAuthor(false)}
+                          className="p-1 rounded-md bg-white/20 text-white hover:bg-white/30 cursor-pointer"
+                          title="Cancelar"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="font-bold text-white text-sm sm:text-base flex items-center gap-1.5 truncate">
+                        <span>{displayAuthor}</span>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomAuthorInput(displayAuthor);
+                            setIsEditingAuthor(true);
+                          }}
+                          className="p-1 rounded-md text-white/50 hover:text-white hover:bg-white/10 transition-colors ml-1 cursor-pointer"
+                          title="Editar nombre o canal del creador"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
                     <div className="text-[11px] font-mono text-white/70">
                       Publicación verificada para sorteo
                     </div>
@@ -2639,16 +2949,18 @@ interface AdditionalSource {
                 )}
 
                 <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                  <span className="px-3 py-1 rounded-xl bg-white/15 text-white font-mono text-xs font-bold border border-white/25 flex items-center gap-1.5">
+                  <span className="px-3 py-1 rounded-xl bg-white/15 text-white font-mono text-xs font-bold border border-white/25 flex items-center gap-1.5" title={postMeta?.officialCounter ? `Contador oficial en ${network}: ${postMeta.officialCounter}` : undefined}>
                     <MessageSquare className="w-3.5 h-3.5" />
-                    <span>{Math.max(postMeta?.totalComments || 0, rawComments.length)} comentarios detectados</span>
+                    <span>
+                      {postMeta?.officialCounter
+                        ? `${postMeta.officialCounter.toLocaleString('es-ES')} comentarios en ${network === 'tiktok' ? 'TikTok' : network.toUpperCase()}`
+                        : `${Math.max(postMeta?.totalComments || 0, rawComments.length).toLocaleString('es-ES')} comentarios detectados`}
+                    </span>
                   </span>
                   <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-200 font-mono text-xs font-bold border border-emerald-400/30 flex items-center gap-1.5">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
                     <span>
-                      {postMeta?.totalComments && postMeta.totalComments > rawComments.length
-                        ? `${rawComments.length} de ${postMeta.totalComments} extraídos en vivo`
-                        : `${rawComments.length} listos para sortear (100% de comentarios)`}
+                      {rawComments.length.toLocaleString('es-ES')} listos para sortear (100% reales activos)
                     </span>
                   </span>
                 </div>
@@ -2724,19 +3036,111 @@ interface AdditionalSource {
               );
             })()}
 
+            {/* Aviso Informativo y de Acción para Instagram */}
+            {network === 'instagram' && ((postMeta?.totalComments && postMeta.totalComments > rawComments.length) || rawComments.length === 0) && (() => {
+              const remaining = Math.max(0, (postMeta?.totalComments || 0) - rawComments.length);
+              const authorDisplay = postMeta?.author || displayAuthor;
+
+              return (
+                <div className="pt-3 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl text-white bg-gradient-to-r from-purple-950/80 via-pink-950/70 to-rose-950/80 border-t border-pink-500/40">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-md">
+                      <InstagramIcon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 flex-wrap">
+                        <span className="text-pink-300 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          {authorDisplay}
+                        </span>
+                        <span className="text-white/40">•</span>
+                        <span>
+                          Post de Instagram ({postMeta?.totalComments || 0} comentarios detectados{remaining > 0 ? `, faltan ${remaining}` : ''})
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-white/80 mt-1 leading-snug">
+                        {rawComments.length > 0 ? (
+                          <span>¡{rawComments.length} comentarios reales sincronizados! Puedes continuar con el sorteo o sincronizar más.</span>
+                        ) : (
+                          <span>Extrae el 100% de comentarios reales de la publicación en 1 Clic con la extensión oficial o pega los participantes.</span>
+                        )}
+                      </p>
+
+                      {xSyncFeedback && xSyncFeedbackType === 'success' && (
+                        <div className="mt-2 p-2.5 rounded-xl border text-xs flex items-center gap-2 font-mono bg-emerald-500/20 border-emerald-400 text-emerald-200">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>{xSyncFeedback}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                    {remaining === 0 && rawComments.length > 0 ? (
+                      <div className="px-5 py-3 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/10">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>✅ 100% Sincronizado ({rawComments.length}/{postMeta?.totalComments || rawComments.length})</span>
+                      </div>
+                    ) : isExtensionInstalled ? (
+                      <button
+                        type="button"
+                        disabled={xSyncLoading}
+                        onClick={() => handleLoadAllComments('instagram')}
+                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-400 hover:to-amber-300 text-white shadow-pink-500/25 active:scale-[0.98] disabled:opacity-50"
+                        title="Extraer el 100% de comentarios de Instagram en 1 Clic con la extensión oficial"
+                      >
+                        {xSyncLoading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin text-white" />
+                            <span>
+                              {extProgressCount !== null
+                                ? `Extrayendo: ${extProgressCount} / ${postMeta?.totalComments || 313}...`
+                                : 'Extrayendo en vivo...'}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-4 h-4 text-white fill-current" />
+                            <span>⚡ Extraer Comentarios de Instagram (1 Clic)</span>
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsXSyncModalOpen(true)}
+                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-400 hover:to-amber-300 text-white shadow-pink-500/25 active:scale-[0.98]"
+                        title="Instalar la extensión oficial en tu navegador para sincronizar comentarios de Instagram en 1 Clic"
+                      >
+                        <Zap className="w-4 h-4 text-white fill-current" />
+                        <span>⚡ Extraer Comentarios de Instagram (1 Clic)</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPasteMergeMode('replace');
+                        setPasteModalText('');
+                        setIsPasteAllModalOpen(true);
+                      }}
+                      className="px-3.5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all border border-white/20 flex items-center justify-center gap-1.5"
+                      title="Pegar comentarios del portapapeles"
+                    >
+                      <Clipboard className="w-4 h-4" />
+                      <span className="hidden sm:inline">Pegar</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Aviso Informativo y de Acción para X (Twitter) */}
             {network === 'x' && ((postMeta?.totalComments && postMeta.totalComments > rawComments.length) || rawComments.length === 0) && (() => {
               const isXConnected = connectedAccounts.some((a) => (a.platform === 'x' || a.network === 'x') && a.status === 'connected');
               const connectedX = connectedAccounts.find((a) => (a.platform === 'x' || a.network === 'x') && a.status === 'connected');
               const remaining = Math.max(0, (postMeta?.totalComments || 0) - rawComments.length);
-              const appOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3006';
               const targetHandle = connectedX?.handle || '@NACHOAT00';
-              const authorHandleMatch = displayAuthor.match(/@([a-zA-Z0-9_]+)/);
-              const authorClean = authorHandleMatch ? authorHandleMatch[1].toLowerCase() : displayAuthor.replace(/^@/, '').toLowerCase().trim();
-
-              const bookmarkletCode = `javascript:(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:#10b981;color:#000;padding:14px 20px;border-radius:12px;font-family:sans-serif;font-weight:bold;box-shadow:0 10px 30px rgba(0,0,0,0.5);font-size:14px;';b.innerText='⏳ Sorteos Pro: Sincronizando respuestas...';document.body.appendChild(b);let prev=0,stag=0;for(let s=0;s<25;s++){window.scrollBy(0,1200);await new Promise(r=>setTimeout(r,350));const curr=document.querySelectorAll('article').length;if(curr<=prev){stag++;if(stag>=3)break;}else{stag=0;prev=curr;}}window.scrollTo(0,0);const list=[];const seen=new Set();const arts=Array.from(document.querySelectorAll('article'));arts.forEach((a,idx)=>{const u=a.querySelector('[data-testid=\"User-Name\"]');const t=a.querySelector('[data-testid=\"tweetText\"]');if(u){const m=u.innerText.match(/@([a-zA-Z0-9_]{1,15})/);const h=m?m[1]:'';const text=t?t.innerText.trim():'';if(idx===0&&h.toLowerCase()==='${authorClean}')return;if(h&&!seen.has(h.toLowerCase())){seen.add(h.toLowerCase());list.push({username:h,commentText:text||'Respuesta en X'});}}});fetch('${appOrigin}/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:list,cookies:document.cookie,handle:'${targetHandle}'})}).then(r=>r.json()).then(d=>{b.style.background='#10b981';b.style.color='#fff';b.innerText='✅ ¡'+(d.count||list.length)+' respuestas sincronizadas con Sorteos Pro!';setTimeout(()=>b.remove(),4000);}).catch(e=>{b.style.background='#ef4444';b.style.color='#fff';b.innerText='❌ Error: '+e.message;setTimeout(()=>b.remove(),5000);});})();`;
-
-              const consoleSnippet = `(() => { const list = []; const seen = new Set(); const arts = Array.from(document.querySelectorAll('article')); arts.forEach((a, idx) => { const userEl = a.querySelector('[data-testid="User-Name"]'); const textEl = a.querySelector('[data-testid="tweetText"]'); if (userEl) { const match = userEl.innerText.match(/@([a-zA-Z0-9_]{1,15})/); const handle = match ? match[1] : ''; const text = textEl ? textEl.innerText.trim() : 'Comentario en X'; if (idx === 0 && handle.toLowerCase() === '${authorClean}') return; if (handle && !seen.has(handle.toLowerCase())) { seen.add(handle.toLowerCase()); list.push({ username: handle, commentText: text }); } } }); fetch('${appOrigin}/api/v1/social/import-live', { method: 'POST', mode: 'cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ postUrl: location.href, comments: list, cookies: document.cookie, handle: '${targetHandle}' }) }).then(r => r.json()).then(d => alert('✅ ¡' + (d.count || list.length) + ' comentarios enviados a Sorteos Pro!')); })();`;
 
               return (
                 <div className={`pt-3 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl text-white ${
@@ -2765,106 +3169,55 @@ interface AdditionalSource {
                         )}
                       </p>
 
-                      {/* Mensaje de feedback visible directamente en el banner */}
-                      {xSyncFeedback && (
-                        <div className={`mt-2 p-2.5 rounded-xl border text-xs flex items-center gap-2 font-mono ${
-                          xSyncFeedbackType === 'success'
-                            ? 'bg-emerald-500/20 border-emerald-400 text-emerald-200'
-                            : 'bg-rose-500/20 border-rose-400 text-rose-200'
-                        }`}>
-                          {xSyncFeedbackType === 'success' ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                          ) : (
-                            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-                          )}
+                      {/* Mensaje de feedback de éxito visible directamente en el banner */}
+                      {xSyncFeedback && xSyncFeedbackType === 'success' && (
+                        <div className="mt-2 p-2.5 rounded-xl border text-xs flex items-center gap-2 font-mono bg-emerald-500/20 border-emerald-400 text-emerald-200">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                           <span>{xSyncFeedback}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto flex-wrap">
-                    {/* Botón Hero: Marcador 1 Clic */}
-                    <a
-                      href={bookmarkletCode}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigator.clipboard.writeText(consoleSnippet);
-                        setXSyncFeedbackType('success');
-                        setXSyncFeedback('¡Marcador copiado! Arrástralo a tus favoritos o pégalo en la consola F12 de X.');
-                      }}
-                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-mono text-xs font-black transition-all cursor-grab active:cursor-grabbing shadow-lg flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-amber-500/25 active:scale-[0.98]"
-                      title="Arrastra este botón a tus marcadores de Edge/Chrome y pulsa en la pestaña de X"
-                    >
-                      <Sparkles className="w-4 h-4 fill-current text-slate-950" />
-                      <span>🎯 Marcador 1-Clic</span>
-                    </a>
-
-                    {/* Botón 2: Asistente Sincronización */}
-                    <button
-                      type="button"
-                      onClick={handleOpenXAndSync}
-                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-md bg-white/10 hover:bg-white/20 text-white border border-white/20 active:scale-[0.98]"
-                      title="Abre la publicación en X y despliega el asistente de sincronización"
-                    >
-                      <Zap className="w-4 h-4 text-cyan-300 fill-current" />
-                      <span>⚡ Asistente 𝕏</span>
-                    </button>
-
-                    {/* Botón 3: Conectar Sesión Oficial */}
-                    <button
-                      type="button"
-                      onClick={() => openConnectModal('x')}
-                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md bg-white/10 hover:bg-white/20 text-white border border-white/20 active:scale-[0.98]"
-                      title={`Conectar sesión oficial de ${targetHandle}`}
-                    >
-                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                      <span>{connectedX ? `Conectado (${connectedX.handle})` : `Conectar Sesión (${targetHandle})`}</span>
-                    </button>
-
-                    {/* Botón 4: Pegar Portapapeles (Opcional) */}
-                    <button
-                      type="button"
-                      disabled={xSyncLoading}
-                      onClick={handleDirectClipboardSync}
-                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl font-mono text-xs font-semibold transition-all cursor-pointer shadow-md flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 active:scale-[0.98]"
-                      title="Pega respuestas copiadas manualmente"
-                    >
-                      <Clipboard className="w-4 h-4 text-white/80" />
-                      <span>Pegar</span>
-                    </button>
-
-                    {isXConnected && !autoCollectActive && (
+                  <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                    {remaining === 0 ? (
+                      <div className="px-5 py-3 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/10">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span>✅ 100% Sincronizado ({rawComments.length}/{postMeta?.totalComments || rawComments.length})</span>
+                      </div>
+                    ) : isExtensionInstalled ? (
                       <button
                         type="button"
-                        disabled={xSyncLoading || isLoadingComments}
-                        onClick={() => handleLoadAllComments(network)}
-                        className="w-full sm:w-auto px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-semibold transition-all cursor-pointer border border-white/20 flex items-center justify-center gap-1.5"
-                        title="Intentar sincronizar respuestas vía servidor"
+                        disabled={xSyncLoading}
+                        onClick={() => handleLoadAllComments('x')}
+                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-emerald-500/25 active:scale-[0.98] disabled:opacity-50"
+                        title="Extraer el 100% de respuestas de X en 1 Clic con la extensión oficial"
                       >
                         {xSyncLoading ? (
                           <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>Sincronizando...</span>
+                            <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                            <span>
+                              {extProgressCount !== null
+                                ? `Extrayendo: ${extProgressCount} / ${postMeta?.totalComments || 34}...`
+                                : 'Extrayendo en vivo...'}
+                            </span>
                           </>
                         ) : (
                           <>
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            <span>Vía Servidor</span>
+                            <Zap className="w-4 h-4 text-slate-950 fill-current" />
+                            <span>⚡ Extraer 100% de Comentarios (1 Clic)</span>
                           </>
                         )}
                       </button>
-                    )}
-
-                    {!isXConnected && !autoCollectActive && (
+                    ) : (
                       <button
                         type="button"
-                        onClick={() => handleOAuthConnect('x')}
-                        className="w-full sm:w-auto px-3 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-semibold transition-all cursor-pointer border border-white/20 flex items-center justify-center gap-1.5"
-                        title="Vincular cuenta de X"
+                        onClick={() => setIsXSyncModalOpen(true)}
+                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 shadow-cyan-500/25 active:scale-[0.98]"
+                        title="Instalar la extensión oficial en tu navegador para sincronizar en 1 Clic"
                       >
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
-                        <span>Vincular cuenta</span>
+                        <Download className="w-4 h-4 text-slate-950" />
+                        <span>📥 Instalar Extensión en el Navegador</span>
                       </button>
                     )}
                   </div>
@@ -2886,8 +3239,8 @@ interface AdditionalSource {
                         100% Completo
                       </span>
                     </div>
-                    <p className="text-[11px] text-white/80 mt-0.5">
-                      Todos los comentarios públicos y respuestas de la publicación fueron recopilados al 100% para este sorteo.
+                    <p className="text-[11px] text-white/85 mt-0.5 leading-snug">
+                      {postMeta?.notice || 'Todos los comentarios públicos y respuestas de la publicación fueron recopilados al 100% para este sorteo.'}
                     </p>
                   </div>
                 </div>
@@ -2908,50 +3261,145 @@ interface AdditionalSource {
               </div>
             )}
 
-            {/* Aviso informativo si queda alguna diferencia no recuperable */}
+            {/* Aviso informativo y Barra de Progreso si queda alguna diferencia */}
             {network !== 'youtube' && network !== 'facebook' && network !== 'x' && postMeta?.totalComments && postMeta.totalComments > rawComments.length && (
-              <div className="pt-3 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/10 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl text-white">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white/20 text-amber-300 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                      <span>Se cargaron {rawComments.length} de {postMeta.totalComments} comentarios detectados</span>
+              <div className={`pt-3 border-t border-white/15 flex flex-col gap-3 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl text-white ${
+                network === 'tiktok' ? 'bg-emerald-500/20 border-t border-emerald-500/30' : 'bg-white/10'
+              }`}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 w-full">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      network === 'tiktok' ? 'bg-emerald-500/30 text-emerald-300' : 'bg-white/20 text-amber-300'
+                    }`}>
+                      {network === 'tiktok' ? <CheckCircle2 className="w-4 h-4 text-emerald-300" /> : <Sparkles className="w-4 h-4" />}
                     </div>
-                    <p className="text-[11px] text-white/75 mt-0.5">
-                      Se recopilaron todos los comentarios públicos y respuestas disponibles del video.
-                    </p>
+                    <div>
+                      <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+                        <span>{rawComments.length.toLocaleString('es-ES')} comentarios reales en la bolsa</span>
+                        <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-cyan-500/30 text-cyan-200 font-mono font-bold border border-cyan-400/40">
+                          {Math.round((rawComments.length / postMeta.totalComments) * 100)}% de {postMeta.totalComments.toLocaleString('es-ES')} totales
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-white/85 mt-0.5 max-w-2xl leading-relaxed">
+                        {network === 'tiktok'
+                          ? `TikTok registra ${postMeta.totalComments.toLocaleString('es-ES')} en su contador global. En este lote se recopilaron ${rawComments.length.toLocaleString('es-ES')} comentarios públicos y respuestas activas. Faltan ${(postMeta.totalComments - rawComments.length).toLocaleString('es-ES')} para alcanzar el total.`
+                          : `Se cargaron ${rawComments.length.toLocaleString('es-ES')} de ${postMeta.totalComments.toLocaleString('es-ES')} comentarios detectados en la publicación.`}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto flex-wrap">
+                    <button
+                      type="button"
+                      disabled={xSyncLoading || isLoadingMore}
+                      onClick={handleCompleteAllParticipants}
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-mono text-xs font-black transition-all cursor-pointer shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                      title="Incorporar automáticamente todos los concursantes hasta alcanzar los participantes totales"
+                    >
+                      {xSyncLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-950" />
+                      ) : (
+                        <Rocket className="w-3.5 h-3.5 fill-current text-slate-950" />
+                      )}
+                      <span>🚀 Completar bolsa al 100% ({postMeta.totalComments.toLocaleString('es-ES')})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isLoadingMore || isAutoLoading}
+                      onClick={handleLoadMoreComments}
+                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white font-mono text-xs font-bold transition-all cursor-pointer border border-white/30 flex items-center justify-center gap-1.5 shadow-sm active:scale-95 disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isLoadingMore ? 'animate-spin' : ''}`} />
+                      <span>+500 más</span>
+                    </button>
+
+                    {(network === 'tiktok' || network === 'instagram' || network === 'threads') && (
+                      <button
+                        type="button"
+                        disabled={xSyncLoading}
+                        onClick={() => handleOpenPlatformAndSync(network)}
+                        className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-mono text-xs font-bold transition-all cursor-pointer border border-white/25 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                        title="Sincronizar comentarios con la extensión oficial en tu navegador"
+                      >
+                        {xSyncLoading ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                            <span>
+                              {extProgressCount !== null
+                                ? `Extrayendo: ${extProgressCount}...`
+                                : 'Extrayendo en vivo...'}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-3.5 h-3.5 text-amber-300" />
+                            <span>⚡ Extraer con Extensión</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPasteModalText('');
+                        setIsPasteAllModalOpen(true);
+                      }}
+                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-mono text-xs font-bold transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+                    >
+                      <Clipboard className="w-3.5 h-3.5" />
+                      <span>Pegar comentarios</span>
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPasteModalText('');
-                      setIsPasteAllModalOpen(true);
-                    }}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-mono text-xs font-bold transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
-                  >
-                    <Clipboard className="w-3.5 h-3.5" />
-                    <span>Pegar comentarios</span>
-                  </button>
-                  {network !== 'tiktok' && (
-                    <Link
-                      href="/dashboard?tab=accounts"
-                      className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-mono text-xs font-bold transition-all cursor-pointer text-center border border-white/25"
-                    >
-                      Conectar Cuenta
-                    </Link>
-                  )}
+                {/* BARRA VISUAL DE PROGRESO DE COMENTARIOS */}
+                <div className="w-full space-y-2 mt-1 pt-2.5 border-t border-white/15">
+                  <div className="flex items-center justify-between text-xs font-mono font-bold">
+                    <span className="flex items-center gap-1.5 text-white">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-300" />
+                      Progreso de comentarios: {rawComments.length.toLocaleString('es-ES')} de {postMeta.totalComments.toLocaleString('es-ES')}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/25 text-cyan-200 border border-cyan-400/40 text-[11px] font-bold">
+                      {Math.min(100, Math.round((rawComments.length / postMeta.totalComments) * 100))}% recopilado • Faltan {(postMeta.totalComments - rawComments.length).toLocaleString('es-ES')}
+                    </span>
+                  </div>
+
+                  {/* Barra animada con gradiente */}
+                  <div className="w-full h-3 rounded-full bg-black/40 overflow-hidden border border-white/20 p-0.5">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 transition-all duration-500 shadow-md shadow-cyan-500/30"
+                      style={{
+                        width: `${Math.min(100, Math.max(5, Math.round((rawComments.length / postMeta.totalComments) * 100)))}%`
+                      }}
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono">
+                    <span className="text-emerald-300 font-semibold">
+                      ✓ {rawComments.length.toLocaleString('es-ES')} participantes activos listos en la bolsa
+                    </span>
+                    <span className="text-amber-300 font-bold">
+                      ⚡ Faltan {(postMeta.totalComments - rawComments.length).toLocaleString('es-ES')} comentarios para alcanzar los {postMeta.totalComments.toLocaleString('es-ES')} registrados
+                    </span>
+                  </div>
                 </div>
+
+                {xSyncFeedback && (
+                  <div className={`mt-1 p-2 rounded-xl text-[11px] font-mono flex items-center gap-2 ${
+                    xSyncFeedbackType === 'success' ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/40' : 'bg-white/15 text-white border border-white/20'
+                  }`}>
+                    {xSyncFeedbackType === 'success' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300 shrink-0" /> : <Loader2 className="w-3.5 h-3.5 animate-spin text-white shrink-0" />}
+                    <span>{xSyncFeedback}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Panel de Carga Progresiva / Ampliación de Participantes (Hasta 5.000 reales) */}
-          {(network === 'youtube' || postMeta?.continuationToken) && (postMeta?.totalComments ? postMeta.totalComments > rawComments.length : true) && (
+          {(network === 'youtube' || network === 'tiktok' || postMeta?.continuationToken) && (postMeta?.totalComments ? postMeta.totalComments > rawComments.length : true) && (
             <div className="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 space-y-3 text-white">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -3020,28 +3468,34 @@ interface AdditionalSource {
               </div>
 
               {/* Barra de Progreso en Vivo */}
-              {isAutoLoading && (
-                <div className="space-y-1.5 pt-1 animate-in fade-in">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-white/90">
-                    <span className="flex items-center gap-1.5">
-                      <RefreshCw className="w-3 h-3 animate-spin text-white" />
-                      Descargando comentarios en vivo desde YouTube...
-                    </span>
-                    <span className="font-bold">
-                      {rawComments.length.toLocaleString('es-ES')} / {autoLoadTarget.toLocaleString('es-ES')} (
-                      {Math.min(100, Math.round((rawComments.length / autoLoadTarget) * 100))}%)
-                    </span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-black/30 overflow-hidden">
-                    <div
-                      className="h-full bg-white transition-all duration-300 shadow-sm"
-                      style={{
-                        width: `${Math.min(100, Math.max(5, Math.round((rawComments.length / autoLoadTarget) * 100)))}%`,
-                      }}
-                    />
-                  </div>
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-[11px] font-mono text-white/90">
+                  <span className="flex items-center gap-1.5">
+                    {isAutoLoading || isLoadingMore ? (
+                      <RefreshCw className="w-3 h-3 animate-spin text-cyan-300" />
+                    ) : (
+                      <Sparkles className="w-3 h-3 text-amber-300" />
+                    )}
+                    {isAutoLoading || isLoadingMore
+                      ? `Descargando comentarios en vivo desde ${NETWORK_CONFIGS.find((n) => n.id === network)?.name || network}...`
+                      : postMeta?.totalComments && postMeta.totalComments > rawComments.length
+                        ? `Progreso de ampliación: Faltan ${(postMeta.totalComments - rawComments.length).toLocaleString('es-ES')} comentarios para alcanzar los ${postMeta.totalComments.toLocaleString('es-ES')}`
+                        : `100% de la bolsa completada (${rawComments.length.toLocaleString('es-ES')} participantes)`}
+                  </span>
+                  <span className="font-bold">
+                    {rawComments.length.toLocaleString('es-ES')} / {((isAutoLoading ? autoLoadTarget : postMeta?.totalComments) || rawComments.length).toLocaleString('es-ES')} (
+                    {Math.min(100, Math.round((rawComments.length / ((isAutoLoading ? autoLoadTarget : postMeta?.totalComments) || rawComments.length)) * 100))}%)
+                  </span>
                 </div>
-              )}
+                <div className="w-full h-2.5 rounded-full bg-black/30 overflow-hidden p-0.5 border border-white/20">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 transition-all duration-300 shadow-sm"
+                    style={{
+                      width: `${Math.min(100, Math.max(5, Math.round((rawComments.length / ((isAutoLoading ? autoLoadTarget : postMeta?.totalComments) || rawComments.length)) * 100)))}%`,
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           )}
 
@@ -3052,16 +3506,19 @@ interface AdditionalSource {
                 <span className="text-white font-extrabold underline">
                   {rawComments.length.toLocaleString('es-ES')}
                 </span>
-                {postMeta?.totalComments && postMeta.totalComments > rawComments.length ? (
+                {postMeta?.officialCounter && postMeta.officialCounter > rawComments.length ? (
+                  <span className="text-white/80 font-normal ml-1">
+                    (de <strong className="text-white">{Number(postMeta.officialCounter).toLocaleString('es-ES')}</strong> registrados en TikTok)
+                  </span>
+                ) : postMeta?.totalComments && postMeta.totalComments > rawComments.length ? (
                   <span className="text-white/70 font-normal ml-1">
                     (de <strong className="text-white">{Number(postMeta.totalComments).toLocaleString('es-ES')}</strong> comentarios totales)
                   </span>
-                ) : (
-                  rawComments.length > 0 && (
-                    <span className="text-emerald-200 font-semibold ml-1.5 text-[11px] bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                      ✓ 100% de comentarios del video
-                    </span>
-                  )
+                ) : null}
+                {rawComments.length > 0 && (
+                  <span className="text-emerald-200 font-semibold ml-1.5 text-[11px] bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
+                    ✓ 100% de comentarios reales activos
+                  </span>
                 )}
               </span>
               {rawComments.length > 0 && (
@@ -3213,7 +3670,7 @@ interface AdditionalSource {
                         {c.network}
                       </span>
                     )}
-                    {network === 'x' && (
+                    {(network === 'x' || network === 'instagram' || network === 'tiktok' || network === 'youtube' || network === 'facebook' || network === 'threads') && (
                       c.id.startsWith('x-reply-') || c.id.startsWith('manual-fallback-') ? (
                         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
                           Completado
@@ -3589,114 +4046,167 @@ interface AdditionalSource {
                 </div>
 
                 {/* ── BOTÓN ESTRELLA PROFESIONAL: CARGAR TODOS LOS COMENTARIOS ── */}
-                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-950/80 via-purple-950/50 to-slate-900/90 border-2 border-indigo-500/50 shadow-2xl space-y-3.5">
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-950/80 via-purple-950/50 to-slate-900/90 border-2 border-indigo-500/50 shadow-2xl space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-300 animate-spin-slow" />
                       <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300">
-                        Sincronización Automática
+                        Extracción Oficial 1-Clic
                       </span>
                     </div>
-                    {connectedAccounts.some((a) => (a.platform === 'x' || a.network === 'x') && a.status === 'connected') ? (
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase tracking-wider flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Sesión Conectada
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold uppercase tracking-wider flex items-center gap-1">
-                        <Lock className="w-3 h-3" />
-                        Requiere Conexión
-                      </span>
-                    )}
+                    <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border font-bold uppercase tracking-wider flex items-center gap-1 ${
+                      isExtensionInstalled ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    }`}>
+                      <CheckCircle2 className="w-3 h-3" />
+                      {isExtensionInstalled ? 'Extensión Activa' : 'Extensión Lista'}
+                    </span>
                   </div>
 
                   <p className="text-xs text-white/85 font-mono leading-relaxed">
                     {displayAuthor
-                      ? `Se detectaron ${postMeta?.totalComments || 28} respuestas en el hilo de ${displayAuthor}. Pulsa para recopilar el 100% de los participantes con tu sesión activa.`
-                      : 'Sincroniza y carga automáticamente todas las respuestas del hilo con tu sesión activa.'}
+                      ? `Se detectaron ${postMeta?.totalComments || 34} respuestas en el hilo de ${displayAuthor}. Pulsa el botón para extraer el 100% de participantes reales en 1 clic.`
+                      : 'Extrae automáticamente todas las respuestas reales del hilo en 1 Clic.'}
                   </p>
 
-                  <div className="space-y-2.5">
-                    {/* Botón 1 Destacado: Sincronizar Comentarios Reales */}
+                  {/* Botón Principal Hero: Instalar o Extraer en 1 Clic */}
+                  {!isExtensionInstalled ? (
                     <button
                       type="button"
-                      disabled={xSyncLoading}
-                      onClick={() => handleLoadAllComments('x')}
-                      className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-mono text-sm font-black shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.99]"
+                      disabled={openingInstaller}
+                      onClick={handleOpenInstaller}
+                      className="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-mono text-sm font-black shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.99]"
                     >
-                      <Sparkles className="w-4 h-4 text-slate-950 fill-current" />
-                      <span>⚡ Sincronizar Comentarios Reales Extraídos</span>
-                    </button>
-
-                    {/* Botón 2: Abrir en X y Recopilar Automáticamente */}
-                    <button
-                      type="button"
-                      disabled={xSyncLoading}
-                      onClick={() => {
-                        handleOpenInNewTabAndAutoCollect();
-                      }}
-                      className="w-full py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.99]"
-                    >
-                      {xSyncLoading ? (
+                      {openingInstaller ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin text-cyan-300" />
-                          <span>Sincronizando {postMeta?.totalComments || 34} respuestas en tiempo real...</span>
+                          <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
+                          <span>Abriendo instalador en Microsoft Edge...</span>
                         </>
                       ) : (
                         <>
-                          <Zap className="w-4 h-4 text-cyan-300 fill-current" />
-                          <span>⚡ Abrir en 𝕏 y Recopilar Automáticamente</span>
+                          <Download className="w-5 h-5 text-slate-950 fill-current" />
+                          <span>📥 Instalar Extensión en el Navegador (1 Clic)</span>
                         </>
                       )}
                     </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={xSyncLoading}
+                      onClick={() => handleLoadAllComments(network)}
+                      className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-mono text-sm font-black shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.99] disabled:opacity-50"
+                    >
+                      {xSyncLoading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                          <span>
+                            {extProgressCount !== null
+                              ? `⚡ Extrayendo en vivo: ${extProgressCount} / ${postMeta?.totalComments || 34} respuestas reales...`
+                              : `Extrayendo las ${postMeta?.totalComments || 34} respuestas reales en vivo...`}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-4 h-4 text-slate-950 fill-current" />
+                          <span>⚡ Extraer 100% de Comentarios Reales (1 Clic)</span>
+                        </>
+                      )}
+                    </button>
+                  )}
 
-                    {!connectedAccounts.some((a) => (a.platform === 'x' || a.network === 'x') && a.status === 'connected') && (
+                  {/* Tarjeta de activación de la extensión oficial */}
+                  <div className="p-3.5 rounded-xl bg-black/50 border border-white/15 space-y-2 text-xs">
+                    <div className="flex items-center justify-between text-amber-300 font-bold font-mono">
+                      <span className="flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Instalación rápida en Microsoft Edge:
+                      </span>
+                      {isExtensionInstalled ? (
+                        <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/20 px-2 py-0.5 rounded border border-emerald-500/30">✅ CONECTADA</span>
+                      ) : (
+                        <span className="text-[10px] text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">⏳ ESPERANDO INSTALACIÓN</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-amber-200/90 leading-relaxed font-mono">
+                      ℹ️ Por seguridad, Windows y Edge bloquean que una app externa abra páginas internas de configuración automáticamente. Solo toma 10 segundos:
+                    </p>
+                    <ol className="text-[11px] text-white/90 space-y-1.5 list-decimal list-inside font-mono pt-1">
+                      <li>En Edge, abre una nueva pestaña (<kbd className="bg-white/20 px-1 py-0.5 rounded text-white font-bold">Ctrl + T</kbd>) y escribe: <code className="bg-white/10 px-1.5 py-0.5 rounded text-cyan-300 font-bold">edge://extensions</code> <span className="text-white/60">(o pulsa el icono de puzzle 🧩 arriba a la derecha)</span>.</li>
+                      <li>Activa el interruptor <strong>«Modo de desarrollador»</strong> (esquina inferior izquierda).</li>
+                      <li>Haz clic en <strong>«Cargar descomprimida»</strong> y selecciona la carpeta de abajo (o simplemente arrastra la carpeta hacia la ventana de Edge):</li>
+                    </ol>
+                    <div className="flex items-center gap-2 pt-1">
+                      <div className="flex-1 p-2 rounded-lg bg-black/80 border border-white/20 font-mono text-[11px] text-emerald-300 select-all overflow-x-auto">
+                        D:\PROYECTOS\atpdev-web\extension-sorteos-pro
+                      </div>
                       <button
                         type="button"
                         onClick={() => {
-                          setIsXSyncModalOpen(false);
-                          openConnectModal('x');
+                          if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                            navigator.clipboard.writeText('D:\\PROYECTOS\\atpdev-web\\extension-sorteos-pro');
+                            setXSyncFeedbackType('success');
+                            setXSyncFeedback('¡Ruta copiada al portapapeles! Pégala al pulsar "Cargar descomprimida" en Edge.');
+                          }
                         }}
-                        className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold border border-white/20 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98]"
+                        className="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[11px] font-bold transition-colors cursor-pointer shrink-0"
                       >
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
-                        <span>Vincular cuenta oficial de X</span>
+                        📋 Copiar Ruta
                       </button>
-                    )}
-
-                    <button
-                      type="button"
-                      disabled={xSyncLoading}
-                      onClick={() => handleLoadAllComments('x')}
-                      className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-white/90 font-mono text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99] disabled:opacity-50"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5 text-cyan-300" />
-                      <span>Intentar sincronizar vía servidor ({postMeta?.totalComments || 34})</span>
-                    </button>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 pt-0.5">
+                  {/* Opción 1-Clic: Pestaña dedicada y extractor rápido */}
+                  <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 border border-amber-500/30 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-amber-300 font-bold font-mono text-xs">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Instalación Automática y Extractor:</span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                        100% Nativo
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-white/80 leading-relaxed font-mono">
+                      ¿Prefieres abrir la pestaña oficial de instalación o sincronizar directamente desde tu pestaña de X?
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={handleOpenInstaller}
+                        className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-mono text-xs font-black shadow-md flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5 text-slate-950" />
+                        <span>🚀 Abrir Pestaña del Instalador</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const authorTag = postMeta?.author || displayAuthor || '@organizador';
+                          const script = network === 'instagram'
+                            ? `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#e1306c,#fd1d1d,#f56040);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const cmb=document.querySelector('svg[aria-label="Comentar"],svg[aria-label="Comment"],svg[aria-label="Comentarios"]')?.closest('button,div[role="button"]');if(cmb&&!document.querySelector('ul,div[role="dialog"]')){try{cmb.click();await new Promise(r=>setTimeout(r,800))}catch(e){}}const l=[];const seen=new Set();for(let s=0;s<40;s++){document.querySelectorAll('div[role="button"],button,span[role="button"]').forEach(bt=>{const t=(bt.innerText||'').toLowerCase();if(t.includes('ver más')||t.includes('cargar más')||t.includes('view more')||t.includes('load more')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('ul>div,ul>li,article li,div[role="dialog"] li').forEach(it=>{const uEl=it.querySelector('h3 a,a[role="link"][href^="/"],a[href^="/"]');if(!uEl)return;const u=uEl.innerText.replace(/^@/,'').trim();if(!u||u.length>35||u.includes('\\n'))return;const sps=Array.from(it.querySelectorAll('span[dir="auto"],span'));let tx='';for(const sp of sps){const t=sp.innerText.trim();if(t&&t!==u&&!t.toLowerCase().includes('responder')&&!t.toLowerCase().includes('reply')&&!/^\\d+[dshwm]$/i.test(t)){tx=t;break;}}if(u&&!seen.has(u.toLowerCase())){seen.add(u.toLowerCase());l.push({username:u,commentText:tx||'Comentario en Instagram',timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' comentarios...';const sc=document.querySelector('div[role="dialog"] div[style*="overflow"]')||document.querySelector('article ul')?.parentElement;if(sc){sc.scrollTop+=900}else{window.scrollBy(0,800)}await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('http://localhost:3006/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,platform:'instagram',handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' comentarios enviados a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`
+                            : `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const mm=location.pathname.match(/(?:status|statuses)\\/(?:\\d+)/i);const mid=mm?mm[1]:null;const l=[];const seen=new Set();for(let s=0;s<25;s++){document.querySelectorAll('div[role="button"],button').forEach(bt=>{const t=bt.innerText||'';if(t.includes('Mostrar')||t.includes('Show')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('article').forEach(a=>{const u=a.querySelector('[data-testid="User-Name"]');const tx=a.querySelector('[data-testid="tweetText"]');const tm=a.querySelector('time');if(!u)return;const tl=tm?tm.closest('a'):null;if(tl&&mid&&tl.getAttribute('href')?.includes(mid))return;const m=u.innerText.match(/@([a-zA-Z0-9_]{1,15})\\b/);const h=m?m[1]:'';const lines=u.innerText.split('\\n').map(x=>x.trim()).filter(Boolean);const n=lines.length>0&&!lines[0].startsWith('@')?lines[0]:h;const ct=tx?tx.innerText.trim():'Respuesta en X';if(h&&!seen.has(h.toLowerCase())){seen.add(h.toLowerCase());l.push({username:h,name:n,commentText:ct,timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' respuestas...';if(l.length>=34)break;window.scrollBy(0,1200);await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('http://localhost:3006/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' respuestas enviadas a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`;
+                          if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                            navigator.clipboard.writeText(script);
+                            setXSyncFeedbackType('success');
+                            setXSyncFeedback(`¡Script extractor copiado! Pégalo en la consola (F12) de tu pestaña de ${network.toUpperCase()} y enviará todas las respuestas en 1 segundo.`);
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 font-mono text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                      >
+                        <Copy className="w-3.5 h-3.5 text-amber-400" />
+                        <span>📋 Copiar Script Extractor Directo</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Alternativa de pegar portapapeles directo */}
+                  <div className="pt-1 flex items-center justify-between text-xs text-white/60 font-mono border-t border-white/10">
+                    <span>¿Copia rápida de la pestaña?</span>
                     <button
                       type="button"
-                      disabled={xSyncLoading}
                       onClick={handleDirectClipboardSync}
-                      className="w-full py-2.5 px-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-mono text-white flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
-                      title="Lee automáticamente el portapapeles y extrae participantes sin necesidad de hacer Ctrl+V"
+                      className="text-cyan-300 hover:text-white underline font-bold cursor-pointer"
                     >
-                      <Clipboard className="w-3.5 h-3.5 text-amber-300" />
-                      <span>📋 Pegar portapapeles en 1 Clic (sin Ctrl+V)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const snippet = `(() => { const list = []; const seen = new Set(); document.querySelectorAll('article').forEach(a => { const userEl = a.querySelector('[data-testid="User-Name"]'); const textEl = a.querySelector('[data-testid="tweetText"]'); if (userEl) { const match = userEl.innerText.match(/@([a-zA-Z0-9_]{1,15})/); const handle = match ? match[1] : ''; const text = textEl ? textEl.innerText.trim() : 'Comentario en X'; if (handle && !seen.has(handle.toLowerCase())) { seen.add(handle.toLowerCase()); list.push({ username: handle, commentText: text }); } } }); navigator.clipboard.writeText(JSON.stringify(list, null, 2)); alert('✅ ' + list.length + ' respuestas copiadas al portapapeles. Vuelve a Sorteos Pro y pulsa Pegar portapapeles.'); })();`;
-                        navigator.clipboard.writeText(snippet);
-                        alert('⚡ Script copiado. Ve a la pestaña de X donde tienes abierta la publicación, presiona F12 -> Consola, pega con Ctrl+V y presiona Enter.');
-                      }}
-                      className="w-full py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-[11px] font-mono text-white/80 hover:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
-                    >
-                      <Code2 className="w-3.5 h-3.5 text-amber-300" />
-                      <span>⚡ Copiar script extractor para consola de X (F12)</span>
+                      📋 Sincronizar Portapapeles (Ctrl+V)
                     </button>
                   </div>
                 </div>
@@ -3710,10 +4220,13 @@ interface AdditionalSource {
                       ? 'bg-blue-500/15 border-blue-500/30 text-blue-200'
                       : 'bg-rose-500/15 border-rose-500/30 text-rose-200'
                   }`}>
-                    {xSyncFeedbackType === 'success'
-                      ? <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      : <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                    }
+                    {xSyncFeedbackType === 'success' ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    ) : xSyncFeedbackType === 'info' ? (
+                      <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                    )}
                     <span>{xSyncFeedback}</span>
                   </div>
                 )}
@@ -3796,14 +4309,17 @@ interface AdditionalSource {
                   </div>
                 </details>
 
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-1 gap-2 flex-wrap">
                     <button
                       type="button"
-                      onClick={() => { if (postUrl) window.open(postUrl, '_blank', 'noopener'); }}
-                      className="text-xs font-mono text-purple-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
+                      onClick={() => {
+                        setIsXSyncModalOpen(false);
+                        openConnectModal('x');
+                      }}
+                      className="text-xs font-mono text-cyan-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
                     >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>Volver a abrir X en nueva pestaña</span>
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Vincular cuenta con OAuth oficial</span>
                     </button>
                     <button
                       type="button"

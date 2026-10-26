@@ -9,8 +9,10 @@ import path from 'node:path';
 interface LiveImportRecord {
   postUrl: string;
   tweetId?: string;
+  shortcode?: string;
   comments: Participant[];
   handle?: string;
+  platform?: string;
   updatedAt: number;
 }
 
@@ -34,18 +36,20 @@ export async function OPTIONS() {
   });
 }
 
-function normalizePostUrl(url: string): { normalized: string; tweetId?: string } {
-  const clean = url.trim().replace(/[?#].*$/, '').toLowerCase();
+function normalizePostUrl(url: string): { normalized: string; tweetId?: string; shortcode?: string } {
+  const clean = url.trim().replace(/[?#].*$/, '').toLowerCase().replace(/\/+$/, '');
   const idMatch = url.match(/(?:status|statuses)\/(\d+)/i) || url.match(/\/(\d{15,})/);
+  const scMatch = url.match(/(?:instagram\.com|threads\.net)\/(?:reel|p|tv|post)\/([A-Za-z0-9_-]+)/i);
   return {
     normalized: clean,
     tweetId: idMatch ? idMatch[1] : undefined,
+    shortcode: scMatch ? scMatch[1].toLowerCase() : undefined,
   };
 }
 
 /**
  * GET /api/v1/social/import-live?postUrl=...
- * Permite a Sorteos Pro consultar en tiempo real si llegaron comentarios desde la pestaña de X
+ * Permite a Sorteos Pro consultar en tiempo real si llegaron comentarios desde la pestaña de X, Instagram o TikTok
  */
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -54,10 +58,18 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: false, comments: [], count: 0 }, { headers: CORS_HEADERS });
   }
 
-  const { normalized, tweetId } = normalizePostUrl(postUrl);
+  const { normalized, tweetId, shortcode } = normalizePostUrl(postUrl);
 
-  // Buscar por URL normalizada o por ID del tweet
+  // Buscar por URL normalizada, por ID de tweet o por shortcode de Instagram
   let match = liveImports.get(normalized);
+  if (!match && shortcode) {
+    for (const record of liveImports.values()) {
+      if (record.shortcode === shortcode) {
+        match = record;
+        break;
+      }
+    }
+  }
   if (!match && tweetId) {
     for (const record of liveImports.values()) {
       if (record.tweetId === tweetId) {
@@ -102,6 +114,7 @@ export async function POST(req: NextRequest) {
     const cookies = String(body.cookies || body.cookie || '').trim();
     const authToken = String(body.authToken || '').trim();
     const organizerHandle = String(body.handle || '@NACHOAT00').trim();
+    const platform = String(body.platform || 'x').toLowerCase();
 
     if (!rawPostUrl) {
       return NextResponse.json(
@@ -110,7 +123,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { normalized, tweetId } = normalizePostUrl(rawPostUrl);
+    const { normalized, tweetId, shortcode } = normalizePostUrl(rawPostUrl);
 
     // Formatear participantes válidos
     const validParticipants: Participant[] = [];
@@ -119,31 +132,37 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < rawComments.length; i++) {
       const c = rawComments[i];
       const username = String(c?.username || c?.user || '').trim().replace(/^@/, '');
-      if (!username || username.length < 1 || username.length > 25) continue;
+      if (!username || username.length < 1 || username.length > 30) continue;
       if (seen.has(username.toLowerCase())) continue;
       seen.add(username.toLowerCase());
 
-      const commentText = String(c?.commentText || c?.text || c?.comment || 'Respuesta en X').trim();
+      const commentText = String(c?.commentText || c?.text || c?.comment || `Comentario en ${platform.toUpperCase()}`).trim();
       const timestamp = c?.timestamp ? new Date(c.timestamp).toISOString() : new Date().toISOString();
 
       validParticipants.push({
-        id: `x-live-${tweetId || Date.now()}-${i}`,
+        id: `${platform}-live-${shortcode || tweetId || Date.now()}-${i}`,
         username,
         commentText: commentText.slice(0, 500),
         isEligible: true,
         timestamp,
-        network: 'x',
+        network: platform as any,
       });
     }
 
     // Guardar en almacén en vivo
-    liveImports.set(normalized, {
+    const importRec: LiveImportRecord = {
       postUrl: rawPostUrl,
       tweetId,
+      shortcode,
       comments: validParticipants,
       handle: organizerHandle,
+      platform,
       updatedAt: Date.now(),
-    });
+    };
+    liveImports.set(normalized, importRec);
+    if (shortcode) {
+      liveImports.set(`ig:${shortcode}`, importRec);
+    }
 
     // Si se enviaron cookies o auth_token, persistir para futuras consultas automáticas server-side
     let detectedToken = authToken;
