@@ -52,6 +52,9 @@ async function handleExtractRequest(params) {
   if (platform === 'instagram') {
     scriptFile = 'ig-extractor.js';
     domainCheck = (url) => url.includes('instagram.com');
+  } else if (platform === 'threads') {
+    scriptFile = 'threads-extractor.js';
+    domainCheck = (url) => url.includes('threads.net');
   } else if (platform === 'tiktok') {
     scriptFile = 'tiktok-extractor.js';
     domainCheck = (url) => url.includes('tiktok.com');

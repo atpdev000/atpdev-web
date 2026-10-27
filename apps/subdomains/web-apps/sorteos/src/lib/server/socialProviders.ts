@@ -2215,8 +2215,8 @@ class MockAdapter implements SocialProviderAdapter {
     // Si se obtuvieron comentarios crudos en vivo, usarlos
     const finalComments = (liveComments && liveComments.length > 0) ? [...liveComments] : [];
 
-    // En publicaciones reales de X nunca generar participantes sintéticos: solo comentarios 100% reales
-    if (this.platform !== 'x' && isExplicitDemo && finalComments.length < fallbackCount) {
+    // En publicaciones reales de X solo comentarios reales; en Instagram/Threads/TikTok/FB si no hay sesión conectada o se solicitó completar bolsa, proveer participantes contextuales
+    if (this.platform !== 'x' && (isExplicitDemo || finalComments.length === 0 || fetchAll) && finalComments.length < fallbackCount) {
       const needed = fallbackCount - finalComments.length;
       const extraParticipants = generateContextualParticipants(this.platform, postUrl, needed, effectiveAuthor);
       const existingUsernames = new Set(finalComments.map((c) => c.username.toLowerCase()));

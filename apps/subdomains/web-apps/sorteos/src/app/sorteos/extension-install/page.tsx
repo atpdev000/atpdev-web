@@ -19,10 +19,50 @@ import {
 export default function ExtensionInstallPage() {
   const [isDetected, setIsDetected] = useState<boolean>(false);
   const [copiedFolder, setCopiedFolder] = useState<boolean>(false);
-  const [copiedEdgeUrl, setCopiedEdgeUrl] = useState<boolean>(false);
+  const [copiedBrowserUrl, setCopiedBrowserUrl] = useState<boolean>(false);
   const [copiedScript, setCopiedScript] = useState<boolean>(false);
   const [launching, setLaunching] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+
+  const [browserInfo, setBrowserInfo] = useState({
+    name: 'Google Chrome',
+    key: 'chrome',
+    url: 'chrome://extensions',
+    devModeTip: 'arriba a la derecha (esquina superior derecha de Chrome)',
+    cmd: 'chrome',
+  });
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined') return;
+    const ua = navigator.userAgent;
+    const isEdge = /Edg\//i.test(ua);
+    const isBrave = Boolean((navigator as any).brave);
+    if (isEdge) {
+      setBrowserInfo({
+        name: 'Microsoft Edge',
+        key: 'edge',
+        url: 'edge://extensions',
+        devModeTip: 'abajo a la izquierda (esquina inferior izquierda de Edge)',
+        cmd: 'msedge',
+      });
+    } else if (isBrave) {
+      setBrowserInfo({
+        name: 'Brave Browser',
+        key: 'brave',
+        url: 'brave://extensions',
+        devModeTip: 'arriba a la derecha (esquina superior derecha de Brave)',
+        cmd: 'brave',
+      });
+    } else {
+      setBrowserInfo({
+        name: 'Google Chrome',
+        key: 'chrome',
+        url: 'chrome://extensions',
+        devModeTip: 'arriba a la derecha (esquina superior derecha de Chrome)',
+        cmd: 'chrome',
+      });
+    }
+  }, []);
 
   const EXTENSION_PATH = 'D:\\PROYECTOS\\atpdev-web\\extension-sorteos-pro';
 
@@ -67,15 +107,15 @@ export default function ExtensionInstallPage() {
     };
   }, []);
 
-  const handleCopy = (text: string, type: 'folder' | 'edge' | 'script') => {
+  const handleCopy = (text: string, type: 'folder' | 'browser' | 'script') => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(text);
       if (type === 'folder') {
         setCopiedFolder(true);
         setTimeout(() => setCopiedFolder(false), 2500);
-      } else if (type === 'edge') {
-        setCopiedEdgeUrl(true);
-        setTimeout(() => setCopiedEdgeUrl(false), 2500);
+      } else if (type === 'browser') {
+        setCopiedBrowserUrl(true);
+        setTimeout(() => setCopiedBrowserUrl(false), 2500);
       } else if (type === 'script') {
         setCopiedScript(true);
         setTimeout(() => setCopiedScript(false), 2500);
@@ -88,10 +128,15 @@ export default function ExtensionInstallPage() {
     setFeedback(null);
     try {
       handleCopy(EXTENSION_PATH, 'folder');
-      await fetch('/api/v1/extension/open-installer', { method: 'POST' });
-      setFeedback('✅ ¡Se abrió Microsoft Edge y la carpeta en el Explorador! Solo arrastra la carpeta hacia Edge.');
+      const res = await fetch('/api/v1/extension/open-installer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ browser: browserInfo.name }),
+      });
+      const data = await res.json().catch(() => null);
+      setFeedback(data?.message || `✅ ¡Se abrió ${browserInfo.name} y la carpeta de la extensión en el Explorador! Arrastra la carpeta hacia la ventana o pulsa «Cargar descomprimida».`);
     } catch {
-      setFeedback('ℹ️ Copia la ruta y abre edge://extensions manualmente.');
+      setFeedback(`ℹ️ Copia la ruta y abre ${browserInfo.url} manualmente en ${browserInfo.name}.`);
     } finally {
       setLaunching(false);
     }
@@ -159,7 +204,7 @@ export default function ExtensionInstallPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-bold">
-                    {isDetected ? '¡Extensión Conectada y Activa!' : 'Esperando Instalación en Microsoft Edge...'}
+                    {isDetected ? '¡Extensión Conectada y Activa!' : `Esperando Instalación en ${browserInfo.name}...`}
                   </h3>
                   <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full font-black ${
                     isDetected
@@ -172,7 +217,7 @@ export default function ExtensionInstallPage() {
                 <p className="text-xs text-slate-400 mt-1">
                   {isDetected
                     ? 'Tu navegador ya tiene el Extractor Oficial sincronizado. Ya puedes cerrar esta pestaña o volver a tu sorteo.'
-                    : 'Detectando automáticamente la extensión en esta ventana cada segundo...'}
+                    : `Detectando automáticamente la extensión en ${browserInfo.name} cada segundo...`}
                 </p>
               </div>
             </div>
@@ -193,7 +238,7 @@ export default function ExtensionInstallPage() {
                 className="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-mono text-sm font-black shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 <FolderOpen className="w-4 h-4" />
-                <span>{launching ? 'Abriendo Instalador...' : '🚀 Abrir Instalador en Edge'}</span>
+                <span>{launching ? 'Abriendo Instalador...' : `🚀 Abrir Instalador en ${browserInfo.name}`}</span>
               </button>
             )}
           </div>
@@ -208,13 +253,13 @@ export default function ExtensionInstallPage() {
 
         {/* 2 Opciones de Instalación */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Tarjeta 1: Instalación Rápida en Edge (Desarrollo Local) */}
+          {/* Tarjeta 1: Instalación Rápida en el Navegador Actual */}
           <div className="p-6 rounded-3xl bg-slate-900/60 border border-white/10 space-y-4 flex flex-col justify-between">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4" />
-                  Instalación en Microsoft Edge
+                  Instalación en {browserInfo.name}
                 </span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
                   10 Segundos
@@ -228,24 +273,24 @@ export default function ExtensionInstallPage() {
               <div className="space-y-3 pt-2 text-xs font-mono">
                 <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-300 font-bold">1. En Edge abre la pestaña de extensiones:</span>
+                    <span className="text-slate-300 font-bold">1. En {browserInfo.name} abre la pestaña de extensiones:</span>
                     <button
                       type="button"
-                      onClick={() => handleCopy('edge://extensions', 'edge')}
+                      onClick={() => handleCopy(browserInfo.url, 'browser')}
                       className="text-[10px] px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-cyan-300 transition-colors cursor-pointer"
                     >
-                      {copiedEdgeUrl ? '✓ Copiado' : 'Copiar URL'}
+                      {copiedBrowserUrl ? '✓ Copiado' : 'Copiar URL'}
                     </button>
                   </div>
                   <div className="p-2 rounded bg-black/60 text-cyan-300 text-[11px] select-all font-bold">
-                    edge://extensions
+                    {browserInfo.url}
                   </div>
                 </div>
 
                 <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-1">
                   <span className="text-slate-300 font-bold">2. Activa el interruptor:</span>
                   <p className="text-[11px] text-slate-400">
-                    Marca la casilla <strong className="text-white">«Modo de desarrollador»</strong> (esquina inferior izquierda de Edge).
+                    Marca la casilla <strong className="text-white">«Modo de desarrollador»</strong> ({browserInfo.devModeTip}).
                   </p>
                 </div>
 
@@ -261,7 +306,7 @@ export default function ExtensionInstallPage() {
                     </button>
                   </div>
                   <p className="text-[11px] text-slate-400">
-                    Pulsa <strong className="text-white">«Cargar descomprimida»</strong> y selecciona la carpeta (o simplemente arrastra la carpeta hacia la ventana de Edge):
+                    Pulsa <strong className="text-white">«Cargar descomprimida»</strong> y selecciona la carpeta (o simplemente arrastra la carpeta hacia la ventana de {browserInfo.name}):
                   </p>
                   <div className="p-2 rounded bg-black/60 text-emerald-300 text-[11px] select-all truncate font-bold">
                     {EXTENSION_PATH}
