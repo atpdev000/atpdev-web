@@ -446,7 +446,7 @@ async function fetchInstagramPostMeta(url: string): Promise<PostMetadata | null>
       const decodedDesc = decodeEntities(ogDescMatch[1]);
       const commentsMatch = decodedDesc.match(/([\d.,kKmM]+)\s*(?:comments|comentarios)/i);
       if (commentsMatch) {
-        let numStr = commentsMatch[1].replace(/,/g, '');
+        const numStr = commentsMatch[1].replace(/,/g, '');
         if (numStr.endsWith('k') || numStr.endsWith('K')) {
           totalComments = Math.round(parseFloat(numStr) * 1000);
         } else if (numStr.endsWith('m') || numStr.endsWith('M')) {
@@ -2213,7 +2213,7 @@ class MockAdapter implements SocialProviderAdapter {
     const isExplicitDemo = postUrl.includes('demo') || postUrl.includes('test') || postUrl.includes('example.com') || postUrl.includes('sample');
     
     // Si se obtuvieron comentarios crudos en vivo, usarlos
-    let finalComments = (liveComments && liveComments.length > 0) ? [...liveComments] : [];
+    const finalComments = (liveComments && liveComments.length > 0) ? [...liveComments] : [];
 
     // En publicaciones reales de X nunca generar participantes sintéticos: solo comentarios 100% reales
     if (this.platform !== 'x' && isExplicitDemo && finalComments.length < fallbackCount) {
