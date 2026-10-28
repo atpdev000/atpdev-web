@@ -14,9 +14,30 @@ export async function POST(req: Request) {
 
   const userAgent = req.headers.get('user-agent') || '';
   const isEdge = reqBrowser.includes('edge') || (!reqBrowser && /Edg\//i.test(userAgent));
+  const isOpera = reqBrowser.includes('opera') || (!reqBrowser && /OPR\/|Opera/i.test(userAgent));
   const isBrave = reqBrowser.includes('brave') || (!reqBrowser && /Brave/i.test(userAgent));
-  const browserCmd = isEdge ? 'msedge \'edge://extensions\'' : isBrave ? 'brave \'brave://extensions\'' : 'chrome \'chrome://extensions\'';
-  const browserName = isEdge ? 'Microsoft Edge' : isBrave ? 'Brave' : 'Google Chrome';
+  const isFirefox = reqBrowser.includes('firefox') || (!reqBrowser && /Firefox\//i.test(userAgent));
+  const isSafari = reqBrowser.includes('safari') || (!reqBrowser && /Safari/i.test(userAgent) && !/Chrome|Chromium|Edg|OPR/i.test(userAgent));
+
+  let browserCmd = 'chrome \'chrome://extensions\'';
+  let browserName = 'Google Chrome';
+
+  if (isEdge) {
+    browserCmd = 'msedge \'edge://extensions\'';
+    browserName = 'Microsoft Edge';
+  } else if (isOpera) {
+    browserCmd = 'opera \'opera://extensions\'';
+    browserName = 'Opera';
+  } else if (isBrave) {
+    browserCmd = 'brave \'brave://extensions\'';
+    browserName = 'Brave';
+  } else if (isFirefox) {
+    browserCmd = 'firefox \'about:debugging#/runtime/this-firefox\'';
+    browserName = 'Mozilla Firefox';
+  } else if (isSafari) {
+    browserCmd = 'start ""';
+    browserName = 'Safari';
+  }
 
   // 1. Abrir la página de extensiones del navegador actual vía PowerShell
   try {

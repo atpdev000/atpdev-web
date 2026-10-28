@@ -36,7 +36,11 @@ export default function ExtensionInstallPage() {
     if (typeof navigator === 'undefined') return;
     const ua = navigator.userAgent;
     const isEdge = /Edg\//i.test(ua);
-    const isBrave = Boolean((navigator as any).brave);
+    const isOpera = /OPR\/|Opera/i.test(ua);
+    const isBrave = Boolean((navigator as any).brave) || /Brave/i.test(ua);
+    const isFirefox = /Firefox\//i.test(ua);
+    const isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|OPR/i.test(ua);
+
     if (isEdge) {
       setBrowserInfo({
         name: 'Microsoft Edge',
@@ -45,6 +49,14 @@ export default function ExtensionInstallPage() {
         devModeTip: 'abajo a la izquierda (esquina inferior izquierda de Edge)',
         cmd: 'msedge',
       });
+    } else if (isOpera) {
+      setBrowserInfo({
+        name: 'Opera',
+        key: 'opera',
+        url: 'opera://extensions',
+        devModeTip: 'arriba a la derecha (esquina superior derecha de Opera)',
+        cmd: 'opera',
+      });
     } else if (isBrave) {
       setBrowserInfo({
         name: 'Brave Browser',
@@ -52,6 +64,22 @@ export default function ExtensionInstallPage() {
         url: 'brave://extensions',
         devModeTip: 'arriba a la derecha (esquina superior derecha de Brave)',
         cmd: 'brave',
+      });
+    } else if (isFirefox) {
+      setBrowserInfo({
+        name: 'Mozilla Firefox',
+        key: 'firefox',
+        url: 'about:debugging#/runtime/this-firefox',
+        devModeTip: 'menú «Cargar complemento temporal...»',
+        cmd: 'firefox',
+      });
+    } else if (isSafari) {
+      setBrowserInfo({
+        name: 'Apple Safari',
+        key: 'safari',
+        url: 'Safari Extensiones',
+        devModeTip: 'Ajustes > Extensiones',
+        cmd: 'safari',
       });
     } else {
       setBrowserInfo({

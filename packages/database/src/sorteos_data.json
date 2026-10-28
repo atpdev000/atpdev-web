@@ -1,6 +1,28 @@
 {
   "giveaways": [
     {
+      "id": "sorteo_mvrf0yno_ht51v9",
+      "title": "Sorteo Instagram En Vivo Test",
+      "platform": "instagram",
+      "network": "instagram",
+      "postUrl": "https://www.instagram.com/srodalmenara/p/DFI7O7jvxV_/",
+      "authorUsername": "@organizador",
+      "totalCommentsCount": 0,
+      "status": "draft",
+      "rules": {
+        "excludeDuplicates": true,
+        "minMentions": 0,
+        "blockedUsers": [],
+        "winnersCount": 1,
+        "substitutesCount": 1
+      },
+      "winners": [],
+      "substitutes": [],
+      "certificateId": "",
+      "verificationHash": "",
+      "createdAt": "2026-10-28T01:08:08.437Z"
+    },
+    {
       "id": "sw-mvgswl6r",
       "title": "Sorteo Oficial de X (Twitter)",
       "platform": "instagram",
