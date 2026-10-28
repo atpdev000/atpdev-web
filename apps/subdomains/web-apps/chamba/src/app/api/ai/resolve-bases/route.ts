@@ -21,6 +21,53 @@ function cleanTitle(raw: string): string {
     .trim();
 }
 
+function extractTargetYear(startDate?: string, endDate?: string, title?: string): number {
+  if (endDate) {
+    const m = endDate.match(/\b(202[4-9]|203\d)\b/);
+    if (m) return parseInt(m[1], 10);
+  }
+  if (startDate) {
+    const m = startDate.match(/\b(202[4-9]|203\d)\b/);
+    if (m) return parseInt(m[1], 10);
+  }
+  if (title) {
+    const m = title.match(/\b(202[4-9]|203\d)\b/);
+    if (m) return parseInt(m[1], 10);
+  }
+  return 2026;
+}
+
+function isAncientOrMismatchYear(text: string, targetYear: number): boolean {
+  const minValidYear = targetYear - 1; // Permite publicaciones de fines del año anterior
+
+  // Detectar años en rutas o títulos ej: /2013/, _2013., -2013-, Julio 2013
+  const yearMatches = text.match(/\b(19\d{2}|20\d{2})\b/g);
+  if (!yearMatches) return false;
+
+  let hasAncient = false;
+  let hasValid = false;
+
+  for (const ym of yearMatches) {
+    const y = parseInt(ym, 10);
+    // Filtrar leyes o decretos típicos del estado (ej. Ley 27444, D.L. 1057, Ley 30057)
+    if (y === 1057 || y === 276 || y === 728) continue;
+    if (y >= 1990 && y <= targetYear + 1) {
+      if (y >= minValidYear) {
+        hasValid = true;
+      } else {
+        hasAncient = true;
+      }
+    }
+  }
+
+  // Si contiene un año viejo (como 2013, 2015, 2018) y no contiene el año de la convocatoria, es inválido
+  if (hasAncient && !hasValid) {
+    return true;
+  }
+
+  return false;
+}
+
 function isAcademicOrIrrelevantUrl(url: string): boolean {
   const low = url.toLowerCase();
   // Excepción legítima: Repositorio del Sistema PSEP del Poder Judicial
@@ -31,7 +78,9 @@ function isAcademicOrIrrelevantUrl(url: string): boolean {
     '/handle/', 'dspace', 'scielo', 'dialnet', 'redalyc', 'alicia.concytec',
     'pei-', 'poi-', 'rof-', 'mof-', 'tupa-', 'silabo', 'malla-curricular',
     'pedagogico', 'instituto-pedagogico', 'balotario', 'materia', 'curso',
-    'investigacion', 'revista.', 'revistas.', 'articulos', 'academic'
+    'investigacion', 'revista.', 'revistas.', 'articulos', 'academic',
+    'conflictividad', 'willaqniki', 'jurisprudencia', 'sentencia',
+    'ordenanza', 'adjudicacion', 'adjudicación', 'licitacion', 'licitación', 'subasta'
   ];
   return badUrlTokens.some(token => low.includes(token));
 }
@@ -47,21 +96,110 @@ function isAcademicOrIrrelevantTitle(title: string): boolean {
     'manual de organizacion', 'tupa', 'texto único de procedimientos',
     'texto unico de procedimientos', 'memoria anual', 'rendición de cuentas',
     'rendicion de cuentas', 'silabo', 'malla curricular', 'examen de admisión',
-    'examen de admision', 'balotario', 'instituto de educación superior pedagógico'
+    'examen de admision', 'balotario', 'instituto de educación superior pedagógico',
+    'conflictividad', 'willaqniki', 'dialogo y prevencion', 'diálogo y prevención',
+    'boletin', 'boletín', 'revista', 'informe mensual', 'diferencias, controversias',
+    'conflicto social', 'conflictos sociales', 'observatorio', 'censo', 'anuario',
+    'ley de presupuesto', 'proyecto de ley', 'sentencia',
+    'ordenanza', 'ordenanza municipal', 'resolución de alcaldía', 'resolucion de alcaldia',
+    'resolución ministerial', 'resolucion ministerial', 'resolución directoral', 'resolucion directoral',
+    'resolución de gerencia', 'resolucion de gerencia', 'directiva administrativa',
+    'adquisición de bienes', 'adquisicion de bienes', 'adjudicación simplificada', 'adjudicacion simplificada',
+    'licitación pública', 'licitacion publica', 'subasta inversa', 'fe de erratas', 'fe de errata'
   ];
   return badTitleWords.some(w => low.includes(w));
 }
 
-function hasHiringSignal(title: string, url: string): boolean {
-  const low = (title + ' ' + url).toLowerCase();
+function hasHiringSignal(title: string, url: string, description?: string): boolean {
+  const low = (title + ' ' + url + ' ' + (description || '')).toLowerCase();
+
   const hiringKeywords = [
-    'convocatoria', 'bases', 'cas', 'proceso', 'seleccion', 'selección',
-    'contratacion', 'contratación', 'anexo', 'cronograma', 'perfil',
-    'tdr', 'plaza', 'comunicado', 'evaluacion', 'evaluación', 'apto',
-    'merito', 'mérito', 'postulacion', 'postulación', 'inscripcion',
-    'inscripción', 'hoja de vida', 'formato', 'puesto', 'vacante', '276', '728', 'dl'
+    'bases',
+    'convocatoria',
+    'proceso cas',
+    'concurso cas',
+    'concurso publico',
+    'concurso público',
+    'seleccion de personal',
+    'selección de personal',
+    'proceso de seleccion',
+    'proceso de selección',
+    'concurso de meritos',
+    'concurso de méritos',
+    'contratacion cas',
+    'contratación cas',
+    'contratacion administrativa',
+    'contratación administrativa',
+    'cas transitorio',
+    'cas confianza',
+    'personal cas',
+    'locacion de servicios',
+    'locación de servicios',
+    'locador de servicios',
+    'anexo',
+    'cronograma',
+    'perfil de puesto',
+    'perfil del puesto',
+    'tdr',
+    'terminos de referencia',
+    'términos de referencia',
+    'termino de referencia',
+    'término de referencia',
+    'comunicado cas',
+    'evaluacion curricular',
+    'evaluación curricular',
+    'personal apto',
+    'cuadro de merito',
+    'cuadro de mérito',
+    'postulacion',
+    'postulación',
+    'inscripcion cas',
+    'inscripción cas',
+    'hoja de vida cas',
+    'formato de postulacion',
+    'formato de postulación',
+    'plazas vacantes',
+    'puesto vacante',
+    'plazas presupuestadas',
+    'contratacion laboral',
+    'contratación laboral'
   ];
-  return hiringKeywords.some(k => low.includes(k));
+
+  if (hiringKeywords.some(k => low.includes(k))) return true;
+  if (/\bcas\b/i.test(title) || /\bcas\b/i.test(url)) return true;
+  if (/\bbases\b/i.test(title) || /\btdr\b/i.test(title) || /\bcronograma\b/i.test(title)) return true;
+
+  return false;
+}
+
+function isEntityAffiliated(itemUrl: string, itemTitle: string, entityName: string, portalUrl?: string): boolean {
+  const lowUrl = itemUrl.toLowerCase();
+  const lowTitle = itemTitle.toLowerCase();
+  const entNorm = (entityName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  // Si el portal oficial canónico tiene un subdirectorio o dominio específico (ej: institucion/anin o institucion/ugelpaucardelsarasara)
+  if (portalUrl && portalUrl.includes('/institucion/')) {
+    const slugMatch = portalUrl.match(/\/institucion\/([^\/?#]+)/);
+    if (slugMatch && slugMatch[1] && lowUrl.includes(slugMatch[1])) {
+      return true;
+    }
+  }
+
+  // Si la entidad es local (UGEL, Municipalidad, DRE, Hospital regional)
+  const isRegionalOrLocal = entNorm.includes('ugel') || entNorm.includes('municipalidad') || entNorm.includes('hospital');
+  if (isRegionalOrLocal) {
+    // Descartar entidades centrales completamente ajenas
+    const foreignBodies = ['pcm.gob.pe', 'congreso.gob.pe', 'tc.gob.pe', 'defensoria.gob.pe', 'mef.gob.pe', 'minjus.gob.pe'];
+    if (foreignBodies.some(fb => lowUrl.includes(fb))) {
+      return false;
+    }
+  }
+
+  // Comprobar coincidencia de palabras clave distintivas de la entidad
+  const entityKeywords = entNorm.split(/\s+/).filter(w => w.length >= 4 && !['para', 'este', 'como', 'esta', 'peru', 'general'].includes(w));
+  const matchesKeyword = entityKeywords.some(k => lowTitle.includes(k) || lowUrl.includes(k));
+
+  return matchesKeyword;
 }
 
 function categorizeDocument(title: string, url: string): string {
@@ -87,37 +225,51 @@ function categorizeDocument(title: string, url: string): string {
 function extractCleanJobRole(title: string, entityName?: string): string {
   let role = (title || '').trim();
 
-  // 1. Quitar menciones del nombre de la entidad o sus partes clave
+  // 1. Quitar prefijo con dos puntos si existe ej: "MINSA: Médico General" -> "Médico General"
+  role = role.replace(/^[^:]+:\s*/, '');
+
+  // 2. Si empieza o contiene el nombre de la entidad (o sus palabras clave), quitarlo
   if (entityName) {
     const rawClean = entityName.replace(/\(.*?\)/g, ' ').replace(/\s+/g, ' ').trim();
-    const words = rawClean.split(/\s+/).filter(w => w.length > 3);
+    const escapedEntity = rawClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    role = role.replace(new RegExp(`^${escapedEntity}\\s*`, 'i'), '');
+    role = role.replace(new RegExp(`\\b${escapedEntity}\\b`, 'gi'), '');
+
+    // Quitar palabras de la entidad de 3 o más caracteres
+    const words = rawClean.split(/\s+/).filter(w => w.length >= 3);
     for (const w of words) {
       role = role.replace(new RegExp(`\\b${w}\\b`, 'gi'), '');
     }
-    role = role.replace(/\([A-Z0-9\s-]+\)/gi, '');
   }
 
-  // Quitar cualquier prefijo antes de ":"
-  role = role.replace(/^[^:]+:\s*/, '');
-
-  // 2. Quitar verbos y palabras típicas de scrapers / agregadores
+  // 3. Quitar verbos iniciales, preposiciones y conectores típicos
   role = role
+    .replace(/^(?:del?|de\s+la|los?|las?|en|para)\s+/i, '')
     .replace(/^(?:solicita|busca|requiere|necesita|convoca|contratara|contratará)\s+/i, '')
+    .replace(/^(?:del?|de\s+la|los?|las?|en|para|un|una|a)\s+/i, '')
     .replace(/^convocatoria\s+(?:de\s+trabajo\s+|cas\s+|publica\s+|pública\s+)?/i, '')
     .replace(/^proceso\s+cas\s+n[ºo°]?\s*\d+\s*-?\s*\d*\s*(?::\s*)?/i, '')
     .replace(/^cas\s+n[ºo°]?\s*\d+\s*(?:[-–]\s*\d+)?\s*(?::\s*)?/i, '')
-    .replace(/\(\d+\)\s*/g, ''); // Quitar número de vacantes ej "(30) "
+    .replace(/\(\d+\)\s*/g, ''); // Quitar número de vacantes ej "(1) " o "(30) "
 
-  // 3. Quitar sufijos de fecha y concurso al final
+  // 4. Quitar sufijos de mes/año y convocatoria al final
   role = role
     .replace(/\s*[-–]\s*convocatoria\s+.*$/i, '')
     .replace(/\s*[-–]\s*bases.*$/i, '')
-    .replace(/\s*[-–]\s*(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|setiembre|septiembre|octubre|noviembre|diciembre).*$/i, '')
-    .replace(/\s*[-–]\s*202[456].*$/i, '')
-    .replace(/^[:\s-]+|[:\s-]+$/g, '')
+    .replace(/\s*[-–]\s*(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|setiembre|septiembre|octubre|noviembre|diciembre)\s*(?:202[0-9]|203[0-9])?.*$/i, '')
+    .replace(/\s*[-–]\s*202[0-9].*$/i, '')
+    .replace(/^[:\s,.-]+|[:\s,.-]+$/g, '')
     .trim();
 
+  // Limpiar conectores sueltos al inicio tras la remoción
+  role = role.replace(/^(?:del?|de\s+la|para|solicita)\s+/i, '').trim();
+
   return role.slice(0, 60).trim();
+}
+
+function extractCasCode(title: string): string | null {
+  const match = title.match(/\bCAS\s*(?:N[°º]?\s*)?(\d+(?:-\d+)?(?:-(?:202[4-9]|203\d))?)\b/i);
+  return match ? match[0].trim() : null;
 }
 
 function extractCleanEntitySearch(entityName: string, searchPattern?: string): string {
@@ -130,12 +282,13 @@ function extractCleanEntitySearch(entityName: string, searchPattern?: string): s
 
 export async function POST(req: Request) {
   try {
-    const { title, entity_name } = await req.json();
+    const { title, entity_name, start_date, end_date } = await req.json();
 
     if (!entity_name && !title) {
       return NextResponse.json({ error: 'Faltan parámetros de búsqueda (título o entidad)' }, { status: 400 });
     }
 
+    const targetYear = extractTargetYear(start_date, end_date, title);
     const canonicalPortal = resolveEntityCanonicalPortal(entity_name || '');
     const safePortalUrl = sanitizeOfficialUrl(canonicalPortal.url, undefined, entity_name);
     const apiKey = process.env.FIRECRAWL_API_KEY;
@@ -150,8 +303,8 @@ export async function POST(req: Request) {
       /\b(UNI|UNMSM|UNAJMA|UNAAT|UNCP|UNAS|UNALM|UNT|UNSA|UNSAAC|UNSCH|UNP|UNAP|UNC|UNAC|UNSM)\b/.test(entUpper)
     );
 
-    // Extraer rol del puesto y términos de búsqueda institucional
     const cleanJobRole = extractCleanJobRole(title || '', entity_name);
+    const casCode = extractCasCode(title || '');
     const entityTerms = extractCleanEntitySearch(entity_name || '', canonicalPortal.searchPattern);
 
     if (apiKey) {
@@ -160,10 +313,25 @@ export async function POST(req: Request) {
           ? '(site:gob.pe OR site:edu.pe)'
           : 'site:gob.pe';
 
-        const roleQuery = cleanJobRole ? `"${cleanJobRole}"` : '';
-        const primaryQuery = `${domainFilter} ${entityTerms} ${roleQuery} (bases OR convocatoria OR CAS OR concurso) filetype:pdf -tesis -repositorio -bitstream -cybertesis -PEI -POI -TUPA -silabo -scielo -dialnet`;
+        // Excluir años obsoletos para evitar que Firecrawl traiga PDFs del 2013, 2014, etc.
+        const ancientYearsExclusion = '-2011 -2012 -2013 -2014 -2015 -2016 -2017 -2018 -2019 -2020 -2021 -2022 -2023 -2024';
+        const negativeKeywords = '-tesis -repositorio -bitstream -cybertesis -PEI -POI -TUPA -silabo -scielo -dialnet -willaqniki -conflictividad -boletin -revista -ordenanza -licitacion -subasta';
 
-        // AbortController con timeout de 9 segundos para evitar bloqueos del servidor
+        let primaryQuery = '';
+        if (canonicalPortal.url.includes('/institucion/')) {
+          const matchSlug = canonicalPortal.url.match(/\/institucion\/([^\/?#]+)/);
+          if (matchSlug && matchSlug[1]) {
+            const roleOrCas = casCode || (cleanJobRole ? `"${cleanJobRole}"` : '');
+            primaryQuery = `site:gob.pe/institucion/${matchSlug[1]}/ ${targetYear} ${roleOrCas} (bases OR convocatoria OR CAS) ${ancientYearsExclusion} ${negativeKeywords}`;
+          }
+        }
+
+        if (!primaryQuery) {
+          const roleQuery = cleanJobRole ? `"${cleanJobRole}"` : '';
+          const casQuery = casCode ? `"${casCode}"` : '';
+          primaryQuery = `${domainFilter} ${entityTerms} ${casQuery || roleQuery} ${targetYear} (bases OR convocatoria OR CAS) filetype:pdf ${ancientYearsExclusion} ${negativeKeywords}`;
+        }
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 9000);
 
@@ -179,7 +347,7 @@ export async function POST(req: Request) {
             limit: 6
           })
         }).catch(err => {
-          console.warn('Firecrawl search timeout or aborted:', err.message);
+          console.warn('Firecrawl primary search error:', err.message);
           return null;
         });
 
@@ -191,9 +359,10 @@ export async function POST(req: Request) {
           items = firecrawlData?.data || [];
         }
 
-        // Si la búsqueda estricta no arrojó resultados y tenemos rol limpio, hacer un pase flexible
-        if (items.length === 0 && cleanJobRole && cleanJobRole.length > 3) {
-          const fallbackQuery = `${entityTerms} "${cleanJobRole}" (bases OR convocatoria OR CAS) filetype:pdf -tesis -repositorio`;
+        // Si no arrojó resultados y tenemos rol limpio, hacer un pase flexible enfocado en el año objetivo
+        if (items.length === 0 && (cleanJobRole || casCode)) {
+          const flexibleRole = casCode ? `"${casCode}"` : `"${cleanJobRole}"`;
+          const fallbackQuery = `${entityTerms} ${flexibleRole} ${targetYear} (bases OR convocatoria OR CAS) filetype:pdf ${ancientYearsExclusion} ${negativeKeywords}`;
           const controller2 = new AbortController();
           const timeoutId2 = setTimeout(() => controller2.abort(), 7000);
 
@@ -223,27 +392,39 @@ export async function POST(req: Request) {
         for (const item of items) {
           const itemUrl = (item.url || '').trim();
           const itemTitle = cleanTitle(item.title || 'Documento Oficial');
+          const itemDesc = item.description || '';
 
           if (!itemUrl || isCompetitorUrl(itemUrl)) continue;
           if (seenUrls.has(itemUrl.toLowerCase())) continue;
           seenUrls.add(itemUrl.toLowerCase());
 
-          // Filtro 1: Descartar tesis y repositorios académicos
+          // FILTRO 1: Descartar documentos con años antiguos o desfasados (ej: 2013)
+          if (isAncientOrMismatchYear(itemTitle + ' ' + itemUrl + ' ' + itemDesc, targetYear)) {
+            continue;
+          }
+
+          // FILTRO 2: Descartar tesis y repositorios académicos
           if (isAcademicOrIrrelevantUrl(itemUrl)) continue;
           if (isAcademicOrIrrelevantTitle(itemTitle)) continue;
 
           const lowUrl = itemUrl.toLowerCase();
 
-          // Filtro 2: Entidades de gobierno (UGEL, Municipalidades, Ministerios, GORE) NO publican en repositorios universitarios .edu.pe
+          // FILTRO 3: Entidades de gobierno (UGEL, Municipalidades, Ministerios, GORE) NO publican en repositorios universitarios .edu.pe
           if (!isEntityUniversity && lowUrl.includes('.edu.pe')) continue;
 
-          // Filtro 3: Exigir señal positiva de contratación / convocatoria
-          if (!hasHiringSignal(itemTitle, itemUrl)) continue;
+          // FILTRO 4: Exigir señal positiva de contratación / convocatoria
+          if (!hasHiringSignal(itemTitle, itemUrl, itemDesc)) continue;
+
+          // FILTRO 5: Exigir afiliación institucional (no mostrar documentos de PCM/Congreso para una UGEL)
+          if (!isEntityAffiliated(itemUrl, itemTitle, entity_name, safePortalUrl)) {
+            continue;
+          }
 
           const isPdf = lowUrl.includes('.pdf') || lowUrl.includes('drive.google.com') || lowUrl.includes('docs.google.com');
+          const isGovPublication = lowUrl.includes('.gob.pe/institucion/') && lowUrl.includes('/informes-publicaciones/');
           const isGov = lowUrl.includes('.gob.pe') || (isEntityUniversity && lowUrl.includes('.edu.pe')) || lowUrl.includes('.mil.pe');
 
-          if (isGov || isPdf) {
+          if (isPdf || isGovPublication || isGov) {
             const category = categorizeDocument(itemTitle, itemUrl);
             officialDocuments.push({
               title: itemTitle,
@@ -273,17 +454,19 @@ export async function POST(req: Request) {
       }
     }
 
+    const hasExternalDocs = officialDocuments.some(d => d.category !== 'Portal Oficial');
+
     return NextResponse.json({
       success: true,
-      found: officialDocuments.length > 0,
+      found: hasExternalDocs,
       official_documents: officialDocuments,
       directBasesUrl: directBasesUrl || safePortalUrl,
       portalName: canonicalPortal.portalName,
       portalUrl: safePortalUrl,
       isSpecific: canonicalPortal.isSpecific,
-      message: directBasesUrl
-        ? `Se localizaron ${officialDocuments.length} documentos y bases oficiales con Inteligencia Artificial.`
-        : `Redirección oficial verificada a ${canonicalPortal.portalName}.`
+      message: hasExternalDocs
+        ? `Se localizaron ${officialDocuments.length} documentos y bases oficiales verificadas para ${targetYear}.`
+        : `No se encontraron PDFs desactualizados. Consulta directamente las bases vigentes en ${canonicalPortal.portalName}.`
     });
   } catch (err: any) {
     console.error('Error in /api/ai/resolve-bases:', err);

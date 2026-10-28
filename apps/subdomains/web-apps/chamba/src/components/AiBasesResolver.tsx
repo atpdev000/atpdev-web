@@ -13,12 +13,30 @@ interface OfficialDoc {
 interface AiBasesResolverProps {
   jobTitle: string;
   entityName: string;
+  startDate?: string;
+  endDate?: string;
   initialDocuments?: OfficialDoc[];
   canonicalPortalUrl?: string;
   canonicalPortalName?: string;
 }
 
-function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string): boolean {
+function extractTargetYear(startDate?: string, endDate?: string, title?: string): number {
+  if (endDate) {
+    const m = endDate.match(/\b(202[4-9]|203\d)\b/);
+    if (m) return parseInt(m[1], 10);
+  }
+  if (startDate) {
+    const m = startDate.match(/\b(202[4-9]|203\d)\b/);
+    if (m) return parseInt(m[1], 10);
+  }
+  if (title) {
+    const m = title.match(/\b(202[4-9]|203\d)\b/);
+    if (m) return parseInt(m[1], 10);
+  }
+  return 2026;
+}
+
+function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string, targetYear?: number): boolean {
   if (!d || !d.url) return false;
   if (isCompetitorUrl(d.url)) return false;
   const lowUrl = d.url.toLowerCase();
@@ -31,7 +49,7 @@ function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string): boolean {
   const badUrlTokens = [
     'repositorio.', 'tesis.', 'cybertesis', 'bitstream', 'bitstreams',
     '/handle/', 'dspace', 'scielo', 'dialnet', 'redalyc', 'alicia.concytec',
-    'pei-', 'poi-', 'rof-', 'mof-', 'tupa-', 'silabo', 'pedagogico'
+    'pei-', 'poi-', 'rof-', 'mof-', 'tupa-', 'silabo', 'pedagogico', 'conflictividad'
   ];
   if (badUrlTokens.some(t => lowUrl.includes(t))) return false;
 
@@ -39,9 +57,33 @@ function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string): boolean {
     'tesis', 'grado académico', 'grado academico', 'para optar el grado',
     'maestro en', 'maestría en', 'maestria en', 'doctor en', 'doctorado',
     'licenciatura en', 'proyecto educativo', 'plan estratégico', 'plan estrategico',
-    'plan operativo', 'manual de organización', 'tupa', 'silabo', 'balotario'
+    'plan operativo', 'manual de organización', 'tupa', 'silabo', 'balotario',
+    'conflictividad', 'willaqniki', 'dialogo y prevencion', 'diálogo y prevención',
+    'boletin', 'boletín', 'revista', 'informe mensual'
   ];
   if (badTitleWords.some(w => lowTitle.includes(w))) return false;
+
+  // Filtro de año estricto: eliminar documentos obsoletos (ej: 2013, 2015, etc.)
+  const year = targetYear || 2026;
+  const minValidYear = year - 1;
+  const yearMatches = (lowTitle + ' ' + lowUrl).match(/\b(19\d{2}|20\d{2})\b/g);
+  if (yearMatches) {
+    let hasAncient = false;
+    let hasValid = false;
+    for (const ym of yearMatches) {
+      const y = parseInt(ym, 10);
+      if (y >= 1990 && y <= year + 1) {
+        if (y >= minValidYear) {
+          hasValid = true;
+        } else {
+          hasAncient = true;
+        }
+      }
+    }
+    if (hasAncient && !hasValid) {
+      return false;
+    }
+  }
 
   // Entidades de gobierno general no publican bases en dominios .edu.pe
   const isUniv = Boolean(
@@ -58,12 +100,15 @@ function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string): boolean {
 export function AiBasesResolver({
   jobTitle,
   entityName,
+  startDate,
+  endDate,
   initialDocuments = [],
   canonicalPortalUrl,
   canonicalPortalName
 }: AiBasesResolverProps) {
-  // Filtrar de inmediato cualquier URL de agregadores o documentos espurios
-  const safeInitialDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, entityName));
+  const targetYear = extractTargetYear(startDate, endDate, jobTitle);
+  // Filtrar de inmediato cualquier URL de agregadores o documentos espurios/antiguos
+  const safeInitialDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, entityName, targetYear));
   const [documents, setDocuments] = useState<OfficialDoc[]>(safeInitialDocs);
   const [loading, setLoading] = useState(false);
   const [resolved, setResolved] = useState(safeInitialDocs.length > 0);
@@ -86,7 +131,7 @@ export function AiBasesResolver({
   useEffect(() => {
     if (prevJobRef.current !== jobTitle) {
       prevJobRef.current = jobTitle;
-      const nextSafeDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, entityName));
+      const nextSafeDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, entityName, targetYear));
       setDocuments(nextSafeDocs);
       setResolved(nextSafeDocs.length > 0);
       setPortalInfo({
@@ -95,7 +140,7 @@ export function AiBasesResolver({
       });
       setErrorMsg(null);
     }
-  }, [jobTitle, entityName, canonicalPortalUrl, canonicalPortalName]);
+  }, [jobTitle, entityName, canonicalPortalUrl, canonicalPortalName, targetYear, initialDocuments]);
 
   const handleResolveBases = async () => {
     try {
@@ -107,7 +152,9 @@ export function AiBasesResolver({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: jobTitle,
-          entity_name: entityName
+          entity_name: entityName,
+          start_date: startDate,
+          end_date: endDate
         })
       });
 
@@ -118,22 +165,24 @@ export function AiBasesResolver({
       const data = await res.json();
       if (!isMountedRef.current) return;
 
-      const verifiedDocs = (data.official_documents || []).filter((d: OfficialDoc) => isLegitimateOfficialDoc(d, entityName));
+      const verifiedDocs = (data.official_documents || []).filter((d: OfficialDoc) => isLegitimateOfficialDoc(d, entityName, targetYear));
       if (verifiedDocs.length > 0) {
         setDocuments(verifiedDocs);
+        setResolved(true);
+      } else {
+        setErrorMsg(data.message || 'No se localizaron PDFs externos indexados para este periodo. Accede directamente al portal institucional verificado.');
       }
+
       if (data.portalUrl && !isCompetitorUrl(data.portalUrl)) {
         setPortalInfo({
           name: data.portalName || entityName,
           url: data.portalUrl
         });
       }
-      setResolved(true);
     } catch (err: any) {
       console.error('Error resolving bases:', err);
       if (isMountedRef.current) {
-        setErrorMsg('No se encontraron PDFs adicionales de forma automática. Accede directamente al portal oficial verificado.');
-        setResolved(true);
+        setErrorMsg('No se encontraron PDFs adicionales para este rango de fecha. Accede directamente al portal oficial verificado.');
       }
     } finally {
       if (isMountedRef.current) {

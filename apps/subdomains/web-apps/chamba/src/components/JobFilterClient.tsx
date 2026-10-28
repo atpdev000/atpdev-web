@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Filter, Search, RotateCcw, Award, MapPin, GraduationCap, ArrowUpDown, CheckCircle2, X, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { Filter, Search, RotateCcw, Award, MapPin, GraduationCap, ArrowUpDown, CheckCircle2, X, SlidersHorizontal, ChevronDown, Briefcase } from "lucide-react";
 
 interface JobFilterClientProps {
   initialQ: string;
@@ -109,7 +109,7 @@ export function JobFilterClient({
   };
 
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
-  const hasAdvancedFilters = Boolean(region || educacion || sueldo || sort !== "ending_soon" || !hideExpired);
+  const hasAdvancedFilters = Boolean(region || categoria || educacion || sueldo || sort !== "ending_soon" || !hideExpired);
 
   const hasActiveFilters = Boolean(
     q || region || regimen || categoria || educacion || sueldo || sort !== "ending_soon" || !hideExpired
@@ -348,6 +348,36 @@ export function JobFilterClient({
             <option value="Locación / FAG" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Locación / FAG</option>
             <option value="Privado" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Sector Privado</option>
             <option value="Prácticas" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Prácticas Pre/Profesionales</option>
+          </select>
+        </div>
+
+        {/* Especialidad / Categoría Filter (Instant Auto-Apply) */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <Briefcase size={14} className="text-emerald-600 dark:text-emerald-400" />
+            <span>Área Profesional / Especialidad</span>
+          </label>
+          <select
+            value={categoria}
+            onChange={(e) => {
+              const val = e.target.value;
+              setCategoria(val);
+              applyFilters({ categoria: val });
+            }}
+            className="w-full p-2.5 bg-slate-50 dark:bg-slate-950/80 text-xs text-slate-800 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-white/10 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer transition-all"
+          >
+            <option value="" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Todas las Especialidades</option>
+            <option value="Administración y Gestión Pública" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Administración y Gestión Pública</option>
+            <option value="Tecnología e Informática" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Tecnología e Informática</option>
+            <option value="Salud y Medicina" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Salud y Medicina</option>
+            <option value="Educación y Docencia" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Educación y Docencia</option>
+            <option value="Derecho y Asesoría Legal" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Derecho y Asesoría Legal</option>
+            <option value="Contabilidad y Finanzas" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Contabilidad y Finanzas</option>
+            <option value="Ingeniería y Construcción" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Ingeniería y Construcción</option>
+            <option value="Atención al Ciudadano y Operativo" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Atención al Ciudadano y Operativo</option>
+            <option value="Logística y Contrataciones del Estado" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Logística y Abastecimiento (OSCE)</option>
+            <option value="Seguridad y Vigilancia" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Seguridad y Vigilancia</option>
+            <option value="Servicios Generales y Mantenimiento" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Servicios Generales / Choferes</option>
           </select>
         </div>
 

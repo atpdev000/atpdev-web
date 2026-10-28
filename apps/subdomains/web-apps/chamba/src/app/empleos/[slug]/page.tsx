@@ -250,10 +250,51 @@ export default async function JobDetailPage({
     ],
   };
 
+  // Extraer año objetivo de la convocatoria para validar que no sea un documento de años anteriores (ej: 2013)
+  const jobYear = Number(
+    job.end_date?.match(/\b(202[4-9]|203\d)\b/)?.[0] || 
+    job.start_date?.match(/\b(202[4-9]|203\d)\b/)?.[0] || 
+    job.title?.match(/\b(202[4-9]|203\d)\b/)?.[0] || 
+    2026
+  );
+
+  const isValidBasesUrl = (url?: string): boolean => {
+    if (!url || !url.startsWith('http') || isCompetitorUrl(url)) return false;
+    const low = url.toLowerCase();
+    // Descartar si menciona años antiguos (< jobYear - 1)
+    const yearMatches = low.match(/\b(19\d{2}|20\d{2})\b/g);
+    if (yearMatches) {
+      const minValid = jobYear - 1;
+      let hasAncient = false;
+      let hasValid = false;
+      for (const ym of yearMatches) {
+        const y = parseInt(ym, 10);
+        if (y === 1057 || y === 276 || y === 728) continue;
+        if (y >= 1990 && y <= jobYear + 1) {
+          if (y >= minValid) hasValid = true;
+          else hasAncient = true;
+        }
+      }
+      if (hasAncient && !hasValid) return false;
+    }
+    // Descartar tesis, boletines e informes de conflictividad
+    if (
+      low.includes('willaqniki') || 
+      low.includes('conflictividad') || 
+      low.includes('tesis') || 
+      low.includes('repositorio.') || 
+      low.includes('cybertesis') ||
+      low.includes('bitstream')
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   // 1. Enlace a bases oficiales (PDF, Google Drive o documento específico)
-  const candidateBases = (job.bases_pdf_url && job.bases_pdf_url.startsWith('http') && !isCompetitorUrl(job.bases_pdf_url))
+  const candidateBases = (job.bases_pdf_url && isValidBasesUrl(job.bases_pdf_url))
     ? job.bases_pdf_url
-    : (job.plazas?.find(p => p.bases_url && p.bases_url.startsWith('http') && !isCompetitorUrl(p.bases_url) && (
+    : (job.plazas?.find(p => p.bases_url && isValidBasesUrl(p.bases_url) && (
         p.bases_url.toLowerCase().includes('.pdf') || 
         p.bases_url.includes('drive.google.com') || 
         p.bases_url.includes('docs.google.com')
@@ -579,6 +620,8 @@ export default async function JobDetailPage({
               key={job.id || job.slug}
               jobTitle={job.title}
               entityName={job.entity_name}
+              startDate={job.start_date}
+              endDate={job.end_date}
               initialDocuments={job.official_documents}
               canonicalPortalUrl={cleanApplyUrl}
               canonicalPortalName={job.official_portal_name || job.entity_name}

@@ -64,7 +64,8 @@ const nextConfig = {
       { source: '/instituciones', destination: '/organizaciones', permanent: true },
       { source: '/entidades', destination: '/organizaciones', permanent: true },
       { source: '/publicar-oferta', destination: '/publicar-empleo', permanent: true },
-      { source: '/publicar', destination: '/publicar-empleo', permanent: true }
+      { source: '/publicar', destination: '/publicar-empleo', permanent: true },
+      { source: '/buscador', destination: '/empleos', permanent: true }
     ];
   }
 };

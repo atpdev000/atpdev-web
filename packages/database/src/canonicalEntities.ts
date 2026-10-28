@@ -482,6 +482,22 @@ export const CANONICAL_ENTITIES: CanonicalEntityInfo[] = [
     searchPattern: 'sernanp'
   },
   {
+    name: 'AUTORIDAD NACIONAL DE INFRAESTRUCTURA',
+    shortName: 'ANIN',
+    convocatoriasUrl: 'https://www.gob.pe/institucion/anin/informes-publicaciones?categoria[]=40-convocatorias-de-trabajo',
+    portalName: 'ANIN - Portal Oficial de Convocatorias CAS Gob.pe',
+    officialRuc: '20611739221',
+    searchPattern: 'anin OR "autoridad nacional de infraestructura"'
+  },
+  {
+    name: 'UGEL PAUCAR DEL SARA SARA',
+    shortName: 'UGEL PAUCAR DEL SARA SARA',
+    convocatoriasUrl: 'https://www.gob.pe/institucion/ugelpaucardelsarasara/informes-publicaciones',
+    portalName: 'UGEL Páucar del Sara Sara - Portal Oficial Gob.pe',
+    officialRuc: '20494488316',
+    searchPattern: '"paucar del sara sara" OR ugelpaucardelsarasara'
+  },
+  {
     name: 'SENAMHI',
     shortName: 'SENAMHI',
     convocatoriasUrl: 'https://www.gob.pe/institucion/senamhi/colecciones/3615-convocatorias-de-trabajo',
@@ -847,6 +863,18 @@ function matchesCanonicalEntity(normRaw: string, entity: CanonicalEntityInfo): b
     }
   }
 
+  if (entShort === 'ANIN') {
+    if (norm.includes('ANIN') || (norm.includes('AUTORIDAD') && norm.includes('INFRAESTRUCTURA'))) {
+      return true;
+    }
+  }
+
+  if (entShort.includes('PAUCAR DEL SARA SARA')) {
+    if (norm.includes('PAUCAR') && norm.includes('SARA')) {
+      return true;
+    }
+  }
+
   // 2. Coincidencia estricta por sigla / acrónimo (debe ser palabra completa o estar entre paréntesis/guiones)
   // NUNCA como subcadena dentro de otra palabra (ej: 'UNI' NO debe coincidir en 'UNIVERSIDAD' o 'MUNICIPALIDAD')
   const escapedShort = entShort.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -945,16 +973,47 @@ export function resolveEntityCanonicalPortal(entityName?: string): {
   }
 
   if (norm.includes('UGEL')) {
-    const ugelMatch = norm.match(/UGEL\s+(?:N[°º]?\s*)?([A-Z0-9ÁÉÍÓÚÑ]+)/i);
-    const ugelName = ugelMatch ? ugelMatch[1].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
-    if (ugelName && ugelName.length >= 2) {
+    if (norm.includes('PAUCAR') && norm.includes('SARA')) {
       return {
-        url: `https://www.gob.pe/institucion/ugel${ugelName}/informes-publicaciones`,
-        portalName: `UGEL ${ugelName.toUpperCase()} - Portal Oficial de Convocatorias Gob.pe`,
+        url: 'https://www.gob.pe/institucion/ugelpaucardelsarasara/informes-publicaciones',
+        portalName: 'UGEL Páucar del Sara Sara - Portal Oficial Gob.pe',
         isSpecific: true,
-        shortName: `UGEL ${ugelName.toUpperCase()}`
+        shortName: 'UGEL PAUCAR DEL SARA SARA',
+        searchPattern: '"paucar del sara sara" OR ugelpaucardelsarasara'
       };
     }
+
+    // Extraer nombre de la UGEL eliminando palabras como UGEL, N°, etc.
+    const cleanUgelTarget = norm
+      .replace(/^.*?\bUGEL\b(?:\s*N[°º]?\s*\d+)?/i, '')
+      .replace(/^(?:PROVINCIAL|DISTRITAL)?\s*(?:DE\s+|DEL?\s+|DE\s+LA\s+)?/i, '')
+      .trim();
+
+    const slugName = cleanUgelTarget
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+
+    if (slugName && slugName.length >= 3 && !/^\d+$/.test(slugName)) {
+      return {
+        url: `https://www.gob.pe/institucion/ugel${slugName}/informes-publicaciones`,
+        portalName: `UGEL ${cleanUgelTarget.toUpperCase()} - Portal Oficial de Convocatorias Gob.pe`,
+        isSpecific: true,
+        shortName: `UGEL ${cleanUgelTarget.toUpperCase()}`,
+        searchPattern: `"ugel ${cleanUgelTarget.toLowerCase()}" OR ugel${slugName}`
+      };
+    }
+
+    // Fallback para UGELs numeradas o que no tienen portal individual en gob.pe:
+    // Búsqueda canónica oficial de publicaciones en Gob.pe
+    const encodedUgel = encodeURIComponent(entityName.slice(0, 40));
+    return {
+      url: `https://www.gob.pe/busquedas?contenido=publicaciones&term=${encodedUgel}+CAS`,
+      portalName: `${entityName} - Búsqueda Oficial de Convocatorias Gob.pe`,
+      isSpecific: true,
+      shortName: 'UGEL'
+    };
   }
 
   if (norm.includes('DRE') || norm.includes('DIRECCION REGIONAL DE EDUCACION') || norm.includes('DIRECCIÓN REGIONAL DE EDUCACIÓN') || norm.includes('DIRECCION DE EDUCACION')) {

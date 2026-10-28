@@ -2550,7 +2550,8 @@ export function isDeadOrBrokenUrl(url?: string): boolean {
     (low.includes('gob.pe/munimagdalena') && !low.includes('-lima')) ||
     low.includes('gob.pe/munipueblo') ||
     low.includes('gob.pe/muniazngaro') ||
-    low.includes('gob.pe/muniandrs')
+    low.includes('gob.pe/muniandrs') ||
+    low.includes('institucion/ugelpaucar/informes-publicaciones')
   );
 }
 
@@ -2559,6 +2560,12 @@ export function fixDeadDomainUrl(url?: string, entityName?: string, sectorType?:
   const low = url.toLowerCase().trim();
   const entUpper = (entityName || '').toUpperCase();
 
+  if (low.includes('institucion/ugelpaucar/informes-publicaciones') || (entUpper.includes('PAUCAR') && entUpper.includes('SARA'))) {
+    return 'https://www.gob.pe/institucion/ugelpaucardelsarasara/informes-publicaciones';
+  }
+  if (low.includes('anin') || entUpper.includes('INFRAESTRUCTURA')) {
+    return 'https://www.gob.pe/institucion/anin/informes-publicaciones?categoria[]=40-convocatorias-de-trabajo';
+  }
   if (low.includes('gob.pe/municomas') || entUpper.includes('COMAS')) {
     return 'https://www.municomas.gob.pe/gestion-municipal/convocatorias-cas';
   }

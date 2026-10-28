@@ -213,7 +213,14 @@ export default function MatchCvPage() {
               Haz clic o arrastra aquí tu CV (PDF, Word o TXT)
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Extracción instantánea y confidencial. No almacenamos datos personales sensibles.
+              Extracción confidencial. No almacenamos datos sensibles. Conforme a la Ley N° 29733, nuestros{' '}
+              <Link href="/terminos-y-condiciones" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
+                Términos
+              </Link>{' '}
+              y{' '}
+              <Link href="/politica-de-privacidad" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
+                Privacidad
+              </Link>.
             </p>
           </div>
         </div>

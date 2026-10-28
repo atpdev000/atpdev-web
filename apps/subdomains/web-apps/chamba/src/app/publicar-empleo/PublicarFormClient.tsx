@@ -241,6 +241,7 @@ export default function PublicarFormClient() {
   const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [shakeTrigger, setShakeTrigger] = useState(0);
 
   // Autocompletado de entidades
@@ -625,6 +626,14 @@ export default function PublicarFormClient() {
       const firstFieldKey = errorKeys[0];
       scrollToField(firstFieldKey);
       setErrorMsg(`Por favor corrige los ${errorKeys.length} campos marcados en rojo para poder enviar la convocatoria.`);
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setShakeTrigger(prev => prev + 1);
+      setErrorMsg('Debes declarar la veracidad de la convocatoria y aceptar los Términos y Condiciones y la Política de Privacidad de Chamba Pro.');
+      const termsEl = document.getElementById('field-accept-terms');
+      if (termsEl) termsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -1941,6 +1950,47 @@ export default function PublicarFormClient() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* ACEPTACIÓN DE TÉRMINOS Y CONDICIONES (COMPLIANCE ADSENSE & LEY 29733) */}
+      <div 
+        id="field-accept-terms"
+        className={`p-5 rounded-2xl border transition-all ${
+          !acceptedTerms && hasSubmitted 
+            ? 'bg-rose-500/10 border-rose-500/50 shadow-sm' 
+            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+        }`}
+      >
+        <label className="flex items-start gap-3 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-1 w-4 h-4 rounded border-slate-300 dark:border-slate-700 text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600 shrink-0"
+          />
+          <div className="space-y-1 text-xs">
+            <span className="font-bold text-slate-900 dark:text-slate-100 block">
+              Declaración de Veracidad y Aceptación de Condiciones Oficiales
+            </span>
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
+              Declaro bajo juramento que los datos consignados en esta convocatoria son oficiales, legítimos y que la postulación es 100% gratuita para los postulantes. Acepto íntegramente los{' '}
+              <Link href="/terminos-y-condiciones" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
+                Términos y Condiciones de Uso
+              </Link>{' '}
+              y la{' '}
+              <Link href="/politica-de-privacidad" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
+                Política de Privacidad
+              </Link>{' '}
+              de Chamba Pro.
+            </p>
+          </div>
+        </label>
+        {!acceptedTerms && hasSubmitted && (
+          <p className="text-[11px] font-mono text-rose-500 dark:text-rose-400 mt-2.5 flex items-center gap-1.5 font-bold">
+            <AlertCircle size={13} />
+            <span>Casilla obligatoria: debes aceptar los términos para poder remitir y publicar la oferta.</span>
+          </p>
+        )}
       </div>
 
       {/* BOTÓN DE ACCIÓN Y GARANTÍA EDITORIAL */}

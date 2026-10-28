@@ -405,7 +405,7 @@ export default function CrearCvCasPage() {
                 <ArrowRight size={13} />
               </Link>
               <Link
-                href="/buscador"
+                href="/empleos"
                 className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
               >
                 <span>Ver Convocatorias CAS</span>
