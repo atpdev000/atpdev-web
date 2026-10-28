@@ -2215,8 +2215,9 @@ class MockAdapter implements SocialProviderAdapter {
     // Si se obtuvieron comentarios crudos en vivo, usarlos
     const finalComments = (liveComments && liveComments.length > 0) ? [...liveComments] : [];
 
-    // En publicaciones reales de X solo comentarios reales; en Instagram/Threads/TikTok/FB si no hay sesión conectada o se solicitó completar bolsa, proveer participantes contextuales
-    if (this.platform !== 'x' && (isExplicitDemo || finalComments.length === 0 || fetchAll) && finalComments.length < fallbackCount) {
+    // En publicaciones reales NUNCA generar participantes ficticios ni simulados.
+    // Solo generar datos de muestra si la URL es explícitamente de prueba (isExplicitDemo: demo, test, sample)
+    if (isExplicitDemo && finalComments.length < fallbackCount) {
       const needed = fallbackCount - finalComments.length;
       const extraParticipants = generateContextualParticipants(this.platform, postUrl, needed, effectiveAuthor);
       const existingUsernames = new Set(finalComments.map((c) => c.username.toLowerCase()));
@@ -2229,7 +2230,7 @@ class MockAdapter implements SocialProviderAdapter {
     }
 
     const count = finalComments.length;
-    const isLive = liveComments && liveComments.length > 0;
+    const isLive = !isExplicitDemo;
     logEvent('social.fetch', { provider: this.platform, latencyMs, mode: isLive ? 'live' : 'mock-verified', postUrl, count });
     return {
       comments: finalComments,
@@ -2240,7 +2241,7 @@ class MockAdapter implements SocialProviderAdapter {
         ...(meta || {}),
         title: meta?.title || `Publicación en ${this.platform.toUpperCase()} (${effectiveAuthor})`,
         author: effectiveAuthor,
-        totalComments: meta?.totalComments || count,
+        totalComments: meta?.totalComments ?? count,
         requiresAuth: false,
         notice: undefined,
       }

@@ -54,6 +54,7 @@
           platform: platform || 'x',
           postUrl: postUrl || '',
           expectedCount: expectedCount || 34,
+          backendOrigin: window.location.origin,
         },
         (response) => {
           if (chrome.runtime.lastError) {

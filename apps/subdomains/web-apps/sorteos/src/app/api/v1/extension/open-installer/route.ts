@@ -19,29 +19,62 @@ export async function POST(req: Request) {
   const isFirefox = reqBrowser.includes('firefox') || (!reqBrowser && /Firefox\//i.test(userAgent));
   const isSafari = reqBrowser.includes('safari') || (!reqBrowser && /Safari/i.test(userAgent) && !/Chrome|Chromium|Edg|OPR/i.test(userAgent));
 
-  let browserCmd = 'chrome \'chrome://extensions\'';
+  const findExe = (candidates: string[]) => candidates.find((c) => fs.existsSync(c)) || candidates[candidates.length - 1];
+
+  let exePath = '';
+  let targetUrl = 'chrome://extensions';
   let browserName = 'Google Chrome';
 
   if (isEdge) {
-    browserCmd = 'msedge \'edge://extensions\'';
     browserName = 'Microsoft Edge';
+    targetUrl = 'edge://extensions';
+    exePath = findExe([
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+      'msedge'
+    ]);
   } else if (isOpera) {
-    browserCmd = 'opera \'opera://extensions\'';
     browserName = 'Opera';
+    targetUrl = 'opera://extensions';
+    exePath = findExe([
+      `${process.env.LOCALAPPDATA || ''}\\Programs\\Opera\\launcher.exe`,
+      'C:\\Program Files\\Opera\\launcher.exe',
+      'opera'
+    ]);
   } else if (isBrave) {
-    browserCmd = 'brave \'brave://extensions\'';
     browserName = 'Brave';
+    targetUrl = 'brave://extensions';
+    exePath = findExe([
+      'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe',
+      `${process.env.LOCALAPPDATA || ''}\\BraveSoftware\\Brave-Browser\\Application\\brave.exe`,
+      'brave'
+    ]);
   } else if (isFirefox) {
-    browserCmd = 'firefox \'about:debugging#/runtime/this-firefox\'';
     browserName = 'Mozilla Firefox';
-  } else if (isSafari) {
-    browserCmd = 'start ""';
-    browserName = 'Safari';
+    targetUrl = 'about:debugging#/runtime/this-firefox';
+    exePath = findExe([
+      'C:\\Program Files\\Mozilla Firefox\\firefox.exe',
+      'C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe',
+      'firefox'
+    ]);
+  } else {
+    browserName = 'Google Chrome';
+    targetUrl = 'chrome://extensions';
+    exePath = findExe([
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      `${process.env.LOCALAPPDATA || ''}\\Google\\Chrome\\Application\\chrome.exe`,
+      'chrome'
+    ]);
   }
 
-  // 1. Abrir la página de extensiones del navegador actual vía PowerShell
+  // 1. Abrir la página de extensiones del navegador actual vía PowerShell con ruta absoluta
   try {
-    exec(`powershell -Command "Start-Process ${browserCmd}"`, (err) => {
+    const launchCmd = exePath.endsWith('.exe')
+      ? `powershell -Command "Start-Process -FilePath '${exePath}' -ArgumentList '${targetUrl}'"`
+      : `powershell -Command "Start-Process '${exePath}' '${targetUrl}'"`;
+
+    exec(launchCmd, (err) => {
       if (err) console.warn(`No se pudo abrir ${browserName} automáticamente:`, err);
     });
   } catch {

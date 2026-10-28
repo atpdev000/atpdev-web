@@ -124,7 +124,8 @@
 
     // Enviar lote al backend
     try {
-      await fetch('http://localhost:3006/api/v1/social/import-live', {
+      const endpoint = `${options.backendOrigin || 'http://localhost:3006'}/api/v1/social/import-live`;
+      await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

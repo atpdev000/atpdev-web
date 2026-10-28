@@ -1521,6 +1521,29 @@ interface AdditionalSource {
     }
   };
 
+  const handleOpenPostAndExtract = (plat: SocialNetwork = network) => {
+    if (!postUrl.trim()) return;
+    const authorTag = postMeta?.author || displayAuthor || '@organizador';
+    const apiOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3006';
+    let script = '';
+    if (plat === 'instagram') {
+      script = `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#e1306c,#fd1d1d,#f56040);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const cmb=document.querySelector('svg[aria-label="Comentar"],svg[aria-label="Comment"],svg[aria-label="Comentarios"]')?.closest('button,div[role="button"]');if(cmb&&!document.querySelector('ul,div[role="dialog"]')){try{cmb.click();await new Promise(r=>setTimeout(r,800))}catch(e){}}const l=[];const seen=new Set();for(let s=0;s<40;s++){document.querySelectorAll('div[role="button"],button,span[role="button"]').forEach(bt=>{const t=(bt.innerText||'').toLowerCase();if(t.includes('ver más')||t.includes('cargar más')||t.includes('view more')||t.includes('load more')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('ul>div,ul>li,article li,div[role="dialog"] li').forEach(it=>{const uEl=it.querySelector('h3 a,a[role="link"][href^="/"],a[href^="/"]');if(!uEl)return;const u=uEl.innerText.replace(/^@/,'').trim();if(!u||u.length>35||u.includes('\\n'))return;const sps=Array.from(it.querySelectorAll('span[dir="auto"],span'));let tx='';for(const sp of sps){const t=sp.innerText.trim();if(t&&t!==u&&!t.toLowerCase().includes('responder')&&!t.toLowerCase().includes('reply')&&!/^\\d+[dshwm]$/i.test(t)){tx=t;break;}}if(u&&!seen.has(u.toLowerCase())){seen.add(u.toLowerCase());l.push({username:u,commentText:tx||'Comentario en Instagram',timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' comentarios...';const sc=document.querySelector('div[role="dialog"] div[style*="overflow"]')||document.querySelector('article ul')?.parentElement;if(sc){sc.scrollTop+=900}else{window.scrollBy(0,800)}await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('${apiOrigin}/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,platform:'instagram',handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' comentarios enviados a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`;
+    } else if (plat === 'threads') {
+      script = `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#000,#333);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const l=[];const seen=new Set();for(let s=0;s<25;s++){document.querySelectorAll('div[data-pressable-container="true"]').forEach(it=>{const uEl=it.querySelector('a[href^="/@"]');if(!uEl)return;const u=uEl.innerText.replace(/^@/,'').trim();if(!u||u.includes('\\n'))return;const tEl=it.querySelector('span[dir="auto"]');const tx=tEl?tEl.innerText.trim():'';if(u&&!seen.has(u.toLowerCase())){seen.add(u.toLowerCase());l.push({username:u,commentText:tx||'Comentario en Threads',timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' comentarios...';window.scrollBy(0,1000);await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('${apiOrigin}/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,platform:'threads',handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' comentarios enviados a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`;
+    } else {
+      script = `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const mm=location.pathname.match(/(?:status|statuses)\\/(?:\\d+)/i);const mid=mm?mm[1]:null;const l=[];const seen=new Set();for(let s=0;s<25;s++){document.querySelectorAll('div[role="button"],button').forEach(bt=>{const t=bt.innerText||'';if(t.includes('Mostrar')||t.includes('Show')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('article').forEach(a=>{const u=a.querySelector('[data-testid="User-Name"]');const tx=a.querySelector('[data-testid="tweetText"]');if(!u)return;const m=u.innerText.match(/@([a-zA-Z0-9_]{1,15})\\b/);const h=m?m[1]:'';const ct=tx?tx.innerText.trim():'Respuesta en X';if(h&&!seen.has(h.toLowerCase())){seen.add(h.toLowerCase());l.push({username:h,commentText:ct,timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' respuestas...';window.scrollBy(0,1200);await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('${apiOrigin}/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' respuestas enviadas a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`;
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(script).catch(() => {});
+    }
+
+    window.open(postUrl.trim(), '_blank', 'noopener');
+    setAutoCollectActive(true);
+    setXSyncFeedbackType('info');
+    setXSyncFeedback(`Publicación abierta en nueva pestaña. Pulsa F12 (Consola) en esa pestaña y presiona Ctrl+V para extraer comentarios reales.`);
+  };
+
   const handleOpenPlatformAndSync = (plat: SocialNetwork = network) => {
     handleLoadAllComments(plat);
   };
@@ -1542,7 +1565,7 @@ interface AdditionalSource {
       }>('/api/v1/social/fetch-comments', {
         method: 'POST',
         body: {
-          platform: 'x',
+          platform: network,
           postUrl: postUrl.trim(),
         },
       });
@@ -1556,7 +1579,7 @@ interface AdditionalSource {
           ? res.comments.filter((c: any) => c.username.toLowerCase().replace(/^@/, '') !== exactAuthorHandle)
           : res.comments;
 
-        const tagged = realOnly.map((c: any) => ({ ...c, network: 'x' as SocialNetwork }));
+        const tagged = realOnly.map((c: any) => ({ ...c, network: network as SocialNetwork }));
         setRawComments(tagged);
         setCommentSourceMode('live');
         setPostMeta((prev) => ({
@@ -1567,7 +1590,7 @@ interface AdditionalSource {
         }));
         setAutoCollectActive(false);
         setXSyncFeedbackType('success');
-        setXSyncFeedback(`¡Cargados ${tagged.length} comentarios 100% reales extraídos de X!`);
+        setXSyncFeedback(`¡Cargados ${tagged.length} comentarios 100% reales extraídos de ${network.toUpperCase()}!`);
         setTimeout(() => {
           setIsXSyncModalOpen(false);
         }, 800);
@@ -2888,15 +2911,20 @@ interface AdditionalSource {
                   <Sparkles className="w-4 h-4 text-amber-300" />
                   <span>Sorteo Multi-Red ({1 + additionalSources.length} Fuentes)</span>
                 </div>
-              ) : commentSourceMode === 'live' ? (
+              ) : commentSourceMode === 'live' && rawComments.length > 0 ? (
                 <div className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-200 font-mono text-xs flex items-center gap-2 font-bold backdrop-blur-md">
                   <ShieldCheck className="w-4 h-4 text-emerald-300" />
                   <span>Comentarios Reales en Vivo ({network.toUpperCase()})</span>
                 </div>
-              ) : commentSourceMode === 'manual' ? (
+              ) : commentSourceMode === 'manual' && rawComments.length > 0 ? (
                 <div className="px-3.5 py-1.5 rounded-xl bg-white/15 border border-white/25 text-white font-mono text-xs flex items-center gap-2 font-bold backdrop-blur-md">
                   <FileText className="w-4 h-4" />
                   <span>Comentarios Reales Importados ({network.toUpperCase()})</span>
+                </div>
+              ) : rawComments.length === 0 ? (
+                <div className="px-3.5 py-1.5 rounded-xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-200 font-mono text-xs flex items-center gap-2 font-bold backdrop-blur-md">
+                  <RefreshCw className="w-4 h-4 text-cyan-300" />
+                  <span>Pendiente de Extracción en Vivo ({network.toUpperCase()})</span>
                 </div>
               ) : (
                 <div className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-200 font-mono text-xs flex items-center gap-2 font-bold backdrop-blur-md">
@@ -3033,12 +3061,21 @@ interface AdditionalSource {
                         : `${Math.max(postMeta?.totalComments || 0, rawComments.length).toLocaleString('es-ES')} comentarios detectados`}
                     </span>
                   </span>
-                  <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-200 font-mono text-xs font-bold border border-emerald-400/30 flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>
-                      {rawComments.length.toLocaleString('es-ES')} listos para sortear (100% reales activos)
+                  {rawComments.length > 0 ? (
+                    <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-200 font-mono text-xs font-bold border border-emerald-400/30 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                      <span>
+                        {rawComments.length.toLocaleString('es-ES')} listos para sortear (100% reales activos)
+                      </span>
                     </span>
-                  </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-200 font-mono text-xs font-bold border border-amber-400/30 flex items-center gap-1.5">
+                      <RefreshCw className="w-3.5 h-3.5 text-amber-300 animate-spin-slow" />
+                      <span>
+                        0 comentarios en la bolsa — Pulsa "Extraer en 1 Clic" abajo
+                      </span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -3112,16 +3149,24 @@ interface AdditionalSource {
               );
             })()}
 
-            {/* Aviso Informativo y de Acción para Instagram */}
-            {network === 'instagram' && ((postMeta?.totalComments && postMeta.totalComments > rawComments.length) || rawComments.length === 0) && (() => {
+            {/* Aviso Informativo y de Acción para Instagram y Threads */}
+            {(network === 'instagram' || network === 'threads') && ((postMeta?.totalComments && postMeta.totalComments > rawComments.length) || rawComments.length === 0) && (() => {
+              const isThreads = network === 'threads';
+              const netLabel = isThreads ? 'Threads' : 'Instagram';
               const remaining = Math.max(0, (postMeta?.totalComments || 0) - rawComments.length);
               const authorDisplay = postMeta?.author || displayAuthor;
 
               return (
-                <div className="pt-3 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl text-white bg-gradient-to-r from-purple-950/80 via-pink-950/70 to-rose-950/80 border-t border-pink-500/40">
+                <div className={`pt-3 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 -mx-5 -mb-5 sm:-mx-6 sm:-mb-6 p-4 sm:p-5 rounded-b-3xl text-white ${
+                  isThreads
+                    ? 'bg-gradient-to-r from-zinc-950/90 via-black to-zinc-900/90 border-t border-purple-500/40'
+                    : 'bg-gradient-to-r from-purple-950/80 via-pink-950/70 to-rose-950/80 border-t border-pink-500/40'
+                }`}>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-md">
-                      <InstagramIcon className="w-5 h-5 text-white" />
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shrink-0 shadow-md ${
+                      isThreads ? 'bg-black border border-white/30 font-bold font-mono text-base' : 'bg-gradient-to-tr from-yellow-500 via-pink-600 to-purple-600'
+                    }`}>
+                      {isThreads ? '@' : <InstagramIcon className="w-5 h-5 text-white" />}
                     </div>
                     <div>
                       <div className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 flex-wrap">
@@ -3131,14 +3176,14 @@ interface AdditionalSource {
                         </span>
                         <span className="text-white/40">•</span>
                         <span>
-                          Post de Instagram ({postMeta?.totalComments || 0} comentarios detectados{remaining > 0 ? `, faltan ${remaining}` : ''})
+                          Post de {netLabel} ({postMeta?.totalComments || 0} comentarios detectados{remaining > 0 ? `, faltan ${remaining}` : ''})
                         </span>
                       </div>
                       <p className="text-[11px] text-white/80 mt-1 leading-snug">
                         {rawComments.length > 0 ? (
                           <span>¡{rawComments.length} comentarios reales sincronizados! Puedes continuar con el sorteo o sincronizar más.</span>
                         ) : (
-                          <span>Extrae el 100% de comentarios reales de la publicación en 1 Clic con la extensión oficial o pega los participantes.</span>
+                          <span>Extrae el 100% de comentarios reales de la publicación en 1 Clic con el extractor oficial o pega los participantes.</span>
                         )}
                       </p>
 
@@ -3151,46 +3196,44 @@ interface AdditionalSource {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto flex-wrap sm:flex-nowrap">
                     {remaining === 0 && rawComments.length > 0 ? (
                       <div className="px-5 py-3 rounded-2xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg shadow-emerald-500/10">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                         <span>✅ 100% Sincronizado ({rawComments.length}/{postMeta?.totalComments || rawComments.length})</span>
                       </div>
-                    ) : isExtensionInstalled ? (
-                      <button
-                        type="button"
-                        disabled={xSyncLoading}
-                        onClick={() => handleLoadAllComments('instagram')}
-                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-400 hover:to-amber-300 text-white shadow-pink-500/25 active:scale-[0.98] disabled:opacity-50"
-                        title="Extraer el 100% de comentarios de Instagram en 1 Clic con la extensión oficial"
-                      >
-                        {xSyncLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin text-white" />
-                            <span>
-                              {extProgressCount !== null
-                                ? `Extrayendo: ${extProgressCount} / ${postMeta?.totalComments || 313}...`
-                                : 'Extrayendo en vivo...'}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <Zap className="w-4 h-4 text-white fill-current" />
-                            <span>⚡ Extraer Comentarios de Instagram (1 Clic)</span>
-                          </>
-                        )}
-                      </button>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => setIsXSyncModalOpen(true)}
-                        className="w-full sm:w-auto px-5 py-3.5 rounded-2xl font-mono text-xs sm:text-sm font-black transition-all cursor-pointer flex items-center justify-center gap-2.5 shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-400 hover:to-amber-300 text-white shadow-pink-500/25 active:scale-[0.98]"
-                        title="Instalar la extensión oficial en tu navegador para sincronizar comentarios de Instagram en 1 Clic"
-                      >
-                        <Zap className="w-4 h-4 text-white fill-current" />
-                        <span>⚡ Extraer Comentarios de Instagram (1 Clic)</span>
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleOpenPostAndExtract(network)}
+                          className="px-4 py-3 rounded-2xl font-mono text-xs font-black shadow-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shrink-0"
+                          title={`Abrir la publicación en ${netLabel} y extraer comentarios reales`}
+                        >
+                          <Rocket className="w-3.5 h-3.5 text-slate-950 fill-current" />
+                          <span>🚀 Abrir y Extraer</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={xSyncLoading}
+                          onClick={() => (isExtensionInstalled ? handleLoadAllComments(network) : setIsXSyncModalOpen(true))}
+                          className="px-4 py-3 rounded-2xl font-mono text-xs font-black transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 hover:from-pink-400 hover:to-amber-300 text-white shadow-pink-500/25 active:scale-[0.98] disabled:opacity-50 shrink-0"
+                          title={`Extraer comentarios reales de ${netLabel} en 1 Clic`}
+                        >
+                          {xSyncLoading ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                              <span>{extProgressCount !== null ? `${extProgressCount}...` : 'Extrayendo...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Zap className="w-3.5 h-3.5 text-white fill-current" />
+                              <span>⚡ Extraer (1 Clic)</span>
+                            </>
+                          )}
+                        </button>
+                      </>
                     )}
 
                     <button
@@ -3200,7 +3243,7 @@ interface AdditionalSource {
                         setPasteModalText('');
                         setIsPasteAllModalOpen(true);
                       }}
-                      className="px-3.5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all border border-white/20 flex items-center justify-center gap-1.5"
+                      className="px-3.5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs font-bold transition-all border border-white/20 flex items-center justify-center gap-1.5 cursor-pointer"
                       title="Pegar comentarios del portapapeles"
                     >
                       <Clipboard className="w-4 h-4" />
@@ -4088,17 +4131,17 @@ interface AdditionalSource {
           {/* Modal Asistente en Vivo para Sincronizar Comentarios (Responsive, Scrollable, Multi-Plataforma) */}
           {isXSyncModalOpen && (
             <div
-              className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-black/80 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-200"
+              className="fixed inset-0 z-50 overflow-y-auto p-3 sm:p-6 bg-black/85 backdrop-blur-md flex flex-col items-center justify-start animate-in fade-in duration-200"
               onClick={(e) => {
                 if (e.target === e.currentTarget) setIsXSyncModalOpen(false);
               }}
             >
               <div
-                className="w-full max-w-xl max-h-[92vh] flex flex-col bg-[#0e1320] rounded-3xl border border-white/20 shadow-2xl text-white my-auto relative overflow-hidden"
+                className="w-full max-w-xl max-h-[85vh] sm:max-h-[90vh] flex flex-col bg-[#0e1320] rounded-3xl border border-white/20 shadow-2xl text-white my-auto relative shrink-0 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                {/* Header Fijo */}
-                <div className="p-5 sm:p-6 pb-4 border-b border-white/10 shrink-0 bg-[#0e1320] flex items-start justify-between">
+                {/* Header Fijo Sticky */}
+                <div className="sticky top-0 z-20 p-4 sm:p-5 border-b border-white/10 shrink-0 bg-[#0e1320]/95 backdrop-blur-md flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     {network === 'instagram' ? (
                       <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center text-white shrink-0 shadow-lg font-bold p-2">
@@ -4141,7 +4184,7 @@ interface AdditionalSource {
                 </div>
 
                 {/* Contenido scrolleable fluido */}
-                <div className="p-5 sm:p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto overscroll-contain custom-scrollbar flex-1">
                   {/* Métricas */}
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="p-3 rounded-2xl bg-white/5 border border-white/10">
@@ -4164,52 +4207,53 @@ interface AdditionalSource {
                     </div>
                   </div>
 
-                  {/* ── BOTONES PRINCIPALES DE EXTRACCIÓN ── */}
+                  {/* ── BOTONES PRINCIPALES DE EXTRACCIÓN REAL ── */}
                   <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-950/80 via-purple-950/50 to-slate-900/90 border-2 border-indigo-500/50 shadow-2xl space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-amber-300 animate-spin-slow" />
                         <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300">
-                          Extracción 1-Clic
+                          Extracción de Comentarios 100% Reales
                         </span>
                       </div>
                       <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border font-bold uppercase tracking-wider flex items-center gap-1 ${
-                        isExtensionInstalled ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                        isExtensionInstalled ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
                       }`}>
                         <CheckCircle2 className="w-3 h-3" />
-                        {isExtensionInstalled ? 'Extensión Activa' : 'Extensión Lista'}
+                        {isExtensionInstalled ? 'Extensión Conectada' : 'Listo para Sincronizar'}
                       </span>
                     </div>
 
                     <p className="text-xs text-white/85 font-mono leading-relaxed">
                       {displayAuthor
-                        ? `Se detectaron ${postMeta?.totalComments || 38} comentarios en la publicación de ${displayAuthor}. Elige cómo deseas cargarlos en la bolsa de participantes:`
-                        : 'Extrae automáticamente todos los comentarios de la publicación en 1 Clic.'}
+                        ? `Se detectaron ${postMeta?.totalComments || 0} comentarios en la publicación de ${displayAuthor}. Extrae los comentarios reales directamente sin datos simulados:`
+                        : 'Extrae automáticamente los comentarios reales de la publicación:'}
                     </p>
 
-                    {/* Botones de acción directa */}
+                    {/* Botones de acción directa 100% Real */}
                     <div className="space-y-2.5">
-                      {/* Botón 1: Si no tiene extensión, ofrecer completar de inmediato sin obligar a instalar */}
+                      {/* Botón 1: Abrir publicación y extraer respuestas en 1 Clic con script/sesión */}
                       <button
                         type="button"
                         disabled={xSyncLoading}
-                        onClick={handleCompleteAllParticipants}
+                        onClick={() => handleOpenPostAndExtract(network)}
                         className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-mono text-sm font-black shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.99] disabled:opacity-50"
                       >
-                        {xSyncLoading ? (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                            <span>Completando participantes en vivo...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Rocket className="w-4 h-4 text-slate-950 fill-current" />
-                            <span>🚀 Completar Bolsa al 100% ({postMeta?.totalComments || 38} participantes)</span>
-                          </>
-                        )}
+                        <Rocket className="w-4 h-4 text-slate-950 fill-current" />
+                        <span>🚀 Abrir Publicación y Extraer en 1 Clic (100% Real)</span>
                       </button>
 
-                      {/* Botón 2: Instalar o sincronizar con extensión */}
+                      {/* Botón 2: Sincronizar directo desde Portapapeles si copió */}
+                      <button
+                        type="button"
+                        onClick={handleDirectClipboardSync}
+                        className="w-full py-3 px-4 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-mono text-xs font-black shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.99]"
+                      >
+                        <Clipboard className="w-4 h-4 text-cyan-300" />
+                        <span>📋 Sincronizar Comentarios Copiados (Ctrl+V)</span>
+                      </button>
+
+                      {/* Botón 3: Instalar o sincronizar con extensión */}
                       {!isExtensionInstalled ? (
                         <button
                           type="button"
@@ -4251,6 +4295,18 @@ interface AdditionalSource {
                               <span>⚡ Extraer con Extensión Oficial (En Vivo)</span>
                             </>
                           )}
+                        </button>
+                      )}
+
+                      {/* Botón Solo Modo Demo */}
+                      {postUrl.includes('demo') && (
+                        <button
+                          type="button"
+                          disabled={xSyncLoading}
+                          onClick={handleCompleteAllParticipants}
+                          className="w-full py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 font-mono text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                        >
+                          <span>🧪 Simular Participantes de Prueba (Solo Modo Demo)</span>
                         </button>
                       )}
                     </div>
@@ -4320,9 +4376,10 @@ interface AdditionalSource {
                           type="button"
                           onClick={() => {
                             const authorTag = postMeta?.author || displayAuthor || '@organizador';
+                            const apiOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3006';
                             const script = network === 'instagram'
-                              ? `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#e1306c,#fd1d1d,#f56040);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const cmb=document.querySelector('svg[aria-label="Comentar"],svg[aria-label="Comment"],svg[aria-label="Comentarios"]')?.closest('button,div[role="button"]');if(cmb&&!document.querySelector('ul,div[role="dialog"]')){try{cmb.click();await new Promise(r=>setTimeout(r,800))}catch(e){}}const l=[];const seen=new Set();for(let s=0;s<40;s++){document.querySelectorAll('div[role="button"],button,span[role="button"]').forEach(bt=>{const t=(bt.innerText||'').toLowerCase();if(t.includes('ver más')||t.includes('cargar más')||t.includes('view more')||t.includes('load more')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('ul>div,ul>li,article li,div[role="dialog"] li').forEach(it=>{const uEl=it.querySelector('h3 a,a[role="link"][href^="/"],a[href^="/"]');if(!uEl)return;const u=uEl.innerText.replace(/^@/,'').trim();if(!u||u.length>35||u.includes('\\n'))return;const sps=Array.from(it.querySelectorAll('span[dir="auto"],span'));let tx='';for(const sp of sps){const t=sp.innerText.trim();if(t&&t!==u&&!t.toLowerCase().includes('responder')&&!t.toLowerCase().includes('reply')&&!/^\\d+[dshwm]$/i.test(t)){tx=t;break;}}if(u&&!seen.has(u.toLowerCase())){seen.add(u.toLowerCase());l.push({username:u,commentText:tx||'Comentario en Instagram',timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' comentarios...';const sc=document.querySelector('div[role="dialog"] div[style*="overflow"]')||document.querySelector('article ul')?.parentElement;if(sc){sc.scrollTop+=900}else{window.scrollBy(0,800)}await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('http://localhost:3006/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,platform:'instagram',handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' comentarios enviados a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`
-                              : `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const mm=location.pathname.match(/(?:status|statuses)\\/(?:\\d+)/i);const mid=mm?mm[1]:null;const l=[];const seen=new Set();for(let s=0;s<25;s++){document.querySelectorAll('div[role="button"],button').forEach(bt=>{const t=bt.innerText||'';if(t.includes('Mostrar')||t.includes('Show')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('article').forEach(a=>{const u=a.querySelector('[data-testid="User-Name"]');const tx=a.querySelector('[data-testid="tweetText"]');const tm=a.querySelector('time');if(!u)return;const tl=tm?tm.closest('a'):null;if(tl&&mid&&tl.getAttribute('href')?.includes(mid))return;const m=u.innerText.match(/@([a-zA-Z0-9_]{1,15})\\b/);const h=m?m[1]:'';const lines=u.innerText.split('\\n').map(x=>x.trim()).filter(Boolean);const n=lines.length>0&&!lines[0].startsWith('@')?lines[0]:h;const ct=tx?tx.innerText.trim():'Respuesta en X';if(h&&!seen.has(h.toLowerCase())){seen.add(h.toLowerCase());l.push({username:h,name:n,commentText:ct,timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' respuestas...';if(l.length>=34)break;window.scrollBy(0,1200);await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('http://localhost:3006/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' respuestas enviadas a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`;
+                              ? `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#e1306c,#fd1d1d,#f56040);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const cmb=document.querySelector('svg[aria-label="Comentar"],svg[aria-label="Comment"],svg[aria-label="Comentarios"]')?.closest('button,div[role="button"]');if(cmb&&!document.querySelector('ul,div[role="dialog"]')){try{cmb.click();await new Promise(r=>setTimeout(r,800))}catch(e){}}const l=[];const seen=new Set();for(let s=0;s<40;s++){document.querySelectorAll('div[role="button"],button,span[role="button"]').forEach(bt=>{const t=(bt.innerText||'').toLowerCase();if(t.includes('ver más')||t.includes('cargar más')||t.includes('view more')||t.includes('load more')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('ul>div,ul>li,article li,div[role="dialog"] li').forEach(it=>{const uEl=it.querySelector('h3 a,a[role="link"][href^="/"],a[href^="/"]');if(!uEl)return;const u=uEl.innerText.replace(/^@/,'').trim();if(!u||u.length>35||u.includes('\\n'))return;const sps=Array.from(it.querySelectorAll('span[dir="auto"],span'));let tx='';for(const sp of sps){const t=sp.innerText.trim();if(t&&t!==u&&!t.toLowerCase().includes('responder')&&!t.toLowerCase().includes('reply')&&!/^\\d+[dshwm]$/i.test(t)){tx=t;break;}}if(u&&!seen.has(u.toLowerCase())){seen.add(u.toLowerCase());l.push({username:u,commentText:tx||'Comentario en Instagram',timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' comentarios...';const sc=document.querySelector('div[role="dialog"] div[style*="overflow"]')||document.querySelector('article ul')?.parentElement;if(sc){sc.scrollTop+=900}else{window.scrollBy(0,800)}await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('${apiOrigin}/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,platform:'instagram',handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' comentarios enviados a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`
+                              : `(async()=>{const b=document.createElement('div');b.style.cssText='position:fixed;top:20px;right:20px;z-index:999999;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:16px 24px;border-radius:14px;font-family:sans-serif;font-weight:bold;box-shadow:0 15px 35px rgba(0,0,0,0.4);font-size:15px;';b.innerText='⚡ Sorteos Pro: Sincronizando...';document.body.appendChild(b);const mm=location.pathname.match(/(?:status|statuses)\\/(?:\\d+)/i);const mid=mm?mm[1]:null;const l=[];const seen=new Set();for(let s=0;s<25;s++){document.querySelectorAll('div[role="button"],button').forEach(bt=>{const t=bt.innerText||'';if(t.includes('Mostrar')||t.includes('Show')||t.includes('respuestas')){try{bt.click()}catch(e){}}});document.querySelectorAll('article').forEach(a=>{const u=a.querySelector('[data-testid="User-Name"]');const tx=a.querySelector('[data-testid="tweetText"]');const tm=a.querySelector('time');if(!u)return;const tl=tm?tm.closest('a'):null;if(tl&&mid&&tl.getAttribute('href')?.includes(mid))return;const m=u.innerText.match(/@([a-zA-Z0-9_]{1,15})\\b/);const h=m?m[1]:'';const lines=u.innerText.split('\\n').map(x=>x.trim()).filter(Boolean);const n=lines.length>0&&!lines[0].startsWith('@')?lines[0]:h;const ct=tx?tx.innerText.trim():'Respuesta en X';if(h&&!seen.has(h.toLowerCase())){seen.add(h.toLowerCase());l.push({username:h,name:n,commentText:ct,timestamp:new Date().toISOString()});}});b.innerText='⚡ Sorteos Pro: '+l.length+' respuestas...';if(l.length>=34)break;window.scrollBy(0,1200);await new Promise(r=>setTimeout(r,400));}window.scrollTo({top:0,behavior:'smooth'});await fetch('${apiOrigin}/api/v1/social/import-live',{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({postUrl:location.href,comments:l,count:l.length,handle:'${authorTag}'})});b.style.background='#059669';b.innerText='✅ ¡'+l.length+' respuestas enviadas a Sorteos Pro!';setTimeout(()=>b.remove(),4000);})();`;
                             if (typeof navigator !== 'undefined' && navigator.clipboard) {
                               navigator.clipboard.writeText(script);
                               setXSyncFeedbackType('success');
