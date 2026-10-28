@@ -144,9 +144,10 @@
     // Regresar al inicio suavemente
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Enviar también al endpoint local de Sorteos Pro en segundo plano
+    // Enviar también al endpoint de Sorteos Pro en segundo plano
     try {
-      await fetch('http://localhost:3006/api/v1/social/import-live', {
+      const endpoint = `${options.backendOrigin || 'http://localhost:3006'}/api/v1/social/import-live`;
+      await fetch(endpoint, {
         method: 'POST',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json' },

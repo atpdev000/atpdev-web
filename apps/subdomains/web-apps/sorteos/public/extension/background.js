@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleExtractRequest(params) {
-  const { platform = 'x', postUrl, expectedCount } = params;
+  const { platform = 'x', postUrl, expectedCount, backendOrigin = 'http://localhost:3006' } = params;
 
   let scriptFile = 'x-extractor.js';
   let domainCheck = (url) => url.includes('x.com') || url.includes('twitter.com');
@@ -52,6 +52,9 @@ async function handleExtractRequest(params) {
   if (platform === 'instagram') {
     scriptFile = 'ig-extractor.js';
     domainCheck = (url) => url.includes('instagram.com');
+  } else if (platform === 'threads') {
+    scriptFile = 'threads-extractor.js';
+    domainCheck = (url) => url.includes('threads.net');
   } else if (platform === 'tiktok') {
     scriptFile = 'tiktok-extractor.js';
     domainCheck = (url) => url.includes('tiktok.com');
@@ -64,7 +67,7 @@ async function handleExtractRequest(params) {
         const authTokenCookie = await chrome.cookies.get({ url: 'https://x.com', name: 'auth_token' });
         const ct0Cookie = await chrome.cookies.get({ url: 'https://x.com', name: 'ct0' });
         if (authTokenCookie?.value) {
-          fetch('http://localhost:3006/api/v1/social/import-live', {
+          fetch(`${backendOrigin}/api/v1/social/import-live`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -80,7 +83,7 @@ async function handleExtractRequest(params) {
         const sessionCookie = await chrome.cookies.get({ url: 'https://www.instagram.com', name: 'sessionid' });
         const dsUserCookie = await chrome.cookies.get({ url: 'https://www.instagram.com', name: 'ds_user_id' });
         if (sessionCookie?.value) {
-          fetch('http://localhost:3006/api/v1/social/import-live', {
+          fetch(`${backendOrigin}/api/v1/social/import-live`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -95,7 +98,7 @@ async function handleExtractRequest(params) {
         const sessionCookie = await chrome.cookies.get({ url: 'https://www.tiktok.com', name: 'sessionid' });
         const ttwidCookie = await chrome.cookies.get({ url: 'https://www.tiktok.com', name: 'ttwid' });
         if (sessionCookie?.value || ttwidCookie?.value) {
-          fetch('http://localhost:3006/api/v1/social/import-live', {
+          fetch(`${backendOrigin}/api/v1/social/import-live`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -144,7 +147,7 @@ async function handleExtractRequest(params) {
   try {
     const response = await chrome.tabs.sendMessage(targetTab.id, {
       action: 'EXTRACT_NOW',
-      options: { expectedCount, platform },
+      options: { expectedCount, platform, backendOrigin },
     });
 
     if (response) {
@@ -160,7 +163,7 @@ async function handleExtractRequest(params) {
 
       const response = await chrome.tabs.sendMessage(targetTab.id, {
         action: 'EXTRACT_NOW',
-        options: { expectedCount, platform },
+        options: { expectedCount, platform, backendOrigin },
       });
 
       return response || { success: true, count: 0 };

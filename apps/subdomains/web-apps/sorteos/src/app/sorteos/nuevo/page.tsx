@@ -4372,6 +4372,15 @@ interface AdditionalSource {
                           <FolderOpen className="w-3.5 h-3.5 text-slate-950" />
                           <span>🚀 Abrir Pestaña del Instalador</span>
                         </button>
+                        <a
+                          href="/extension-sorteos-pro.zip"
+                          download="extension-sorteos-pro.zip"
+                          className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                          title="Descargar archivo comprimido .ZIP de la extensión para instalar en cualquier equipo"
+                        >
+                          <Download className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>📥 Descargar .ZIP</span>
+                        </a>
                         <button
                           type="button"
                           onClick={() => {

@@ -260,15 +260,26 @@ export default function ExtensionInstallPage() {
                 <span>Volver al Sorteo y Extraer (1 Clic)</span>
               </Link>
             ) : (
-              <button
-                type="button"
-                onClick={handleLaunchWindowsInstaller}
-                disabled={launching}
-                className="w-full md:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-mono text-sm font-black shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
-              >
-                <FolderOpen className="w-4 h-4" />
-                <span>{launching ? 'Abriendo Instalador...' : `🚀 Abrir Instalador en ${browserInfo.name}`}</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                <button
+                  type="button"
+                  onClick={handleLaunchWindowsInstaller}
+                  disabled={launching}
+                  className="flex-1 md:flex-initial px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-mono text-sm font-black shadow-lg shadow-cyan-500/25 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  <span>{launching ? 'Abriendo Instalador...' : `🚀 Abrir en ${browserInfo.name}`}</span>
+                </button>
+                <a
+                  href="/extension-sorteos-pro.zip"
+                  download="extension-sorteos-pro.zip"
+                  className="flex-1 md:flex-initial px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-mono text-sm font-black shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                  title="Descargar archivo comprimido .ZIP de la extensión para instalar en cualquier equipo"
+                >
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  <span>Descargar .ZIP</span>
+                </a>
+              </div>
             )}
           </div>
         </div>

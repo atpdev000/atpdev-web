@@ -21,6 +21,11 @@
     "https://*.facebook.com/*",
     "https://facebook.com/*",
     "https://*.threads.net/*",
+    "https://threads.net/*",
+    "https://*.atpdev.dev/*",
+    "https://atpdev.dev/*",
+    "https://*.atpdev.pe/*",
+    "https://atpdev.pe/*",
     "http://localhost:3006/*",
     "http://127.0.0.1:3006/*",
     "https://*.sorteos.pro/*",
@@ -35,7 +40,11 @@
         "http://localhost:3006/*",
         "http://127.0.0.1:3006/*",
         "https://*.sorteos.pro/*",
-        "https://sorteos.pro/*"
+        "https://sorteos.pro/*",
+        "https://*.atpdev.dev/*",
+        "https://atpdev.dev/*",
+        "https://*.atpdev.pe/*",
+        "https://atpdev.pe/*"
       ],
       "js": ["bridge.js"],
       "run_at": "document_start"
@@ -54,6 +63,14 @@
         "https://instagram.com/*"
       ],
       "js": ["ig-extractor.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://*.threads.net/*",
+        "https://threads.net/*"
+      ],
+      "js": ["threads-extractor.js"],
       "run_at": "document_idle"
     },
     {

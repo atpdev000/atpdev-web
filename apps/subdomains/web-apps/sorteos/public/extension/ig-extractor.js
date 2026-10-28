@@ -49,32 +49,19 @@
 
     // Buscar el contenedor con scroll de comentarios de Instagram
     const findScrollContainer = () => {
-      const allDivs = document.querySelectorAll('article div, div[role="dialog"] div, div[tabindex="-1"] div');
+      const allDivs = document.querySelectorAll('article div, div[role="dialog"] div');
       for (const d of allDivs) {
         const style = window.getComputedStyle(d);
         if (
           (style.overflowY === 'auto' || style.overflowY === 'scroll') &&
           d.scrollHeight > d.clientHeight &&
-          d.querySelectorAll('ul, div[role="button"], li').length > 0
+          d.querySelectorAll('ul, div[role="button"]').length > 0
         ) {
           return d;
         }
       }
       return null;
     };
-
-    // Si estamos en un Reel y el panel de comentarios aún no está abierto, hacer clic en el botón de comentar
-    const commentDrawerBtn = document.querySelector('svg[aria-label="Comentar"], svg[aria-label="Comment"], svg[aria-label="Comentarios"], svg[aria-label="Comments"]')?.closest('button, div[role="button"]');
-    if (commentDrawerBtn && !document.querySelector('ul, article li, div[role="dialog"] ul')) {
-      try {
-        commentDrawerBtn.click();
-        await new Promise((r) => setTimeout(r, 1000));
-      } catch {
-        // noop
-      }
-    }
-
-    const maxScrolls = 60;
 
     for (let s = 0; s < maxScrolls; s++) {
       // 1. Clic automático en botones de "Ver más comentarios" o "+" o "Cargar más comentarios"
@@ -102,7 +89,7 @@
 
       // 2. Extraer comentarios del DOM
       // En Instagram cada comentario tiene un autor (enlace al perfil) y un span con el texto
-      const commentItems = document.querySelectorAll('ul > div, ul > li, article ul div[role="button"], div[role="dialog"] ul li, div[role="dialog"] ul > div, div[tabindex="-1"] ul li, div[role="dialog"] div[role="button"]');
+      const commentItems = document.querySelectorAll('ul > div, ul > li, article ul div[role="button"]');
       commentItems.forEach((item) => {
         const userLink = item.querySelector('h3 a, a[role="link"][href^="/"], a[href^="/"]');
         if (!userLink) return;
@@ -186,9 +173,10 @@
     // Scroll arriba suave
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Enviar lote al backend local
+    // Enviar lote al backend
     try {
-      const response = await fetch('http://localhost:3006/api/v1/social/import-live', {
+      const endpoint = `${options.backendOrigin || 'http://localhost:3006'}/api/v1/social/import-live`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
