@@ -54,6 +54,7 @@ export default function TiktokDownloader() {
   const [videoInfo, setVideoInfo] = useState<DownloadResponse | null>(null)
   const [downloading, setDownloading] = useState<string | null>(null)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const [downloadDetails, setDownloadDetails] = useState('')
 
 
 
@@ -109,13 +110,62 @@ export default function TiktokDownloader() {
     }
   }
 
+  // Helper para leer flujo de descarga en tiempo real con cálculo de velocidad y ETA
+  const readStreamWithProgress = async (
+    response: Response,
+    defaultType: string
+  ): Promise<Blob> => {
+    const totalStr = response.headers.get('Content-Length') || response.headers.get('X-File-Size')
+    const total = totalStr ? parseInt(totalStr, 10) : 0
+    let loaded = 0
+    const startTime = Date.now()
+
+    const reader = response.body?.getReader()
+    if (!reader) throw new Error('No se pudo establecer el flujo de datos')
+
+    const chunks: Uint8Array[] = []
+    setDownloadProgress(2)
+    setDownloadDetails('Iniciando transferencia...')
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      chunks.push(value)
+      loaded += value.length
+
+      const elapsedSec = (Date.now() - startTime) / 1000
+      const speedBps = elapsedSec > 0 ? loaded / elapsedSec : 0
+      const speedText = speedBps > 1024 * 1024
+        ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
+        : `${Math.round(speedBps / 1024)} KB/s`
+
+      if (total > 0) {
+        const progress = Math.round((loaded / total) * 100)
+        setDownloadProgress(Math.min(progress, 99))
+        const remainingBytes = Math.max(total - loaded, 0)
+        const etaSec = speedBps > 0 ? Math.round(remainingBytes / speedBps) : 0
+        const etaText = etaSec > 0 ? `ETA: ${Math.floor(etaSec / 60)}:${String(etaSec % 60).padStart(2, '0')}` : ''
+        setDownloadDetails(`${speedText} ${etaText ? '• ' + etaText : ''}`)
+      } else {
+        setDownloadProgress((prev) => Math.min(prev + 1, 95))
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)}`)
+      }
+    }
+
+    setDownloadProgress(100)
+    setDownloadDetails('Guardando archivo...')
+    return new Blob(chunks as any, { type: response.headers.get('Content-Type') || defaultType })
+  }
+
   // Función de descarga directa (sin abrir nueva pestaña)
   const handleDownload = async (downloadUrl: string, quality: string, fileExt: string = 'mp4') => {
     // 📺 MOSTRAR ANUNCIO BONIFICADO ANTES DE DESCARGAR
     showRewarded(async () => {
       try {
         setDownloading(quality)
-        // ... Logica existente ...
+        setDownloadProgress(1)
+        setDownloadDetails('Conectando al servidor...')
 
         if (isNative) {
           try {
@@ -145,7 +195,7 @@ export default function TiktokDownloader() {
           throw new Error(`Error Proxy: ${errText || response.statusText}`);
         }
 
-        const blob = await response.blob()
+        const blob = await readStreamWithProgress(response, fileExt === 'mp3' ? 'audio/mpeg' : 'video/mp4')
 
         if (isNative) {
           // 📱 NATIVE: Usar Chunked Write para TikTok
@@ -277,12 +327,14 @@ export default function TiktokDownloader() {
         console.error('Error en descarga:', error)
         setError('Error al descargar el archivo: ' + (error instanceof Error ? error.message : 'Error desconocido'))
       } finally {
-        setDownloading(null)
+        setTimeout(() => {
+          setDownloading(null)
+          setDownloadProgress(0)
+          setDownloadDetails('')
+        }, 1500)
       }
     }); // Fin showRewarded
   }
-
-
 
   // Función para descarga directa desde API
   const handleDirectDownload = async (quality: string, fileExt: string = 'mp4') => {
@@ -290,6 +342,8 @@ export default function TiktokDownloader() {
 
     try {
       setDownloading(quality)
+      setDownloadProgress(1)
+      setDownloadDetails('Conectando al servidor...')
 
       if (isNative) {
         try {
@@ -304,7 +358,7 @@ export default function TiktokDownloader() {
       const response = await fetch(downloadUrl)
       if (!response.ok) throw new Error('Error al descargar el archivo')
 
-      const blob = await response.blob()
+      const blob = await readStreamWithProgress(response, fileExt === 'mp3' ? 'audio/mpeg' : 'video/mp4')
       const urlObject = window.URL.createObjectURL(blob)
 
       const link = document.createElement('a')
@@ -331,7 +385,11 @@ export default function TiktokDownloader() {
       console.error('Error en descarga:', error)
       setError('Error al descargar el archivo')
     } finally {
-      setDownloading(null)
+      setTimeout(() => {
+        setDownloading(null)
+        setDownloadProgress(0)
+        setDownloadDetails('')
+      }, 1500)
     }
   }
 
@@ -348,16 +406,34 @@ export default function TiktokDownloader() {
     return `${count} vistas`
   }
 
-  const ProgressBar = ({ progress, quality }: { progress: number, quality: string }) => (
-    <div className="w-full">
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+  const ProgressBar = ({ progress, quality, details }: { progress: number, quality: string, details?: string }) => (
+    <div className="w-full min-w-[160px] py-1">
+      <div className="w-full bg-gray-200 rounded-full h-3 mb-1.5 overflow-hidden shadow-inner">
         <div
-          className="bg-black h-2.5 rounded-full transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        ></div>
+          className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 h-3 rounded-full transition-all duration-300 ease-out flex items-center justify-end pr-1 text-[9px] text-white font-bold"
+          style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+        >
+          {progress >= 15 && `${Math.round(progress)}%`}
+        </div>
       </div>
-      <div className="text-xs text-gray-600 text-center">
-        {progress < 100 ? `Descargando ${quality}: ${progress}%` : '✅ Descarga completada'}
+      <div className="text-xs text-gray-700 text-center font-medium">
+        {progress < 100 ? (
+          <div>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700 px-0.5">
+              <span>Descargando {quality}</span>
+              <span className="text-rose-600 font-bold">{Math.round(progress)}%</span>
+            </div>
+            {details && (
+              <div className="text-[11px] text-gray-600 font-medium mt-0.5">
+                {details}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-rose-600 font-bold flex items-center justify-center gap-1">
+            <span>✅</span> ¡Descarga completada!
+          </span>
+        )}
       </div>
     </div>
   )
@@ -530,8 +606,8 @@ export default function TiktokDownloader() {
                       </div>
 
                       {isDownloading ? (
-                        <div className="w-full min-w-[120px]">
-                          <ProgressBar progress={downloadProgress} quality={quality.value} />
+                        <div className="w-40 min-w-[140px]">
+                          <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                         </div>
                       ) : (
                         <button
@@ -588,35 +664,37 @@ export default function TiktokDownloader() {
                             {format?.format || 'Auto'}
                           </td>
                           <td className="border border-gray-300 px-4 py-3">
-                            <button
-                              onClick={() => {
-                                if (format) {
-                                  handleDownload(format.url, quality.value, quality.ext);
-                                } else {
-                                  handleDirectDownload(quality.value, quality.ext);
-                                }
-                              }}
-                              disabled={!isAvailable || isDownloading}
-                              className={`py-2 px-4 rounded-lg font-semibold transition-colors text-sm flex items-center justify-center w-full ${isAvailable && !isDownloading
-                                ? 'bg-black hover:bg-gray-800 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
-                            >
-                              {isDownloading ? (
-                                <div className="w-full">
-                                  <ProgressBar progress={downloadProgress} quality={quality.value} />
-                                </div>
-                              ) : isAvailable ? (
-                                <>
-                                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                  </svg>
-                                  Descargar
-                                </>
-                              ) : (
-                                'No disponible'
-                              )}
-                            </button>
+                            {isDownloading ? (
+                              <div className="w-full">
+                                <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  if (format) {
+                                    handleDownload(format.url, quality.value, quality.ext);
+                                  } else {
+                                    handleDirectDownload(quality.value, quality.ext);
+                                  }
+                                }}
+                                disabled={!isAvailable || isDownloading}
+                                className={`py-2 px-4 rounded-lg font-semibold transition-colors text-sm flex items-center justify-center w-full ${isAvailable && !isDownloading
+                                  ? 'bg-black hover:bg-gray-800 text-white'
+                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  }`}
+                              >
+                                {isAvailable ? (
+                                  <>
+                                    <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Descargar
+                                  </>
+                                ) : (
+                                  'No disponible'
+                                )}
+                              </button>
+                            )}
                           </td>
                         </tr>
                       )

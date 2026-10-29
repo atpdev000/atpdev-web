@@ -44,6 +44,7 @@ export default function FacebookDownloader() {
   const [videoInfo, setVideoInfo] = useState<FacebookVideoInfo | null>(null)
   const [downloading, setDownloading] = useState<string | null>(null)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const [downloadDetails, setDownloadDetails] = useState('')
 
   const [originalUrl, setOriginalUrl] = useState('');
 
@@ -156,16 +157,8 @@ export default function FacebookDownloader() {
         }
       }
 
-      // Simular progreso inicial
-      const progressInterval = setInterval(() => {
-        setDownloadProgress(prev => {
-          if (prev >= 80) {
-            clearInterval(progressInterval)
-            return 80
-          }
-          return prev + 5
-        })
-      }, 500)
+      setDownloadProgress(2)
+      setDownloadDetails('Conectando al servidor...')
 
       // Llamar al proxy de Facebook
       const isAudio = quality === 'audio'; // ✅ Definir isAudio
@@ -182,8 +175,6 @@ export default function FacebookDownloader() {
         })
       })
 
-      clearInterval(progressInterval)
-
       if (!response.ok) {
         const errorText = await response.text();
         let errorDetail = 'Error desconocido';
@@ -198,13 +189,47 @@ export default function FacebookDownloader() {
         throw new Error(errorDetail || `Error ${response.status}`)
       }
 
-      // Verificar que la respuesta tenga contenido
-      const contentLength = response.headers.get('content-length');
-      if (contentLength === '0') {
-        throw new Error('El archivo recibido está vacío');
+      // Tracking de progreso mediante stream
+      const totalStr = response.headers.get('Content-Length') || response.headers.get('X-File-Size')
+      const total = totalStr ? parseInt(totalStr, 10) : 0
+      let loaded = 0
+      const startTime = Date.now()
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No se pudo establecer el flujo de datos')
+
+      const chunks: Uint8Array[] = []
+      setDownloadDetails('Iniciando transferencia...')
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        chunks.push(value)
+        loaded += value.length
+
+        const elapsedSec = (Date.now() - startTime) / 1000
+        const speedBps = elapsedSec > 0 ? loaded / elapsedSec : 0
+        const speedText = speedBps > 1024 * 1024
+          ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
+          : `${Math.round(speedBps / 1024)} KB/s`
+
+        if (total > 0) {
+          const progress = Math.round((loaded / total) * 100)
+          setDownloadProgress(Math.min(progress, 99))
+          const remainingBytes = Math.max(total - loaded, 0)
+          const etaSec = speedBps > 0 ? Math.round(remainingBytes / speedBps) : 0
+          const etaText = etaSec > 0 ? `ETA: ${Math.floor(etaSec / 60)}:${String(etaSec % 60).padStart(2, '0')}` : ''
+          setDownloadDetails(`${speedText} ${etaText ? '• ' + etaText : ''}`)
+        } else {
+          setDownloadProgress((prev) => Math.min(prev + 1, 95))
+          setDownloadDetails(`${speedText} • ${formatBytes(loaded)}`)
+        }
       }
 
-      const blob = await response.blob()
+      const blob = new Blob(chunks as any, { type: response.headers.get('Content-Type') || (isAudio ? 'audio/mp4' : 'video/mp4') })
+      setDownloadProgress(100)
+      setDownloadDetails('Guardando archivo...')
 
       if (blob.size === 0) {
         throw new Error('El archivo recibido está vacío')
@@ -345,13 +370,15 @@ export default function FacebookDownloader() {
       setTimeout(() => {
         setDownloading(null)
         setDownloadProgress(0)
-      }, 5000)
+        setDownloadDetails('')
+      }, 2000)
 
     } catch (error) {
       console.error('❌ Error en descarga con proxy:', error)
       setError(error instanceof Error ? error.message : 'Error desconocido en la descarga')
       setDownloading(null)
       setDownloadProgress(0)
+      setDownloadDetails('')
     }
   }
 
@@ -469,16 +496,34 @@ export default function FacebookDownloader() {
     }
   }
 
-  const ProgressBar = ({ progress, quality }: { progress: number, quality: string }) => (
-    <div className="w-full">
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+  const ProgressBar = ({ progress, quality, details }: { progress: number, quality: string, details?: string }) => (
+    <div className="w-full min-w-[160px] py-1">
+      <div className="w-full bg-gray-200 rounded-full h-3 mb-1.5 overflow-hidden shadow-inner">
         <div
-          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        ></div>
+          className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 h-3 rounded-full transition-all duration-300 ease-out flex items-center justify-end pr-1 text-[9px] text-white font-bold"
+          style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+        >
+          {progress >= 15 && `${Math.round(progress)}%`}
+        </div>
       </div>
-      <div className="text-xs text-gray-600 text-center">
-        {progress < 100 ? `Descargando ${quality}: ${progress}%` : '✅ Descarga completada'}
+      <div className="text-xs text-gray-700 text-center font-medium">
+        {progress < 100 ? (
+          <div>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700 px-0.5">
+              <span>Descargando {quality}</span>
+              <span className="text-blue-700 font-bold">{Math.round(progress)}%</span>
+            </div>
+            {details && (
+              <div className="text-[11px] text-gray-600 font-medium mt-0.5">
+                {details}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-blue-700 font-bold flex items-center justify-center gap-1">
+            <span>✅</span> ¡Descarga completada!
+          </span>
+        )}
       </div>
     </div>
   )
@@ -639,7 +684,7 @@ export default function FacebookDownloader() {
               <div className="flex flex-col items-center">
                 {downloading === 'audio-only' ? (
                   <div className="w-full max-w-md">
-                    <ProgressBar progress={downloadProgress} quality="Audio" />
+                    <ProgressBar progress={downloadProgress} quality="Audio" details={downloadDetails} />
                   </div>
                 ) : (
                   <button
@@ -679,8 +724,8 @@ export default function FacebookDownloader() {
 
                         {/* Action Button */}
                         {isDownloading ? (
-                          <div className="w-24 text-center">
-                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mx-auto" />
+                          <div className="w-36 min-w-[130px]">
+                            <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                           </div>
                         ) : (
                           <button
@@ -738,8 +783,8 @@ export default function FacebookDownloader() {
                             </td>
                             <td className="border border-gray-300 px-4 py-3">
                               {isDownloading ? (
-                                <div className="flex justify-center">
-                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+                                <div className="w-full">
+                                  <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                                 </div>
                               ) : (
                                 <button

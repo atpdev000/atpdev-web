@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
             // Headers de respuesta
             const responseHeaders = new Headers();
             responseHeaders.set('Content-Type', contentType);
-            if (contentLength) responseHeaders.set('Content-Length', contentLength);
+            responseHeaders.set('Content-Length', arrayBuffer.byteLength.toString());
             responseHeaders.set('Content-Disposition', `attachment; filename="${filename}"`);
             responseHeaders.set('Cache-Control', 'no-cache');
 
