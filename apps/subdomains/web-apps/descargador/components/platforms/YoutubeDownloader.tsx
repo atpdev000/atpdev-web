@@ -200,7 +200,21 @@ export default function YoutubeDownloader() {
         throw new Error(errorMsg)
       }
 
-      await downloadStream(response, `youtube_combined_${quality}_${Date.now()}.mp4`, `combined-${quality}`)
+      // Verificar que la respuesta sea binaria y no un error JSON
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Respuesta inválida del servidor')
+      }
+
+      const cd = response.headers.get('content-disposition') || ''
+      let filename = `youtube_combined_${quality}_${Date.now()}.mp4`
+      const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+      if (match && match[1]) {
+        try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
+      }
+
+      await downloadStream(response, filename, `combined-${quality}`)
 
     } catch (error) {
       console.error('❌ Error en descarga combinada:', error)
@@ -340,7 +354,21 @@ export default function YoutubeDownloader() {
         throw new Error(errorMsg)
       }
 
-      await downloadStream(response, `youtube_simple_${quality}_${Date.now()}.${fileExt}`, `simple-${quality}`)
+      // Verificar que la respuesta sea binaria y no un error JSON
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Respuesta inválida del servidor')
+      }
+
+      const cd = response.headers.get('content-disposition') || ''
+      let filename = `youtube_simple_${quality}_${Date.now()}.${fileExt}`
+      const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+      if (match && match[1]) {
+        try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
+      }
+
+      await downloadStream(response, filename, `simple-${quality}`)
 
     } catch (error) {
       console.error('❌ Error en descarga simple backend:', error)
@@ -772,7 +800,21 @@ export default function YoutubeDownloader() {
         }
         throw new Error(errorMsg)
       }
-      await downloadStream(response, `audio_${audioFormat.itag}_${Date.now()}.${ext}`, `audio-${audioFormat.itag}`)
+      // Verificar que la respuesta sea binaria y no un error JSON
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Respuesta inválida del servidor')
+      }
+
+      const cd = response.headers.get('content-disposition') || ''
+      let filename = `audio_${audioFormat.itag}_${Date.now()}.${ext}`
+      const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+      if (match && match[1]) {
+        try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
+      }
+
+      await downloadStream(response, filename, `audio-${audioFormat.itag}`)
     } catch (error: any) {
       console.error('❌ Error en descarga de audio backend:', error)
       setError(error.message || 'Error en descarga de audio')

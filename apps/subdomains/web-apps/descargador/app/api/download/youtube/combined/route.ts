@@ -1,247 +1,214 @@
 // app/api/download/youtube/combined/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { POST as getYoutubeInfo } from '../route'
+import { spawn } from 'child_process'
+import path from 'path'
+import fs from 'fs'
+import os from 'os'
 
-const PYTHON_API_URL = process.env.PYTHON_API_URL?.replace(/\/$/, '')
+export const maxDuration = 300 // 5 minutos máximo para descargas grandes
 
-// Función para mapear calidad a itag
-const mapQualityToItag = (quality: string) => {
-  const qNum = parseInt(quality.match(/\d+/)?.[0] || '1080')
+function getBinPaths() {
+  const cwd = process.cwd()
+  const possibleYtDlp = [
+    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'yt-dlp.exe'),
+    path.join(cwd, 'bin', 'yt-dlp.exe'),
+    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'yt-dlp'),
+    path.join(cwd, 'bin', 'yt-dlp')
+  ]
+  const possibleFfmpeg = [
+    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'ffmpeg.exe'),
+    path.join(cwd, 'bin', 'ffmpeg.exe'),
+    path.join(cwd, 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
+    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'ffmpeg')
+  ]
 
-  const qualityMap: { [key: number]: { video: number; audio: number } } = {
-    144: { video: 160, audio: 140 },
-    240: { video: 133, audio: 140 },
-    360: { video: 134, audio: 140 },
-    480: { video: 135, audio: 140 },
-    720: { video: 136, audio: 140 },
-    1080: { video: 137, audio: 140 },
-    1440: { video: 271, audio: 140 },
-    2160: { video: 313, audio: 140 }
+  const ytDlp = possibleYtDlp.find(p => fs.existsSync(p)) || 'yt-dlp'
+  const ffmpeg = possibleFfmpeg.find(p => fs.existsSync(p)) || 'ffmpeg'
+  const binDir = path.dirname(ffmpeg)
+
+  return { ytDlp, ffmpeg, binDir }
+}
+
+function cleanUrl(inputUrl: string): string {
+  try {
+    const urlObj = new URL(inputUrl)
+    const videoId = urlObj.searchParams.get('v')
+    if (videoId) return `https://www.youtube.com/watch?v=${videoId}`
+    return inputUrl.split('&')[0]
+  } catch {
+    return inputUrl.split('&')[0]
   }
-
-  return qualityMap[qNum] || qualityMap[1080]
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const { url, quality = '1080p', format_type = 'mp4' } = body
-    const { video_itag: reqVideoItag, audio_itag: reqAudioItag } = body
-
-    console.log('🎬 [YouTube Combined] Iniciando descarga combinada...')
-    console.log('📋 [YouTube Combined] Parámetros:', { url, quality, format_type, reqVideoItag, reqAudioItag })
+    const { url, quality = '1080p', format_type = 'mp4', video_itag, audio_itag } = body
 
     if (!url) {
       return NextResponse.json({ error: 'URL es requerida' }, { status: 400 })
     }
 
-    const youtubeRegex = /^https?:\/\/(www\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/)|youtu\.be\/)/
-    if (!youtubeRegex.test(url)) {
-      return NextResponse.json({ error: 'URL de YouTube inválida' }, { status: 400 })
-    }
-
-    const cleanUrl = (inputUrl: string): string => {
-      try {
-        const urlObj = new URL(inputUrl)
-        const videoId = urlObj.searchParams.get('v')
-        if (videoId) return `https://www.youtube.com/watch?v=${videoId}`
-        return inputUrl.split('&')[0]
-      } catch {
-        return inputUrl.split('&')[0]
-      }
-    }
-
     const cleanedUrl = cleanUrl(url)
+    const { ytDlp, binDir } = getBinPaths()
 
-    const itags = {
-      video: reqVideoItag !== undefined && reqVideoItag !== null ? reqVideoItag : mapQualityToItag(quality).video,
-      audio: reqAudioItag !== undefined ? reqAudioItag : mapQualityToItag(quality).audio
-    }
-
-    // Si hay un backend Python remoto explícitamente configurado (que no sea localhost ni railway caído)
-    const isRemotePython =
-      PYTHON_API_URL &&
-      !PYTHON_API_URL.includes('localhost') &&
-      !PYTHON_API_URL.includes('up.railway.app')
-
-    if (isRemotePython) {
-      try {
-        console.log('🔗 [YouTube Combined] Conectando a backend remoto:', PYTHON_API_URL)
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 60000)
-
-        const combineResponse = await fetch(`${PYTHON_API_URL}/api/v1/combiner/youtube/combine`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: cleanedUrl,
-            quality: quality,
-            video_itag: itags.video,
-            audio_itag: itags.audio
-          }),
-          signal: controller.signal
-        })
-
-        clearTimeout(timeoutId)
-
-        if (combineResponse.ok) {
-          const responseHeaders = new Headers()
-          const headersToForward = [
-            'Content-Type',
-            'Content-Length',
-            'Content-Disposition',
-            'X-File-Size',
-            'X-Video-Itag',
-            'X-Audio-Itag'
-          ]
-          headersToForward.forEach((h) => {
-            const val = combineResponse.headers.get(h)
-            if (val) responseHeaders.set(h, val)
-          })
-          if (!responseHeaders.has('Content-Type')) {
-            responseHeaders.set('Content-Type', 'video/mp4')
-          }
-          return new Response(combineResponse.body, {
-            status: 200,
-            headers: responseHeaders
-          })
-        }
-      } catch (err: any) {
-        console.warn('⚠️ [YouTube Combined] Backend remoto no respondió, usando extracción local:', err.message)
-      }
-    }
-
-    // Modo Serverless / Local In-Process
-    return await handleServerlessCombination(request, cleanedUrl, quality, format_type, itags.video, itags.audio)
-  } catch (error: any) {
-    console.error('💥 [YouTube Combined] Error general:', error)
-    return NextResponse.json(
-      {
-        error: 'Error en descarga combinada: ' + error.message,
-        details: error.toString()
-      },
-      { status: 500 }
-    )
-  }
-}
-
-async function handleServerlessCombination(
-  request: NextRequest,
-  url: string,
-  quality: string,
-  format_type: string,
-  videoItag?: number | string,
-  audioItag?: number | string
-) {
-  try {
-    console.log('🔄 [YouTube Combined] Ejecutando estrategia serverless in-process...')
-
-    // Obtener información directamente invocando el handler serverless
-    const reqInternal = new NextRequest(new URL('/api/download/youtube', request.url), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, quality, format_type })
+    console.log('🎬 [YouTube Combined Engine] Iniciando descarga real...', {
+      url: cleanedUrl,
+      quality,
+      format_type,
+      video_itag,
+      audio_itag,
+      binDir
     })
 
-    const infoResponse = await getYoutubeInfo(reqInternal)
-
-    if (!infoResponse.ok) {
-      const errorData = await infoResponse.json().catch(() => ({}))
-      throw new Error(errorData.error || 'Error obteniendo información del video')
-    }
-
-    const videoData = await infoResponse.json()
-    const formats = videoData.formats || []
-
-    // 1. Buscar coincidencia exacta por itag
-    let bestVideo: any = null
-    let bestAudio: any = null
-
-    if (videoItag) {
-      bestVideo = formats.find((f: any) => String(f.itag) === String(videoItag))
-    }
-
-    if (audioItag && audioItag !== 'null') {
-      bestAudio = formats.find((f: any) => String(f.itag) === String(audioItag))
-    }
-
-    // 2. Si no se encontró por itag, buscar por resolución / calidad numérica
+    const isAudioOnly = quality === 'audio' || (!video_itag && !!audio_itag) || format_type === 'mp3' || format_type === 'm4a'
     const targetHeight = parseInt(quality.match(/\d+/)?.[0] || '1080')
+    const finalExt = isAudioOnly ? (format_type === 'mp3' ? 'mp3' : 'm4a') : 'mp4'
 
-    if (!bestVideo) {
-      const candidates = formats.filter((f: any) => {
-        if (!f.hasVideo) return false
-        const h = f.height || parseInt(f.resolution?.match(/\d+/)?.[0] || '0')
-        return h === targetHeight
+    // Formular el selector de formato yt-dlp
+    let formatArg = ''
+    if (isAudioOnly) {
+      if (audio_itag) {
+        formatArg = `${audio_itag}/bestaudio[ext=m4a]/bestaudio/best`
+      } else {
+        formatArg = 'bestaudio[ext=m4a]/bestaudio/best'
+      }
+    } else if (video_itag && audio_itag) {
+      formatArg = `${video_itag}+${audio_itag}/bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+    } else if (video_itag && !audio_itag) {
+      formatArg = `${video_itag}/bestvideo[height<=${targetHeight}]/best`
+    } else {
+      formatArg = `bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+    }
+
+    const tempDir = os.tmpdir()
+    const tempFileBase = path.join(tempDir, `ytdl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`)
+    const tempOutputPattern = `${tempFileBase}.%(ext)s`
+
+    const ytArgs: string[] = [
+      '--ffmpeg-location', binDir,
+      '--no-playlist',
+      '--no-warnings',
+      '--no-part',
+      '-f', formatArg,
+      '-o', tempOutputPattern,
+    ]
+
+    if (isAudioOnly) {
+      ytArgs.push('-x', '--audio-format', finalExt)
+    } else {
+      ytArgs.push('--merge-output-format', 'mp4')
+    }
+
+    ytArgs.push(cleanedUrl)
+
+    console.log('🚀 [YouTube Engine] Ejecutando comando:', ytDlp, ytArgs.join(' '))
+
+    // Ejecutar yt-dlp
+    await new Promise<void>((resolve, reject) => {
+      const proc = spawn(ytDlp, ytArgs, {
+        windowsHide: true,
+        stdio: ['ignore', 'pipe', 'pipe']
       })
-      bestVideo = candidates[0] || null
-    }
 
-    if (!bestAudio && audioItag !== 'null') {
-      const audioCandidates = formats.filter((f: any) => f.hasAudio && !f.hasVideo)
-      bestAudio = audioCandidates.find((f: any) => f.format === 'm4a') || audioCandidates[0] || null
-    }
+      let stderr = ''
+      proc.stderr.on('data', (d) => { stderr += d.toString() })
+      proc.stdout.on('data', (d) => {
+        const text = d.toString()
+        if (text.includes('[download]') && text.includes('%')) {
+          // Log de progreso
+          process.stdout.write(`\r${text.trim()}`)
+        }
+      })
 
-    // 3. Si no hay formatos separados, verificar si existe un formato progresivo directo
-    if (!bestVideo && !bestAudio) {
-      const combinedFormats = formats.filter((f: any) => f.hasVideo && f.hasAudio && f.url)
-      const bestCombined =
-        combinedFormats.find((f: any) => f.quality?.includes(quality) || f.resolution?.includes(quality)) ||
-        combinedFormats[0]
+      proc.on('close', (code) => {
+        if (code === 0) {
+          resolve()
+        } else {
+          console.error('❌ [YouTube Engine] Error en yt-dlp stderr:', stderr)
+          reject(new Error(stderr || `yt-dlp finalizó con código ${code}`))
+        }
+      })
 
-      if (bestCombined) {
-        return NextResponse.json({
-          status: 'success',
-          download_url: bestCombined.url,
-          filename: `youtube_${quality}_${Date.now()}.${format_type}`,
-          title: videoData.title,
-          combined: false,
-          method: 'existing_combined',
-          quality: quality,
-          file_size: bestCombined.size || 0
-        })
+      proc.on('error', (err) => {
+        reject(err)
+      })
+    })
+
+    // Encontrar el archivo generado
+    const expectedFile = `${tempFileBase}.${finalExt}`
+    let realFile = expectedFile
+
+    if (!fs.existsSync(realFile)) {
+      // Buscar cualquier archivo que empiece con tempFileBase
+      const files = fs.readdirSync(tempDir).filter(f => f.startsWith(path.basename(tempFileBase)))
+      if (files.length > 0) {
+        realFile = path.join(tempDir, files[0])
+      } else {
+        throw new Error('El archivo procesado no fue encontrado en el disco temporal')
       }
     }
 
-    // 4. Si encontramos ambos, retornar para combinación en proxy o cliente
-    if (bestVideo && bestAudio) {
-      return NextResponse.json({
-        status: 'success',
-        video_url: bestVideo.url,
-        audio_url: bestAudio.url,
-        filename: `youtube_${quality}_${Date.now()}.mp4`,
-        title: videoData.title,
-        combined: true,
-        method: 'proxy_combination',
-        quality: quality,
-        video_quality: bestVideo.quality || bestVideo.resolution,
-        audio_quality: bestAudio.quality,
-        video_size: bestVideo.size || 0,
-        audio_size: bestAudio.size || 0
-      })
+    const stat = await fs.promises.stat(realFile)
+    if (stat.size === 0) {
+      try { await fs.promises.unlink(realFile) } catch {}
+      throw new Error('El archivo descargado tiene tamaño 0')
     }
 
-    // 5. Si solo se encontró video
-    if (bestVideo) {
-      return NextResponse.json({
-        status: 'success',
-        download_url: bestVideo.url,
-        filename: `youtube_${quality}_${Date.now()}.mp4`,
-        title: videoData.title,
-        combined: false,
-        method: 'video_only',
-        quality: quality,
-        warning: 'Este video no incluye audio separado disponible',
-        video_quality: bestVideo.quality || bestVideo.resolution,
-        video_size: bestVideo.size || 0
-      })
+    console.log(`✅ [YouTube Engine] Archivo generado exitosamente: ${realFile} (${(stat.size / (1024 * 1024)).toFixed(2)} MB)`)
+
+    const nodeStream = fs.createReadStream(realFile)
+    const cleanup = () => {
+      try {
+        if (fs.existsSync(realFile)) {
+          fs.unlinkSync(realFile)
+          console.log('🧹 [YouTube Engine] Archivo temporal limpiado:', realFile)
+        }
+      } catch (e) {
+        console.warn('Advertencia limpiando archivo temporal:', e)
+      }
     }
 
-    throw new Error(`No se encontró formato compatible para ${quality}`)
-  } catch (err: any) {
-    console.error('💥 [YouTube Combined] Error en combinación serverless:', err)
+    const webStream = new ReadableStream({
+      start(controller) {
+        nodeStream.on('data', (chunk) => {
+          controller.enqueue(chunk)
+        })
+        nodeStream.on('end', () => {
+          controller.close()
+          cleanup()
+        })
+        nodeStream.on('error', (err) => {
+          controller.error(err)
+          cleanup()
+        })
+      },
+      cancel() {
+        nodeStream.destroy()
+        cleanup()
+      }
+    })
+
+    const downloadFilename = isAudioOnly
+      ? `audio_${quality}_${Date.now()}.${finalExt}`
+      : `youtube_combined_${quality}_${Date.now()}.mp4`
+
+    return new Response(webStream, {
+      status: 200,
+      headers: {
+        'Content-Type': isAudioOnly ? (finalExt === 'mp3' ? 'audio/mpeg' : 'audio/mp4') : 'video/mp4',
+        'Content-Disposition': `attachment; filename="${downloadFilename}"`,
+        'Content-Length': stat.size.toString(),
+        'X-File-Size': stat.size.toString(),
+        'X-Combined': 'true',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      }
+    })
+
+  } catch (error: any) {
+    console.error('💥 [YouTube Combined] Error:', error)
     return NextResponse.json(
-      { error: 'Error procesando combinación: ' + err.message },
+      { error: 'Error procesando descarga: ' + (error.message || 'Error desconocido') },
       { status: 500 }
     )
   }
@@ -250,7 +217,7 @@ async function handleServerlessCombination(
 export async function GET() {
   return NextResponse.json({
     status: 'success',
-    message: 'YouTube Combined Serverless API está activa y lista',
+    message: 'YouTube Combined Engine Activo con yt-dlp y ffmpeg nativo',
     endpoint: 'POST /api/download/youtube/combined'
   })
 }
