@@ -68,9 +68,11 @@ function cleanYoutubeUrl(url: string): string {
 }
 
 async function extractMetadata(url: string, binPath: string): Promise<any> {
+  const nodeBin = process.execPath || 'node'
   return new Promise((resolve, reject) => {
     const args = [
       '--dump-json',
+      '--js-runtimes', `node:${nodeBin}`,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',

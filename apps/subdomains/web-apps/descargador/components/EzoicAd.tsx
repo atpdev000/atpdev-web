@@ -23,6 +23,9 @@ declare global {
 export default function EzoicAd({ placeholderId, className = "" }: EzoicAdProps) {
     useEffect(() => {
         if (typeof window !== 'undefined') {
+            if (process.env.NODE_ENV !== 'production' || window.location.hostname === 'localhost') {
+                return;
+            }
             const ez = window.ezstandalone;
             if (ez) {
                 ez.cmd = ez.cmd || [];

@@ -215,11 +215,13 @@ export default function YoutubeDownloader() {
           if (response.status === 403 || errorData.code === 'PRO_REQUIRED') {
             setTargetProQuality(quality)
             setIsProModalOpen(true)
+            return
           }
         } catch {
           errorMsg = errorText.substring(0, 100) || errorMsg
         }
-        throw new Error(errorMsg)
+        setError(errorMsg)
+        return
       }
 
       // Verificar que la respuesta sea binaria y no un error JSON
@@ -373,7 +375,8 @@ export default function YoutubeDownloader() {
         } catch {
           errorMsg = errorText.substring(0, 100) || errorMsg
         }
-        throw new Error(errorMsg)
+        setError(errorMsg)
+        return
       }
 
       // Verificar que la respuesta sea binaria y no un error JSON
@@ -820,7 +823,8 @@ export default function YoutubeDownloader() {
         } catch {
           errorMsg = errorText.substring(0, 100) || errorMsg
         }
-        throw new Error(errorMsg)
+        setError(errorMsg)
+        return
       }
       // Verificar que la respuesta sea binaria y no un error JSON
       const contentType = response.headers.get('content-type') || ''

@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
         formatArg = 'bestaudio[ext=m4a]/bestaudio/best'
       }
     } else if (video_itag && audio_itag) {
-      formatArg = `${video_itag}+${audio_itag}/bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+      formatArg = `${video_itag}+${audio_itag}/${video_itag}+bestaudio/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
     } else if (video_itag && !audio_itag) {
       formatArg = `${video_itag}/bestvideo[height<=${targetHeight}]/best`
     } else {
@@ -100,11 +100,15 @@ export async function POST(request: NextRequest) {
     const tempFileBase = path.join(tempDir, `ytdl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`)
     const tempOutputPattern = `${tempFileBase}.%(ext)s`
 
+    const nodeBin = process.execPath || 'node'
     const ytArgs: string[] = [
       '--ffmpeg-location', binDir,
+      '--js-runtimes', `node:${nodeBin}`,
       '--no-playlist',
       '--no-warnings',
       '--no-part',
+      '--no-check-certificates',
+      '--geo-bypass',
       '-f', formatArg,
       '-o', tempOutputPattern,
     ]
@@ -222,8 +226,12 @@ export async function POST(request: NextRequest) {
 
   } catch (error: any) {
     console.error('💥 [YouTube Combined] Error:', error)
+    let errorMsg = error?.message || 'Error desconocido al procesar el video'
+    if (errorMsg.includes('403') || errorMsg.includes('Forbidden')) {
+      errorMsg = 'YouTube restringió temporalmente este formato específico. Por favor reintenta con 720p o vuelve a intentarlo en unos instantes.'
+    }
     return NextResponse.json(
-      { error: 'Error procesando descarga: ' + (error.message || 'Error desconocido') },
+      { error: errorMsg },
       { status: 500 }
     )
   }

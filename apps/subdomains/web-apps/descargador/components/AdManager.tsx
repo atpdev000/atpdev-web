@@ -8,14 +8,20 @@ export default function AdManager() {
   const { isNative } = usePlatform()
   const [mounted, setMounted] = useState(false)
 
-  // Refrescar anuncios de Ezoic al montar en cliente
+  // Refrescar anuncios de Ezoic al montar en cliente (solo en producción externa)
   useEffect(() => {
     setMounted(true)
-    if (!isNative && typeof window !== 'undefined' && (window as any).ezstandalone?.showAds) {
-      (window as any).ezstandalone.cmd = (window as any).ezstandalone.cmd || []
-      ;(window as any).ezstandalone.cmd.push(function () {
-        ;(window as any).ezstandalone?.showAds()
-      })
+    if (
+      process.env.NODE_ENV === 'production' &&
+      typeof window !== 'undefined' &&
+      window.location.hostname !== 'localhost'
+    ) {
+      if (!isNative && (window as any).ezstandalone?.showAds) {
+        (window as any).ezstandalone.cmd = (window as any).ezstandalone.cmd || []
+        ;(window as any).ezstandalone.cmd.push(function () {
+          ;(window as any).ezstandalone?.showAds()
+        })
+      }
     }
   }, [isNative])
 

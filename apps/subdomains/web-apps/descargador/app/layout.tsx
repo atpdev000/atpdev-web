@@ -81,29 +81,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-        {/* Scripts de Ezoic y consentimiento cargados de forma segura con Next.js Script */}
-        <Script
-          strategy="afterInteractive"
-          src="https://cmp.gatekeeperconsent.com/min.js"
-        />
-        <Script
-          strategy="afterInteractive"
-          src="https://the.gatekeeperconsent.com/cmp.min.js"
-        />
-        <Script
-          strategy="afterInteractive"
-          src="//www.ezojs.com/ezoic/sa.min.js"
-        />
-        <Script
-          id="ezoic-standalone-init"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.ezstandalone = window.ezstandalone || {};
-              ezstandalone.cmd = ezstandalone.cmd || [];
-            `
-          }}
-        />
+        {/* Scripts de Ezoic y consentimiento cargados solo en producción para evitar error 403 en localhost */}
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src="https://cmp.gatekeeperconsent.com/min.js"
+            />
+            <Script
+              strategy="afterInteractive"
+              src="https://the.gatekeeperconsent.com/cmp.min.js"
+            />
+            <Script
+              strategy="afterInteractive"
+              src="//www.ezojs.com/ezoic/sa.min.js"
+            />
+            <Script
+              id="ezoic-standalone-init"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.ezstandalone = window.ezstandalone || {};
+                  ezstandalone.cmd = ezstandalone.cmd || [];
+                `
+              }}
+            />
+          </>
+        )}
 
         <AdManager />
         {children}
