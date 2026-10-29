@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 import { formatBytes } from '@/lib/utils';
 import { usePlatform } from '@/hooks/usePlatform';
@@ -8,6 +9,8 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { useAdMobInterstitial } from '@/hooks/useAdMobInterstitial';
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded';
+import { useProPlan } from '@/hooks/useProPlan';
+import ProModal from '@/components/ProModal';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
@@ -54,15 +57,15 @@ interface DownloadResponse {
   }
 }
 
-const predefinedQualities: { value: string, label: string, ext?: string }[] = [
-  { label: '2160p (4K)', value: '2160p', ext: 'mp4' },
-  { label: '1440p (2K)', value: '1440p', ext: 'mp4' },
-  { label: '1080p (.mp4)', value: '1080p', ext: 'mp4' },
-  { label: '720p (.mp4)', value: '720p', ext: 'mp4' },
-  { label: '480p (.mp4)', value: '480p', ext: 'mp4' },
-  { value: '360p', label: '360p', ext: 'mp4' },
-  { value: '240p', label: '240p', ext: 'mp4' },
-  { value: '144p', label: '144p', ext: 'mp4' }
+const predefinedQualities: { value: string, label: string, ext?: string, isPro?: boolean }[] = [
+  { label: '2160p (4K UHD)', value: '2160p', ext: 'mp4', isPro: true },
+  { label: '1440p (2K QHD)', value: '1440p', ext: 'mp4', isPro: true },
+  { label: '1080p (Full HD)', value: '1080p', ext: 'mp4', isPro: true },
+  { label: '720p (HD Gratis)', value: '720p', ext: 'mp4', isPro: false },
+  { label: '480p (.mp4)', value: '480p', ext: 'mp4', isPro: false },
+  { value: '360p', label: '360p (.mp4)', ext: 'mp4', isPro: false },
+  { value: '240p', label: '240p (.mp4)', ext: 'mp4', isPro: false },
+  { value: '144p', label: '144p (.mp4)', ext: 'mp4', isPro: false }
 ]
 
 export default function YoutubeDownloader() {
@@ -71,6 +74,8 @@ export default function YoutubeDownloader() {
   const { addToHistory } = useDownloadHistory()
   const { showInterstitial } = useAdMobInterstitial()
   const { showRewarded } = useAdMobRewarded()
+  const { plan, isPro } = useProPlan()
+
   const [url, setUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -78,8 +83,13 @@ export default function YoutubeDownloader() {
   const [downloading, setDownloading] = useState<string | null>(null)
   const [downloadProgress, setDownloadProgress] = useState(0)
 
+  const [isProModalOpen, setIsProModalOpen] = useState(false)
+  const [targetProQuality, setTargetProQuality] = useState('1080p')
+
   const [originalUrl, setOriginalUrl] = useState('');
   const [activeTab, setActiveTab] = useState<'simple' | 'combined'>('simple');
+
+  const isProQuality = (quality: string) => ['1080p', '1440p', '2160p'].includes(quality)
 
   // 🔄 CAMBIAR TAB + ANUNCIO
   const handleTabChange = async (tab: 'simple' | 'combined') => {
@@ -147,18 +157,23 @@ export default function YoutubeDownloader() {
 
 
 
-  // ✅ FUNCIÓN PARA VERIFICAR SI LA COMBINACIÓN ESTÁ PERMITIDA (HASTA 1080p)
+  // ✅ FUNCIÓN PARA VERIFICAR SI LA COMBINACIÓN ESTÁ SOPORTADA POR EL MOTOR FFmpeg
   const isCombinationAllowed = (quality: string): boolean => {
-    // ✅ LIMITAR COMBINACIÓN HASTA 1080p (MENOS DE 200MB)
-    const allowedCombinationQualities = ['144p', '240p', '360p', '480p', '720p', '1080p']
+    const allowedCombinationQualities = ['144p', '240p', '360p', '480p', '720p', '1080p', '1440p', '2160p']
     return allowedCombinationQualities.includes(quality)
   }
 
-  // ✅ FUNCIÓN MEJORADA PARA DESCARGA COMBINADA CON STREAMING BINARIO REAL
+  // ✅ FUNCIÓN MEJORADA PARA DESCARGA COMBINADA CON STREAMING BINARIO REAL Y CONTROL PRO
   const downloadCombined = async (quality: string) => {
-    // ✅ VERIFICAR LÍMITE ANTES DE PROCESAR
+    // 🔒 Control de Suscripción PRO para alta calidad combinada (1080p, 1440p, 2160p)
+    if (isProQuality(quality) && !isPro) {
+      setTargetProQuality(quality)
+      setIsProModalOpen(true)
+      return
+    }
+
     if (!isCombinationAllowed(quality)) {
-      setError("La combinación automática no está disponible para " + quality + ". Descarga el video por separado.")
+      setError("La combinación no está disponible para " + quality)
       return
     }
 
@@ -178,12 +193,15 @@ export default function YoutubeDownloader() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-plan': plan
         },
         body: JSON.stringify({
           url: originalUrl,
           quality: quality,
           video_itag: format.itag,
-          audio_itag: (format.recommended_audio as any)?.itag || 140
+          audio_itag: (format.recommended_audio as any)?.itag || 140,
+          is_pro: isPro,
+          plan: plan
         })
       })
 
@@ -194,6 +212,10 @@ export default function YoutubeDownloader() {
         try {
           const errorData = JSON.parse(errorText)
           errorMsg = errorData.error || errorMsg
+          if (response.status === 403 || errorData.code === 'PRO_REQUIRED') {
+            setTargetProQuality(quality)
+            setIsProModalOpen(true)
+          }
         } catch {
           errorMsg = errorText.substring(0, 100) || errorMsg
         }
@@ -1326,34 +1348,72 @@ export default function YoutubeDownloader() {
 
               {activeTab === 'combined' && (
                 <div>
-                  {/* ✅ NUEVO: MENSAJE DE LÍMITE DE COMBINACIÓN */}
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center space-x-2 text-yellow-800">
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="font-semibold">Límite de Combinación</span>
+                  {/* Banner Estado Plan PRO vs Gratis */}
+                  {isPro ? (
+                    <div className="bg-gradient-to-r from-amber-50 to-emerald-50 border border-emerald-300 rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                      <div className="flex items-center space-x-3 text-emerald-800">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-xl shrink-0">
+                          👑
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-emerald-900">Membresía PRO Activa ({plan.toUpperCase()})</p>
+                          <p className="text-xs text-emerald-700">Tienes acceso ilimitado a descargas combinadas en 1080p, 2K y 4K con FFmpeg acelerado.</p>
+                        </div>
+                      </div>
+                      <Link
+                        href="/planes"
+                        className="text-xs font-bold text-emerald-800 hover:text-emerald-900 bg-emerald-200/60 hover:bg-emerald-200 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap self-start sm:self-auto"
+                      >
+                        Gestionar Plan
+                      </Link>
                     </div>
-                    <p className="text-yellow-700 text-sm mt-2">
-                      La combinación automática está disponible solo hasta 1080p. Para 1440p y 4K,
-                      descarga el video y audio por separado y combínalos localmente.
-                    </p>
-                  </div>
+                  ) : (
+                    <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 border border-amber-200 rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                      <div className="flex items-center space-x-3 text-amber-900">
+                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-xl shrink-0">
+                          ✨
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-amber-900">Descargas Gratis hasta 720p HD</p>
+                          <p className="text-xs text-amber-700">Las calidades 1080p Full HD, 2K y 4K con audio integrado requieren el Plan PRO.</p>
+                        </div>
+                      </div>
+                      <Link
+                        href="/planes"
+                        className="text-xs font-bold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-3.5 py-1.5 rounded-lg transition-all shadow-sm whitespace-nowrap self-start sm:self-auto inline-flex items-center gap-1"
+                      >
+                        👑 Ver Planes PRO
+                      </Link>
+                    </div>
+                  )}
 
                   {/* MOBILE: Simplified Layout - Only Quality + Action */}
                   <div className={isNative ? 'block' : 'block md:hidden space-y-2'}>
                     {predefinedQualities.map((quality) => {
                       const isAvailable = isQualityAvailable(quality.value)
                       const isDownloading = downloading === `combined-${quality.value}`
-                      const formatInfo = getFormatInfo(quality.value, false)
+                      const isProTier = isProQuality(quality.value)
+                      const isLocked = isProTier && !isPro
 
                       return (
-                        <div key={quality.value} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
+                        <div key={quality.value} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? (isProTier ? 'border-amber-200 bg-amber-50/30' : 'border-gray-300 bg-white') : 'border-gray-200 bg-gray-50 opacity-60'}`}>
                           <div className="flex-1">
-                            <p className="font-semibold text-gray-900">{quality.label}</p>
-                            {!isAvailable && <p className="text-xs text-red-500">No disponible</p>}
-                            {isAvailable && !formatInfo.combinationAllowed && (
-                              <p className="text-xs text-yellow-600">⚠️ Muy grande</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-gray-900">{quality.label}</p>
+                              {isProTier && (
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                  👑 PRO
+                                </span>
+                              )}
+                              {!isProTier && (
+                                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                                  Gratis
+                                </span>
+                              )}
+                            </div>
+                            {!isAvailable && <p className="text-xs text-red-500">No disponible para este video</p>}
+                            {isAvailable && isLocked && (
+                              <p className="text-xs text-amber-700 font-medium mt-0.5">🔒 Requiere Plan PRO</p>
                             )}
                           </div>
 
@@ -1371,14 +1431,32 @@ export default function YoutubeDownloader() {
                             </div>
                           ) : (
                             <button
-                              onClick={() => downloadCombined(quality.value)}
-                              disabled={!isAvailable || !!downloading || !formatInfo.combinationAllowed}
-                              className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${isAvailable && !downloading && formatInfo.combinationAllowed
-                                ? 'bg-green-600 hover:bg-green-700 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                }`}
+                              onClick={() => {
+                                if (isLocked) {
+                                  setTargetProQuality(quality.value)
+                                  setIsProModalOpen(true)
+                                } else {
+                                  downloadCombined(quality.value)
+                                }
+                              }}
+                              disabled={!isAvailable || !!downloading}
+                              className={`px-4 py-2 rounded-lg font-semibold text-xs whitespace-nowrap transition-all shadow-sm ${
+                                !isAvailable
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : isLocked
+                                  ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white'
+                                  : isProTier
+                                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white'
+                                  : 'bg-green-600 hover:bg-green-700 text-white'
+                              }`}
                             >
-                              {isAvailable && formatInfo.combinationAllowed ? 'Combinar' : 'N/A'}
+                              {!isAvailable
+                                ? 'N/A'
+                                : isLocked
+                                ? '👑 Desbloquear'
+                                : isProTier
+                                ? '⚡ Descargar PRO'
+                                : 'Descargar Gratis'}
                             </button>
                           )}
                         </div>
@@ -1391,39 +1469,61 @@ export default function YoutubeDownloader() {
                     <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
                       <thead>
                         <tr className="bg-gray-100">
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">File type</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Format</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Peso</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Action</th>
+                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Resolución</th>
+                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Formato</th>
+                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Nivel / Acceso</th>
+                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Acción</th>
                         </tr>
                       </thead>
                       <tbody>
                         {predefinedQualities.map((quality) => {
                           const isAvailable = isQualityAvailable(quality.value)
                           const isDownloading = downloading === `combined-${quality.value}`
-                          const formatInfo = getFormatInfo(quality.value, false)
+                          const isProTier = isProQuality(quality.value)
+                          const isLocked = isProTier && !isPro
 
                           return (
-                            <tr key={quality.value} className={`hover:bg-gray-50 ${!isAvailable ? 'opacity-50' : ''}`}>
+                            <tr key={quality.value} className={`hover:bg-gray-50 ${!isAvailable ? 'opacity-50' : isProTier ? 'bg-amber-50/20' : ''}`}>
                               <td className="border border-gray-300 px-4 py-3 text-gray-800 font-medium">
-                                {quality.label}
-                                {!isAvailable && (
-                                  <span className="text-xs text-red-500 ml-2">(No disponible)</span>
-                                )}
-                              </td>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-600">
-                                <div className="flex items-center">
-                                  {formatInfo.type}
-                                  {formatInfo.canCombine && formatInfo.combinationAllowed && (
-                                    <span className="ml-2 text-green-600" title="Audio será combinado">🔊</span>
+                                <div className="flex items-center gap-2">
+                                  <span>{quality.label}</span>
+                                  {isProTier && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                      👑 PRO
+                                    </span>
                                   )}
-                                  {formatInfo.canCombine && !formatInfo.combinationAllowed && (
-                                    <span className="ml-2 text-yellow-600" title="Combinación no disponible">⚠️</span>
+                                  {!isProTier && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700">
+                                      Gratis
+                                    </span>
+                                  )}
+                                  {!isAvailable && (
+                                    <span className="text-xs text-red-500 ml-1">(No disponible)</span>
                                   )}
                                 </div>
                               </td>
                               <td className="border border-gray-300 px-4 py-3 text-gray-600">
-                                {formatInfo.size}
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-medium text-xs">MP4</span>
+                                  <span className="text-green-600 text-xs font-medium" title="Audio y video combinados">
+                                    🔊 Video + Audio
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="border border-gray-300 px-4 py-3 text-gray-600 text-xs">
+                                {isLocked ? (
+                                  <span className="text-amber-700 font-semibold flex items-center gap-1">
+                                    🔒 Requiere Plan PRO
+                                  </span>
+                                ) : isProTier ? (
+                                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                                    ✨ PRO Desbloqueado
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-600">
+                                    100% Libre / Sin límites
+                                  </span>
+                                )}
                               </td>
                               <td className="border border-gray-300 px-4 py-3">
                                 {isDownloading ? (
@@ -1432,26 +1532,44 @@ export default function YoutubeDownloader() {
                                   </div>
                                 ) : (
                                   <button
-                                    onClick={() => downloadCombined(quality.value)}
-                                    disabled={!isAvailable || !!downloading || !formatInfo.combinationAllowed}
-                                    className={`py-2 px-4 rounded-lg font-semibold transition-colors text-sm flex items-center justify-center w-full ${isAvailable && !downloading && formatInfo.combinationAllowed
-                                      ? 'bg-green-600 hover:bg-green-700 text-white'
-                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                      }`}
+                                    onClick={() => {
+                                      if (isLocked) {
+                                        setTargetProQuality(quality.value)
+                                        setIsProModalOpen(true)
+                                      } else {
+                                        downloadCombined(quality.value)
+                                      }
+                                    }}
+                                    disabled={!isAvailable || !!downloading}
+                                    className={`py-2 px-4 rounded-lg font-bold transition-all text-xs flex items-center justify-center w-full shadow-sm ${
+                                      !isAvailable
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        : isLocked
+                                        ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white'
+                                        : isProTier
+                                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white'
+                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                    }`}
                                   >
-                                    {isAvailable ? (
-                                      formatInfo.combinationAllowed ? (
-                                        <>
-                                          <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                          </svg>
-                                          Combinar
-                                        </>
-                                      ) : (
-                                        'N/A (Muy grande)'
-                                      )
-                                    ) : (
+                                    {!isAvailable ? (
                                       'No disponible'
+                                    ) : isLocked ? (
+                                      <>
+                                        <span className="mr-1.5">👑</span>
+                                        Desbloquear {quality.value} PRO
+                                      </>
+                                    ) : isProTier ? (
+                                      <>
+                                        <span className="mr-1.5">⚡</span>
+                                        Descargar PRO ({quality.value})
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg className="h-4 w-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        Descargar Gratis
+                                      </>
                                     )}
                                   </button>
                                 )}
@@ -1494,7 +1612,18 @@ export default function YoutubeDownloader() {
             <span>💡 <strong>Consejo:</strong> Para videos largos o alta calidad, prueba con 720p o 480p para mejor rendimiento.</span>
           </div>
         </div>
-      </div >
+      </div>
+
+      {/* 👑 MODAL PRO / BLOQUEO Y DESBLOQUEO */}
+      <ProModal
+        isOpen={isProModalOpen}
+        onClose={() => setIsProModalOpen(false)}
+        targetQuality={targetProQuality}
+        onDownloadFallback={() => {
+          setIsProModalOpen(false)
+          downloadCombined('720p')
+        }}
+      />
     </>
   )
 }

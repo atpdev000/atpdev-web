@@ -65,6 +65,21 @@ export async function POST(request: NextRequest) {
     const targetHeight = parseInt(quality.match(/\d+/)?.[0] || '1080')
     const finalExt = isAudioOnly ? (format_type === 'mp3' ? 'mp3' : 'm4a') : 'mp4'
 
+    // 🔒 Validación de suscripción PRO para descargas combinadas en alta calidad (> 720p)
+    const authPlan = request.headers.get('x-user-plan') || body.plan
+    const isProUser = authPlan === 'pro' || authPlan === 'business' || body.is_pro === true
+
+    // Las descargas combinadas (video + audio) mayores a 720p (1080p, 1440p, 2160p) requieren PRO
+    const isCombinedHighRes = targetHeight > 720 && !isAudioOnly && audio_itag !== null
+    if (isCombinedHighRes && !isProUser) {
+      console.warn(`🔒 [YouTube Engine] Intento de descarga combinada ${quality} sin Plan PRO activo.`)
+      return NextResponse.json({
+        error: `Las descargas combinadas en alta calidad (${quality}) requieren suscripción al Plan PRO. Actualiza tu cuenta en /planes para desbloquear 1080p, 2K y 4K con máxima velocidad.`,
+        code: 'PRO_REQUIRED',
+        upgrade_url: '/planes'
+      }, { status: 403 })
+    }
+
     // Formular el selector de formato yt-dlp
     let formatArg = ''
     if (isAudioOnly) {

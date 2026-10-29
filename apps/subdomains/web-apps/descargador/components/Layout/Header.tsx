@@ -47,6 +47,12 @@ export default function Header() {
             <Link href="/faq" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               FAQ
             </Link>
+            <Link
+              href="/planes"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold text-xs shadow-sm hover:from-amber-600 hover:to-yellow-600 transition-all"
+            >
+              👑 Planes PRO
+            </Link>
           </nav>
 
           {/* Badges de características - MANTENIDO */}
@@ -56,6 +62,14 @@ export default function Header() {
               <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">⚡ Rápido</span>
               <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">🔒 Seguro</span>
             </div>
+
+            {/* Enlace Planes para móvil / desktop */}
+            <Link
+              href="/planes"
+              className="md:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500 text-white font-bold text-xs"
+            >
+              👑 PRO
+            </Link>
 
             {/* Botón Contacto - NUEVO */}
             <Link

@@ -34,14 +34,28 @@ export default function MainHeader() {
             <Link href="/faq" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">
               FAQ
             </Link>
+            <Link
+              href="/planes"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold text-xs shadow-sm hover:from-amber-600 hover:to-yellow-600 transition-all"
+            >
+              👑 Planes PRO
+            </Link>
           </nav>
 
-          <Link
-            href="/contact"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors text-sm"
-          >
-            Contacto
-          </Link>
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/planes"
+              className="md:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500 text-white font-bold text-xs"
+            >
+              👑 PRO
+            </Link>
+            <Link
+              href="/contact"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium transition-colors text-sm"
+            >
+              Contacto
+            </Link>
+          </div>
         </div>
       </div>
     </header>
