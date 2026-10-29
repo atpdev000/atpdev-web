@@ -43,10 +43,22 @@ function cleanUrl(inputUrl: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const { url, quality = '1080p', format_type = 'mp4', video_itag, audio_itag } = body
+    const { url, quality = '1080p', format_type = 'mp4', video_itag, audio_itag, downloadId } = body
 
     if (!url) {
       return NextResponse.json({ error: 'URL es requerida' }, { status: 400 })
+    }
+
+    if (!globalThis.__downloadProgressMap) {
+      globalThis.__downloadProgressMap = new Map()
+    }
+
+    if (downloadId) {
+      globalThis.__downloadProgressMap.set(downloadId, {
+        percent: 0,
+        status: 'starting',
+        updatedAt: Date.now()
+      })
     }
 
     const cleanedUrl = cleanUrl(url)
@@ -58,6 +70,7 @@ export async function POST(request: NextRequest) {
       format_type,
       video_itag,
       audio_itag,
+      downloadId,
       binDir
     })
 
@@ -104,6 +117,7 @@ export async function POST(request: NextRequest) {
     const ytArgs: string[] = [
       '--ffmpeg-location', binDir,
       '--js-runtimes', `node:${nodeBin}`,
+      '--newline',
       '--no-playlist',
       '--no-warnings',
       '--no-part',
@@ -130,20 +144,69 @@ export async function POST(request: NextRequest) {
         stdio: ['ignore', 'pipe', 'pipe']
       })
 
-      let stderr = ''
-      proc.stderr.on('data', (d) => { stderr += d.toString() })
-      proc.stdout.on('data', (d) => {
-        const text = d.toString()
-        if (text.includes('[download]') && text.includes('%')) {
-          // Log de progreso
-          process.stdout.write(`\r${text.trim()}`)
+      const parseProgress = (chunk: Buffer | string) => {
+        const text = chunk.toString()
+        const lines = text.split(/[\r\n]+/)
+        for (const line of lines) {
+          if (line.includes('[download]') && line.includes('%')) {
+            process.stdout.write(`\r${line.trim()}`)
+
+            if (downloadId && globalThis.__downloadProgressMap) {
+              const pMatch = line.match(/\[download\]\s+([\d\.]+)%/i)
+              const speedMatch = line.match(/at\s+([^\s]+)/i)
+              const etaMatch = line.match(/ETA\s+([^\s\r\n]+)/i)
+
+              if (pMatch) {
+                const percent = Math.min(Math.max(parseFloat(pMatch[1]) || 0, 0), 100)
+                globalThis.__downloadProgressMap.set(downloadId, {
+                  percent,
+                  speed: speedMatch ? speedMatch[1] : undefined,
+                  eta: etaMatch ? etaMatch[1] : undefined,
+                  status: percent >= 100 ? 'merging' : 'downloading',
+                  updatedAt: Date.now()
+                })
+              }
+            }
+          } else if (line.includes('[Merger]') || line.includes('ffmpeg') || line.includes('Destination')) {
+            if (downloadId && globalThis.__downloadProgressMap) {
+              const current = globalThis.__downloadProgressMap.get(downloadId)
+              globalThis.__downloadProgressMap.set(downloadId, {
+                percent: Math.max(current?.percent || 90, 95),
+                status: 'merging',
+                updatedAt: Date.now()
+              })
+            }
+          }
         }
+      }
+
+      let stderr = ''
+      proc.stderr.on('data', (d) => {
+        stderr += d.toString()
+        parseProgress(d)
+      })
+      proc.stdout.on('data', (d) => {
+        parseProgress(d)
       })
 
       proc.on('close', (code) => {
         if (code === 0) {
+          if (downloadId && globalThis.__downloadProgressMap) {
+            globalThis.__downloadProgressMap.set(downloadId, {
+              percent: 100,
+              status: 'completed',
+              updatedAt: Date.now()
+            })
+          }
           resolve()
         } else {
+          if (downloadId && globalThis.__downloadProgressMap) {
+            globalThis.__downloadProgressMap.set(downloadId, {
+              percent: 0,
+              status: 'error',
+              updatedAt: Date.now()
+            })
+          }
           console.error('❌ [YouTube Engine] Error en yt-dlp stderr:', stderr)
           reject(new Error(stderr || `yt-dlp finalizó con código ${code}`))
         }

@@ -82,6 +82,7 @@ export default function YoutubeDownloader() {
   const [videoInfo, setVideoInfo] = useState<DownloadResponse | null>(null)
   const [downloading, setDownloading] = useState<string | null>(null)
   const [downloadProgress, setDownloadProgress] = useState(0)
+  const [downloadDetails, setDownloadDetails] = useState('')
 
   const [isProModalOpen, setIsProModalOpen] = useState(false)
   const [targetProQuality, setTargetProQuality] = useState('1080p')
@@ -183,8 +184,39 @@ export default function YoutubeDownloader() {
       return
     }
 
+    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
     setDownloading(`combined-${quality}`)
-    setDownloadProgress(0)
+    setDownloadProgress(1)
+    setDownloadDetails('Iniciando descarga en el servidor...')
+
+    let pollActive = true
+    const pollProgress = async () => {
+      while (pollActive) {
+        try {
+          const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
+          if (res.ok) {
+            const data = await res.json()
+            if (data.status === 'downloading' && typeof data.percent === 'number') {
+              setDownloadProgress(data.percent)
+              const parts = []
+              if (data.speed) parts.push(data.speed)
+              if (data.eta) parts.push(`ETA: ${data.eta}`)
+              setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando flujo...')
+            } else if (data.status === 'merging') {
+              setDownloadProgress(99)
+              setDownloadDetails('Combinando audio y video con FFmpeg...')
+            } else if (data.status === 'completed') {
+              setDownloadProgress(100)
+              setDownloadDetails('Guardando archivo...')
+            }
+          }
+        } catch {
+          // ignore poll error
+        }
+        await new Promise((r) => setTimeout(r, 400))
+      }
+    }
+    pollProgress()
 
     try {
       console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
@@ -196,12 +228,13 @@ export default function YoutubeDownloader() {
           'x-user-plan': plan
         },
         body: JSON.stringify({
-          url: originalUrl,
+          url: originalUrl || url,
           quality: quality,
           video_itag: format.itag,
           audio_itag: (format.recommended_audio as any)?.itag || 140,
           is_pro: isPro,
-          plan: plan
+          plan: plan,
+          downloadId
         })
       })
 
@@ -238,16 +271,21 @@ export default function YoutubeDownloader() {
         try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
       }
 
+      // Detener polling una vez que el servidor entregó el archivo y comienza el stream del cliente
+      pollActive = false
+      setDownloadDetails('Finalizando descarga...')
       await downloadStream(response, filename, `combined-${quality}`)
 
     } catch (error) {
       console.error('❌ Error en descarga combinada:', error)
       setError(error instanceof Error ? error.message : 'Error en la descarga combinada')
     } finally {
+      pollActive = false
       setTimeout(() => {
         setDownloading(null)
         setDownloadProgress(0)
-      }, 1000)
+        setDownloadDetails('')
+      }, 1500)
     }
   }
 
@@ -344,8 +382,36 @@ export default function YoutubeDownloader() {
       return
     }
 
-    setDownloadProgress(0)
+    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+    setDownloadProgress(1)
     setDownloading(`simple-${quality}`)
+    setDownloadDetails('Iniciando descarga en el servidor...')
+
+    let pollActive = true
+    const pollProgress = async () => {
+      while (pollActive) {
+        try {
+          const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
+          if (res.ok) {
+            const data = await res.json()
+            if (data.status === 'downloading' && typeof data.percent === 'number') {
+              setDownloadProgress(data.percent)
+              const parts = []
+              if (data.speed) parts.push(data.speed)
+              if (data.eta) parts.push(`ETA: ${data.eta}`)
+              setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando video...')
+            } else if (data.status === 'completed') {
+              setDownloadProgress(100)
+              setDownloadDetails('Guardando video...')
+            }
+          }
+        } catch {
+          // ignore
+        }
+        await new Promise((r) => setTimeout(r, 400))
+      }
+    }
+    pollProgress()
 
     try {
       console.log('📥 Iniciando descarga simple con motor del backend...', quality)
@@ -361,7 +427,8 @@ export default function YoutubeDownloader() {
           quality: quality,
           video_itag: format.itag, // ENVIAR SOLO VIDEO_ITAG
           audio_itag: null,        // DESHABILITAR AUDIO
-          format_type: fileExt
+          format_type: fileExt,
+          downloadId
         })
       })
 
@@ -393,17 +460,20 @@ export default function YoutubeDownloader() {
         try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
       }
 
+      pollActive = false
+      setDownloadDetails('Finalizando...')
       await downloadStream(response, filename, `simple-${quality}`)
 
     } catch (error) {
       console.error('❌ Error en descarga simple backend:', error)
       setError(error instanceof Error ? error.message : 'Error en descarga simple')
     } finally {
-      // Pequeno timeout para mostrar el 100%
+      pollActive = false
       setTimeout(() => {
         setDownloading(null)
         setDownloadProgress(0)
-      }, 1000)
+        setDownloadDetails('')
+      }, 1500)
     }
   }
 
@@ -795,8 +865,36 @@ export default function YoutubeDownloader() {
       return
     }
 
+    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
     setDownloading(`audio-${audioFormat.itag}`)
-    setDownloadProgress(0)
+    setDownloadProgress(1)
+    setDownloadDetails('Extrayendo audio en el servidor...')
+
+    let pollActive = true
+    const pollProgress = async () => {
+      while (pollActive) {
+        try {
+          const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
+          if (res.ok) {
+            const data = await res.json()
+            if (data.status === 'downloading' && typeof data.percent === 'number') {
+              setDownloadProgress(data.percent)
+              const parts = []
+              if (data.speed) parts.push(data.speed)
+              if (data.eta) parts.push(`ETA: ${data.eta}`)
+              setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando audio...')
+            } else if (data.status === 'completed') {
+              setDownloadProgress(100)
+              setDownloadDetails('Guardando audio...')
+            }
+          }
+        } catch {
+          // ignore
+        }
+        await new Promise((r) => setTimeout(r, 400))
+      }
+    }
+    pollProgress()
 
     try {
       const ext = audioFormat.format.toLowerCase().includes('mp3') ? 'mp3' : 'm4a'
@@ -810,7 +908,8 @@ export default function YoutubeDownloader() {
           quality: 'audio',
           video_itag: null,
           audio_itag: audioFormat.itag,
-          format_type: ext
+          format_type: ext,
+          downloadId
         })
       })
 
@@ -840,14 +939,18 @@ export default function YoutubeDownloader() {
         try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
       }
 
+      pollActive = false
+      setDownloadDetails('Finalizando...')
       await downloadStream(response, filename, `audio-${audioFormat.itag}`)
     } catch (error: any) {
       console.error('❌ Error en descarga de audio backend:', error)
       setError(error.message || 'Error en descarga de audio')
     } finally {
+      pollActive = false
       setTimeout(() => {
         setDownloading(null)
         setDownloadProgress(0)
+        setDownloadDetails('')
       }, 1500)
     }
   }
@@ -991,16 +1094,34 @@ export default function YoutubeDownloader() {
     }
   }
 
-  const ProgressBar = ({ progress, quality }: { progress: number, quality: string }) => (
-    <div className="w-full">
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+  const ProgressBar = ({ progress, quality, details }: { progress: number, quality: string, details?: string }) => (
+    <div className="w-full min-w-[170px] py-1">
+      <div className="w-full bg-gray-200 rounded-full h-3 mb-1.5 overflow-hidden shadow-inner">
         <div
-          className="bg-green-600 h-2.5 rounded-full transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        ></div>
+          className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 h-3 rounded-full transition-all duration-300 ease-out flex items-center justify-end pr-1 text-[9px] text-white font-bold"
+          style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
+        >
+          {progress >= 15 && `${Math.round(progress)}%`}
+        </div>
       </div>
-      <div className="text-xs text-gray-600 text-center">
-        {progress < 100 ? `Descargando ${quality}: ${progress}% ` : '✅ Descarga completada'}
+      <div className="text-xs text-gray-700 text-center font-medium">
+        {progress < 100 ? (
+          <div>
+            <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700 px-0.5">
+              <span>Descargando {quality}</span>
+              <span className="text-emerald-700 font-bold">{Math.round(progress)}%</span>
+            </div>
+            {details && (
+              <div className="text-[11px] text-gray-600 font-medium mt-0.5">
+                {details}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-emerald-700 font-bold flex items-center justify-center gap-1">
+            <span>✅</span> ¡Descarga completada!
+          </span>
+        )}
       </div>
     </div>
   )
@@ -1183,7 +1304,7 @@ export default function YoutubeDownloader() {
               <div className="flex flex-col items-center">
                 {downloading?.startsWith('audio-') ? (
                   <div className="w-full max-w-md">
-                    <ProgressBar progress={downloadProgress} quality="Audio" />
+                    <ProgressBar progress={downloadProgress} quality="Audio" details={downloadDetails} />
                   </div>
                 ) : (
                   <button
@@ -1250,16 +1371,21 @@ export default function YoutubeDownloader() {
                           </div>
 
                           {isDownloading ? (
-                            <div className="flex flex-col items-end min-w-[120px]">
-                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="flex flex-col items-end min-w-[130px]">
+                              <div className="w-28 h-2.5 bg-gray-200 rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-blue-500 transition-all duration-300"
-                                  style={{ width: `${downloadProgress}%` }}
+                                  style={{ width: `${Math.min(Math.max(downloadProgress, 0), 100)}%` }}
                                 />
                               </div>
-                              <span className="text-[10px] text-blue-600 font-bold mt-1">
+                              <span className="text-[11px] text-blue-600 font-bold mt-1">
                                 {Math.round(downloadProgress)}%
                               </span>
+                              {downloadDetails && (
+                                <span className="text-[9px] text-gray-500 text-right truncate max-w-[130px]">
+                                  {downloadDetails}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <button
@@ -1317,7 +1443,7 @@ export default function YoutubeDownloader() {
                               <td className="border border-gray-300 px-4 py-3">
                                 {isDownloading ? (
                                   <div className="w-full">
-                                    <ProgressBar progress={downloadProgress} quality={quality.value} />
+                                    <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                                   </div>
                                 ) : (
                                   <button
@@ -1422,16 +1548,21 @@ export default function YoutubeDownloader() {
                           </div>
 
                           {isDownloading ? (
-                            <div className="flex flex-col items-end min-w-[120px]">
-                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="flex flex-col items-end min-w-[140px]">
+                              <div className="w-28 h-2.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                                 <div
-                                  className="h-full bg-green-500 transition-all duration-300"
-                                  style={{ width: `${downloadProgress}%` }}
+                                  className="h-full bg-gradient-to-r from-emerald-500 to-green-600 transition-all duration-300"
+                                  style={{ width: `${Math.min(Math.max(downloadProgress, 0), 100)}%` }}
                                 />
                               </div>
-                              <span className="text-[10px] text-green-600 font-bold mt-1">
+                              <span className="text-[11px] text-green-700 font-bold mt-1">
                                 {Math.round(downloadProgress)}%
                               </span>
+                              {downloadDetails && (
+                                <span className="text-[9px] text-gray-500 font-medium text-right max-w-[140px] truncate">
+                                  {downloadDetails}
+                                </span>
+                              )}
                             </div>
                           ) : (
                             <button
@@ -1532,7 +1663,7 @@ export default function YoutubeDownloader() {
                               <td className="border border-gray-300 px-4 py-3">
                                 {isDownloading ? (
                                   <div className="w-full">
-                                    <ProgressBar progress={downloadProgress} quality={quality.value} />
+                                    <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                                   </div>
                                 ) : (
                                   <button
