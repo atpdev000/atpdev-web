@@ -11,11 +11,9 @@ function findYtDlpBinary(): string | null {
   const binaryName = isWindows ? 'yt-dlp.exe' : 'yt-dlp'
 
   const searchLocations = [
-    path.join(process.cwd(), 'apps/subdomains/web-apps/descargador/bin', binaryName),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', binaryName),
     path.join(process.cwd(), 'bin', binaryName),
-    path.join('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/bin', binaryName),
-    path.join('d:/PROYECTOS/PYTHON/Dowload APP WEB/downloader-api/node_modules/yt-dlp-exec/bin', binaryName),
-    path.join(process.cwd(), 'node_modules/yt-dlp-exec/bin', binaryName),
+    path.join(process.cwd(), 'node_modules', 'yt-dlp-exec', 'bin', binaryName)
   ]
 
   for (const location of searchLocations) {
