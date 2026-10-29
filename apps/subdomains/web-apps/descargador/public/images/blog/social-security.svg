@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#050510"/>
+      <stop offset="100%" style="stop-color:#0a1a0a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <text x="400" y="55" text-anchor="middle" fill="white" font-size="22" font-weight="bold" font-family="Arial">Ciberseguridad 2026: Blindar tus Cuentas</text>
+  <text x="400" y="79" text-anchor="middle" fill="#86efac" font-size="12" font-family="Arial">FIDO2 • Passkeys • Gestión de Sesiones • Ingeniería Social</text>
+  <!-- Shield center -->
+  <path d="M400,100 L490,140 L490,240 C490,300 400,340 400,340 C400,340 310,300 310,240 L310,140 Z" fill="#0a1a0a" stroke="#22c55e" stroke-width="2.5" opacity="0.95"/>
+  <text x="400" y="230" text-anchor="middle" fill="#22c55e" font-size="60">🔒</text>
+  <!-- Threat indicators around shield -->
+  <rect x="50" y="115" width="200" height="75" rx="10" fill="#1f0000" opacity="0.9" stroke="#ef4444" stroke-width="1"/>
+  <text x="150" y="140" text-anchor="middle" fill="#ef4444" font-size="20">⚠️</text>
+  <text x="150" y="162" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="bold" font-family="Arial">SIM Swapping</text>
+  <text x="150" y="179" text-anchor="middle" fill="#9ca3af" font-size="10" font-family="Arial">SMS = vulnerable en 2026</text>
+  <rect x="550" y="115" width="200" height="75" rx="10" fill="#1f0000" opacity="0.9" stroke="#f59e0b" stroke-width="1"/>
+  <text x="650" y="140" text-anchor="middle" fill="#f59e0b" font-size="20">🤖</text>
+  <text x="650" y="162" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="bold" font-family="Arial">Phishing con IA</text>
+  <text x="650" y="179" text-anchor="middle" fill="#9ca3af" font-size="10" font-family="Arial">Voz clonada perfecta</text>
+  <!-- Security solutions -->
+  <rect x="50" y="230" width="200" height="75" rx="10" fill="#0a1a0a" opacity="0.9" stroke="#22c55e" stroke-width="1"/>
+  <text x="150" y="255" text-anchor="middle" fill="#22c55e" font-size="20">🔑</text>
+  <text x="150" y="277" text-anchor="middle" fill="#86efac" font-size="11" font-weight="bold" font-family="Arial">Llaves FIDO2</text>
+  <text x="150" y="294" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Arial">YubiKey • Presencia física</text>
+  <rect x="550" y="230" width="200" height="75" rx="10" fill="#0a1a0a" opacity="0.9" stroke="#3b82f6" stroke-width="1"/>
+  <text x="650" y="255" text-anchor="middle" fill="#3b82f6" font-size="20">🪪</text>
+  <text x="650" y="277" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="bold" font-family="Arial">Passkeys</text>
+  <text x="650" y="294" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Arial">Biometría criptográfica</text>
+  <!-- Checklist bottom -->
+  <rect x="100" y="360" width="600" height="55" rx="12" fill="#0c1a0c" stroke="#22c55e" stroke-width="1" opacity="0.7"/>
+  <text x="400" y="383" text-anchor="middle" fill="#86efac" font-size="12" font-weight="bold" font-family="Arial">✅ Checklist Mensual de Seguridad Pro</text>
+  <text x="400" y="403" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Arial">Auditar apps • Actualizar emails de recuperación • Revisar sesiones activas</text>
+</svg>

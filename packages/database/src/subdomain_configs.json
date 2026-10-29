@@ -141,5 +141,75 @@
       "support_url": "https://sorteos.atpdev.pe/planes"
     },
     "updated_at": "2026-10-03T17:04:06.545Z"
+  },
+  "descargador": {
+    "id": "descargador",
+    "name": "Descargador Pro",
+    "slug": "descargador",
+    "subdomain": "descargador",
+    "full_domain": "descargador.atpdev.dev",
+    "devPort": 3007,
+    "category": "Descarga de Video & Audio Multiplataforma",
+    "status": "active",
+    "theme": {
+      "accent_color": "#3b82f6",
+      "accent_name": "blue",
+      "theme_mode": "dark",
+      "radius_style": "rounded-3xl",
+      "radius_scale": "full",
+      "seed_color": "#3b82f6",
+      "color_theme": "ocean",
+      "primary_color": "#3b82f6",
+      "secondary_color": "#1d4ed8",
+      "tertiary_color": "#60a5fa",
+      "neutral_color": "#64748b",
+      "font_headline": "Space Grotesk",
+      "font_body": "Inter",
+      "font_label": "IBM Plex Mono",
+      "glow_style": "full-border",
+      "neon_thickness": "4px",
+      "cursor_effect": "cursor-trail",
+      "global_background_image": ""
+    },
+    "branding": {
+      "site_title": "descargador pro",
+      "site_tagline": "Descarga Videos y Audios de YouTube, TikTok y Facebook en Alta Calidad",
+      "hero_badge": "Motor Ultra Rápido • Sin Marcas de Agua • 1080p/4K",
+      "hero_title_prefix": "Descarga videos y audios gratis con",
+      "hero_title_highlight": "Descargador Pro",
+      "hero_description": "La herramienta más potente para descargar contenido multimedia de YouTube, TikTok, Facebook e Instagram en MP4 o MP3 al instante.",
+      "logo_url": "/icon.png",
+      "favicon_url": "/favicon.ico",
+      "announcement_text": "⚡ Descargas ilimitadas en máxima calidad sin marcas de agua.",
+      "announcement_enabled": true
+    },
+    "seo": {
+      "meta_title": "Descargador Pro — Descargar Videos de YouTube, TikTok y Facebook Gratis",
+      "meta_description": "Descarga videos y música en MP4 y MP3 de YouTube, TikTok sin marca de agua y Facebook en alta definición gratis y rápido.",
+      "keywords": [
+        "descargar videos youtube",
+        "descargar tiktok sin marca de agua",
+        "descargar video facebook",
+        "convertidor mp3",
+        "bajar videos online"
+      ],
+      "canonical_url": "https://descargador.atpdev.dev"
+    },
+    "modules": {
+      "youtube_enabled": true,
+      "tiktok_enabled": true,
+      "facebook_enabled": true,
+      "instagram_enabled": true,
+      "audio_extractor_enabled": true,
+      "ffmpeg_client_enabled": true,
+      "adsense_enabled": true,
+      "blog_enabled": true
+    },
+    "contact": {
+      "email": "contacto@atpdev.dev",
+      "whatsapp": "+51987654321",
+      "support_url": "https://descargador.atpdev.dev/contact"
+    },
+    "updated_at": "2026-10-28T16:45:00.000Z"
   }
 }

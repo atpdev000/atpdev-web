@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1a2e1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <!-- Title -->
+  <text x="400" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">Gestion de Colecciones de Video</text>
+  <text x="400" y="80" text-anchor="middle" fill="#86efac" font-size="13" font-family="Arial">Organiza cientos de clips como un profesional</text>
+  <!-- Folder card 1: By Date -->
+  <rect x="60" y="110" width="150" height="130" rx="12" fill="#14532d" opacity="0.9" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="135" y="158" text-anchor="middle" fill="#22c55e" font-size="36">&#x1F4C1;</text>
+  <text x="135" y="185" text-anchor="middle" fill="#86efac" font-size="13" font-weight="bold" font-family="Arial">Por Fecha</text>
+  <text x="135" y="205" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Arial">2026 / 01 / Feb</text>
+  <text x="135" y="222" text-anchor="middle" fill="#4ade80" font-size="10" font-family="Arial">Ideal para vlogs</text>
+  <!-- Folder card 2: By Category -->
+  <rect x="230" y="110" width="150" height="130" rx="12" fill="#1e3a5f" opacity="0.9" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="305" y="158" text-anchor="middle" fill="#3b82f6" font-size="36">&#x1F5C2;</text>
+  <text x="305" y="185" text-anchor="middle" fill="#93c5fd" font-size="13" font-weight="bold" font-family="Arial">Por Categoria</text>
+  <text x="305" y="205" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Arial">Tutoriales / Vlogs</text>
+  <text x="305" y="222" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="Arial">Multi-temas</text>
+  <!-- Folder card 3: By Resolution -->
+  <rect x="400" y="110" width="150" height="130" rx="12" fill="#3b0764" opacity="0.9" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="475" y="158" text-anchor="middle" fill="#8b5cf6" font-size="36">&#x1F3AC;</text>
+  <text x="475" y="185" text-anchor="middle" fill="#c4b5fd" font-size="13" font-weight="bold" font-family="Arial">Por Resolucion</text>
+  <text x="475" y="205" text-anchor="middle" fill="#a855f7" font-size="10" font-family="Arial">4K / 1080p / 720p</text>
+  <text x="475" y="222" text-anchor="middle" fill="#a855f7" font-size="10" font-family="Arial">Coherencia visual</text>
+  <!-- Folder card 4: Favorites -->
+  <rect x="570" y="110" width="170" height="130" rx="12" fill="#1c0800" opacity="0.9" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="655" y="158" text-anchor="middle" fill="#f59e0b" font-size="36">&#x2B50;</text>
+  <text x="655" y="185" text-anchor="middle" fill="#fde68a" font-size="13" font-weight="bold" font-family="Arial">Favoritos</text>
+  <text x="655" y="205" text-anchor="middle" fill="#fcd34d" font-size="10" font-family="Arial">Acceso rapido</text>
+  <text x="655" y="222" text-anchor="middle" fill="#fcd34d" font-size="10" font-family="Arial">Top clips</text>
+  <!-- Stats panel -->
+  <rect x="60" y="265" width="680" height="95" rx="14" fill="#0c1a0c" stroke="#22c55e" stroke-width="1" opacity="0.85"/>
+  <text x="230" y="298" text-anchor="middle" fill="#86efac" font-size="14" font-weight="bold" font-family="Arial">&#x1F4CA; Tu Coleccion</text>
+  <text x="230" y="320" text-anchor="middle" fill="#4ade80" font-size="12" font-family="Arial">500+ archivos organizados</text>
+  <text x="230" y="340" text-anchor="middle" fill="#22c55e" font-size="11" font-family="Arial">SHA-256 verificado</text>
+  <rect x="395" y="275" width="2" height="75" fill="#374151" opacity="0.5"/>
+  <text x="565" y="298" text-anchor="middle" fill="#93c5fd" font-size="14" font-weight="bold" font-family="Arial">&#x26A1; Descarga Optima</text>
+  <text x="565" y="320" text-anchor="middle" fill="#60a5fa" font-size="12" font-family="Arial">Programa en horas de bajo</text>
+  <text x="565" y="340" text-anchor="middle" fill="#60a5fa" font-size="12" font-family="Arial">consumo de red</text>
+  <!-- Bottom tip -->
+  <text x="400" y="400" text-anchor="middle" fill="#4b5563" font-size="12" font-family="Arial">FTY Downloader Pro - Gestion profesional de activos multimedia</text>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#1a0a2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg3)"/>
+  <!-- Neon circles -->
+  <circle cx="400" cy="225" r="180" fill="none" stroke="#ff0050" stroke-width="1" opacity="0.2"/>
+  <circle cx="400" cy="225" r="130" fill="none" stroke="#00f2ea" stroke-width="1" opacity="0.2"/>
+  <!-- TikTok logo artistic representation -->
+  <g transform="translate(320, 130)">
+    <rect x="0" y="0" width="80" height="100" rx="12" fill="#ff0050" opacity="0.15"/>
+    <rect x="8" y="8" width="80" height="100" rx="12" fill="#00f2ea" opacity="0.15"/>
+    <rect x="4" y="4" width="80" height="100" rx="12" fill="#1a1a2e"/>
+    <path d="M52 20 C52 20 60 22 65 30 C65 30 58 30 55 25 L55 55 C55 65 47 73 37 73 C27 73 19 65 19 55 C19 45 27 37 37 37 C39 37 41 37 43 38 L43 48 C41 47 39 47 37 47 C32 47 29 51 29 55 C29 59 32 63 37 63 C42 63 45 59 45 55 L45 20 Z" fill="white"/>
+  </g>
+  <!-- Watermark cross out -->
+  <g transform="translate(530, 140)">
+    <rect x="0" y="0" width="120" height="60" rx="10" fill="#ff0050" opacity="0.2"/>
+    <rect x="10" y="10" width="100" height="40" rx="6" fill="#1a1a2e"/>
+    <text x="60" y="35" text-anchor="middle" fill="#ff0050" font-size="12" font-family="Arial">@watermark</text>
+    <line x1="10" y1="10" x2="110" y2="50" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+    <line x1="110" y1="10" x2="10" y2="50" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- Clean download -->
+  <rect x="530" y="240" width="120" height="60" rx="10" fill="#15803d" opacity="0.9"/>
+  <text x="590" y="265" text-anchor="middle" fill="white" font-size="12" font-family="Arial" font-weight="bold">✓ Sin Marca</text>
+  <text x="590" y="285" text-anchor="middle" fill="#86efac" font-size="11" font-family="Arial">MP4 • 1080p</text>
+  <!-- Connection arrow -->
+  <line x1="400" y1="225" x2="530" y2="270" stroke="#22c55e" stroke-width="2" stroke-dasharray="8,4" opacity="0.7"/>
+  <!-- Left stats -->
+  <rect x="100" y="165" width="140" height="130" rx="14" fill="#0d0d1a" opacity="0.9" stroke="#ff0050" stroke-width="1"/>
+  <text x="170" y="195" text-anchor="middle" fill="#ff0050" font-size="14" font-weight="bold" font-family="Arial">TikTok</text>
+  <text x="170" y="220" text-anchor="middle" fill="white" font-size="11" font-family="Arial">Compresión:</text>
+  <rect x="120" y="230" width="100" height="10" rx="5" fill="#1a1a2e"/>
+  <rect x="120" y="230" width="60" height="10" rx="5" fill="#ff0050"/>
+  <text x="170" y="260" text-anchor="middle" fill="white" font-size="11" font-family="Arial">Original:</text>
+  <rect x="120" y="270" width="100" height="10" rx="5" fill="#1a1a2e"/>
+  <rect x="120" y="270" width="95" height="10" rx="5" fill="#00f2ea"/>
+  <!-- Title -->
+  <text x="400" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">TikTok Sin Marca de Agua</text>
+  <text x="400" y="83" text-anchor="middle" fill="#a8a8b3" font-size="13" font-family="Arial">Extracción limpia • 1080p máxima calidad</text>
+  <text x="400" y="400" text-anchor="middle" fill="#ff0050" font-size="13" font-family="Arial">FTY Downloader Pro 2026</text>
+</svg>

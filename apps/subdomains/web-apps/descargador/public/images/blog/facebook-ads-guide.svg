@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <text x="400" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">Facebook Ads para Pequeños Negocios</text>
+  <!-- Ad campaign mockup -->
+  <rect x="60" y="90" width="300" height="270" rx="16" fill="#0f172a" stroke="#1d4ed8" stroke-width="2" opacity="0.95"/>
+  <!-- Phone frame with FB ad -->
+  <rect x="75" y="105" width="270" height="240" rx="12" fill="#111827"/>
+  <!-- FB ad header -->
+  <rect x="85" y="112" width="250" height="35" rx="6" fill="#1e3a5f"/>
+  <text x="100" y="126" fill="white" font-size="10" font-family="Arial" font-weight="bold">FTY Pro · Patrocinado</text>
+  <text x="100" y="141" fill="#9ca3af" font-size="9" font-family="Arial">📣 Publicidad</text>
+  <!-- Ad image -->
+  <rect x="85" y="150" width="250" height="100" rx="6" fill="#1d4ed8" opacity="0.7"/>
+  <text x="210" y="208" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="Arial">85% Descuento</text>
+  <!-- CTA button -->
+  <rect x="155" y="265" width="110" height="28" rx="6" fill="#2563eb"/>
+  <text x="210" y="283" text-anchor="middle" fill="white" font-size="12" font-family="Arial" font-weight="bold">Más información</text>
+  <!-- Metrics panel -->
+  <rect x="390" y="90" width="350" height="270" rx="16" fill="#0c1a0c" stroke="#22c55e" stroke-width="1.5" opacity="0.9"/>
+  <text x="565" y="120" text-anchor="middle" fill="#86efac" font-size="14" font-weight="bold" font-family="Arial">📊 Métricas de Campaña</text>
+  <rect x="415" y="135" width="300" height="1" fill="#22c55e" opacity="0.3"/>
+  <!-- Metrics -->
+  <text x="415" y="163" fill="#4ade80" font-size="12" font-family="Arial">Alcance:</text>
+  <rect x="510" y="150" width="180" height="14" rx="4" fill="#374151"/>
+  <rect x="510" y="150" width="160" height="14" rx="4" fill="#22c55e"/>
+  <text x="700" y="163" text-anchor="end" fill="#86efac" font-size="11" font-family="Arial">12,450</text>
+  <text x="415" y="193" fill="#4ade80" font-size="12" font-family="Arial">CTR:</text>
+  <rect x="510" y="180" width="180" height="14" rx="4" fill="#374151"/>
+  <rect x="510" y="180" width="72" height="14" rx="4" fill="#3b82f6"/>
+  <text x="700" y="193" text-anchor="end" fill="#93c5fd" font-size="11" font-family="Arial">3.8%</text>
+  <text x="415" y="223" fill="#4ade80" font-size="12" font-family="Arial">CPC:</text>
+  <text x="700" y="223" text-anchor="end" fill="#22c55e" font-size="12" font-family="Arial" font-weight="bold">$0.12</text>
+  <text x="415" y="253" fill="#4ade80" font-size="12" font-family="Arial">ROI:</text>
+  <text x="700" y="253" text-anchor="end" fill="#22c55e" font-size="14" font-family="Arial" font-weight="bold">+340%</text>
+  <!-- Tip box -->
+  <rect x="415" y="278" width="305" height="55" rx="10" fill="#1e3a5f" opacity="0.8"/>
+  <text x="567" y="298" text-anchor="middle" fill="#93c5fd" font-size="11" font-family="Arial" font-weight="bold">💡 Tip: Video Reels obtienen</text>
+  <text x="567" y="318" text-anchor="middle" fill="#60a5fa" font-size="11" font-family="Arial">el mejor CPC en 2026</text>
+</svg>

@@ -1,8 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+**/node_modules/
+.gradle/
+**/build/
+local.properties
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -57,3 +61,5 @@ list-files.js
 packages/database/test-buckets.ts
 .claude/
 .tmp-bisect/
+apps/subdomains/web-apps/descargador/bin/
+*.exe

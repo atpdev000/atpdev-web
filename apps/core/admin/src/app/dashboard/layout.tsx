@@ -19,6 +19,7 @@ import {
   User2,
   Briefcase,
   Gift,
+  Download,
   Sun,
   Moon
 } from "lucide-react";
@@ -123,6 +124,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           icon: <Gift size={17} />, 
           href: "/dashboard/sorteos",
           badge: "3006"
+        },
+        { 
+          label: "Descargador Pro", 
+          icon: <Download size={17} />, 
+          href: "/dashboard/descargador",
+          badge: "3007"
         },
       ]
     },

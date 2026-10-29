@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f1a"/>
+      <stop offset="100%" style="stop-color:#1a0a2e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <text x="400" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">Editar Reels con CapCut como Pro</text>
+  <text x="400" y="80" text-anchor="middle" fill="#c4b5fd" font-size="13" font-family="Arial">Domina la edición móvil y crea videos virales</text>
+  <!-- Phone with CapCut mockup -->
+  <rect x="290" y="100" width="220" height="310" rx="24" fill="#1a1a2e" stroke="#8b5cf6" stroke-width="2.5"/>
+  <rect x="304" y="115" width="192" height="280" rx="16" fill="#0d0d1a"/>
+  <!-- CapCut UI elements -->
+  <rect x="314" y="125" width="172" height="110" rx="8" fill="#1a1a2e"/>
+  <!-- Video player -->
+  <rect x="314" y="125" width="172" height="100" rx="8" fill="#2d1b69" opacity="0.8"/>
+  <text x="400" y="185" text-anchor="middle" fill="#a855f7" font-size="30">▶</text>
+  <!-- Timeline -->
+  <rect x="314" y="238" width="172" height="30" rx="4" fill="#1e1e3a"/>
+  <rect x="314" y="242" width="90" height="22" rx="4" fill="#7c3aed" opacity="0.8"/>
+  <rect x="406" y="242" width="50" height="22" rx="4" fill="#2563eb" opacity="0.8"/>
+  <rect x="458" y="242" width="28" height="22" rx="4" fill="#ef4444" opacity="0.8"/>
+  <!-- Effects panel -->
+  <rect x="314" y="278" width="40" height="40" rx="8" fill="#2d1b69"/>
+  <text x="334" y="303" text-anchor="middle" fill="#a855f7" font-size="14">✨</text>
+  <rect x="362" y="278" width="40" height="40" rx="8" fill="#1e3a5f"/>
+  <text x="382" y="303" text-anchor="middle" fill="#3b82f6" font-size="14">🎵</text>
+  <rect x="410" y="278" width="40" height="40" rx="8" fill="#14532d"/>
+  <text x="430" y="303" text-anchor="middle" fill="#22c55e" font-size="14">⚡</text>
+  <rect x="458" y="278" width="40" height="40" rx="8" fill="#7c2d12"/>
+  <text x="478" y="303" text-anchor="middle" fill="#f97316" font-size="14">🎨</text>
+  <!-- Export button -->
+  <rect x="334" y="340" width="132" height="34" rx="10" fill="#7c3aed"/>
+  <text x="400" y="362" text-anchor="middle" fill="white" font-size="13" font-family="Arial" font-weight="bold">Exportar 1080p</text>
+  <!-- Left features -->
+  <rect x="50" y="120" width="195" height="220" rx="14" fill="#1a1a2e" stroke="#8b5cf6" stroke-width="1" opacity="0.9"/>
+  <text x="147" y="150" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial">Features</text>
+  <rect x="65" y="160" width="165" height="1" fill="#8b5cf6" opacity="0.3"/>
+  <text x="75" y="182" fill="#c4b5fd" font-size="11" font-family="Arial">✨ Efectos de tendencia</text>
+  <text x="75" y="204" fill="#c4b5fd" font-size="11" font-family="Arial">🎵 Sync automático beats</text>
+  <text x="75" y="226" fill="#c4b5fd" font-size="11" font-family="Arial">🤖 IA mejora imagen</text>
+  <text x="75" y="248" fill="#c4b5fd" font-size="11" font-family="Arial">📝 Subtítulos auto</text>
+  <text x="75" y="270" fill="#c4b5fd" font-size="11" font-family="Arial">💫 Transiciones fluidas</text>
+  <text x="75" y="292" fill="#c4b5fd" font-size="11" font-family="Arial">🆓 100% Gratuito</text>
+  <!-- Right stats -->
+  <rect x="555" y="120" width="195" height="220" rx="14" fill="#1a1a2e" stroke="#22c55e" stroke-width="1" opacity="0.9"/>
+  <text x="652" y="150" text-anchor="middle" fill="white" font-size="13" font-weight="bold" font-family="Arial">Resultados</text>
+  <rect x="570" y="160" width="165" height="1" fill="#22c55e" opacity="0.3"/>
+  <text x="580" y="182" fill="#86efac" font-size="11" font-family="Arial">📈 +300% engagement</text>
+  <text x="580" y="204" fill="#86efac" font-size="11" font-family="Arial">⏱ Edita en 15 min</text>
+  <text x="580" y="226" fill="#86efac" font-size="11" font-family="Arial">📱 Solo desde móvil</text>
+  <text x="580" y="248" fill="#86efac" font-size="11" font-family="Arial">🎯 Para TikTok/Reels</text>
+  <text x="580" y="270" fill="#86efac" font-size="11" font-family="Arial">👁 Hook en 3 seg</text>
+  <text x="580" y="292" fill="#86efac" font-size="11" font-family="Arial">💡 Formatos virales</text>
+</svg>
