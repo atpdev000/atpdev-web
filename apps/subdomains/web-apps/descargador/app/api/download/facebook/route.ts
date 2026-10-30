@@ -1,4 +1,4 @@
-// app/api/download/facebook/route.ts - 100% SERVERLESS CON FALLBACKS INTELIGENTES
+// app/api/download/facebook/route.ts - 100% SERVERLESS CON EXTRACCIÓN ROBUSTA DE MINIATURA Y MEDIOS
 import { NextRequest, NextResponse } from 'next/server'
 
 export const maxDuration = 45; // Vercel timeout
@@ -10,6 +10,85 @@ interface ExtractedFacebookVideo {
   uploader: string
   hdUrl?: string
   sdUrl?: string
+}
+
+// Decodificar entidades HTML numéricas y con nombre
+function decodeHtmlEntities(str?: string | null): string {
+  if (!str) return '';
+  return str
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCharCode(Number(dec)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&middot;/g, '·')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+}
+
+// Limpiar URLs de medios (reemplazar secuencias escapadas en JSON y HTML)
+function cleanMediaUrl(u?: string | null): string {
+  if (!u) return '';
+  let clean = u
+    .replace(/\\u00252F/g, '/')
+    .replace(/\\u002F/g, '/')
+    .replace(/\\\//g, '/')
+    .replace(/\\u0026/g, '&')
+    .replace(/&amp;/g, '&')
+    .replace(/\\u00253D/g, '=')
+    .replace(/\\u002526/g, '&')
+    .replace(/\\u00253A/g, ':');
+  return clean.startsWith('http') ? clean : '';
+}
+
+// Extracción especializada de miniatura de video en Facebook
+function extractFacebookThumbnail(html: string): string {
+  try {
+    // 1. Buscar en estructuras JSON conocidas (preferir URIs con 't15', que es el identificador oficial de miniatura de video en fbcdn)
+    const jsonUriRegex = /"(?:preferred_thumbnail|thumbnail|video_thumbnail|image|thumbnailImage|video_preview_image)"\s*:\s*(?:\{[^}]*"uri"\s*:\s*"([^"]+)"|"([^"]+)")/gi;
+    let match;
+    const jsonUris: string[] = [];
+    while ((match = jsonUriRegex.exec(html)) !== null) {
+      const raw = match[1] || match[2];
+      const cleaned = cleanMediaUrl(raw);
+      if (cleaned && cleaned.includes('fbcdn.net')) {
+        jsonUris.push(cleaned);
+      }
+    }
+
+    // Si hay URIs con t15 (video thumbnail oficial de Meta), devolver la primera
+    const t15Json = jsonUris.find(u => u.includes('t15'));
+    if (t15Json) return t15Json;
+    if (jsonUris.length > 0) return jsonUris[0];
+
+    // 2. Coincidencia directa con URL t15 de fbcdn en el HTML
+    const t15Match = html.match(/https:[^"'\s\\]+fbcdn\.net[^"'\s\\]*\/t15[^"'\s\\]*\.(?:jpg|png|webp)[^"'\s\\]*/i) ||
+                     html.match(/https:\\\/\\\/[^"'\s]+fbcdn\.net[^"'\s]*\\\/t15[^"'\s]*\.(?:jpg|png|webp)[^"'\s]*/i);
+    if (t15Match) {
+      const cleaned = cleanMediaUrl(t15Match[0]);
+      if (cleaned) return cleaned;
+    }
+
+    // 3. Meta etiquetas OpenGraph / Twitter (flexible en orden de atributos)
+    const metaMatch = html.match(/<meta[^>]+(?:property|name)=["'](?:og:image|twitter:image|thumbnail)["'][^>]+content=["']([^"']+)["']/i) ||
+                      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["'](?:og:image|twitter:image|thumbnail)["']/i) ||
+                      html.match(/<link[^>]+rel=["']image_src["'][^>]+href=["']([^"']+)["']/i);
+    if (metaMatch) {
+      const cleaned = cleanMediaUrl(metaMatch[1]);
+      if (cleaned) return cleaned;
+    }
+
+    // 4. Cualquier imagen fbcdn que termine en jpg/png/webp
+    const anyFbcdnMatch = html.match(/https:[^"'\s\\]+fbcdn\.net[^"'\s\\]*\.(?:jpg|png|webp)[^"'\s\\]*/i);
+    if (anyFbcdnMatch) {
+      return cleanMediaUrl(anyFbcdnMatch[0]);
+    }
+  } catch (e) {
+    console.warn('⚠️ [Facebook Thumbnail] Error al extraer miniatura:', e);
+  }
+  return '';
 }
 
 // 1. Extractor Nativo de Facebook (Serverless sin backend)
@@ -37,16 +116,19 @@ async function extractDirectFacebook(url: string): Promise<ExtractedFacebookVide
       .replace(/\\u002F/g, '/')
       .replace(/\\\//g, '/');
 
-    // Extracción de título
+    // Extracción de título y decodificación de entidades HTML
     const titleMatch = unescaped.match(/<title id="pageTitle">([^<]+)<\/title>/i) ||
                        unescaped.match(/property="og:title"\s+content="([^"]+)"/i) ||
-                       unescaped.match(/name="description"\s+content="([^"]+)"/i);
-    const title = titleMatch ? titleMatch[1].replace(/ \| Facebook$/i, '').trim() : 'Video de Facebook';
+                       unescaped.match(/content="([^"]+)"\s+property="og:title"/i) ||
+                       unescaped.match(/name="description"\s+content="([^"]+)"/i) ||
+                       unescaped.match(/content="([^"]+)"\s+name="description"/i) ||
+                       unescaped.match(/<title[^>]*>([^<]+)<\/title>/i);
+    
+    let title = titleMatch ? titleMatch[1].replace(/ \| Facebook$/i, '').trim() : 'Video de Facebook';
+    title = decodeHtmlEntities(title);
 
-    // Extracción de miniatura
-    const thumbMatch = unescaped.match(/property="og:image"\s+content="([^"]+)"/i) ||
-                       unescaped.match(/"preferred_thumbnail"\s*:\s*\{"image"\s*:\s*\{"uri"\s*:\s*"([^"]+)"/i);
-    const thumbnail = thumbMatch ? thumbMatch[1] : 'https://picsum.photos/600/400';
+    // Extracción de miniatura con extractor especializado
+    const thumbnail = extractFacebookThumbnail(html) || extractFacebookThumbnail(unescaped);
 
     // Extracción de streams HD
     const hdMatch = unescaped.match(/browser_native_hd_url["']?\s*:\s*["']([^"']+)["']/i) ||
@@ -60,14 +142,8 @@ async function extractDirectFacebook(url: string): Promise<ExtractedFacebookVide
                     unescaped.match(/sd_src["']?\s*:\s*["']([^"']+)["']/i) ||
                     unescaped.match(/"sd_src_no_ratelimit"\s*:\s*["']([^"']+)["']/i);
 
-    const cleanUrl = (u?: string | null) => {
-      if (!u) return undefined;
-      let clean = u.replace(/&amp;/g, '&');
-      return clean.startsWith('http') ? clean : undefined;
-    };
-
-    const hdUrl = cleanUrl(hdMatch ? hdMatch[1] : null);
-    const sdUrl = cleanUrl(sdMatch ? sdMatch[1] : null);
+    const hdUrl = cleanMediaUrl(hdMatch ? hdMatch[1] : null);
+    const sdUrl = cleanMediaUrl(sdMatch ? sdMatch[1] : null);
 
     if (!hdUrl && !sdUrl) return null;
 
@@ -76,8 +152,8 @@ async function extractDirectFacebook(url: string): Promise<ExtractedFacebookVide
       thumbnail,
       duration: 60,
       uploader: 'Facebook Video',
-      hdUrl,
-      sdUrl
+      hdUrl: hdUrl || undefined,
+      sdUrl: sdUrl || undefined
     };
   } catch (err) {
     console.warn('⚠️ [Facebook Direct] Falló extracción directa:', err);
@@ -98,12 +174,12 @@ async function extractFallbackFacebook(url: string): Promise<ExtractedFacebookVi
       const data = await res.json().catch(() => null);
       if (data && (data.hd || data.sd || data.video_url)) {
         return {
-          title: data.title || 'Video de Facebook',
-          thumbnail: data.thumbnail || 'https://picsum.photos/600/400',
+          title: decodeHtmlEntities(data.title || 'Video de Facebook'),
+          thumbnail: cleanMediaUrl(data.thumbnail || ''),
           duration: data.duration || 60,
-          uploader: data.author || 'Facebook Creator',
-          hdUrl: data.hd || data.video_url,
-          sdUrl: data.sd || data.video_url
+          uploader: decodeHtmlEntities(data.author || 'Facebook Creator'),
+          hdUrl: cleanMediaUrl(data.hd || data.video_url),
+          sdUrl: cleanMediaUrl(data.sd || data.video_url)
         };
       }
     }
@@ -147,6 +223,9 @@ export async function POST(request: NextRequest) {
         });
         if (pyRes.ok) {
           const pyData = await pyRes.json();
+          if (pyData && pyData.title) {
+            pyData.title = decodeHtmlEntities(pyData.title);
+          }
           return NextResponse.json(pyData);
         }
       } catch (e) {
@@ -211,7 +290,7 @@ export async function POST(request: NextRequest) {
       formats
     };
 
-    console.log('✅ [Facebook Serverless] Extracción exitosa. Formatos disponibles:', formats.length);
+    console.log('✅ [Facebook Serverless] Extracción exitosa. Formatos disponibles:', formats.length, 'Miniatura:', extracted.thumbnail ? 'Sí' : 'No');
     return NextResponse.json(responsePayload);
 
   } catch (error: any) {

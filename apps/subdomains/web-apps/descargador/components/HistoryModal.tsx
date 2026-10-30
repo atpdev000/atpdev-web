@@ -128,10 +128,15 @@ export default function HistoryModal({ isOpen, onClose, history, onClear, onDele
                                         <img
                                             src={item.thumbnail}
                                             alt={item.title}
+                                            referrerPolicy="no-referrer"
                                             className="w-full h-full object-cover"
                                             onError={(e) => {
-                                                // Fallback si la imagen falla
-                                                e.currentTarget.style.display = 'none';
+                                                const target = e.currentTarget;
+                                                if (item.thumbnail && !target.src.includes('/api/download/proxy/image')) {
+                                                    target.src = `/api/download/proxy/image?url=${encodeURIComponent(item.thumbnail)}`;
+                                                } else {
+                                                    target.style.display = 'none';
+                                                }
                                             }}
                                         />
                                     ) : (

@@ -378,9 +378,13 @@ export default function TwitterDownloader() {
               <img
                 src={videoInfo.thumbnail}
                 alt={videoInfo.title}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://picsum.photos/600/400';
+                  const target = e.target as HTMLImageElement;
+                  if (videoInfo.thumbnail && !target.src.includes('/api/download/proxy/image')) {
+                    target.src = `/api/download/proxy/image?url=${encodeURIComponent(videoInfo.thumbnail)}`;
+                  }
                 }}
               />
               <div className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm text-white px-2 py-0.5 rounded text-xs font-semibold">

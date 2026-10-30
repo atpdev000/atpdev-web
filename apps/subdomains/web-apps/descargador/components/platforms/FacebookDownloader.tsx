@@ -47,6 +47,8 @@ export default function FacebookDownloader() {
   const [downloadDetails, setDownloadDetails] = useState('')
 
   const [originalUrl, setOriginalUrl] = useState('');
+  const [thumbSrc, setThumbSrc] = useState<string>('');
+  const [thumbError, setThumbError] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,6 +66,8 @@ export default function FacebookDownloader() {
     try {
       const data = await getFacebookInfo(url)
       setVideoInfo(data)
+      setThumbSrc(data.thumbnail || '')
+      setThumbError(false)
       setOriginalUrl(url);
       setUrl('')
     } catch (error) {
@@ -630,15 +634,48 @@ export default function FacebookDownloader() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {videoInfo.thumbnail && (
-                <div className="md:col-span-1">
-                  <img
-                    src={videoInfo.thumbnail}
-                    alt={videoInfo.title}
-                    className="w-full h-40 object-cover rounded-lg"
-                  />
+              <div className="md:col-span-1">
+                <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden shadow-md bg-gray-900 flex items-center justify-center">
+                  {thumbSrc && !thumbError ? (
+                    <img
+                      src={thumbSrc}
+                      alt={videoInfo.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      onError={() => {
+                        if (thumbSrc && !thumbSrc.startsWith('/api/download/proxy/image') && videoInfo.thumbnail) {
+                          setThumbSrc(`/api/download/proxy/image?url=${encodeURIComponent(videoInfo.thumbnail)}`);
+                        } else {
+                          setThumbError(true);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-950 flex flex-col items-center justify-center p-4 text-center">
+                      <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center mb-2 shadow-inner">
+                        <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
+                      <span className="text-xs font-medium text-blue-100 line-clamp-2 px-2">
+                        Facebook Video
+                      </span>
+                    </div>
+                  )}
+                  {/* Badge oficial Facebook */}
+                  <div className="absolute top-2 left-2 bg-[#1877F2] text-white p-1 rounded-md shadow-md flex items-center justify-center">
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                    </svg>
+                  </div>
+                  {/* Badge de duración */}
+                  {videoInfo.duration > 0 && (
+                    <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[11px] font-semibold">
+                      {formatDuration(videoInfo.duration)}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
               <div className="md:col-span-2">
                 <h4 className="font-semibold text-gray-900 mb-2 text-sm leading-tight">{videoInfo.title}</h4>
 
