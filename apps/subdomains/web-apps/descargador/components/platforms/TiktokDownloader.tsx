@@ -177,7 +177,42 @@ export default function TiktokDownloader() {
 
         const filename = `tiktok_${quality}_${Date.now()}.${fileExt}`
 
-        // Usar Proxy para evitar CORS
+        // ⚡ WEB: Descarga directa de alta velocidad desde el CDN original (0% uso de servidor)
+        if (!isNative && downloadUrl && downloadUrl.startsWith('http')) {
+          console.log('⚡ Web: Descarga directa de alta velocidad (bypass de proxy para máximo ahorro)...');
+          setDownloadProgress(100);
+          setDownloadDetails('¡Iniciando descarga directa!');
+
+          const a = document.createElement('a');
+          a.href = downloadUrl;
+          a.download = filename;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          addToHistory({
+            title: videoInfo?.title || 'Video de TikTok',
+            platform: 'tiktok',
+            thumbnail: videoInfo?.thumbnail || '',
+            originalUrl: url,
+            status: 'completed',
+            format: quality,
+            fileSize: 'HD',
+            mimeType: fileExt === 'mp3' ? 'audio/mpeg' : 'video/mp4'
+          });
+
+          setTimeout(() => {
+            setDownloading(null);
+            setDownloadProgress(0);
+            setDownloadDetails('');
+          }, 1500);
+
+          return;
+        }
+
+        // Usar Proxy para Capacitor / Native o respaldo
         console.log('🚀 Usando Proxy para descarga de TikTok...');
         const response = await fetch('/api/download/tiktok/proxy', {
           method: 'POST',
