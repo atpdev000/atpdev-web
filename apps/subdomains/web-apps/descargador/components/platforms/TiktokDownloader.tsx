@@ -10,6 +10,7 @@ import { Media } from '@capacitor-community/media'
 import { Dialog } from '@capacitor/dialog'
 import { Toast } from '@capacitor/toast' // ✅ Usar Toast nativo
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded' // ✅ Hook Rewarded
+import { Volume2, Music } from 'lucide-react'
 
 interface VideoFormat {
   quality: string
@@ -146,10 +147,10 @@ export default function TiktokDownloader() {
         const remainingBytes = Math.max(total - loaded, 0)
         const etaSec = speedBps > 0 ? Math.round(remainingBytes / speedBps) : 0
         const etaText = etaSec > 0 ? `ETA: ${Math.floor(etaSec / 60)}:${String(etaSec % 60).padStart(2, '0')}` : ''
-        setDownloadDetails(`${speedText} ${etaText ? '• ' + etaText : ''}`)
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)} / ${formatBytes(total)} ${etaText ? '• ' + etaText : ''}`)
       } else {
-        setDownloadProgress((prev) => Math.min(prev + 1, 95))
-        setDownloadDetails(`${speedText} • ${formatBytes(loaded)}`)
+        setDownloadProgress((prev) => Math.min(prev + 2, 95))
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)} transferidos`)
       }
     }
 
@@ -601,8 +602,19 @@ export default function TiktokDownloader() {
                   return (
                     <div key={quality.value} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{quality.label}</p>
-                        {!isAvailable && <p className="text-xs text-red-500">No disponible</p>}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-semibold text-gray-900">{quality.label}</p>
+                          {quality.value === 'audio' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                              <Music className="w-3 h-3 text-purple-600" /> Solo Audio
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              <Volume2 className="w-3 h-3 text-emerald-600" /> Video + Audio
+                            </span>
+                          )}
+                        </div>
+                        {!isAvailable && <p className="text-xs text-red-500 mt-0.5">No disponible</p>}
                       </div>
 
                       {isDownloading ? (
@@ -655,7 +667,18 @@ export default function TiktokDownloader() {
                       return (
                         <tr key={quality.value} className={`hover:bg-gray-50 ${!isAvailable ? 'opacity-50' : ''}`}>
                           <td className="border border-gray-300 px-4 py-3 text-gray-800 font-medium">
-                            {quality.label}
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span>{quality.label}</span>
+                              {quality.value === 'audio' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                  <Music className="w-3 h-3 text-purple-600" /> Solo Audio
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <Volume2 className="w-3 h-3 text-emerald-600" /> Video + Audio
+                                </span>
+                              )}
+                            </div>
                             {!isAvailable && (
                               <span className="text-xs text-red-500 ml-2">(No disponible)</span>
                             )}

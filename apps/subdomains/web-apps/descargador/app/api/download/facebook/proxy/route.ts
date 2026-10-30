@@ -94,16 +94,9 @@ export async function POST(request: NextRequest) {
         // Continuamos de todas formas, Facebook a veces usa content-types extraños
       }
 
-      const arrayBuffer = await response.arrayBuffer();
-
-      if (arrayBuffer.byteLength === 0) {
-        throw new Error('El archivo recibido está vacío');
+      if (!response.body) {
+        throw new Error('El archivo recibido no tiene flujo de datos');
       }
-
-      console.log('✅ [Facebook Proxy] Descarga exitosa:', {
-        size: arrayBuffer.byteLength,
-        contentType
-      });
 
       // Determinar content-type apropiado para la respuesta
       let responseContentType = contentType;
@@ -113,15 +106,23 @@ export async function POST(request: NextRequest) {
         responseContentType = 'video/mp4';
       }
 
-      // Crear respuesta con headers apropiados
+      // Crear respuesta con headers apropiados para streaming en tiempo real
       const headers = new Headers();
       headers.set('Content-Type', responseContentType);
-      headers.set('Content-Length', arrayBuffer.byteLength.toString());
+      if (contentLength) {
+        headers.set('Content-Length', contentLength);
+        headers.set('X-File-Size', contentLength);
+      }
       headers.set('Content-Disposition', `attachment; filename="${filename}"`);
-      headers.set('Cache-Control', 'no-cache');
+      headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       headers.set('X-Content-Type-Options', 'nosniff');
 
-      return new NextResponse(arrayBuffer, {
+      console.log('✅ [Facebook Proxy] Transmitiendo flujo en tiempo real:', {
+        size: contentLength,
+        contentType: responseContentType
+      });
+
+      return new NextResponse(response.body, {
         status: 200,
         headers
       });

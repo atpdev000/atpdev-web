@@ -484,11 +484,14 @@ export default function YoutubeDownloader() {
     const totalStr = response.headers.get('Content-Length') || response.headers.get('X-File-Size')
     const total = totalStr ? parseInt(totalStr, 10) : 0
     let loaded = 0
+    const startTime = Date.now()
 
     const reader = response.body?.getReader()
     if (!reader) throw new Error('No se pudo establecer el flujo de datos')
 
     const chunks: Uint8Array[] = []
+    setDownloadProgress(2)
+    setDownloadDetails('Iniciando transferencia...')
 
     while (true) {
       const { done, value } = await reader.read()
@@ -497,12 +500,22 @@ export default function YoutubeDownloader() {
       chunks.push(value)
       loaded += value.length
 
+      const elapsedSec = (Date.now() - startTime) / 1000
+      const speedBps = elapsedSec > 0 ? loaded / elapsedSec : 0
+      const speedText = speedBps > 1024 * 1024
+        ? `${(speedBps / (1024 * 1024)).toFixed(1)} MB/s`
+        : `${Math.round(speedBps / 1024)} KB/s`
+
       if (total > 0) {
         const progress = Math.round((loaded / total) * 100)
         setDownloadProgress(Math.min(progress, 99)) // Nunca mostrar 100% hasta que termine el stream
+        const remainingBytes = Math.max(total - loaded, 0)
+        const etaSec = speedBps > 0 ? Math.round(remainingBytes / speedBps) : 0
+        const etaText = etaSec > 0 ? `ETA: ${Math.floor(etaSec / 60)}:${String(etaSec % 60).padStart(2, '0')}` : ''
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)} / ${formatBytes(total)} ${etaText ? '• ' + etaText : ''}`)
       } else {
-        // Si no sabemos el total, simular un progreso lento para que el usuario vea actividad
-        setDownloadProgress((prev) => Math.min(prev + 1, 95))
+        setDownloadProgress((prev) => Math.min(prev + 2, 95))
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)} transferidos`)
       }
     }
 

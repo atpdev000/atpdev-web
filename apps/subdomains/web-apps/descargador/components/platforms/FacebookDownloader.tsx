@@ -12,6 +12,7 @@ import { Media } from '@capacitor-community/media'
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded';
+import { Volume2, VolumeX, Music, Film } from 'lucide-react';
 
 interface VideoFormat {
   quality: string
@@ -224,10 +225,10 @@ export default function FacebookDownloader() {
           const remainingBytes = Math.max(total - loaded, 0)
           const etaSec = speedBps > 0 ? Math.round(remainingBytes / speedBps) : 0
           const etaText = etaSec > 0 ? `ETA: ${Math.floor(etaSec / 60)}:${String(etaSec % 60).padStart(2, '0')}` : ''
-          setDownloadDetails(`${speedText} ${etaText ? '• ' + etaText : ''}`)
+          setDownloadDetails(`${speedText} • ${formatBytes(loaded)} / ${formatBytes(total)} ${etaText ? '• ' + etaText : ''}`)
         } else {
-          setDownloadProgress((prev) => Math.min(prev + 1, 95))
-          setDownloadDetails(`${speedText} • ${formatBytes(loaded)}`)
+          setDownloadProgress((prev) => Math.min(prev + 2, 95))
+          setDownloadDetails(`${speedText} • ${formatBytes(loaded)} transferidos`)
         }
       }
 
@@ -750,13 +751,27 @@ export default function FacebookDownloader() {
                   .map((quality) => {
                     const isAvailable = isQualityAvailable(quality.value)
                     const isDownloading = downloading === quality.id
+                    const formatInfo = getFormatInfo(quality.value)
 
                     return (
                       <div key={quality.id} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
                         {/* Quality Label */}
                         <div className="flex-1">
-                          <p className="font-semibold text-gray-900">{quality.label}</p>
-                          {!isAvailable && <p className="text-xs text-red-500">No disponible</p>}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-gray-900">{quality.label}</p>
+                            {isAvailable && (
+                              formatInfo.hasAudio ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <Volume2 className="w-3 h-3 text-emerald-600" /> Video + Audio
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                                  <VolumeX className="w-3 h-3 text-orange-600" /> Solo Video
+                                </span>
+                              )
+                            )}
+                          </div>
+                          {!isAvailable && <p className="text-xs text-red-500 mt-0.5">No disponible</p>}
                         </div>
 
                         {/* Action Button */}
@@ -813,7 +828,15 @@ export default function FacebookDownloader() {
                               {quality.ext.toUpperCase()}
                             </td>
                             <td className="border border-gray-300 px-4 py-3 text-gray-600">
-                              {formatInfo.type}
+                              {formatInfo.hasAudio ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <Volume2 className="w-3 h-3 text-emerald-600" /> Video + Audio
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                                  <VolumeX className="w-3 h-3 text-orange-600" /> Solo Video
+                                </span>
+                              )}
                             </td>
                             <td className="border border-gray-300 px-4 py-3 text-gray-600">
                               {formatInfo.size}

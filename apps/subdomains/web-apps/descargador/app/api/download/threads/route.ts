@@ -12,6 +12,8 @@ interface ThreadsFormat {
   url: string;
   size?: string;
   isAudio?: boolean;
+  hasAudio?: boolean;
+  hasVideo?: boolean;
 }
 
 interface ThreadsMediaResult {
@@ -81,7 +83,9 @@ async function extractLoveThreads(url: string): Promise<ThreadsMediaResult | nul
         const formats: ThreadsFormat[] = videoUrls.map((vUrl, i) => ({
           quality: i === 0 ? 'HD 1080p' : `Calidad ${i + 1}`,
           format: 'MP4',
-          url: vUrl
+          url: vUrl,
+          hasAudio: true,
+          hasVideo: true
         }));
 
         return {
@@ -136,7 +140,9 @@ async function extractDirectThreads(url: string): Promise<ThreadsMediaResult | n
           {
             quality: 'HD Video',
             format: 'MP4',
-            url: cleanVideoUrl
+            url: cleanVideoUrl,
+            hasAudio: true,
+            hasVideo: true
           }
         ]
       };
@@ -177,7 +183,9 @@ async function extractThreadsWithYtDlp(url: string, binPath: string): Promise<Th
                 {
                   quality: 'HD Video',
                   format: 'MP4',
-                  url: vFormats[0]?.url || data.url
+                  url: vFormats[0]?.url || data.url,
+                  hasAudio: !(vFormats[0]?.acodec === 'none'),
+                  hasVideo: true
                 }
               ]
             });
@@ -234,7 +242,9 @@ export async function POST(request: NextRequest) {
       quality: 'Audio M4A (Original)',
       format: 'M4A',
       url: result.formats[0].url,
-      isAudio: true
+      isAudio: true,
+      hasAudio: true,
+      hasVideo: false
     });
 
     return NextResponse.json({

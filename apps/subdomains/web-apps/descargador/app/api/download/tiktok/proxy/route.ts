@@ -56,24 +56,26 @@ export async function POST(request: NextRequest) {
                 status: response.status
             });
 
-            const arrayBuffer = await response.arrayBuffer();
-
-            if (arrayBuffer.byteLength === 0) {
-                throw new Error('El archivo recibido está vacío');
+            if (!response.body) {
+                throw new Error('El archivo recibido no tiene flujo de datos');
             }
 
-            console.log('✅ [TikTok Proxy] Descarga exitosa:', {
-                size: arrayBuffer.byteLength
-            });
-
-            // Headers de respuesta
+            // Headers de respuesta para streaming en tiempo real
             const responseHeaders = new Headers();
             responseHeaders.set('Content-Type', contentType);
-            responseHeaders.set('Content-Length', arrayBuffer.byteLength.toString());
+            if (contentLength) {
+                responseHeaders.set('Content-Length', contentLength);
+                responseHeaders.set('X-File-Size', contentLength);
+            }
             responseHeaders.set('Content-Disposition', `attachment; filename="${filename}"`);
-            responseHeaders.set('Cache-Control', 'no-cache');
+            responseHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
-            return new NextResponse(arrayBuffer, {
+            console.log('✅ [TikTok Proxy] Transmitiendo flujo en tiempo real:', {
+                size: contentLength,
+                contentType
+            });
+
+            return new NextResponse(response.body, {
                 status: 200,
                 headers: responseHeaders
             });

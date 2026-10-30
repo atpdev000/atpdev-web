@@ -1,5 +1,24 @@
 // app/api/download/proxy/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import path from 'path'
+import fs from 'fs'
+
+function findFfmpegBinary(): string | null {
+  try {
+    const staticPath = require('ffmpeg-static')
+    if (staticPath && fs.existsSync(staticPath)) return staticPath
+  } catch {}
+
+  const candidates = [
+    path.join(process.cwd(), 'bin', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'),
+    'D:\\PROYECTOS\\atpdev-web\\apps\\subdomains\\web-apps\\descargador\\bin\\ffmpeg.exe'
+  ]
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c
+  }
+  return null
+}
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
 const COMBINE_TIMEOUT = 300000 // 5 minutos para combinación
@@ -44,6 +63,99 @@ function isValidDownloadUrl(url: string): boolean {
   ]
 
   return validDomains.some(domain => url.includes(domain)) || url.includes('.mp4') || url.includes('.m4a') || url.includes('.mp3') || url.includes('.webm')
+}
+
+// ✅ ENCABEZADOS ADAPTATIVOS SEGÚN PLATAFORMA (Evita bloqueos 403 Forbidden por Hotlinking/Cross-Origin)
+function getPlatformHeaders(url: string, detectedIsAudio: boolean, detectedIsVideo: boolean): Record<string, string> {
+  const baseHeaders: Record<string, string> = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': detectedIsAudio ? 'audio/*' : detectedIsVideo ? 'video/*,*/*' : '*/*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'identity',
+  }
+
+  // Twitter / X (video.twimg.com)
+  if (url.includes('twimg.com') || url.includes('twitter.com') || url.includes('x.com')) {
+    return {
+      ...baseHeaders,
+      'Referer': 'https://twitter.com/',
+      'Sec-Fetch-Dest': detectedIsAudio ? 'audio' : 'video',
+      'Sec-Fetch-Mode': 'no-cors',
+      'Sec-Fetch-Site': 'cross-site'
+    }
+  }
+
+  // Snapcdn / SaveTwitter CDN
+  if (url.includes('snapcdn.app') || url.includes('savetwitter.net')) {
+    return {
+      ...baseHeaders,
+      'Referer': 'https://savetwitter.net/',
+      'Origin': 'https://savetwitter.net'
+    }
+  }
+
+  // Instagram / Meta CDN
+  if (url.includes('cdninstagram.com') || url.includes('instagram.com') || url.includes('fbcdn.net') || url.includes('fbsbx.com')) {
+    return {
+      ...baseHeaders,
+      'Referer': 'https://www.instagram.com/',
+      'Sec-Fetch-Dest': detectedIsAudio ? 'audio' : 'video'
+    }
+  }
+
+  // Threads
+  if (url.includes('threads.net') || url.includes('cdnthreads.com')) {
+    return {
+      ...baseHeaders,
+      'Referer': 'https://www.threads.net/'
+    }
+  }
+
+  // TikTok CDN
+  if (url.includes('tiktokcdn.com') || url.includes('tiktok.com') || url.includes('tikwm.com')) {
+    return {
+      ...baseHeaders,
+      'Referer': 'https://www.tiktok.com/'
+    }
+  }
+
+  // YouTube / GoogleVideo
+  if (url.includes('googlevideo.com') || url.includes('youtube.com') || url.includes('youtu.be')) {
+    return {
+      ...baseHeaders,
+      'Referer': 'https://www.youtube.com/',
+      'Origin': 'https://www.youtube.com',
+      'Range': 'bytes=0-',
+      'Sec-Fetch-Dest': detectedIsAudio ? 'audio' : 'video'
+    }
+  }
+
+  // Genérico: intentar derivar referer del host
+  try {
+    const parsed = new URL(url)
+    baseHeaders['Referer'] = `${parsed.protocol}//${parsed.host}/`
+  } catch {}
+
+  return baseHeaders
+}
+
+function getFfmpegHeadersString(url: string): string {
+  if (url.includes('twimg.com') || url.includes('twitter.com') || url.includes('x.com')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://twitter.com/\r\n'
+  }
+  if (url.includes('snapcdn.app') || url.includes('savetwitter.net')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://savetwitter.net/\r\nOrigin: https://savetwitter.net\r\n'
+  }
+  if (url.includes('cdninstagram.com') || url.includes('instagram.com') || url.includes('fbcdn.net') || url.includes('fbsbx.com')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.instagram.com/\r\n'
+  }
+  if (url.includes('threads.net')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.threads.net/\r\n'
+  }
+  if (url.includes('tiktokcdn.com') || url.includes('tiktok.com') || url.includes('tikwm.com')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.tiktok.com/\r\n'
+  }
+  return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n'
 }
 
 export async function POST(request: NextRequest) {
@@ -128,78 +240,85 @@ export async function POST(request: NextRequest) {
     }, DOWNLOAD_TIMEOUT)
 
     try {
-      // ✅ FETCH MEJORADO con timeouts extendidos
-      const fetchOptions: RequestInit = {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': detectedIsAudio ? 'audio/*' : detectedIsVideo ? 'video/*,*/*' : '*/*',
-          'Accept-Encoding': 'identity',
-          'Range': 'bytes=0-',
-          'Referer': 'https://www.youtube.com/',
-          'Origin': 'https://www.youtube.com',
-          'Sec-Fetch-Dest': detectedIsAudio ? 'audio' : detectedIsVideo ? 'video' : 'empty',
-          'Accept-Language': 'en-US,en;q=0.9',
-        },
-        redirect: 'follow',
-        signal: controller.signal,
+      // ✅ ESTRATEGIAS ADAPTATIVAS DE HEADERS SEGÚN LA PLATAFORMA Y RESPUESTA (Evita 403 Forbidden)
+      const primaryHeaders = getPlatformHeaders(url, detectedIsAudio, detectedIsVideo)
+      const cleanHeaders: Record<string, string> = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': detectedIsAudio ? 'audio/*' : detectedIsVideo ? 'video/*,*/*' : '*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
+      }
+      const mobileHeaders: Record<string, string> = {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1',
+        'Accept': '*/*',
+        'Accept-Language': 'en-US,en;q=0.9',
       }
 
-      // Usar fetch con retry en caso de error
-      let response: Response
-      let retries = 3 // ✅ Aumentado a 3 reintentos
+      const headerStrategies = [primaryHeaders, cleanHeaders, mobileHeaders]
+      let response: Response | null = null
 
-      while (retries >= 0) {
+      for (let attempt = 0; attempt < headerStrategies.length; attempt++) {
         try {
-          console.log(`🔄 [Proxy] Intento ${3 - retries + 1} de 3`)
-          response = await fetch(url, fetchOptions)
+          console.log(`🔄 [Proxy] Intento ${attempt + 1} de ${headerStrategies.length} para: ${url.substring(0, 70)}...`)
+          const headers = headerStrategies[attempt]
 
-          // ✅ VERIFICAR CONTENT-TYPE PARA EVITAR DESCARGAR HTML
-          const contentType = response.headers.get('content-type') || ''
-          if (contentType.includes('text/html') || contentType.includes('application/json')) {
-            console.error('❌ [Proxy] La respuesta es HTML/JSON, no un archivo multimedia')
-            throw new Error('El servidor devolvió una página web en lugar de un archivo multimedia')
+          response = await fetch(url, {
+            method: 'GET',
+            headers,
+            redirect: 'follow',
+            signal: controller.signal,
+          })
+
+          if (response.ok) {
+            const contentType = response.headers.get('content-type') || ''
+            if (!contentType.includes('text/html') && !contentType.includes('application/json')) {
+              // ✅ Flujo multimedia válido recibido
+              break
+            } else {
+              console.warn(`⚠️ [Proxy] Intento ${attempt + 1}: Devolvió HTML/JSON, reintentando con otra estrategia...`)
+            }
+          } else {
+            console.warn(`⚠️ [Proxy] Intento ${attempt + 1} falló con status ${response.status} ${response.statusText}`)
+            // Si el intento falló con 403 (Forbidden) o 401, el siguiente intento usará otra estrategia de headers
+            if (attempt < headerStrategies.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 800))
+            }
           }
-
-          break
         } catch (fetchError: any) {
-          if (retries === 0) throw fetchError
-          console.log(`🔄 [Proxy] Reintentando... (${retries} intentos restantes)`)
-          retries--
-          // ✅ Esperar 2 segundos antes del reintento (más tiempo)
-          await new Promise(resolve => setTimeout(resolve, 2000))
+          console.warn(`⚠️ [Proxy] Intento ${attempt + 1} arrojó error:`, fetchError.message)
+          if (attempt < headerStrategies.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 800))
+          }
         }
       }
 
       clearTimeout(timeoutId)
 
-      if (!response!.ok) {
-        console.error('❌ [Proxy] Error en fetch:', response!.status, response!.statusText)
+      if (!response || !response.ok) {
+        console.error('❌ [Proxy] Todos los intentos de descarga fallaron:', response?.status, response?.statusText)
         return NextResponse.json({
-          error: `Failed to download file: ${response!.status} ${response!.statusText}`
-        }, { status: response!.status })
+          error: `No se pudo descargar el archivo del servidor de origen (${response ? response.status : 502}: ${response ? response.statusText : 'Fallo de conexión'}). El enlace puede requerir descarga directa.`,
+          status: response ? response.status : 502,
+          fallback_url: url
+        }, { status: response ? response.status : 502 })
       }
 
-      // Obtener blob con manejo de progreso
-      console.log('📥 [Proxy] Descargando contenido... (esto puede tomar varios minutos para videos grandes)')
-      const blob = await response!.blob()
-
-      if (blob.size === 0) {
-        return NextResponse.json({ error: 'Empty file received' }, { status: 500 })
+      if (!response!.body) {
+        return NextResponse.json({ error: 'No se recibió flujo de datos multimedia' }, { status: 500 })
       }
 
-      // ✅ VERIFICAR QUE EL ARCHIVO NO SEA HTML
-      const firstBytes = await blob.slice(0, 50).text()
-      if (firstBytes.trim().startsWith('<!DOCTYPE') || firstBytes.trim().startsWith('<html')) {
-        console.error('❌ [Proxy] El archivo descargado es HTML, no multimedia')
+      const upstreamContentType = response!.headers.get('content-type') || ''
+      const upstreamContentLength = response!.headers.get('content-length')
+
+      // Verificar que el archivo no sea una página de error o HTML
+      if (upstreamContentType.includes('text/html') || upstreamContentType.includes('application/json')) {
+        console.error('❌ [Proxy] El servidor devolvió HTML/JSON, no multimedia:', upstreamContentType)
         return NextResponse.json({
-          error: 'El servidor devolvió una página HTML en lugar de un archivo multimedia. La URL puede haber expirado.'
+          error: 'El enlace multimedia expiró o es inválido. Por favor intenta de nuevo.'
         }, { status: 400 })
       }
 
-      console.log(`✅ [Proxy] Archivo descargado: ${(blob.size / (1024 * 1024)).toFixed(2)} MB (${detectedIsAudio ? 'AUDIO' : detectedIsVideo ? 'VIDEO' : 'FILE'})`)
-
       // Detectar tipo de contenido y extensión
-      let contentType = blob.type
+      let contentType = upstreamContentType
       let fileExtension = 'mp4'
 
       if (!contentType || contentType === 'application/octet-stream') {
@@ -210,11 +329,10 @@ export async function POST(request: NextRequest) {
           contentType = 'video/mp4'
           fileExtension = 'mp4'
         } else {
-          contentType = 'application/octet-stream'
+          contentType = 'video/mp4'
         }
       }
 
-      // Determinar extensión basada en el tipo de contenido
       if (contentType.includes('audio/mp4') || contentType.includes('audio/m4a')) {
         fileExtension = 'm4a'
       } else if (contentType.includes('audio/mpeg')) {
@@ -225,37 +343,39 @@ export async function POST(request: NextRequest) {
         fileExtension = 'webm'
       }
 
-      // Crear nombre de archivo por defecto si no se proporciona
       let finalFilename = filename
       if (!finalFilename) {
         const timestamp = Date.now()
         if (detectedIsAudio) {
-          finalFilename = `youtube_audio_${timestamp}.${fileExtension}`
+          finalFilename = `audio_${timestamp}.${fileExtension}`
         } else if (quality) {
-          finalFilename = `youtube_${quality}_${timestamp}.${fileExtension}`
+          finalFilename = `video_${quality}_${timestamp}.${fileExtension}`
         } else {
-          finalFilename = `youtube_download_${timestamp}.${fileExtension}`
+          finalFilename = `download_${timestamp}.${fileExtension}`
         }
       }
 
-      // Asegurar que el nombre de archivo tenga la extensión correcta
       if (!finalFilename.includes('.')) {
         finalFilename += `.${fileExtension}`
       }
 
-      // Crear respuesta con el archivo
-      return new NextResponse(blob, {
+      const responseHeaders = new Headers()
+      responseHeaders.set('Content-Type', contentType)
+      responseHeaders.set('Content-Disposition', `attachment; filename="${finalFilename}"`)
+      responseHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+      if (upstreamContentLength) {
+        responseHeaders.set('Content-Length', upstreamContentLength)
+        responseHeaders.set('X-File-Size', upstreamContentLength)
+      }
+      responseHeaders.set('X-File-Type', detectedIsAudio ? 'audio' : detectedIsVideo ? 'video' : 'file')
+      responseHeaders.set('X-Download-Mode', 'streaming')
+      responseHeaders.set('X-Url-Validated', 'true')
+
+      console.log(`✅ [Proxy] Transmitiendo en tiempo real hacia el cliente: ${finalFilename} (${upstreamContentLength ? (parseInt(upstreamContentLength, 10) / (1024 * 1024)).toFixed(1) + ' MB' : 'stream'})`)
+
+      return new NextResponse(response!.body, {
         status: 200,
-        headers: {
-          'Content-Type': contentType,
-          'Content-Disposition': `attachment; filename="${finalFilename}"`,
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Content-Length': blob.size.toString(),
-          'X-File-Size': blob.size.toString(),
-          'X-File-Type': detectedIsAudio ? 'audio' : detectedIsVideo ? 'video' : 'file',
-          'X-Download-Time': 'extended', // ✅ Indicar que usó timeout extendido
-          'X-Url-Validated': 'true' // ✅ Confirmar que la URL pasó validación
-        }
+        headers: responseHeaders
       })
 
     } catch (fetchError: any) {
@@ -311,12 +431,12 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
 
     // Importaciones dinámicas para evitar problemas en build time si no se usan
     const ffmpeg = require('fluent-ffmpeg');
-    const ffmpegPath = require('ffmpeg-static');
+    const ffmpegPath = findFfmpegBinary();
 
     if (ffmpegPath) {
       ffmpeg.setFfmpegPath(ffmpegPath);
     } else {
-      throw new Error('ffmpeg-static binary not found');
+      throw new Error('ffmpeg binary not found in system or bin directory');
     }
 
     const { PassThrough } = require('stream');
@@ -329,12 +449,12 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
       const command = ffmpeg()
         .input(videoUrl)
         .inputOptions([
-          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/',
+          '-headers', getFfmpegHeadersString(videoUrl),
           '-re'
         ])
         .input(audioUrl)
         .inputOptions([
-          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/',
+          '-headers', getFfmpegHeadersString(audioUrl),
           '-re'
         ])
         .outputOptions([
@@ -405,12 +525,12 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
   }
 }
 
-// ✅ FUNCIÓN PARA INCRUSTAR MINIATURA EN AUDIO
+// ✅ FUNCIÓN PARA INCRUSTAR MINIATURA EN AUDIO (Cover Art / Portada de álbum)
 async function handleAudioWithThumbnail(audioUrl: string, thumbnailUrl: string, filename: string) {
   try {
-    console.log('🎨 [Proxy] Incrustando miniatura con FFmpeg...')
+    console.log('🎨 [Proxy] Incrustando miniatura en audio con FFmpeg...')
     const ffmpeg = require('fluent-ffmpeg');
-    const ffmpegPath = require('ffmpeg-static');
+    const ffmpegPath = findFfmpegBinary();
 
     if (ffmpegPath) ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -420,20 +540,28 @@ async function handleAudioWithThumbnail(audioUrl: string, thumbnailUrl: string, 
     const ffmpegPromise = new Promise<void>((resolve, reject) => {
       ffmpeg()
         .input(audioUrl)
-        .input(thumbnailUrl)
-        .outputOptions([
-          '-map 0:0',
-          '-map 1:0',
-          '-c copy',
-          '-disposition:v:1 attached_pic' // ✅ Correct flag for cover art in M4A/MP4
+        .inputOptions([
+          '-headers', getFfmpegHeadersString(audioUrl)
         ])
-        .format('ipod') // 'ipod' es el formato para m4a/mp4 amigable con tags
+        .input(thumbnailUrl)
+        .inputOptions([
+          '-headers', getFfmpegHeadersString(thumbnailUrl)
+        ])
+        .outputOptions([
+          '-map 0:a',
+          '-map 1:v',
+          '-c:a copy',
+          '-c:v mjpeg',
+          '-disposition:v:0 attached_pic',
+          '-movflags frag_keyframe+empty_moov'
+        ])
+        .format('ipod') // 'ipod' es el formato para m4a/mp4 amigable con tags y carátulas
         .on('error', (err: Error) => {
-          console.error('❌ [FFmpeg/Audio] Error:', err.message);
+          console.error('❌ [FFmpeg/Audio] Error incrustando carátula:', err.message);
           reject(err);
         })
         .on('end', () => {
-          console.log('✅ [FFmpeg/Audio] Finished!');
+          console.log('✅ [FFmpeg/Audio] Audio con portada incrustada exitosamente!');
           resolve();
         })
         .pipe(outputStream, { end: true });

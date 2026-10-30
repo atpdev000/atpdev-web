@@ -10,7 +10,7 @@ import { Media } from '@capacitor-community/media'
 import { Dialog } from '@capacitor/dialog'
 import { Toast } from '@capacitor/toast'
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded'
-import { Sparkles, Download, Music, Film, AlertCircle } from 'lucide-react'
+import { Sparkles, Download, Music, Film, AlertCircle, Volume2, VolumeX, Loader2 } from 'lucide-react'
 
 interface MediaFormat {
   quality: string
@@ -18,6 +18,8 @@ interface MediaFormat {
   url: string
   size?: string
   isAudio?: boolean
+  hasAudio?: boolean
+  hasVideo?: boolean
 }
 
 interface TwitterResponse {
@@ -123,10 +125,10 @@ export default function TwitterDownloader() {
         const remainingBytes = Math.max(total - loaded, 0)
         const etaSec = speedBps > 0 ? Math.round(remainingBytes / speedBps) : 0
         const etaText = etaSec > 0 ? `ETA: ${Math.floor(etaSec / 60)}:${String(etaSec % 60).padStart(2, '0')}` : ''
-        setDownloadDetails(`${speedText} ${etaText ? '• ' + etaText : ''}`)
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)} / ${formatBytes(total)} ${etaText ? '• ' + etaText : ''}`)
       } else {
-        setDownloadProgress((prev) => Math.min(prev + 1, 95))
-        setDownloadDetails(`${speedText} • ${formatBytes(loaded)}`)
+        setDownloadProgress((prev) => Math.min(prev + 2, 95))
+        setDownloadDetails(`${speedText} • ${formatBytes(loaded)} transferidos`)
       }
     }
 
@@ -164,13 +166,49 @@ export default function TwitterDownloader() {
             url: format.url,
             filename,
             isAudio: format.isAudio,
-            quality: format.quality
+            quality: format.quality,
+            thumbnailUrl: videoInfo?.thumbnail
           })
         });
 
         if (!response.ok) {
           const errText = await response.text();
-          throw new Error(`Error en descarga: ${errText || response.statusText}`);
+          let errorMessage = errText || response.statusText;
+          let fallbackUrl = format.url;
+
+          try {
+            const errData = JSON.parse(errText);
+            errorMessage = errData.error || errorMessage;
+            if (errData.fallback_url) fallbackUrl = errData.fallback_url;
+          } catch {}
+
+          // Fallback para navegador web si el proxy de servidor es bloqueado por IP del CDN
+          if (!isNative && fallbackUrl && fallbackUrl.startsWith('http')) {
+            console.warn('⚠️ Proxy falló, activando enlace directo de respaldo...', { fallbackUrl });
+            setDownloadDetails('Descargando enlace directo...');
+            const a = document.createElement('a');
+            a.href = fallbackUrl;
+            a.download = filename;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            addToHistory({
+              title: videoInfo?.title || 'Video de Twitter / X',
+              platform: 'twitter',
+              thumbnail: videoInfo?.thumbnail || '',
+              originalUrl: url,
+              status: 'completed',
+              format: format.quality,
+              fileSize: format.size || 'HD',
+              mimeType: 'video/mp4'
+            });
+            return;
+          }
+
+          throw new Error(errorMessage);
         }
 
         const blob = await readStreamWithProgress(response, format.isAudio ? 'audio/mp4' : 'video/mp4')
@@ -344,42 +382,16 @@ export default function TwitterDownloader() {
         </div>
       )}
 
-      {/* Barra de progreso de descarga en tiempo real */}
-      {downloading && (
-        <div className="p-5 bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm space-y-3">
-          <div className="flex items-center justify-between text-sm font-semibold text-gray-700">
-            <span className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-black animate-pulse" />
-              <span>Descargando {downloading}...</span>
-            </span>
-            <span className="text-black font-bold">{downloadProgress}%</span>
-          </div>
-
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div
-              className="bg-black h-full rounded-full transition-all duration-200 ease-out"
-              style={{ width: `${downloadProgress}%` }}
-            />
-          </div>
-
-          {downloadDetails && (
-            <p className="text-xs text-gray-600 font-medium text-right">
-              {downloadDetails}
-            </p>
-          )}
-        </div>
-      )}
-
       {/* Información del Tweet y Opciones de Formato */}
-      {videoInfo && !downloading && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-lg overflow-hidden transition-all">
+      {videoInfo && (
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden transition-all">
           <div className="p-5 flex flex-col sm:flex-row gap-5 items-center sm:items-start">
-            <div className="relative w-40 h-28 sm:w-48 sm:h-32 rounded-xl overflow-hidden shadow-md shrink-0 bg-gray-100">
+            <div className="relative w-40 h-28 sm:w-52 sm:h-36 rounded-2xl overflow-hidden shadow-md shrink-0 bg-gray-100 group">
               <img
                 src={videoInfo.thumbnail}
                 alt={videoInfo.title}
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   if (videoInfo.thumbnail && !target.src.includes('/api/download/proxy/image')) {
@@ -387,48 +399,161 @@ export default function TwitterDownloader() {
                   }
                 }}
               />
-              <div className="absolute top-2 right-2 bg-black/80 backdrop-blur-sm text-white px-2 py-0.5 rounded text-xs font-semibold">
+              <div className="absolute top-2 right-2 bg-black/85 backdrop-blur-md text-white px-2.5 py-0.5 rounded-full text-xs font-bold shadow">
                 𝕏 Video
               </div>
             </div>
 
-            <div className="flex-1 w-full text-center sm:text-left space-y-3">
+            <div className="flex-1 w-full space-y-4">
               <div>
-                <h3 className="font-bold text-gray-900 line-clamp-2 text-base">
+                <h3 className="font-extrabold text-gray-900 line-clamp-2 text-base sm:text-lg leading-snug">
                   {videoInfo.title}
                 </h3>
-                <p className="text-xs text-gray-500 font-semibold mt-1">
+                <p className="text-xs sm:text-sm font-semibold text-gray-500 mt-1 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-black inline-block" />
                   Publicado por @{videoInfo.uploader}
                 </p>
               </div>
 
-              {/* Botones de Descarga */}
-              <div className="space-y-2 pt-2">
-                {videoInfo.formats.map((fmt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleDownload(fmt)}
-                    className={`w-full py-2.5 px-4 rounded-xl font-semibold flex items-center justify-between transition-all duration-200 ${
-                      fmt.isAudio
-                        ? 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 border border-neutral-300'
-                        : 'bg-black hover:bg-neutral-800 text-white shadow-md'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-2">
-                      {fmt.isAudio ? (
-                        <Music className="w-4 h-4 text-neutral-700" />
-                      ) : (
-                        <Film className="w-4 h-4" />
-                      )}
-                      <span>{fmt.quality}</span>
-                    </div>
+              {/* Barra de progreso de descarga en tiempo real */}
+              {downloading && (
+                <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl shadow-sm space-y-2.5 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-gray-800">
+                    <span className="flex items-center space-x-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-black animate-ping" />
+                      <span>Descargando: {downloading}</span>
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-black text-white font-extrabold text-xs shadow-sm">
+                      {downloadProgress}%
+                    </span>
+                  </div>
 
-                    <div className="flex items-center space-x-2 text-xs">
-                      {fmt.size && <span className="opacity-80">{fmt.size}</span>}
-                      <Download className="w-4 h-4" />
+                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden p-0.5 shadow-inner">
+                    <div
+                      className="bg-black h-full rounded-full transition-all duration-300 ease-out shadow"
+                      style={{ width: `${Math.max(downloadProgress, 3)}%` }}
+                    />
+                  </div>
+
+                  {downloadDetails && (
+                    <div className="flex items-center justify-between text-[11px] sm:text-xs text-gray-600 font-medium">
+                      <span className="flex items-center gap-1 text-black font-semibold">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        Transfiriendo medios...
+                      </span>
+                      <span>{downloadDetails}</span>
                     </div>
-                  </button>
-                ))}
+                  )}
+                </div>
+              )}
+
+              {/* Lista de Calidades y Formatos Disponibles */}
+              <div className="space-y-2.5 pt-1">
+                <div className="flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider pb-1">
+                  <span>Formatos disponibles</span>
+                  <span>{videoInfo.formats.length} opciones</span>
+                </div>
+
+                {videoInfo.formats.map((fmt, idx) => {
+                  const isCurrentDownloading = downloading === fmt.quality;
+                  const isAudio = !!fmt.isAudio;
+                  const isMute = fmt.hasAudio === false && !isAudio;
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`p-3 sm:p-3.5 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        isCurrentDownloading
+                          ? 'border-black bg-neutral-100 ring-2 ring-black/10'
+                          : 'border-gray-200/80 bg-white hover:border-neutral-400 hover:shadow-sm'
+                      }`}
+                    >
+                      {/* Información de calidad y tipo */}
+                      <div className="flex items-center space-x-3 min-w-0">
+                        <div
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
+                            isAudio
+                              ? 'bg-neutral-800 text-white'
+                              : isMute
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-black text-white'
+                          }`}
+                        >
+                          {isAudio ? (
+                            <Music className="w-5 h-5" />
+                          ) : isMute ? (
+                            <VolumeX className="w-5 h-5" />
+                          ) : (
+                            <Film className="w-5 h-5" />
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-extrabold text-gray-900 text-sm sm:text-base">
+                              {fmt.quality}
+                            </span>
+
+                            {/* Badge oficial de Audio/Video */}
+                            {isAudio ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-300">
+                                <Music className="w-3 h-3 text-neutral-600" />
+                                <span>Solo Audio</span>
+                              </span>
+                            ) : isMute ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                                <VolumeX className="w-3 h-3 text-orange-600" />
+                                <span>Solo Video (Sin audio)</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                <Volume2 className="w-3 h-3 text-emerald-600" />
+                                <span>Video + Audio</span>
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mt-0.5">
+                            <span className="uppercase tracking-wide font-semibold text-gray-600">
+                              .{fmt.format?.toUpperCase() || 'MP4'}
+                            </span>
+                            {fmt.size && (
+                              <>
+                                <span>•</span>
+                                <span>{fmt.size}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Botón de acción */}
+                      <button
+                        onClick={() => handleDownload(fmt)}
+                        disabled={!!downloading}
+                        className={`w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all duration-200 shrink-0 shadow-sm ${
+                          isCurrentDownloading
+                            ? 'bg-black text-white cursor-wait opacity-90'
+                            : downloading
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                            : 'bg-black hover:bg-neutral-800 text-white active:scale-95'
+                        }`}
+                      >
+                        {isCurrentDownloading ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Descargando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4" />
+                            <span>Descargar</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

@@ -12,6 +12,8 @@ interface TwitterFormat {
   url: string;
   size?: string;
   isAudio?: boolean;
+  hasAudio?: boolean;
+  hasVideo?: boolean;
 }
 
 interface TwitterMediaResult {
@@ -88,7 +90,9 @@ async function extractSaveTwitter(url: string): Promise<TwitterMediaResult | nul
           formats.push({
             quality: qualityName,
             format: 'MP4',
-            url: href
+            url: href,
+            hasAudio: true,
+            hasVideo: true
           });
         }
       }
@@ -148,7 +152,9 @@ async function extractFxTwitter(url: string): Promise<TwitterMediaResult | null>
             formats.push({
               quality: qualityLabel,
               format: 'MP4',
-              url: v.url
+              url: v.url,
+              hasAudio: true,
+              hasVideo: true
             });
           }
         }
@@ -204,7 +210,9 @@ async function extractTwitterWithYtDlp(url: string, binPath: string): Promise<Tw
               quality: f.height ? `${f.height}p` : 'Video MP4',
               format: 'MP4',
               url: f.url,
-              size: f.filesize ? `${(f.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
+              size: f.filesize ? `${(f.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined,
+              hasAudio: !(f.acodec === 'none'),
+              hasVideo: true
             }));
 
             return resolve({
@@ -267,7 +275,9 @@ export async function POST(request: NextRequest) {
       quality: 'Audio M4A (Original)',
       format: 'M4A',
       url: result.formats[0].url,
-      isAudio: true
+      isAudio: true,
+      hasAudio: true,
+      hasVideo: false
     });
 
     return NextResponse.json({

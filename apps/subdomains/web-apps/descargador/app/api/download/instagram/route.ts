@@ -12,6 +12,11 @@ interface InstagramFormat {
   url: string;
   size?: string;
   isAudio?: boolean;
+  hasAudio?: boolean;
+  hasVideo?: boolean;
+  isCombined?: boolean;
+  video_url?: string;
+  audio_url?: string;
 }
 
 interface InstagramMediaResult {
@@ -61,35 +66,102 @@ async function extractInstagramWithYtDlp(url: string, binPath: string): Promise<
       if (code === 0 && stdout) {
         try {
           const data = JSON.parse(stdout);
+          const rawFormats = data.formats || [];
           const formats: InstagramFormat[] = [];
 
-          // Video formats
-          const vFormats = (data.formats || []).filter((f: any) => f.vcodec !== 'none' && f.url);
+          // 1. Encontrar la mejor pista de audio disponible
+          const audioCandidates = rawFormats.filter((f: any) => f.url && f.acodec && f.acodec !== 'none');
+          const audioOnly = audioCandidates.find((f: any) => (!f.vcodec || f.vcodec === 'none'));
+          const bestAudio = audioOnly || audioCandidates[0] || null;
+          const bestAudioUrl = bestAudio?.url || null;
+
+          // 2. Extraer formatos de video
+          const vFormats = rawFormats.filter((f: any) => f.url && f.vcodec && f.vcodec !== 'none');
           if (vFormats.length > 0) {
             vFormats.sort((a: any, b: any) => (b.height || 0) - (a.height || 0));
-            const best = vFormats[0];
-            formats.push({
-              quality: best.height ? `${best.height}p HD` : 'HD Video',
-              format: 'MP4',
-              url: best.url,
-              size: best.filesize ? `${(best.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
-            });
-            if (vFormats.length > 1) {
-              const sd = vFormats[vFormats.length - 1];
-              if (sd.url !== best.url) {
+
+            // Progressive formats (video con audio incluido)
+            const progressiveFormats = vFormats.filter((f: any) => f.acodec && f.acodec !== 'none');
+            const highestVideo = vFormats[0];
+            const highestHasAudio = !!(highestVideo.acodec && highestVideo.acodec !== 'none');
+            const hHeight = highestVideo.height || 1080;
+
+            if (highestHasAudio) {
+              // Si la calidad máxima ya incluye audio
+              formats.push({
+                quality: `${hHeight}p Full HD`,
+                format: 'MP4',
+                url: highestVideo.url,
+                hasAudio: true,
+                hasVideo: true,
+                isCombined: false,
+                size: highestVideo.filesize ? `${(highestVideo.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
+              });
+            } else {
+              // Calidad máxima es DASH (solo video)
+              // A) Formato combinado con audio mediante FFmpeg
+              if (bestAudioUrl) {
                 formats.push({
-                  quality: sd.height ? `${sd.height}p SD` : 'SD Video',
+                  quality: `${hHeight}p Full HD`,
                   format: 'MP4',
-                  url: sd.url,
-                  size: sd.filesize ? `${(sd.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
+                  url: highestVideo.url,
+                  video_url: highestVideo.url,
+                  audio_url: bestAudioUrl,
+                  hasAudio: true,
+                  hasVideo: true,
+                  isCombined: true,
+                  size: highestVideo.filesize ? `${((highestVideo.filesize + (bestAudio?.filesize || 0)) / (1024 * 1024)).toFixed(1)} MB` : undefined
                 });
               }
+
+              // B) Formato solo video (sin audio)
+              formats.push({
+                quality: `${hHeight}p HD`,
+                format: 'MP4',
+                url: highestVideo.url,
+                hasAudio: false,
+                hasVideo: true,
+                isCombined: false,
+                size: highestVideo.filesize ? `${(highestVideo.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
+              });
+            }
+
+            // Calidad estándar SD / 720p que sí tiene audio
+            const sdFormat = progressiveFormats.find((f: any) => f.url !== highestVideo.url) ||
+                             (progressiveFormats.length > 0 && progressiveFormats[0].url !== highestVideo.url ? progressiveFormats[0] : null);
+            if (sdFormat) {
+              const sHeight = sdFormat.height || 480;
+              formats.push({
+                quality: `${sHeight}p SD`,
+                format: 'MP4',
+                url: sdFormat.url,
+                hasAudio: true,
+                hasVideo: true,
+                isCombined: false,
+                size: sdFormat.filesize ? `${(sdFormat.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
+              });
             }
           } else if (data.url) {
             formats.push({
               quality: 'HD Video',
               format: 'MP4',
-              url: data.url
+              url: data.url,
+              hasAudio: true,
+              hasVideo: true,
+              isCombined: false
+            });
+          }
+
+          // 3. Audio M4A Original
+          if (bestAudioUrl) {
+            formats.push({
+              quality: 'Audio M4A (Original)',
+              format: 'M4A',
+              url: bestAudioUrl,
+              hasAudio: true,
+              hasVideo: false,
+              isAudio: true,
+              size: bestAudio?.filesize ? `${(bestAudio.filesize / (1024 * 1024)).toFixed(1)} MB` : undefined
             });
           }
 
@@ -102,9 +174,7 @@ async function extractInstagramWithYtDlp(url: string, binPath: string): Promise<
               formats
             });
           }
-        } catch {
-          // parse error
-        }
+        } catch {}
       }
       resolve(null);
     });
@@ -163,7 +233,10 @@ async function extractDirectInstagram(url: string): Promise<InstagramMediaResult
         {
           quality: 'HD 1080p',
           format: 'MP4',
-          url: uniqueUrls[0]
+          url: uniqueUrls[0],
+          hasAudio: true,
+          hasVideo: true,
+          isCombined: false
         }
       ];
 
@@ -171,9 +244,21 @@ async function extractDirectInstagram(url: string): Promise<InstagramMediaResult
         formats.push({
           quality: 'SD 720p',
           format: 'MP4',
-          url: uniqueUrls[1]
+          url: uniqueUrls[1],
+          hasAudio: true,
+          hasVideo: true,
+          isCombined: false
         });
       }
+
+      formats.push({
+        quality: 'Audio M4A (Original)',
+        format: 'M4A',
+        url: uniqueUrls[0],
+        hasAudio: true,
+        hasVideo: false,
+        isAudio: true
+      });
 
       return {
         title: title || 'Video de Instagram',
@@ -230,7 +315,9 @@ export async function POST(request: NextRequest) {
         quality: 'Audio M4A (Original)',
         format: 'M4A',
         url: result.formats[0].url,
-        isAudio: true
+        isAudio: true,
+        hasAudio: true,
+        hasVideo: false
       });
     }
 
