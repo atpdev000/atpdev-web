@@ -46,14 +46,14 @@ export default function ThreadsDownloader() {
   const [downloadDetails, setDownloadDetails] = useState('')
 
   const isValidThreadsUrl = (inputUrl: string) => {
-    return inputUrl.includes('threads.net')
+    return /threads\.(net|com)/i.test(inputUrl)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!isValidThreadsUrl(url)) {
-      setError('Por favor, ingresa un enlace válido de Threads (ej. threads.net/@usuario/post/...)')
+      setError('Por favor, ingresa un enlace válido de Threads (ej. threads.com/@usuario/post/... o threads.net/...)')
       return
     }
 

@@ -202,28 +202,53 @@ export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
 
-    if (!url || !url.includes('threads.net')) {
+    if (!url || (!url.includes('threads.net') && !url.includes('threads.com'))) {
       return NextResponse.json(
-        { error: 'URL de Threads inválida. Debe ser un enlace de threads.net' },
+        { error: 'URL de Threads inválida. Debe ser un enlace de threads.com o threads.net' },
         { status: 400 }
       );
     }
 
-    console.log('🧵 [Threads Engine] Procesando URL:', url);
+    console.log('🧵 [Threads Engine] Procesando URL original:', url);
 
-    // Intentar 1: LoveThreads API
-    let result = await extractLoveThreads(url);
+    // Resolver redirecciones (enlaces de compartir tipo threads.com/share/... o /t/...)
+    let targetUrl = url.trim();
+    try {
+      if (targetUrl.includes('/share/') || targetUrl.includes('/t/')) {
+        const headRes = await fetch(targetUrl, {
+          method: 'GET',
+          redirect: 'follow',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+          }
+        });
+        if (headRes.url && (headRes.url.includes('threads.net') || headRes.url.includes('threads.com'))) {
+          targetUrl = headRes.url;
+          console.log('🧵 [Threads Engine] URL resuelta de redirección:', targetUrl);
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ [Threads Engine] No se pudo seguir redirección previa:', e);
+    }
+
+    // Intentar 1: LoveThreads API (con targetUrl y fallback alternativo)
+    let result = await extractLoveThreads(targetUrl);
+    if (!result && targetUrl.includes('threads.com')) {
+      result = await extractLoveThreads(targetUrl.replace('threads.com', 'threads.net'));
+    } else if (!result && targetUrl.includes('threads.net')) {
+      result = await extractLoveThreads(targetUrl.replace('threads.net', 'threads.com'));
+    }
 
     // Intentar 2: Extracción directa de OpenGraph
     if (!result) {
-      result = await extractDirectThreads(url);
+      result = await extractDirectThreads(targetUrl);
     }
 
     // Intentar 3: yt-dlp local
     if (!result) {
       const bin = findYtDlpBinary();
       if (bin) {
-        result = await extractThreadsWithYtDlp(url, bin);
+        result = await extractThreadsWithYtDlp(targetUrl, bin);
       }
     }
 

@@ -54,6 +54,7 @@ function isValidDownloadUrl(url: string): boolean {
     'cdninstagram.com',
     'instagram.com',
     'threads.net',
+    'threads.com',
     'twimg.com',
     'twitter.com',
     'x.com',
@@ -104,10 +105,10 @@ function getPlatformHeaders(url: string, detectedIsAudio: boolean, detectedIsVid
   }
 
   // Threads
-  if (url.includes('threads.net') || url.includes('cdnthreads.com')) {
+  if (url.includes('threads.net') || url.includes('threads.com') || url.includes('cdnthreads.com')) {
     return {
       ...baseHeaders,
-      'Referer': 'https://www.threads.net/'
+      'Referer': url.includes('threads.com') ? 'https://www.threads.com/' : 'https://www.threads.net/'
     }
   }
 
@@ -149,8 +150,8 @@ function getFfmpegHeadersString(url: string): string {
   if (url.includes('cdninstagram.com') || url.includes('instagram.com') || url.includes('fbcdn.net') || url.includes('fbsbx.com')) {
     return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.instagram.com/\r\n'
   }
-  if (url.includes('threads.net')) {
-    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.threads.net/\r\n'
+  if (url.includes('threads.net') || url.includes('threads.com')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.threads.com/\r\n'
   }
   if (url.includes('tiktokcdn.com') || url.includes('tiktok.com') || url.includes('tikwm.com')) {
     return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.tiktok.com/\r\n'

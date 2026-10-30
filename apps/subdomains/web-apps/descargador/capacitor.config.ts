@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'FTY Downloader Pro',
   webDir: 'out',
   server: {
-    url: 'https://www.ftydownloader.com',
+    url: 'https://descargador-pro-nt6e.onrender.com',
     androidScheme: 'https',
     cleartext: true
   },
