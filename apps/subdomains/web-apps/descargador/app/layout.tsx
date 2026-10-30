@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 import AdManager from '@/components/AdManager'
+import ServerWarmup from '@/components/ServerWarmup'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -110,6 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         )}
 
         <AdManager />
+        <ServerWarmup />
         {children}
       </body>
     </html>
