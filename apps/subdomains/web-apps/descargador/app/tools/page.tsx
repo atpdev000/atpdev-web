@@ -2,13 +2,16 @@
 
 import { useState } from 'react'
 import { FEATURES } from '@/lib/featureFlags'
-import PlatformTabs from '@/components/PlatformTabs'
+import PlatformTabs, { Platform } from '@/components/PlatformTabs'
 import FacebookDownloader from '@/components/platforms/FacebookDownloader'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
 import TiktokDownloader from '@/components/platforms/TiktokDownloader'
+import InstagramDownloader from '@/components/platforms/InstagramDownloader'
+import ThreadsDownloader from '@/components/platforms/ThreadsDownloader'
+import TwitterDownloader from '@/components/platforms/TwitterDownloader'
 
 export default function ToolsPage() {
-  const [activePlatform, setActivePlatform] = useState<'facebook' | 'youtube' | 'tiktok'>('facebook')
+  const [activePlatform, setActivePlatform] = useState<Platform>('facebook')
 
   const renderPlatform = () => {
     switch (activePlatform) {
@@ -18,6 +21,12 @@ export default function ToolsPage() {
         return <YoutubeDownloader />
       case 'tiktok':
         return <TiktokDownloader />
+      case 'instagram':
+        return <InstagramDownloader />
+      case 'threads':
+        return <ThreadsDownloader />
+      case 'twitter':
+        return <TwitterDownloader />
       default:
         return <FacebookDownloader />
     }
@@ -42,7 +51,7 @@ export default function ToolsPage() {
           <div className="text-gray-700">Gratuito</div>
         </div>
         <div className="bg-green-50 rounded-lg p-6 text-center">
-          <div className="text-2xl font-bold text-green-600 mb-2">3</div>
+          <div className="text-2xl font-bold text-green-600 mb-2">6+</div>
           <div className="text-gray-700">Plataformas</div>
         </div>
         <div className="bg-purple-50 rounded-lg p-6 text-center">

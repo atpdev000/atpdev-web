@@ -4,7 +4,7 @@ import { Filesystem } from '@capacitor/filesystem';
 export interface HistoryItem {
     id: string;
     title: string;
-    platform: 'facebook' | 'youtube' | 'tiktok';
+    platform: 'facebook' | 'youtube' | 'tiktok' | 'instagram' | 'threads' | 'twitter' | string;
     thumbnail?: string;
     originalUrl?: string;
     date: number;

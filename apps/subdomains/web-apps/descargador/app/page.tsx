@@ -1,12 +1,15 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
-import PlatformTabs from '@/components/PlatformTabs'
+import PlatformTabs, { Platform } from '@/components/PlatformTabs'
 import FacebookDownloader from '@/components/platforms/FacebookDownloader'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
 import TiktokDownloader from '@/components/platforms/TiktokDownloader'
+import InstagramDownloader from '@/components/platforms/InstagramDownloader'
+import TwitterDownloader from '@/components/platforms/TwitterDownloader'
+import ThreadsDownloader from '@/components/platforms/ThreadsDownloader'
 import FeaturesSection from '@/components/FeaturesSection'
 import SEOContentSection from '@/components/SEOContentSection'
 import BlogPreview from '@/components/blog/BlogPreview'
@@ -27,8 +30,8 @@ import { Filesystem } from '@capacitor/filesystem'
 export default function Home() {
   const { isNative } = usePlatform()
   // Default to Facebook if YouTube is disabled (Play Store build)
-  const defaultPlatform: 'facebook' | 'youtube' | 'tiktok' = FEATURES.YOUTUBE_ENABLED ? 'facebook' : 'facebook'
-  const [activePlatform, setActivePlatform] = useState<'facebook' | 'youtube' | 'tiktok'>(defaultPlatform)
+  const defaultPlatform: Platform = 'facebook'
+  const [activePlatform, setActivePlatform] = useState<Platform>(defaultPlatform)
   const { showInterstitial } = useAdMobInterstitial()
   const hasShownInitialAd = useRef(false) // Control para evitar bucles de anuncios
 
@@ -70,7 +73,7 @@ export default function Home() {
   }, [isNative, showInterstitial])
 
   // 🔄 CAMBIAR PLATAFORMA + ANUNCIO
-  const handlePlatformChange = async (platform: 'facebook' | 'youtube' | 'tiktok') => {
+  const handlePlatformChange = async (platform: Platform) => {
     // 1. Mostrar anuncio
     if (isNative) {
       await showInterstitial()
@@ -83,10 +86,16 @@ export default function Home() {
     switch (activePlatform) {
       case 'facebook':
         return <FacebookDownloader />
-      case 'youtube':
-        return <YoutubeDownloader />
       case 'tiktok':
         return <TiktokDownloader />
+      case 'instagram':
+        return <InstagramDownloader />
+      case 'twitter':
+        return <TwitterDownloader />
+      case 'threads':
+        return <ThreadsDownloader />
+      case 'youtube':
+        return <YoutubeDownloader />
       default:
         return <FacebookDownloader />
     }
@@ -168,11 +177,11 @@ export default function Home() {
           <section id="herramientas" className="max-w-4xl mx-auto mb-16">
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <div className="text-center mb-8">
-                <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 truncate">
-                  FTY Downloader - Facebook & TikTok
+                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
+                  FTY Downloader - Descargador Multiplataforma
                 </h1>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  La herramienta profesional para descargar videos de Facebook en HD y TikTok sin marca de agua.
+                <p className="text-base text-gray-600 max-w-2xl mx-auto mt-2">
+                  Descarga videos y audios de Facebook, TikTok, Instagram, Twitter / 𝕏 y Threads en alta calidad HD y sin marcas de agua.
                 </p>
               </div>
 

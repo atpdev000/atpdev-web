@@ -33,7 +33,14 @@ function isValidDownloadUrl(url: string): boolean {
     'tikwm.com',
     'tiktok.com',
     'cdninstagram.com',
-    'twimg.com'
+    'instagram.com',
+    'threads.net',
+    'twimg.com',
+    'twitter.com',
+    'x.com',
+    'snapcdn.app',
+    'fxtwitter.com',
+    'vxtwitter.com'
   ]
 
   return validDomains.some(domain => url.includes(domain)) || url.includes('.mp4') || url.includes('.m4a') || url.includes('.mp3') || url.includes('.webm')
