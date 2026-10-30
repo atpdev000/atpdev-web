@@ -13,16 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copiar archivos de dependencias para aprovechar caché de capas Docker
-COPY package*.json ./
-COPY apps/subdomains/web-apps/descargador/package*.json ./apps/subdomains/web-apps/descargador/
-COPY packages ./packages
-
-# Instalar todas las dependencias
-RUN npm install
-
-# Copiar el resto del código fuente del proyecto
+# Copiar el código fuente completo del monorepo
 COPY . .
+
+# Instalar todas las dependencias completas del monorepo
+RUN npm install
 
 # Variables de entorno de producción
 ENV NODE_ENV=production
@@ -31,9 +26,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Compilar la aplicación descargador
 RUN npm run build:descargador
 
-# Puerto por defecto (Koyeb usa 8000, Render usa 10000, se adapta automáticamente)
-ENV PORT=8000
-EXPOSE 8000
+# Puerto dinámico (Render usa 10000, Koyeb usa 8000)
+ENV PORT=10000
+EXPOSE 10000
 
 # Iniciar servidor Next.js
-CMD ["sh", "-c", "npx next start apps/subdomains/web-apps/descargador -p ${PORT:-8000}"]
+CMD ["sh", "-c", "npx next start apps/subdomains/web-apps/descargador -p ${PORT:-10000}"]
