@@ -134,9 +134,9 @@ export default function Home() {
   // 📱 MODO APP NATIVA
   if (isNative) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe pt-44 transition-colors">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe pt-32 transition-colors">
         <AppHeader />
-        <TopNav activePlatform={activePlatform} onPlatformChange={handlePlatformChange} />
+        <TopNav activePlatform={activePlatform} onPlatformChange={handlePlatformChange} modules={modules} />
 
         {/* Contenido Centrado Limpio */}
         <main className="container mx-auto px-4 py-6">
