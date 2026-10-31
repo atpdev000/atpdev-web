@@ -108,6 +108,19 @@ export default function HeroSection({ onSelectPlatform, modules }: HeroSectionPr
           <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-slate-300 group-hover:text-zinc-200 transition-colors">Threads</span>
         </button>
 
+        <button
+          type="button"
+          onClick={() => handlePlatformClick('whatsapp')}
+          className="text-center group cursor-pointer focus:outline-none transition-transform hover:scale-110"
+        >
+          <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-xs group-hover:shadow-emerald-500/20 group-hover:border-emerald-500 transition-all">
+            <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.772.82 2.791.82 3.181 0 5.768-2.587 5.768-5.766.001-3.182-2.585-5.806-5.768-5.806zm3.374 8.211c-.144.405-.837.774-1.17.824-.312.045-.694.06-2.001-.482-1.674-.693-2.736-2.42-2.82-2.53-.083-.11-.676-.901-.676-1.718 0-.818.431-1.218.583-1.385.153-.166.333-.208.444-.208.111 0 .222.002.319.006.102.005.239-.039.373.283.144.346.49 1.196.533 1.284.043.088.072.19.014.305-.058.115-.087.188-.173.289-.087.102-.183.228-.261.306-.087.087-.178.182-.077.355.101.173.45 1.742 1.488 2.666.804.717 1.48.939 1.69.1.043.21-.043.324-.117.41-.074.086-.168.201-.255.302-.087.1-.174.143-.246.216z"/>
+            </svg>
+          </div>
+          <span className="text-xs sm:text-sm font-semibold text-gray-700 dark:text-slate-300 group-hover:text-emerald-500 transition-colors">WhatsApp</span>
+        </button>
+
         {FEATURES.YOUTUBE_ENABLED && (
           <button
             type="button"
