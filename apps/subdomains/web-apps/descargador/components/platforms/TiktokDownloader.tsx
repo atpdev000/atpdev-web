@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -44,14 +44,19 @@ const predefinedQualities = [
   { label: 'Solo Audio (.mp3)', value: 'audio', ext: 'mp3' }
 ]
 
-export default function TiktokDownloader() {
+export interface DownloaderProps {
+  initialUrl?: string
+  autoSearch?: boolean
+}
+
+export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderProps = {}) {
   const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
   const { showRewarded } = useAdMobRewarded() // ✅ Hook
 
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<DownloadResponse | null>(null)
@@ -59,18 +64,13 @@ export default function TiktokDownloader() {
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadDetails, setDownloadDetails] = useState('')
 
-
-
-
   // Función para validar URL de TikTok
-  const isValidTiktokUrl = (url: string) => {
-    return url.includes('tiktok.com') || url.includes('vm.tiktok.com')
+  const isValidTiktokUrl = (checkUrl: string) => {
+    return checkUrl.includes('tiktok.com') || checkUrl.includes('vm.tiktok.com') || checkUrl.includes('vt.tiktok.com')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!isValidTiktokUrl(url)) {
+  const processUrl = async (urlToFetch: string) => {
+    if (!isValidTiktokUrl(urlToFetch)) {
       setError('Por favor, ingresa un enlace válido de TikTok')
       return
     }
@@ -85,7 +85,7 @@ export default function TiktokDownloader() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url: urlToFetch })
       })
 
       const data = await response.json()
@@ -94,24 +94,31 @@ export default function TiktokDownloader() {
         throw new Error(data.error || 'Error al procesar el video')
       }
 
-      if (data.status === 'success') {
+      if (data.status === 'success' || data.formats) {
         setVideoInfo(data)
-        setUrl('') // ✅ limpia el campo después de analizar correctamente el video
       } else {
-        // Si no tiene status pero tiene formats, también es válido
-        if (data.formats) {
-          setVideoInfo(data)
-        } else {
-          throw new Error(data.message || 'Error desconocido')
-        }
+        throw new Error(data.message || 'Error desconocido')
       }
-
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error al procesar el video')
     } finally {
       setIsLoading(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    processUrl(url)
+  }
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+      if (autoSearch) {
+        processUrl(initialUrl)
+      }
+    }
+  }, [initialUrl, autoSearch])
 
   // Helper para leer flujo de descarga en tiempo real con cálculo de velocidad y ETA
   const readStreamWithProgress = async (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -32,14 +32,19 @@ interface ThreadsResponse {
   formats: MediaFormat[]
 }
 
-export default function ThreadsDownloader() {
+export interface DownloaderProps {
+  initialUrl?: string
+  autoSearch?: boolean
+}
+
+export default function ThreadsDownloader({ initialUrl, autoSearch }: DownloaderProps = {}) {
   const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
   const { showRewarded } = useAdMobRewarded()
 
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<ThreadsResponse | null>(null)
@@ -51,10 +56,8 @@ export default function ThreadsDownloader() {
     return /threads\.(net|com)/i.test(inputUrl)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!isValidThreadsUrl(url)) {
+  const processUrl = async (urlToFetch: string) => {
+    if (!isValidThreadsUrl(urlToFetch)) {
       setError('Por favor, ingresa un enlace válido de Threads (ej. threads.com/@usuario/post/... o threads.net/...)')
       return
     }
@@ -69,7 +72,7 @@ export default function ThreadsDownloader() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url: urlToFetch })
       })
 
       const data = await response.json()
@@ -80,7 +83,6 @@ export default function ThreadsDownloader() {
 
       if (data.status === 'success' && data.formats?.length > 0) {
         setVideoInfo(data)
-        setUrl('')
       } else {
         throw new Error(data.message || 'No se encontraron formatos de video')
       }
@@ -91,6 +93,20 @@ export default function ThreadsDownloader() {
       setIsLoading(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    processUrl(url)
+  }
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+      if (autoSearch) {
+        processUrl(initialUrl)
+      }
+    }
+  }, [initialUrl, autoSearch])
 
   const readStreamWithProgress = async (
     response: Response,

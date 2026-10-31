@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import { getFacebookInfo, FacebookVideoInfo } from '@/lib/platforms/facebook';
 import { formatBytes } from '@/lib/utils';
@@ -35,13 +35,18 @@ const facebookQualities = [
   { id: 'audio-only', label: 'Audio Only .m4a', value: 'DASH audio', ext: 'm4a' }
 ]
 
-export default function FacebookDownloader() {
+export interface DownloaderProps {
+  initialUrl?: string
+  autoSearch?: boolean
+}
+
+export default function FacebookDownloader({ initialUrl, autoSearch }: DownloaderProps = {}) {
   const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
   const { showRewarded } = useAdMobRewarded()
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<FacebookVideoInfo | null>(null)
@@ -53,10 +58,8 @@ export default function FacebookDownloader() {
   const [thumbSrc, setThumbSrc] = useState<string>('');
   const [thumbError, setThumbError] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!url.includes('facebook.com') && !url.includes('fb.watch')) {
+  const processUrl = async (urlToFetch: string) => {
+    if (!urlToFetch.includes('facebook.com') && !urlToFetch.includes('fb.watch') && !urlToFetch.includes('fb.me')) {
       setError('Por favor, ingresa un enlace válido de Facebook')
       return
     }
@@ -67,18 +70,31 @@ export default function FacebookDownloader() {
     setDownloadProgress(0)
 
     try {
-      const data = await getFacebookInfo(url)
+      const data = await getFacebookInfo(urlToFetch)
       setVideoInfo(data)
       setThumbSrc(data.thumbnail || '')
       setThumbError(false)
-      setOriginalUrl(url);
-      setUrl('')
+      setOriginalUrl(urlToFetch);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error al procesar el video')
     } finally {
       setIsLoading(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    processUrl(url)
+  }
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+      if (autoSearch) {
+        processUrl(initialUrl)
+      }
+    }
+  }, [initialUrl, autoSearch])
 
   // ✅ FUNCIÓN PARA DESCARGAR VIDEO CON PROXY
   const handleVideoDownload = async (qualityId: string, qualityValue: string, fileExt: string = 'mp4') => {

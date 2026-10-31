@@ -28,11 +28,19 @@ import { LocalNotifications } from '@capacitor/local-notifications'
 import { Filesystem } from '@capacitor/filesystem'
 import { useI18n } from '@/lib/i18n/context'
 
+import SmartClipboardDetector from '@/components/SmartClipboardDetector'
+import { DetectedUrlInfo } from '@/lib/clipboardDetector'
+
 export default function Home() {
   const { isNative } = usePlatform()
   const { t } = useI18n()
   const defaultPlatform: Platform = 'facebook'
   const [activePlatform, setActivePlatform] = useState<Platform>(defaultPlatform)
+  const [autoSearchPayload, setAutoSearchPayload] = useState<{
+    platform: Platform
+    url: string
+    autoSearch: boolean
+  } | null>(null)
   const { showInterstitial } = useAdMobInterstitial()
   const hasShownInitialAd = useRef(false)
 
@@ -112,22 +120,35 @@ export default function Home() {
     setActivePlatform(platform)
   }
 
+  const handleClipboardDetected = (info: DetectedUrlInfo, autoSearch: boolean) => {
+    setActivePlatform(info.platform)
+    setAutoSearchPayload({
+      platform: info.platform,
+      url: info.url,
+      autoSearch: autoSearch
+    })
+  }
+
   const renderPlatform = () => {
+    const isMatchingAutoSearch = autoSearchPayload?.platform === activePlatform
+    const initialUrl = isMatchingAutoSearch ? autoSearchPayload.url : undefined
+    const autoSearch = isMatchingAutoSearch ? autoSearchPayload.autoSearch : false
+
     switch (activePlatform) {
       case 'facebook':
-        return <FacebookDownloader />
+        return <FacebookDownloader key={`fb-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'tiktok':
-        return <TiktokDownloader />
+        return <TiktokDownloader key={`tt-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'instagram':
-        return <InstagramDownloader />
+        return <InstagramDownloader key={`ig-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'twitter':
-        return <TwitterDownloader />
+        return <TwitterDownloader key={`tw-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'threads':
-        return <ThreadsDownloader />
+        return <ThreadsDownloader key={`th-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'youtube':
-        return <YoutubeDownloader />
+        return <YoutubeDownloader key={`yt-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       default:
-        return <FacebookDownloader />
+        return <FacebookDownloader key="fb-def" />
     }
   }
 
@@ -135,6 +156,7 @@ export default function Home() {
   if (isNative) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe pt-32 transition-colors">
+        <SmartClipboardDetector onDetected={handleClipboardDetected} />
         <AppHeader />
         <TopNav activePlatform={activePlatform} onPlatformChange={handlePlatformChange} modules={modules} />
 
@@ -163,6 +185,7 @@ export default function Home() {
   // 🌐 MODO WEB
   return (
     <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <SmartClipboardDetector onDetected={handleClipboardDetected} />
       <Header />
 
       {/* SIDEBARS GLOBALES - FUERA DEL MAIN */}

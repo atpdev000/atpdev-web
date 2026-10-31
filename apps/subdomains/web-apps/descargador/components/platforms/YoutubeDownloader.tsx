@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 import { formatBytes } from '@/lib/utils';
@@ -69,7 +69,12 @@ const predefinedQualities: { value: string, label: string, ext?: string, isPro?:
   { value: '144p', label: '144p (.mp4)', ext: 'mp4', isPro: false }
 ]
 
-export default function YoutubeDownloader() {
+export interface DownloaderProps {
+  initialUrl?: string
+  autoSearch?: boolean
+}
+
+export default function YoutubeDownloader({ initialUrl, autoSearch }: DownloaderProps = {}) {
   const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
@@ -78,7 +83,7 @@ export default function YoutubeDownloader() {
   const { showRewarded } = useAdMobRewarded()
   const { plan, isPro } = useProPlan()
 
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<DownloadResponse | null>(null)
@@ -102,10 +107,8 @@ export default function YoutubeDownloader() {
     setActiveTab(tab)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!url.includes('youtube.com') && !url.includes('youtu.be')) {
+  const processUrl = async (urlToFetch: string) => {
+    if (!urlToFetch.includes('youtube.com') && !urlToFetch.includes('youtu.be')) {
       setError('Por favor, ingresa un enlace válido de YouTube')
       return
     }
@@ -121,7 +124,7 @@ export default function YoutubeDownloader() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url: urlToFetch })
       })
 
       const data = await response.json()
@@ -145,8 +148,7 @@ export default function YoutubeDownloader() {
         }
 
         setVideoInfo(data)
-        setOriginalUrl(url);
-        setUrl('')
+        setOriginalUrl(urlToFetch);
       } else {
         throw new Error(data.message || 'Error desconocido')
       }
@@ -157,6 +159,20 @@ export default function YoutubeDownloader() {
       setIsLoading(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    processUrl(url)
+  }
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+      if (autoSearch) {
+        processUrl(initialUrl)
+      }
+    }
+  }, [initialUrl, autoSearch])
 
 
 
@@ -186,42 +202,43 @@ export default function YoutubeDownloader() {
       return
     }
 
-    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-    setDownloading(`combined-${quality}`)
-    setDownloadProgress(1)
-    setDownloadDetails('Iniciando descarga en el servidor...')
+    showRewarded(async () => {
+      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+      setDownloading(`combined-${quality}`)
+      setDownloadProgress(1)
+      setDownloadDetails('Iniciando descarga en el servidor...')
 
-    let pollActive = true
-    const pollProgress = async () => {
-      while (pollActive) {
-        try {
-          const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
-          if (res.ok) {
-            const data = await res.json()
-            if (data.status === 'downloading' && typeof data.percent === 'number') {
-              setDownloadProgress(data.percent)
-              const parts = []
-              if (data.speed) parts.push(data.speed)
-              if (data.eta) parts.push(`ETA: ${data.eta}`)
-              setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando flujo...')
-            } else if (data.status === 'merging') {
-              setDownloadProgress(99)
-              setDownloadDetails('Combinando audio y video con FFmpeg...')
-            } else if (data.status === 'completed') {
-              setDownloadProgress(100)
-              setDownloadDetails('Guardando archivo...')
+      let pollActive = true
+      const pollProgress = async () => {
+        while (pollActive) {
+          try {
+            const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
+            if (res.ok) {
+              const data = await res.json()
+              if (data.status === 'downloading' && typeof data.percent === 'number') {
+                setDownloadProgress(data.percent)
+                const parts = []
+                if (data.speed) parts.push(data.speed)
+                if (data.eta) parts.push(`ETA: ${data.eta}`)
+                setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando flujo...')
+              } else if (data.status === 'merging') {
+                setDownloadProgress(99)
+                setDownloadDetails('Combinando audio y video con FFmpeg...')
+              } else if (data.status === 'completed') {
+                setDownloadProgress(100)
+                setDownloadDetails('Guardando archivo...')
+              }
             }
+          } catch {
+            // ignore poll error
           }
-        } catch {
-          // ignore poll error
+          await new Promise((r) => setTimeout(r, 400))
         }
-        await new Promise((r) => setTimeout(r, 400))
       }
-    }
-    pollProgress()
+      pollProgress()
 
-    try {
-      console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
+      try {
+        console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
 
       const response = await fetch('/api/download/youtube/combined', {
         method: 'POST',
@@ -289,6 +306,7 @@ export default function YoutubeDownloader() {
         setDownloadDetails('')
       }, 1500)
     }
+    })
   }
 
   // ✅ FUNCIÓN PARA COMBINACIÓN CON PROXY (FALLBACK)
@@ -372,11 +390,6 @@ export default function YoutubeDownloader() {
 
   // ✅ DESCARGA SIMPLE (SIN COMBINAR) - AHORA USANDO BACKEND ROBUSTO
   const handleSimpleDownload = async (quality: string, fileExt: string = 'mp4') => {
-    // 📺 ANUNCIO INTERSTICIAL (Normal) para descargas simples
-    if (isNative) {
-      await showInterstitial();
-    }
-
     const { format } = findBestFormatForQuality(quality, true)
 
     if (!format) {
@@ -384,99 +397,101 @@ export default function YoutubeDownloader() {
       return
     }
 
-    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-    setDownloadProgress(1)
-    setDownloading(`simple-${quality}`)
-    setDownloadDetails('Iniciando descarga en el servidor...')
+    showRewarded(async () => {
+      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+      setDownloadProgress(1)
+      setDownloading(`simple-${quality}`)
+      setDownloadDetails('Iniciando descarga en el servidor...')
 
-    let pollActive = true
-    const pollProgress = async () => {
-      while (pollActive) {
-        try {
-          const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
-          if (res.ok) {
-            const data = await res.json()
-            if (data.status === 'downloading' && typeof data.percent === 'number') {
-              setDownloadProgress(data.percent)
-              const parts = []
-              if (data.speed) parts.push(data.speed)
-              if (data.eta) parts.push(`ETA: ${data.eta}`)
-              setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando video...')
-            } else if (data.status === 'completed') {
-              setDownloadProgress(100)
-              setDownloadDetails('Guardando video...')
+      let pollActive = true
+      const pollProgress = async () => {
+        while (pollActive) {
+          try {
+            const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
+            if (res.ok) {
+              const data = await res.json()
+              if (data.status === 'downloading' && typeof data.percent === 'number') {
+                setDownloadProgress(data.percent)
+                const parts = []
+                if (data.speed) parts.push(data.speed)
+                if (data.eta) parts.push(`ETA: ${data.eta}`)
+                setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando video...')
+              } else if (data.status === 'completed') {
+                setDownloadProgress(100)
+                setDownloadDetails('Guardando video...')
+              }
             }
+          } catch {
+            // ignore
           }
-        } catch {
-          // ignore
+          await new Promise((r) => setTimeout(r, 400))
         }
-        await new Promise((r) => setTimeout(r, 400))
       }
-    }
-    pollProgress()
+      pollProgress()
 
-    try {
-      console.log('📥 Iniciando descarga simple con motor del backend...', quality)
+      try {
+        console.log('📥 Iniciando descarga simple con motor del backend...', quality)
 
-      // ✅ USAR EL MISMO ENDPOINT DE COMBINACIÓN PERO PARA UN SOLO ITAG
-      const response = await fetch('/api/download/youtube/combined', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url: originalUrl,
-          quality: quality,
-          video_itag: format.itag, // ENVIAR SOLO VIDEO_ITAG
-          audio_itag: null,        // DESHABILITAR AUDIO
-          format_type: fileExt,
-          downloadId
+        // ✅ USAR EL MISMO ENDPOINT DE COMBINACIÓN PERO PARA UN SOLO ITAG
+        const response = await fetch('/api/download/youtube/combined', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: originalUrl,
+            quality: quality,
+            video_itag: format.itag, // ENVIAR SOLO VIDEO_ITAG
+            audio_itag: null,        // DESHABILITAR AUDIO
+            format_type: fileExt,
+            downloadId
+          })
         })
-      })
 
-      if (!response.ok) {
-        // ✅ MEJORADO: Leer como texto primero
-        const errorText = await response.text().catch(() => 'Error de red')
-        let errorMsg = 'Error en descarga simple del servidor'
-        try {
-          const errorData = JSON.parse(errorText)
-          errorMsg = errorData.error || errorMsg
-        } catch {
-          errorMsg = errorText.substring(0, 100) || errorMsg
+        if (!response.ok) {
+          // ✅ MEJORADO: Leer como texto primero
+          const errorText = await response.text().catch(() => 'Error de red')
+          let errorMsg = 'Error en descarga simple del servidor'
+          try {
+            const errorData = JSON.parse(errorText)
+            errorMsg = errorData.error || errorMsg
+          } catch {
+            errorMsg = errorText.substring(0, 100) || errorMsg
+          }
+          setError(errorMsg)
+          return
         }
-        setError(errorMsg)
-        return
+
+        // Verificar que la respuesta sea binaria y no un error JSON
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || 'Respuesta inválida del servidor')
+        }
+
+        const cd = response.headers.get('content-disposition') || ''
+        let filename = `youtube_simple_${quality}_${Date.now()}.${fileExt}`
+        const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+        if (match && match[1]) {
+          try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
+        }
+
+        pollActive = false
+        setDownloadDetails('Finalizando...')
+        await downloadStream(response, filename, `simple-${quality}`)
+
+      } catch (error) {
+        console.error('❌ Error en descarga simple backend:', error)
+        setError(error instanceof Error ? error.message : 'Error en descarga simple')
+      } finally {
+        pollActive = false
+        setTimeout(() => {
+          setDownloading(null)
+          setDownloadProgress(0)
+          setDownloadDetails('')
+        }, 1500)
       }
-
-      // Verificar que la respuesta sea binaria y no un error JSON
-      const contentType = response.headers.get('content-type') || ''
-      if (contentType.includes('application/json')) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.error || 'Respuesta inválida del servidor')
-      }
-
-      const cd = response.headers.get('content-disposition') || ''
-      let filename = `youtube_simple_${quality}_${Date.now()}.${fileExt}`
-      const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
-      if (match && match[1]) {
-        try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
-      }
-
-      pollActive = false
-      setDownloadDetails('Finalizando...')
-      await downloadStream(response, filename, `simple-${quality}`)
-
-    } catch (error) {
-      console.error('❌ Error en descarga simple backend:', error)
-      setError(error instanceof Error ? error.message : 'Error en descarga simple')
-    } finally {
-      pollActive = false
-      setTimeout(() => {
-        setDownloading(null)
-        setDownloadProgress(0)
-        setDownloadDetails('')
-      }, 1500)
-    }
+    })
   }
 
 
@@ -880,94 +895,96 @@ export default function YoutubeDownloader() {
       return
     }
 
-    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-    setDownloading(`audio-${audioFormat.itag}`)
-    setDownloadProgress(1)
-    setDownloadDetails('Extrayendo audio en el servidor...')
+    showRewarded(async () => {
+      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+      setDownloading(`audio-${audioFormat.itag}`)
+      setDownloadProgress(1)
+      setDownloadDetails('Extrayendo audio en el servidor...')
 
-    let pollActive = true
-    const pollProgress = async () => {
-      while (pollActive) {
-        try {
-          const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
-          if (res.ok) {
-            const data = await res.json()
-            if (data.status === 'downloading' && typeof data.percent === 'number') {
-              setDownloadProgress(data.percent)
-              const parts = []
-              if (data.speed) parts.push(data.speed)
-              if (data.eta) parts.push(`ETA: ${data.eta}`)
-              setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando audio...')
-            } else if (data.status === 'completed') {
-              setDownloadProgress(100)
-              setDownloadDetails('Guardando audio...')
+      let pollActive = true
+      const pollProgress = async () => {
+        while (pollActive) {
+          try {
+            const res = await fetch(`/api/download/youtube/progress?id=${downloadId}`)
+            if (res.ok) {
+              const data = await res.json()
+              if (data.status === 'downloading' && typeof data.percent === 'number') {
+                setDownloadProgress(data.percent)
+                const parts = []
+                if (data.speed) parts.push(data.speed)
+                if (data.eta) parts.push(`ETA: ${data.eta}`)
+                setDownloadDetails(parts.length > 0 ? parts.join(' • ') : 'Descargando audio...')
+              } else if (data.status === 'completed') {
+                setDownloadProgress(100)
+                setDownloadDetails('Guardando audio...')
+              }
             }
+          } catch {
+            // ignore
           }
-        } catch {
-          // ignore
+          await new Promise((r) => setTimeout(r, 400))
         }
-        await new Promise((r) => setTimeout(r, 400))
       }
-    }
-    pollProgress()
+      pollProgress()
 
-    try {
-      const ext = audioFormat.format.toLowerCase().includes('mp3') ? 'mp3' : 'm4a'
-      console.log('🎵 Descargando audio:', audioFormat.itag)
+      try {
+        const ext = audioFormat.format.toLowerCase().includes('mp3') ? 'mp3' : 'm4a'
+        console.log('🎵 Descargando audio:', audioFormat.itag)
 
-      const response = await fetch('/api/download/youtube/combined', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: originalUrl, // USAR ESTADO originalUrl
-          quality: 'audio',
-          video_itag: null,
-          audio_itag: audioFormat.itag,
-          format_type: ext,
-          downloadId
+        const response = await fetch('/api/download/youtube/combined', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: originalUrl, // USAR ESTADO originalUrl
+            quality: 'audio',
+            video_itag: null,
+            audio_itag: audioFormat.itag,
+            format_type: ext,
+            downloadId
+          })
         })
-      })
 
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => 'Error de red')
-        let errorMsg = `Error ${response.status}: Ha fallado el servidor de descargas`
-        try {
-          const errorData = JSON.parse(errorText)
-          errorMsg = errorData.error || errorMsg
-        } catch {
-          errorMsg = errorText.substring(0, 100) || errorMsg
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Error de red')
+          let errorMsg = `Error ${response.status}: Ha fallado el servidor de descargas`
+          try {
+            const errorData = JSON.parse(errorText)
+            errorMsg = errorData.error || errorMsg
+          } catch {
+            errorMsg = errorText.substring(0, 100) || errorMsg
+          }
+          setError(errorMsg)
+          return
         }
-        setError(errorMsg)
-        return
-      }
-      // Verificar que la respuesta sea binaria y no un error JSON
-      const contentType = response.headers.get('content-type') || ''
-      if (contentType.includes('application/json')) {
-        const data = await response.json().catch(() => ({}))
-        throw new Error(data.error || 'Respuesta inválida del servidor')
-      }
+        // Verificar que la respuesta sea binaria y no un error JSON
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/json')) {
+          const data = await response.json().catch(() => ({}))
+          throw new Error(data.error || 'Respuesta inválida del servidor')
+        }
 
-      const cd = response.headers.get('content-disposition') || ''
-      let filename = `audio_${audioFormat.itag}_${Date.now()}.${ext}`
-      const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
-      if (match && match[1]) {
-        try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
-      }
+        const cd = response.headers.get('content-disposition') || ''
+        let filename = `audio_${audioFormat.itag}_${Date.now()}.${ext}`
+        const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+        if (match && match[1]) {
+          try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
+        }
 
-      pollActive = false
-      setDownloadDetails('Finalizando...')
-      await downloadStream(response, filename, `audio-${audioFormat.itag}`)
-    } catch (error: any) {
-      console.error('❌ Error en descarga de audio backend:', error)
-      setError(error.message || 'Error en descarga de audio')
-    } finally {
-      pollActive = false
-      setTimeout(() => {
-        setDownloading(null)
-        setDownloadProgress(0)
-        setDownloadDetails('')
-      }, 1500)
-    }
+        pollActive = false
+        setDownloadDetails('Finalizando...')
+        await downloadStream(response, filename, `audio-${audioFormat.itag}`)
+      } catch (error: any) {
+        console.error('❌ Error en descarga de audio backend:', error)
+        setError(error.message || 'Error en descarga de audio')
+      } finally {
+        pollActive = false
+        setTimeout(() => {
+          setDownloading(null)
+          setDownloadProgress(0)
+          setDownloadDetails('')
+        }, 1500)
+      }
+    })
   }
 
   // ✅ FUNCIONES AUXILIARES

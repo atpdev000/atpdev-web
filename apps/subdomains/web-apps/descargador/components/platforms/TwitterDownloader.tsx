@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -32,14 +32,19 @@ interface TwitterResponse {
   formats: MediaFormat[]
 }
 
-export default function TwitterDownloader() {
+export interface DownloaderProps {
+  initialUrl?: string
+  autoSearch?: boolean
+}
+
+export default function TwitterDownloader({ initialUrl, autoSearch }: DownloaderProps = {}) {
   const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
   const { showRewarded } = useAdMobRewarded()
 
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<TwitterResponse | null>(null)
@@ -51,10 +56,8 @@ export default function TwitterDownloader() {
     return inputUrl.includes('twitter.com') || inputUrl.includes('x.com')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!isValidTwitterUrl(url)) {
+  const processUrl = async (urlToFetch: string) => {
+    if (!isValidTwitterUrl(urlToFetch)) {
       setError('Por favor, ingresa un enlace válido de Twitter o X (ej. x.com/usuario/status/...)')
       return
     }
@@ -69,7 +72,7 @@ export default function TwitterDownloader() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url: urlToFetch })
       })
 
       const data = await response.json()
@@ -80,7 +83,6 @@ export default function TwitterDownloader() {
 
       if (data.status === 'success' && data.formats?.length > 0) {
         setVideoInfo(data)
-        setUrl('')
       } else {
         throw new Error(data.message || 'No se encontraron formatos de video')
       }
@@ -91,6 +93,20 @@ export default function TwitterDownloader() {
       setIsLoading(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    processUrl(url)
+  }
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+      if (autoSearch) {
+        processUrl(initialUrl)
+      }
+    }
+  }, [initialUrl, autoSearch])
 
   const readStreamWithProgress = async (
     response: Response,

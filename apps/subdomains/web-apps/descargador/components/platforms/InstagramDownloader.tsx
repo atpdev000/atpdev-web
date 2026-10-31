@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useNotifications } from '@/hooks/useNotifications'
@@ -35,14 +35,19 @@ interface InstagramResponse {
   formats: MediaFormat[]
 }
 
-export default function InstagramDownloader() {
+export interface DownloaderProps {
+  initialUrl?: string
+  autoSearch?: boolean
+}
+
+export default function InstagramDownloader({ initialUrl, autoSearch }: DownloaderProps = {}) {
   const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
   const { showRewarded } = useAdMobRewarded()
 
-  const [url, setUrl] = useState('')
+  const [url, setUrl] = useState(initialUrl || '')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoInfo, setVideoInfo] = useState<InstagramResponse | null>(null)
@@ -54,10 +59,8 @@ export default function InstagramDownloader() {
     return inputUrl.includes('instagram.com') || inputUrl.includes('instagr.am')
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!isValidInstagramUrl(url)) {
+  const processUrl = async (urlToFetch: string) => {
+    if (!isValidInstagramUrl(urlToFetch)) {
       setError('Por favor, ingresa un enlace válido de Instagram (Reels, Posts o Videos)')
       return
     }
@@ -72,7 +75,7 @@ export default function InstagramDownloader() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url })
+        body: JSON.stringify({ url: urlToFetch })
       })
 
       const data = await response.json()
@@ -83,7 +86,6 @@ export default function InstagramDownloader() {
 
       if (data.status === 'success' && data.formats?.length > 0) {
         setVideoInfo(data)
-        setUrl('')
       } else {
         throw new Error(data.message || 'No se encontraron formatos de descarga')
       }
@@ -94,6 +96,20 @@ export default function InstagramDownloader() {
       setIsLoading(false)
     }
   }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    processUrl(url)
+  }
+
+  useEffect(() => {
+    if (initialUrl) {
+      setUrl(initialUrl)
+      if (autoSearch) {
+        processUrl(initialUrl)
+      }
+    }
+  }, [initialUrl, autoSearch])
 
   const readStreamWithProgress = async (
     response: Response,
