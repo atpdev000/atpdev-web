@@ -3,7 +3,7 @@
 import { FEATURES } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
 
-export type Platform = 'facebook' | 'tiktok' | 'instagram' | 'twitter' | 'threads' | 'youtube'
+export type Platform = 'facebook' | 'tiktok' | 'instagram' | 'twitter' | 'threads' | 'youtube' | 'whatsapp'
 
 interface PlatformTabsProps {
   activePlatform: Platform

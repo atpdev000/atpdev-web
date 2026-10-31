@@ -10,6 +10,7 @@ import TiktokDownloader from '@/components/platforms/TiktokDownloader'
 import InstagramDownloader from '@/components/platforms/InstagramDownloader'
 import TwitterDownloader from '@/components/platforms/TwitterDownloader'
 import ThreadsDownloader from '@/components/platforms/ThreadsDownloader'
+import WhatsappStatusDownloader from '@/components/platforms/WhatsappStatusDownloader'
 import FeaturesSection from '@/components/FeaturesSection'
 import SEOContentSection from '@/components/SEOContentSection'
 import BlogPreview from '@/components/blog/BlogPreview'
@@ -52,6 +53,7 @@ export default function Home() {
     instagram_enabled: true,
     twitter_enabled: true,
     threads_enabled: true,
+    whatsapp_enabled: true,
     audio_extractor_enabled: true,
     ffmpeg_client_enabled: true,
     adsense_enabled: true,
@@ -147,6 +149,8 @@ export default function Home() {
         return <ThreadsDownloader key={`th-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'youtube':
         return <YoutubeDownloader key={`yt-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+      case 'whatsapp':
+        return <WhatsappStatusDownloader key="wa-status" />
       default:
         return <FacebookDownloader key="fb-def" />
     }

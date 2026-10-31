@@ -446,6 +446,32 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
             </p>
           </div>
 
+          {/* WhatsApp Status Saver (Mobile Exclusivo) */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div className="flex items-start justify-between">
+              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Smartphone className="w-6 h-6" />
+              </div>
+              <button
+                onClick={() => toggleModule('whatsapp_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.modules.whatsapp_enabled ? 'bg-emerald-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.modules.whatsapp_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            <div className="flex items-center gap-2 mt-4">
+              <h3 className="text-base font-bold text-white">WhatsApp Estados (Solo Teléfonos)</h3>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Móvil</span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Detector y guardador automático de fotos y videos de estados de WhatsApp vistos en el celular.
+            </p>
+          </div>
+
           {/* MP3 Audio Extractor */}
           <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
             <div className="flex items-start justify-between">

@@ -34,7 +34,8 @@ export const translations = {
       instagram: 'Instagram',
       twitter: 'Twitter / 𝕏',
       threads: 'Threads',
-      multimedia: 'Multimedia'
+      multimedia: 'Multimedia',
+      whatsapp: 'WhatsApp Estados'
     },
     downloader: {
       placeholderFacebook: 'https://www.facebook.com/watch/?v=123456 o https://fb.watch/abc123',
@@ -142,7 +143,8 @@ export const translations = {
       instagram: 'Instagram',
       twitter: 'Twitter / 𝕏',
       threads: 'Threads',
-      multimedia: 'Multimedia'
+      multimedia: 'Multimedia',
+      whatsapp: 'WhatsApp Status'
     },
     downloader: {
       placeholderFacebook: 'https://www.facebook.com/watch/?v=123456 or https://fb.watch/abc123',
@@ -250,7 +252,8 @@ export const translations = {
       instagram: 'Instagram',
       twitter: 'Twitter / 𝕏',
       threads: 'Threads',
-      multimedia: 'Multimídia'
+      multimedia: 'Multimídia',
+      whatsapp: 'WhatsApp Status'
     },
     downloader: {
       placeholderFacebook: 'https://www.facebook.com/watch/?v=123456 ou https://fb.watch/abc123',
