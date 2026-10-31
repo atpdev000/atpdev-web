@@ -6,9 +6,10 @@ import { Platform } from './PlatformTabs'
 
 interface HeroSectionProps {
   onSelectPlatform?: (platform: Platform) => void
+  modules?: Record<string, boolean>
 }
 
-export default function HeroSection({ onSelectPlatform }: HeroSectionProps) {
+export default function HeroSection({ onSelectPlatform, modules }: HeroSectionProps) {
   const { t } = useI18n()
 
   const scrollToTools = () => {

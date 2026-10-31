@@ -334,9 +334,12 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     tiktok_enabled: true,
     facebook_enabled: true,
     instagram_enabled: true,
+    twitter_enabled: true,
+    threads_enabled: true,
     audio_extractor_enabled: true,
     ffmpeg_client_enabled: true,
     adsense_enabled: true,
+    admob_enabled: true,
     blog_enabled: true
   },
   contact: {

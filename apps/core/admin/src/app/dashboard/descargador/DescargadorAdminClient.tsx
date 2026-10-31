@@ -20,6 +20,10 @@ import {
   Activity,
   Flame,
   Radio,
+  Instagram,
+  Twitter,
+  FileText,
+  Share2,
   Image as ImageIcon,
   Sparkles,
   Trash2,
@@ -373,6 +377,75 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
             </p>
           </div>
 
+          {/* Instagram */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div className="flex items-start justify-between">
+              <div className="p-3 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20">
+                <Instagram className="w-6 h-6" />
+              </div>
+              <button
+                onClick={() => toggleModule('instagram_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.modules.instagram_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.modules.instagram_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            <h3 className="mt-4 text-base font-bold text-white">Instagram Video & Reels</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Descarga de publicaciones, Reels, Stories y audios de Instagram en alta definición.
+            </p>
+          </div>
+
+          {/* Twitter / X */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div className="flex items-start justify-between">
+              <div className="w-12 h-12 rounded-xl bg-slate-800/80 text-white border border-slate-700 flex items-center justify-center">
+                <span className="font-black text-xl">𝕏</span>
+              </div>
+              <button
+                onClick={() => toggleModule('twitter_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.modules.twitter_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.modules.twitter_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            <h3 className="mt-4 text-base font-bold text-white">Twitter / 𝕏 Video & GIF</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Extracción directa de clips y GIFs animados en formatos MP4 de alta tasa de bits.
+            </p>
+          </div>
+
+          {/* Threads */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div className="flex items-start justify-between">
+              <div className="w-12 h-12 rounded-xl bg-zinc-800/80 text-white border border-zinc-700 flex items-center justify-center">
+                <span className="font-bold text-xl">@</span>
+              </div>
+              <button
+                onClick={() => toggleModule('threads_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.modules.threads_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.modules.threads_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            <h3 className="mt-4 text-base font-bold text-white">Threads Video Downloader</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Soporte para videos y publicaciones multimedia de la red social Threads de Meta.
+            </p>
+          </div>
+
           {/* MP3 Audio Extractor */}
           <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
             <div className="flex items-start justify-between">
@@ -436,9 +509,55 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 }`} />
               </button>
             </div>
-            <h3 className="mt-4 text-base font-bold text-white">Monetización Google AdSense</h3>
+            <h3 className="mt-4 text-base font-bold text-white">Monetización Google AdSense & Ezoic</h3>
             <p className="text-xs text-slate-400 mt-1">
               Banners automáticos y unidades de anuncios responsivas estratégicamente ubicadas.
+            </p>
+          </div>
+
+          {/* AdMob (Mobile) */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div className="flex items-start justify-between">
+              <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <Smartphone className="w-6 h-6" />
+              </div>
+              <button
+                onClick={() => toggleModule('admob_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.modules.admob_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.modules.admob_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            <h3 className="mt-4 text-base font-bold text-white">Google AdMob (App Android)</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Banners nativos en pie de pantalla e Interstitials entre descargas en APK/Play Store.
+            </p>
+          </div>
+
+          {/* Blog & SEO Guides */}
+          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
+            <div className="flex items-start justify-between">
+              <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <FileText className="w-6 h-6" />
+              </div>
+              <button
+                onClick={() => toggleModule('blog_enabled')}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.modules.blog_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.modules.blog_enabled ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+            <h3 className="mt-4 text-base font-bold text-white">Blog & Guías Técnicas SEO</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Sección con 9 tutoriales especializados para posicionamiento orgánico en Google.
             </p>
           </div>
         </div>

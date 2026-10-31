@@ -36,6 +36,43 @@ export default function Home() {
   const { showInterstitial } = useAdMobInterstitial()
   const hasShownInitialAd = useRef(false)
 
+  // 🧩 Módulos controlados desde CMS Admin
+  const [modules, setModules] = useState<Record<string, boolean>>({
+    youtube_enabled: true,
+    tiktok_enabled: true,
+    facebook_enabled: true,
+    instagram_enabled: true,
+    twitter_enabled: true,
+    threads_enabled: true,
+    audio_extractor_enabled: true,
+    ffmpeg_client_enabled: true,
+    adsense_enabled: true,
+    admob_enabled: true,
+    blog_enabled: true
+  })
+
+  // Cargar módulos iniciales y escuchar cambios en vivo
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.modules) {
+          setModules(data.modules)
+        }
+      })
+      .catch(() => {})
+
+    try {
+      const channel = new BroadcastChannel('atp_descargador_theme_channel')
+      channel.onmessage = (event) => {
+        if (event.data?.modules) {
+          setModules(event.data.modules)
+        }
+      }
+      return () => channel.close()
+    } catch (e) {}
+  }, [])
+
   // 📺 ANUNCIO AL INICIAR APP (App Open Ad simulado con Interstitial)
   // 🔐 SOLICITAR PERMISOS AL INICIAR (Request Permissions on init)
   useEffect(() => {
@@ -138,12 +175,14 @@ export default function Home() {
         {/* CONTENIDO PRINCIPAL */}
         <main className="flex-1 container mx-auto px-4 py-8 main-with-sidebars">
           {/* 1. Hero Section */}
-          <HeroSection onSelectPlatform={setActivePlatform} />
+          <HeroSection onSelectPlatform={setActivePlatform} modules={modules} />
 
           {/* Banner Top (Top of Page) */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <EzoicAd placeholderId={101} />
-          </div>
+          {modules.adsense_enabled !== false && (
+            <div className="max-w-4xl mx-auto mb-8">
+              <EzoicAd placeholderId={101} />
+            </div>
+          )}
 
           {/* 2. Herramientas - CON ID PARA SCROLL */}
           <section id="herramientas" className="max-w-4xl mx-auto mb-16">
@@ -159,14 +198,16 @@ export default function Home() {
 
               {/* Platform Tabs */}
               <div className="max-w-4xl mx-auto mb-8">
-                <PlatformTabs activePlatform={activePlatform} onPlatformChange={setActivePlatform} />
+                <PlatformTabs activePlatform={activePlatform} onPlatformChange={setActivePlatform} modules={modules} />
               </div>
 
               {/* Platform Content + Under Title Ad */}
               <div className="max-w-4xl mx-auto">
-                <div className="mb-6">
-                  <EzoicAd placeholderId={102} />
-                </div>
+                {modules.adsense_enabled !== false && (
+                  <div className="mb-6">
+                    <EzoicAd placeholderId={102} />
+                  </div>
+                )}
                 {renderPlatform()}
               </div>
 
@@ -184,10 +225,12 @@ export default function Home() {
             </div>
           </section>
 
-          {/* 3. Blog Preview */}
-          <section className="max-w-4xl mx-auto mb-16">
-            <BlogPreview />
-          </section>
+          {/* 3. Blog Preview (controlado por módulo) */}
+          {modules.blog_enabled !== false && (
+            <section className="max-w-4xl mx-auto mb-16">
+              <BlogPreview />
+            </section>
+          )}
 
           {/* Video Rewards - DESPUÉS DEL BLOG */}
           <div className="max-w-4xl mx-auto mb-16">

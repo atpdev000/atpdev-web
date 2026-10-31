@@ -8,12 +8,13 @@ export type Platform = 'facebook' | 'tiktok' | 'instagram' | 'twitter' | 'thread
 interface PlatformTabsProps {
   activePlatform: Platform
   onPlatformChange: (platform: Platform) => void
+  modules?: Record<string, boolean>
 }
 
-export default function PlatformTabs({ activePlatform, onPlatformChange }: PlatformTabsProps) {
+export default function PlatformTabs({ activePlatform, onPlatformChange, modules }: PlatformTabsProps) {
   const { t } = useI18n()
 
-  const platforms = [
+  const allPlatforms = [
     {
       id: 'facebook' as Platform,
       name: t.platforms.facebook,
@@ -73,6 +74,12 @@ export default function PlatformTabs({ activePlatform, onPlatformChange }: Platf
       activeClass: 'bg-red-600 text-white shadow-xl shadow-red-500/40 ring-2 ring-red-400 font-bold scale-[1.02]'
     }] : [])
   ]
+
+  const platforms = allPlatforms.filter(p => {
+    if (!modules) return true
+    const key = `${p.id}_enabled`
+    return modules[key] !== false
+  })
 
   return (
     <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/80 dark:border-slate-800 p-2.5 transition-colors">
