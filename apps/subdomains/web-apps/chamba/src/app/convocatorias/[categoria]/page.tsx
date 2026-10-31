@@ -7,7 +7,7 @@ import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { Briefcase, ChevronRight, Scale, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { SITE_URL } from "@/lib/siteConfig";
 
-export const revalidate = 60;
+export const revalidate = 3600; // 1 hora de caché en CDN
 export const dynamicParams = true;
 
 export const CATEGORIAS_MAP: Record<string, { 

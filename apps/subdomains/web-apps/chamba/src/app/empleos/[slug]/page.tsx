@@ -16,7 +16,7 @@ import { AiBasesResolver } from "@/components/AiBasesResolver";
 import { SITE_URL } from "@/lib/siteConfig";
 
 export const dynamicParams = true;
-export const revalidate = 60;
+export const revalidate = 86400; // 24 horas - optimizado para CDN y rastreo de Googlebot
 
 export async function generateStaticParams() {
   const jobs = await getJobPostings();

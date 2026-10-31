@@ -7,7 +7,7 @@ import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { Search, Filter, Briefcase } from "lucide-react";
 import { SITE_URL } from "@/lib/siteConfig";
 
-export const revalidate = 0;
+export const revalidate = 1800; // 30 minutos de caché en CDN
 
 export async function generateMetadata({
   searchParams,
