@@ -11,6 +11,7 @@ import { Dialog } from '@capacitor/dialog'
 import { Toast } from '@capacitor/toast' // ✅ Usar Toast nativo
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded' // ✅ Hook Rewarded
 import { Volume2, Music } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface VideoFormat {
   quality: string
@@ -44,6 +45,7 @@ const predefinedQualities = [
 ]
 
 export default function TiktokDownloader() {
+  const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
@@ -486,18 +488,18 @@ export default function TiktokDownloader() {
 
       {/* Contenido principal */}
 
-      <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-200">
+      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors">
         <div className="text-center mb-6">
-          <div className="bg-black w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-black dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10 shadow-md">
             <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
             </svg>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Descargar de TikTok
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+            {t.downloader.tiktokTitle}
           </h2>
-          <p className="text-gray-600">
-            Pega el enlace del video de TikTok
+          <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300">
+            {t.downloader.tiktokSubtitle}
           </p>
         </div>
 
@@ -511,26 +513,26 @@ export default function TiktokDownloader() {
                 setError(null)
                 setVideoInfo(null)
               }}
-              placeholder="https://www.tiktok.com/@usuario/video/123456789 o https://vm.tiktok.com/abc123/"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+              placeholder={t.downloader.placeholderTiktok}
+              className="flex-1 px-4 py-3.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
               required
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center"
+              className="bg-black hover:bg-neutral-800 dark:bg-pink-600 dark:hover:bg-pink-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px] flex items-center justify-center shadow-lg shadow-black/20 dark:shadow-pink-500/25 cursor-pointer"
             >
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Procesando...
+                  {t.downloader.searchingBtn}
                 </>
               ) : (
                 <>
                   <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Buscar Video
+                  {t.downloader.searchBtn}
                 </>
               )}
             </button>
@@ -807,16 +809,16 @@ export default function TiktokDownloader() {
         )}
 
         {/* Ejemplos */}
-        <div className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+        <div className="mt-6 p-4 bg-gray-50/90 dark:bg-slate-800/60 rounded-xl border border-gray-200/90 dark:border-slate-700/80 transition-colors">
           <div className="flex items-center space-x-2 mb-2">
-            <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 text-gray-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <p className="text-sm font-semibold text-gray-800">
-              Ejemplos de TikTok:
+            <p className="text-sm font-bold text-gray-800 dark:text-slate-200">
+              {t.downloader.examplesHeader} TikTok:
             </p>
           </div>
-          <div className="text-xs text-gray-700 space-y-1 font-mono break-all">
+          <div className="text-xs text-gray-600 dark:text-slate-400 space-y-1 font-mono break-all">
             <div>• https://www.tiktok.com/@usuario/video/123456789</div>
             <div>• https://vm.tiktok.com/abc123def/</div>
             <div>• https://tiktok.com/@creator/video/1234567890123456789</div>
@@ -824,12 +826,12 @@ export default function TiktokDownloader() {
         </div>
 
         {/* Información adicional */}
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-4 p-4 bg-gray-50/70 dark:bg-slate-800/40 rounded-xl border border-gray-200/80 dark:border-slate-700/60 transition-colors">
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-400">
+            <svg className="h-4 w-4 text-gray-400 dark:text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Formatos soportados: MP4 sin marca de agua, MP4 con marca de agua, MP3 de audio.</span>
+            <span>{t.downloader.supportedFormats}</span>
           </div>
         </div>
       </div>

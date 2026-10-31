@@ -1,6 +1,7 @@
 'use client'
 
 import { FEATURES } from '@/lib/featureFlags'
+import { useI18n } from '@/lib/i18n/context'
 
 export type Platform = 'facebook' | 'tiktok' | 'instagram' | 'twitter' | 'threads' | 'youtube'
 
@@ -9,84 +10,93 @@ interface PlatformTabsProps {
   onPlatformChange: (platform: Platform) => void
 }
 
-const platforms = [
-  {
-    id: 'facebook' as Platform,
-    name: 'Facebook',
-    icon: (
-      <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-      </svg>
-    ),
-    color: 'bg-blue-600'
-  },
-  {
-    id: 'tiktok' as Platform,
-    name: 'TikTok',
-    icon: (
-      <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
-      </svg>
-    ),
-    color: 'bg-slate-900'
-  },
-  {
-    id: 'instagram' as Platform,
-    name: 'Instagram',
-    icon: (
-      <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-      </svg>
-    ),
-    color: 'bg-gradient-to-r from-purple-600 to-pink-600'
-  },
-  {
-    id: 'twitter' as Platform,
-    name: 'Twitter / 𝕏',
-    icon: (
-      <span className="font-black text-base shrink-0 leading-none">𝕏</span>
-    ),
-    color: 'bg-black'
-  },
-  {
-    id: 'threads' as Platform,
-    name: 'Threads',
-    icon: (
-      <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12.186 24h-.007C5.462 24 0 18.538 0 11.814 0 5.09 5.462 0 12.179 0c6.643 0 11.821 5.09 11.821 11.664 0 .61-.044 1.222-.132 1.819h-3.864c.05-.38.077-.768.077-1.164 0-4.664-3.64-8.318-8.23-8.318-4.59 0-8.23 3.654-8.23 8.318 0 4.664 3.64 8.319 8.23 8.319 2.502 0 4.697-1.077 6.136-2.825l2.673 2.164C16.942 22.384 14.717 24 12.186 24z" />
-      </svg>
-    ),
-    color: 'bg-zinc-800'
-  },
-  ...(FEATURES.YOUTUBE_ENABLED ? [{
-    id: 'youtube' as Platform,
-    name: 'Multimedia',
-    icon: (
-      <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-      </svg>
-    ),
-    color: 'bg-red-600'
-  }] : [])
-]
-
 export default function PlatformTabs({ activePlatform, onPlatformChange }: PlatformTabsProps) {
+  const { t } = useI18n()
+
+  const platforms = [
+    {
+      id: 'facebook' as Platform,
+      name: t.platforms.facebook,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+        </svg>
+      ),
+      activeClass: 'bg-blue-600 text-white shadow-xl shadow-blue-500/40 ring-2 ring-blue-400 font-bold scale-[1.02]'
+    },
+    {
+      id: 'tiktok' as Platform,
+      name: t.platforms.tiktok,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743l-.002-.001.002.001a2.895 2.895 0 0 1 3.183-4.51v-3.5a6.329 6.329 0 0 0-5.394 10.692 6.33 6.33 0 0 0 10.857-4.424V8.687a8.182 8.182 0 0 0 4.773 1.526V6.79a4.831 4.831 0 0 1-1.003-.104z" />
+        </svg>
+      ),
+      activeClass: 'bg-black text-white shadow-xl shadow-pink-500/30 ring-2 ring-pink-500 border border-cyan-400 font-bold scale-[1.02]'
+    },
+    {
+      id: 'instagram' as Platform,
+      name: t.platforms.instagram,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+        </svg>
+      ),
+      activeClass: 'bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 text-white shadow-xl shadow-pink-500/40 ring-2 ring-pink-400 font-bold scale-[1.02]'
+    },
+    {
+      id: 'twitter' as Platform,
+      name: t.platforms.twitter,
+      icon: (
+        <span className="font-black text-base shrink-0 leading-none">𝕏</span>
+      ),
+      activeClass: 'bg-slate-900 dark:bg-black text-white shadow-xl shadow-slate-500/30 ring-2 ring-slate-400 border border-slate-600 font-bold scale-[1.02]'
+    },
+    {
+      id: 'threads' as Platform,
+      name: t.platforms.threads,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12.186 24h-.007C5.462 24 0 18.538 0 11.814 0 5.09 5.462 0 12.179 0c6.643 0 11.821 5.09 11.821 11.664 0 .61-.044 1.222-.132 1.819h-3.864c.05-.38.077-.768.077-1.164 0-4.664-3.64-8.318-8.23-8.318-4.59 0-8.23 3.654-8.23 8.318 0 4.664 3.64 8.319 8.23 8.319 2.502 0 4.697-1.077 6.136-2.825l2.673 2.164C16.942 22.384 14.717 24 12.186 24z" />
+        </svg>
+      ),
+      activeClass: 'bg-zinc-900 dark:bg-black text-white shadow-xl shadow-zinc-500/30 ring-2 ring-zinc-400 border border-zinc-600 font-bold scale-[1.02]'
+    },
+    ...(FEATURES.YOUTUBE_ENABLED ? [{
+      id: 'youtube' as Platform,
+      name: t.platforms.multimedia,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+        </svg>
+      ),
+      activeClass: 'bg-red-600 text-white shadow-xl shadow-red-500/40 ring-2 ring-red-400 font-bold scale-[1.02]'
+    }] : [])
+  ]
+
   return (
-    <div className="bg-white rounded-xl shadow-lg p-2">
+    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/80 dark:border-slate-800 p-2.5 transition-colors">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2">
-        {platforms.map((platform) => (
-          <button
-            key={platform.id}
-            onClick={() => onPlatformChange(platform.id)}
-            className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg font-semibold text-sm transition-all duration-200 justify-center w-full md:flex-1 ${activePlatform === platform.id
-              ? `${platform.color} text-white shadow-md`
-              : 'text-gray-600 hover:bg-gray-100'
+        {platforms.map((platform) => {
+          const isActive = activePlatform === platform.id;
+          return (
+            <button
+              key={platform.id}
+              onClick={() => onPlatformChange(platform.id)}
+              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer ${
+                isActive
+                  ? platform.activeClass
+                  : 'bg-gray-100/80 dark:bg-slate-800/80 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white border border-transparent'
               }`}
-          >
-            {platform.icon}
-            <span className="truncate">{platform.name}</span>
-          </button>
-        ))}
+            >
+              {platform.icon}
+              <span className="truncate">{platform.name}</span>
+              {isActive && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_8px_#34d399]" />
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   )

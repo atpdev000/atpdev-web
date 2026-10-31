@@ -1,29 +1,69 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --primary: #3b82f6;
+    --accent-primary: #3b82f6;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --border: 217.2 32.6% 17.5%;
+    --bg-main: #070a12;
+    --bg-card: #0f172a;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --primary: #3b82f6;
+    --accent-primary: #3b82f6;
   }
 
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--border-color);
   }
   
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    transition: background-color 0.25s ease, color 0.25s ease;
+    min-height: 100vh;
+  }
+
+  /* 🖼️ GLASSMORPHISM & CUSTOM BACKGROUND IMAGE ENHANCEMENT */
+  body[data-has-custom-bg="true"] {
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+
+  body[data-has-custom-bg="true"] .bg-white,
+  body[data-has-custom-bg="true"] .bg-white\/95,
+  body[data-has-custom-bg="true"] .bg-white\/90 {
+    background-color: rgba(255, 255, 255, 0.88) !important;
+    backdrop-filter: blur(12px) !important;
+  }
+
+  .dark body[data-has-custom-bg="true"] .bg-white,
+  .dark body[data-has-custom-bg="true"] .bg-white\/95,
+  .dark body[data-has-custom-bg="true"] .bg-white\/90,
+  .dark body[data-has-custom-bg="true"] .dark\:bg-slate-900,
+  .dark body[data-has-custom-bg="true"] .dark\:bg-slate-900\/95,
+  .dark body[data-has-custom-bg="true"] .dark\:bg-slate-900\/90 {
+    background-color: rgba(15, 23, 42, 0.88) !important;
+    backdrop-filter: blur(14px) !important;
   }
 }
 
@@ -56,21 +96,18 @@
     scrollbar-color: #4b5563 transparent;
   }
 
-  /* ✅ NUEVAS UTILIDADES PARA SIDEBARS GLOBALES */
   .sidebar-fixed {
     position: fixed;
-    top: 5rem; /* Ajusta según la altura de tu header */
+    top: 5rem;
     height: calc(100vh - 5rem);
     overflow-y: auto;
   }
 
-  /* Para que el contenido principal no quede detrás de los sidebars */
   .main-with-sidebars {
-    margin-left: 16rem; /* 64 = w-64 */
-    margin-right: 16rem; /* 64 = w-64 */
+    margin-left: 16rem;
+    margin-right: 16rem;
   }
 
-  /* Ajustes responsive */
   @media (max-width: 1024px) {
     .main-with-sidebars {
       margin-left: 0;

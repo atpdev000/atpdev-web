@@ -15,6 +15,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
+import { useI18n } from '@/lib/i18n/context';
 
 interface VideoFormat {
   quality: string
@@ -69,6 +70,7 @@ const predefinedQualities: { value: string, label: string, ext?: string, isPro?:
 ]
 
 export default function YoutubeDownloader() {
+  const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
@@ -1186,18 +1188,18 @@ export default function YoutubeDownloader() {
     <>
 
 
-      <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-200">
+      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors">
         <div className="text-center mb-6">
-          <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="h-8 w-8 text-red-600" fill="currentColor" viewBox="0 0 24 24">
+          <div className="bg-red-100 dark:bg-red-950/80 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20 shadow-md">
+            <svg className="h-8 w-8 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
             </svg>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Descargar de YouTube
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+            {t.downloader.youtubeTitle}
           </h2>
-          <p className="text-gray-600">
-            Pega el enlace del video de YouTube
+          <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300">
+            {t.downloader.youtubeSubtitle}
           </p>
         </div>
 
@@ -1212,25 +1214,25 @@ export default function YoutubeDownloader() {
                 setVideoInfo(null)
               }}
               placeholder="https://www.youtube.com/watch?v=abc123 o https://youtu.be/abc123"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="flex-1 px-4 py-3.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
               required
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center"
+              className="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px] flex items-center justify-center shadow-lg shadow-red-500/25 cursor-pointer"
             >
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Procesando...
+                  {t.downloader.searchingBtn}
                 </>
               ) : (
                 <>
                   <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Buscar Video
+                  {t.downloader.searchBtn}
                 </>
               )}
             </button>
@@ -1735,29 +1737,30 @@ export default function YoutubeDownloader() {
         )}
 
         {/* SECCIÓN DE EJEMPLOS */}
-        <div className="mt-6 p-4 bg-red-50 rounded-lg border border-red-200">
+        {/* EJEMPLOS */}
+        <div className="mt-6 p-4 bg-red-50/80 dark:bg-slate-800/60 rounded-xl border border-red-200/80 dark:border-slate-700/80 transition-colors">
           <div className="flex items-center space-x-2 mb-2">
-            <svg className="h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <p className="text-sm font-semibold text-red-800">
-              Ejemplos de YouTube:
+            <p className="text-sm font-bold text-red-800 dark:text-slate-200">
+              {t.downloader.examplesHeader} YouTube:
             </p>
           </div>
-          <div className="text-xs text-red-700 space-y-1 break-all">
-            <div className="font-mono">• https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
-            <div className="font-mono">• https://youtu.be/dQw4w9WgXcQ</div>
-            <div className="font-mono">• https://www.youtube.com/embed/dQw4w9WgXcQ</div>
+          <div className="text-xs text-gray-600 dark:text-slate-400 space-y-1 break-all font-mono">
+            <div>• https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+            <div>• https://youtu.be/dQw4w9WgXcQ</div>
+            <div>• https://www.youtube.com/embed/dQw4w9WgXcQ</div>
           </div>
         </div>
 
         {/* CONSEJOS */}
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-4 p-4 bg-gray-50/70 dark:bg-slate-800/40 rounded-xl border border-gray-200/80 dark:border-slate-700/60 transition-colors">
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-400">
+            <svg className="h-4 w-4 text-gray-400 dark:text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>💡 <strong>Consejo:</strong> Para videos largos o alta calidad, prueba con 720p o 480p para mejor rendimiento.</span>
+            <span>{t.downloader.supportedFormats}</span>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { FEATURES } from '@/lib/featureFlags'
 import { Platform } from '@/components/PlatformTabs'
+import { useI18n } from '@/lib/i18n/context'
 
 interface TopNavProps {
     activePlatform: Platform
@@ -9,10 +10,12 @@ interface TopNavProps {
 }
 
 export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps) {
+    const { t } = useI18n()
+
     const allTabs = [
         {
             id: 'facebook' as Platform,
-            label: 'Facebook',
+            label: t.platforms.facebook,
             color: 'bg-blue-600',
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -22,7 +25,7 @@ export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps
         },
         {
             id: 'tiktok' as Platform,
-            label: 'TikTok',
+            label: t.platforms.tiktok,
             color: 'bg-slate-900',
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -33,7 +36,7 @@ export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps
         },
         {
             id: 'instagram' as Platform,
-            label: 'Instagram',
+            label: t.platforms.instagram,
             color: 'bg-pink-600',
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -45,7 +48,7 @@ export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps
         },
         {
             id: 'twitter' as Platform,
-            label: 'Twitter / 𝕏',
+            label: t.platforms.twitter,
             color: 'bg-black',
             icon: (
                 <span className="font-black text-xs leading-none">𝕏</span>
@@ -53,7 +56,7 @@ export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps
         },
         {
             id: 'threads' as Platform,
-            label: 'Threads',
+            label: t.platforms.threads,
             color: 'bg-zinc-800',
             icon: (
                 <span className="font-bold text-xs leading-none">@</span>
@@ -61,7 +64,7 @@ export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps
         },
         ...(FEATURES.YOUTUBE_ENABLED ? [{
             id: 'youtube' as Platform,
-            label: 'Multimedia',
+            label: t.platforms.multimedia,
             color: 'bg-red-600',
             icon: (
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,15 +76,15 @@ export default function TopNav({ activePlatform, onPlatformChange }: TopNavProps
     ]
 
     return (
-        <div className="bg-white shadow-sm pt-1 pb-1 px-1 fixed top-20 left-0 right-0 z-30 overflow-x-auto no-scrollbar">
-            <div className="flex space-x-1 min-w-max">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-slate-800 pt-1.5 pb-1.5 px-2 fixed top-16 left-0 right-0 z-30 overflow-x-auto no-scrollbar transition-colors">
+            <div className="flex space-x-1.5 min-w-max">
                 {allTabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => onPlatformChange(tab.id)}
-                        className={`flex items-center space-x-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-200 border whitespace-nowrap ${activePlatform === tab.id
-                            ? `${tab.color} text-white border-transparent shadow-md`
-                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                        className={`flex items-center space-x-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all duration-200 border whitespace-nowrap cursor-pointer ${activePlatform === tab.id
+                            ? `${tab.color} text-white border-transparent shadow-sm`
+                            : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700'
                             }`}
                     >
                         {tab.icon}

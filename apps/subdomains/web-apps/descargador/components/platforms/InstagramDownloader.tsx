@@ -11,6 +11,7 @@ import { Dialog } from '@capacitor/dialog'
 import { Toast } from '@capacitor/toast'
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded'
 import { Camera, Sparkles, Download, Music, Film, CheckCircle2, AlertCircle, Volume2, VolumeX, Loader2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface MediaFormat {
   quality: string
@@ -35,6 +36,7 @@ interface InstagramResponse {
 }
 
 export default function InstagramDownloader() {
+  const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
@@ -342,8 +344,8 @@ export default function InstagramDownloader() {
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Pega el enlace del Reel o Post de Instagram aquí..."
-            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none bg-white text-gray-800 shadow-sm"
+            placeholder={t.downloader.placeholderInstagram}
+            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-transparent transition-all outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-sm font-medium"
             required
           />
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -352,26 +354,26 @@ export default function InstagramDownloader() {
           <button
             type="button"
             onClick={handlePaste}
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/60 hover:bg-pink-100 dark:hover:bg-pink-900/50 rounded-lg transition-colors border border-pink-200/50 dark:border-pink-800/40 cursor-pointer"
           >
-            Pegar
+            {t.downloader.pasteBtn}
           </button>
         </div>
 
         <button
           type="submit"
           disabled={isLoading || !url}
-          className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-95 disabled:opacity-50 transition-all duration-200 shadow-md flex items-center justify-center space-x-2"
+          className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 via-pink-600 to-amber-500 hover:opacity-95 disabled:opacity-50 transition-all duration-200 shadow-lg shadow-pink-500/25 flex items-center justify-center space-x-2 cursor-pointer"
         >
           {isLoading ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Analizando video...</span>
+              <span>{t.downloader.searchingBtn}</span>
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              <span>Obtener Enlace de Descarga</span>
+              <span>{t.downloader.searchBtn}</span>
             </>
           )}
         </button>

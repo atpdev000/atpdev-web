@@ -13,6 +13,7 @@ import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded';
 import { Volume2, VolumeX, Music, Film } from 'lucide-react';
+import { useI18n } from '@/lib/i18n/context';
 
 interface VideoFormat {
   quality: string
@@ -35,6 +36,7 @@ const facebookQualities = [
 ]
 
 export default function FacebookDownloader() {
+  const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
@@ -558,18 +560,18 @@ export default function FacebookDownloader() {
     <>
 
 
-      <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-200">
+      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors">
         <div className="text-center mb-6">
-          <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="h-8 w-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+          <div className="bg-blue-100 dark:bg-blue-950/80 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-md">
+            <svg className="h-8 w-8 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-            Descargar de Facebook
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+            {t.downloader.facebookTitle}
           </h2>
-          <p className="text-gray-600">
-            Pega el enlace del video de Facebook
+          <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300">
+            {t.downloader.facebookSubtitle}
           </p>
         </div>
 
@@ -583,26 +585,26 @@ export default function FacebookDownloader() {
                 setError(null)
                 setVideoInfo(null)
               }}
-              placeholder="https://www.facebook.com/watch/?v=123456 o https://fb.watch/abc123"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder={t.downloader.placeholderFacebook}
+              className="flex-1 px-4 py-3.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
               required
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px] flex items-center justify-center shadow-lg shadow-blue-500/25 cursor-pointer"
             >
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Procesando...
+                  {t.downloader.searchingBtn}
                 </>
               ) : (
                 <>
                   <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
-                  Buscar Video
+                  {t.downloader.searchBtn}
                 </>
               )}
             </button>
@@ -871,32 +873,32 @@ export default function FacebookDownloader() {
 
 
         {/* SECCIÓN DE EJEMPLOS */}
-        < div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200" >
+        <div className="mt-6 p-4 bg-blue-50/80 dark:bg-slate-800/60 rounded-xl border border-blue-200/80 dark:border-slate-700/80 transition-colors">
           <div className="flex items-center space-x-2 mb-2">
-            <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-4 w-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <p className="text-sm font-semibold text-blue-800">
-              Ejemplos de Facebook:
+            <p className="text-sm font-bold text-gray-800 dark:text-slate-200">
+              {t.downloader.examplesHeader} Facebook:
             </p>
           </div>
-          <div className="text-xs text-blue-700 space-y-1 break-all">
+          <div className="text-xs text-gray-600 dark:text-slate-400 space-y-1 break-all">
             <div className="font-mono">• https://www.facebook.com/watch/?v=123456789</div>
             <div className="font-mono">• https://fb.watch/abc123def/</div>
             <div className="font-mono">• https://www.facebook.com/username/videos/123456789</div>
           </div>
-        </div >
+        </div>
 
         {/* INFORMACIÓN ADICIONAL */}
-        < div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200" >
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <svg className="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mt-4 p-4 bg-gray-50/70 dark:bg-slate-800/40 rounded-xl border border-gray-200/80 dark:border-slate-700/60 transition-colors">
+          <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-slate-400">
+            <svg className="h-4 w-4 text-gray-400 dark:text-slate-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span>Formatos soportados: MP4, M4A. Calidades desde 480p hasta 1080p y DASH</span>
+            <span>{t.downloader.supportedFormats}</span>
           </div>
-        </div >
-      </div >
+        </div>
+      </div>
     </>
   )
 }

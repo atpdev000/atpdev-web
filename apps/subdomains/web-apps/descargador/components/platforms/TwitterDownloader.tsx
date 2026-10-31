@@ -11,6 +11,7 @@ import { Dialog } from '@capacitor/dialog'
 import { Toast } from '@capacitor/toast'
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded'
 import { Sparkles, Download, Music, Film, AlertCircle, Volume2, VolumeX, Loader2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface MediaFormat {
   quality: string
@@ -32,6 +33,7 @@ interface TwitterResponse {
 }
 
 export default function TwitterDownloader() {
+  const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
@@ -337,36 +339,36 @@ export default function TwitterDownloader() {
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Pega el enlace del tweet de Twitter o X aquí..."
-            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-200 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none bg-white text-gray-800 shadow-sm"
+            placeholder={t.downloader.placeholderTwitter}
+            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-slate-500 dark:focus:ring-slate-400 focus:border-transparent transition-all outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-sm font-medium"
             required
           />
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-800 font-black text-lg select-none">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-800 dark:text-white font-black text-lg select-none">
             𝕏
           </div>
           <button
             type="button"
             onClick={handlePaste}
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-gray-800 dark:text-slate-200 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors border border-gray-200 dark:border-slate-600 cursor-pointer"
           >
-            Pegar
+            {t.downloader.pasteBtn}
           </button>
         </div>
 
         <button
           type="submit"
           disabled={isLoading || !url}
-          className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-black hover:bg-neutral-800 disabled:opacity-50 transition-all duration-200 shadow-md flex items-center justify-center space-x-2"
+          className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-black hover:bg-neutral-800 dark:bg-slate-800 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700 disabled:opacity-50 transition-all duration-200 shadow-lg shadow-black/20 flex items-center justify-center space-x-2 cursor-pointer"
         >
           {isLoading ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Analizando tweet...</span>
+              <span>{t.downloader.searchingBtn}</span>
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              <span>Descargar de Twitter / 𝕏</span>
+              <span>{t.downloader.searchBtn}</span>
             </>
           )}
         </button>

@@ -11,6 +11,7 @@ import { Dialog } from '@capacitor/dialog'
 import { Toast } from '@capacitor/toast'
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded'
 import { AtSign, Sparkles, Download, Music, Film, AlertCircle, Volume2, VolumeX, Loader2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/context'
 
 interface MediaFormat {
   quality: string
@@ -32,6 +33,7 @@ interface ThreadsResponse {
 }
 
 export default function ThreadsDownloader() {
+  const { t } = useI18n()
   const { isNative } = usePlatform()
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
@@ -336,36 +338,36 @@ export default function ThreadsDownloader() {
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Pega el enlace del post de Threads aquí..."
-            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-200 focus:ring-2 focus:ring-zinc-800 focus:border-transparent transition-all outline-none bg-white text-gray-800 shadow-sm"
+            placeholder={t.downloader.placeholderThreads}
+            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-zinc-800 dark:focus:ring-zinc-400 focus:border-transparent transition-all outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-sm font-medium"
             required
           />
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-            <AtSign className="w-5 h-5 text-zinc-800" />
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-700 dark:text-gray-300">
+            <AtSign className="w-5 h-5 text-zinc-800 dark:text-zinc-200" />
           </div>
           <button
             type="button"
             onClick={handlePaste}
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-zinc-700 dark:text-zinc-200 bg-zinc-100 dark:bg-slate-700 hover:bg-zinc-200 dark:hover:bg-slate-600 rounded-lg transition-colors border border-zinc-200 dark:border-slate-600 cursor-pointer"
           >
-            Pegar
+            {t.downloader.pasteBtn}
           </button>
         </div>
 
         <button
           type="submit"
           disabled={isLoading || !url}
-          className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-zinc-900 hover:bg-black disabled:opacity-50 transition-all duration-200 shadow-md flex items-center justify-center space-x-2"
+          className="w-full py-3.5 px-6 rounded-xl font-bold text-white bg-zinc-900 hover:bg-black dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-transparent dark:border-zinc-600 disabled:opacity-50 transition-all duration-200 shadow-lg shadow-black/20 flex items-center justify-center space-x-2 cursor-pointer"
         >
           {isLoading ? (
             <>
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Analizando post...</span>
+              <span>{t.downloader.searchingBtn}</span>
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              <span>Descargar de Threads</span>
+              <span>{t.downloader.searchBtn}</span>
             </>
           )}
         </button>

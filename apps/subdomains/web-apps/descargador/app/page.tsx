@@ -26,45 +26,40 @@ import { useEffect, useRef } from 'react'
 import { FEATURES } from '@/lib/featureFlags'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Filesystem } from '@capacitor/filesystem'
+import { useI18n } from '@/lib/i18n/context'
 
 export default function Home() {
   const { isNative } = usePlatform()
-  // Default to Facebook if YouTube is disabled (Play Store build)
+  const { t } = useI18n()
   const defaultPlatform: Platform = 'facebook'
   const [activePlatform, setActivePlatform] = useState<Platform>(defaultPlatform)
   const { showInterstitial } = useAdMobInterstitial()
-  const hasShownInitialAd = useRef(false) // Control para evitar bucles de anuncios
+  const hasShownInitialAd = useRef(false)
 
   // 📺 ANUNCIO AL INICIAR APP (App Open Ad simulado con Interstitial)
   // 🔐 SOLICITAR PERMISOS AL INICIAR (Request Permissions on init)
   useEffect(() => {
     if (isNative && !hasShownInitialAd.current) {
-      // 1. Marcar inicio
       hasShownInitialAd.current = true
 
-      // 2. Solicitar permisos CRÍTICOS (Notificaciones + Almacenamiento)
       const requestPermissions = async () => {
         try {
           console.log('🔐 Solicitando permisos de notificación...')
           await LocalNotifications.requestPermissions();
 
           console.log('🔐 Solicitando permisos de almacenamiento...')
-          // Solicitar Filesystem permissions explícitamente
           const fsStatus = await Filesystem.requestPermissions();
           console.log('📂 Estado permisos Filesystem:', fsStatus);
-
         } catch (e) {
           console.error('Error solicitando permisos al inicio:', e)
         }
       }
 
-      // Ejecutar solicitud de permisos INMEDIATAMENTE
       requestPermissions();
 
-      // 3. Mostrar anuncio después de unos segundos (para no interrumpir permisos)
       const timer = setTimeout(() => {
         showInterstitial()
-      }, 4000) // Un poco más de delay para dar tiempo al usuario a aceptar permisos
+      }, 4000)
 
       return () => {
         clearTimeout(timer)
@@ -74,11 +69,9 @@ export default function Home() {
 
   // 🔄 CAMBIAR PLATAFORMA + ANUNCIO
   const handlePlatformChange = async (platform: Platform) => {
-    // 1. Mostrar anuncio
     if (isNative) {
       await showInterstitial()
     }
-    // 2. Cambiar pestaña
     setActivePlatform(platform)
   }
 
@@ -104,41 +97,35 @@ export default function Home() {
   // 📱 MODO APP NATIVA
   if (isNative) {
     return (
-
-
-      <div className="min-h-screen bg-gray-50 pb-safe pt-44"> {/* pt-44 para dar espacio SEGURO a Header + TopNav */}
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe pt-44 transition-colors">
         <AppHeader />
         <TopNav activePlatform={activePlatform} onPlatformChange={handlePlatformChange} />
 
         {/* Contenido Centrado Limpio */}
         <main className="container mx-auto px-4 py-6">
-          <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-            {/* Título simple dinámico */}
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center capitalize">
-              Descargar de {activePlatform}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm p-6 border border-gray-100 dark:border-slate-800 transition-colors">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-800 dark:text-white mb-6 text-center capitalize">
+              {t.toolsCard.title}
             </h2>
 
-            {/* Renderizador de componente */}
             {renderPlatform()}
           </div>
 
-          {/* Espacio para publicidad nativa (gestionada por AdMob overlays, pero dejamos espacio visual si es necesario) */}
           <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
-              v1.0.0
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              FTYDownloader Pro • v1.0.0
             </p>
           </div>
         </main>
 
-        {/* <BottomNav activePlatform={activePlatform} onPlatformChange={setActivePlatform} /> */}
         <AdMobBanner />
       </div>
     )
   }
 
-  // 🌐 MODO WEB (Original)
+  // 🌐 MODO WEB
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200">
       <Header />
 
       {/* SIDEBARS GLOBALES - FUERA DEL MAIN */}
@@ -151,37 +138,22 @@ export default function Home() {
         {/* CONTENIDO PRINCIPAL */}
         <main className="flex-1 container mx-auto px-4 py-8 main-with-sidebars">
           {/* 1. Hero Section */}
-          <HeroSection />
+          <HeroSection onSelectPlatform={setActivePlatform} />
 
           {/* Banner Top (Top of Page) */}
           <div className="max-w-4xl mx-auto mb-8">
             <EzoicAd placeholderId={101} />
           </div>
 
-          {/* 2. Blog Preview */}
-          <section className="max-w-4xl mx-auto mb-16">
-            <BlogPreview />
-          </section>
-
-          {/* Video Rewards - DESPUÉS DEL BLOG */}
-          <div className="max-w-4xl mx-auto mb-16">
-            <VideoRewardsAds position="left" />
-          </div>
-
-          {/* Banner Middle (Removing 103 to use as Bottom) */}
-          <div className="max-w-4xl mx-auto mb-16">
-            {/* Espacio para contenido - removido placeholder adicional */}
-          </div>
-
-          {/* 3. Herramientas - CON ID PARA SCROLL */}
+          {/* 2. Herramientas - CON ID PARA SCROLL */}
           <section id="herramientas" className="max-w-4xl mx-auto mb-16">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
+            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-xl border border-gray-200/80 dark:border-slate-800 p-6 sm:p-8 transition-colors">
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
-                  FTY Downloader - Descargador Multiplataforma
+                <h1 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
+                  {t.toolsCard.title}
                 </h1>
-                <p className="text-base text-gray-600 max-w-2xl mx-auto mt-2">
-                  Descarga videos y audios de Facebook, TikTok, Instagram, Twitter / 𝕏 y Threads en alta calidad HD y sin marcas de agua.
+                <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300 max-w-2xl mx-auto mt-2">
+                  {t.toolsCard.subtitle}
                 </p>
               </div>
 
@@ -204,19 +176,25 @@ export default function Home() {
               </div>
 
               {/* Aviso Legal */}
-              <div className="max-w-4xl mx-auto mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 text-center">
-                  <strong>Aviso Legal:</strong> Para gestión de contenido propio. Respeta los derechos de autor.
+              <div className="max-w-4xl mx-auto mt-8 p-4 bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl">
+                <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 text-center">
+                  <strong>{t.toolsCard.legalNoticeTitle}</strong> {t.toolsCard.legalNoticeText}
                 </p>
               </div>
             </div>
           </section>
 
-          {/* Banner Middle 2 - Removido */}
+          {/* 3. Blog Preview */}
+          <section className="max-w-4xl mx-auto mb-16">
+            <BlogPreview />
+          </section>
+
+          {/* Video Rewards - DESPUÉS DEL BLOG */}
           <div className="max-w-4xl mx-auto mb-16">
+            <VideoRewardsAds position="left" />
           </div>
 
-          {/* 5. SEO Content Section (NUEVO PARA ADSENSE) */}
+          {/* 5. SEO Content Section */}
           <section className="mb-16">
             <SEOContentSection />
           </section>
