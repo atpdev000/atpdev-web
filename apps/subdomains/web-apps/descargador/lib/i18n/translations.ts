@@ -35,7 +35,7 @@ export const translations = {
       twitter: 'Twitter / 𝕏',
       threads: 'Threads',
       multimedia: 'Multimedia',
-      whatsapp: 'WhatsApp Estados'
+      whatsapp: 'WhatsApp'
     },
     downloader: {
       placeholderFacebook: 'https://www.facebook.com/watch/?v=123456 o https://fb.watch/abc123',
@@ -144,7 +144,7 @@ export const translations = {
       twitter: 'Twitter / 𝕏',
       threads: 'Threads',
       multimedia: 'Multimedia',
-      whatsapp: 'WhatsApp Status'
+      whatsapp: 'WhatsApp'
     },
     downloader: {
       placeholderFacebook: 'https://www.facebook.com/watch/?v=123456 or https://fb.watch/abc123',

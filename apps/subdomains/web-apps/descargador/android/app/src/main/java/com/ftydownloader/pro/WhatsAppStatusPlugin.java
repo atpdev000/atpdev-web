@@ -15,6 +15,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Base64;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -300,6 +301,49 @@ public class WhatsAppStatusPlugin extends Plugin {
             call.resolve(ret);
         } catch (Exception ex) {
             call.reject("WhatsApp no está instalado");
+        }
+    }
+
+    @PluginMethod
+    public void openMedia(PluginCall call) {
+        String filePath = call.getString("filePath");
+        if (filePath == null || filePath.isEmpty()) {
+            call.reject("filePath es requerido");
+            return;
+        }
+
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                call.reject("El archivo no existe");
+                return;
+            }
+
+            String name = file.getName().toLowerCase();
+            boolean isVideo = name.endsWith(".mp4") || name.endsWith(".3gp") || name.endsWith(".mov") || name.endsWith(".mkv");
+            String mimeType = isVideo ? "video/*" : "image/*";
+
+            Uri contentUri;
+            try {
+                contentUri = FileProvider.getUriForFile(
+                    getContext(),
+                    getContext().getPackageName() + ".fileprovider",
+                    file
+                );
+            } catch (Exception ex) {
+                contentUri = Uri.fromFile(file);
+            }
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(contentUri, mimeType);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(intent);
+
+            JSObject ret = new JSObject();
+            ret.put("success", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Error al abrir medio: " + e.getMessage());
         }
     }
 

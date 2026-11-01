@@ -13,19 +13,20 @@ export default function AppHeader() {
 
     return (
         <>
-            <div className="py-2.5 px-4 flex items-center justify-between transition-colors border-b border-gray-100 dark:border-slate-800/80">
-                <h1 className="text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="py-2 px-3 sm:px-4 flex items-center justify-between transition-colors border-b border-gray-100 dark:border-slate-800/80 max-w-full overflow-hidden">
+                <h1 className="text-base sm:text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate min-w-0 mr-1 sm:mr-2">
                     FTY Downloader Pro
                 </h1>
 
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
                     <LanguageSelector />
                     <ThemeToggle />
 
                     <button
                         onClick={() => setIsHistoryOpen(true)}
-                        className="p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative"
-                        aria-label="Ver Historial"
+                        className="p-1.5 sm:p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative shrink-0 cursor-pointer"
+                        title="Historial de Descargas"
+                        aria-label="Historial de Descargas"
                     >
                         <Clock className="w-5 h-5" />
                         {unreadCount > 0 && (
