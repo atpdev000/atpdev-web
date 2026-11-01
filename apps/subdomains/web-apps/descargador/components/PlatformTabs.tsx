@@ -101,7 +101,7 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
             <button
               key={platform.id}
               onClick={() => onPlatformChange(platform.id)}
-              className={`flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer active:scale-95 ${
+              className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-[11px] sm:text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer active:scale-95 ${
                 isLastOdd ? 'col-span-2 sm:col-span-1' : ''
               } ${
                 isActive
@@ -110,9 +110,9 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
               }`}
             >
               {platform.icon}
-              <span className="whitespace-nowrap overflow-hidden text-ellipsis">{platform.name}</span>
+              <span className="whitespace-nowrap">{platform.name}</span>
               {isActive && (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse shrink-0 shadow-[0_0_6px_#86efac]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse shrink-0 shadow-[0_0_6px_#86efac] hidden xs:inline-block" />
               )}
             </button>
           );
