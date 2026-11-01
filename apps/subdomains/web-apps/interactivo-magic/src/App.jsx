@@ -815,6 +815,35 @@ function App() {
 
   const toggleTheme = () => setIsDark(prev => !prev);
 
+  // Live CMS Theme Synchronization Listener
+  useEffect(() => {
+    const handleThemeMessage = (e) => {
+      if (!e.data) return;
+      if (e.data.type === 'UPDATE_MAGIC_THEME' || e.data.type === 'UPDATE_THEME_PREVIEW') {
+        const payload = e.data.payload || {};
+        if (payload.accent_color || payload.primary || payload.primary_color) {
+          const color = payload.accent_color || payload.primary || payload.primary_color;
+          document.documentElement.style.setProperty('--primary', color);
+        }
+        if (payload.theme_mode || payload.mode) {
+          const mode = payload.theme_mode || payload.mode;
+          setIsDark(mode === 'dark');
+        }
+        if (payload.global_background_image !== undefined) {
+          if (payload.global_background_image && payload.global_background_image.trim()) {
+            document.body.style.backgroundImage = `url("${payload.global_background_image}")`;
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundAttachment = 'fixed';
+          } else {
+            document.body.style.backgroundImage = '';
+          }
+        }
+      }
+    };
+    window.addEventListener('message', handleThemeMessage);
+    return () => window.removeEventListener('message', handleThemeMessage);
+  }, []);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [giftOpened, setGiftOpened] = useState(false);
   const [searchTermFlag, setSearchTermFlag] = useState('Argentina');

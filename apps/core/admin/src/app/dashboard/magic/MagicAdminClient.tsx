@@ -32,8 +32,9 @@ import {
   Sun,
   Moon
 } from "lucide-react";
-import { SubdomainConfig } from "@atpdev/database";
+import { SubdomainConfig, SubdomainTheme } from "@atpdev/database";
 import { saveMagicConfigAction, checkMagicBackendHealthAction } from "./actions";
+import UnifiedThemeStudio from "@/components/theme/UnifiedThemeStudio";
 
 interface Props {
   initialConfig: SubdomainConfig;
@@ -334,227 +335,23 @@ export default function MagicAdminClient({ initialConfig }: Props) {
         </div>
       )}
 
-      {/* Tab 2: Theme Studio Neón */}
+      {/* Tab 2: Theme Studio Neón Unificado Nivel Dios */}
       {activeTab === 'theme' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 space-y-5">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Palette className="w-5 h-5 text-pink-400" />
-              <span>Colores de Acento y Resplandor</span>
-            </h3>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Paleta Predefinida
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {ACCENT_PRESETS.map(preset => (
-                  <button
-                    key={preset.hex}
-                    onClick={() => updateTheme('accent_color', preset.hex)}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border transition ${
-                      config.theme?.accent_color === preset.hex 
-                        ? 'border-pink-500 bg-pink-500/15 text-white' 
-                        : 'border-slate-800 bg-slate-800/40 text-slate-300 hover:border-slate-700'
-                    }`}
-                  >
-                    <span className="w-4 h-4 rounded-full shadow-sm" style={{ backgroundColor: preset.hex }} />
-                    <span className="text-xs font-medium truncate">{preset.name}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Color Primario Hex
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={config.theme?.accent_color || '#ec4899'}
-                    onChange={(e) => updateTheme('accent_color', e.target.value)}
-                    className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
-                  />
-                  <input
-                    type="text"
-                    value={config.theme?.accent_color || '#ec4899'}
-                    onChange={(e) => updateTheme('accent_color', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-white font-mono text-sm"
-                  />
-                </div>
-              </div>
-
-            {/* Modo de Color (Dark / Light) */}
-            <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                Modo Visual Predeterminado
-              </label>
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateTheme('theme_mode', 'dark');
-                    setPreviewMode('dark');
-                  }}
-                  className={`p-3 rounded-xl border text-left transition flex items-center gap-2.5 cursor-pointer ${
-                    config.theme?.theme_mode === 'dark'
-                      ? 'bg-slate-800/90 border-pink-500 shadow-md ring-1 ring-pink-500/40 text-white'
-                      : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0">
-                    <Moon size={16} className="text-pink-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold leading-tight">Modo Oscuro</p>
-                    <p className="text-[10px] text-slate-400">Cyberpunk / Neón Mágico</p>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateTheme('theme_mode', 'light');
-                    setPreviewMode('light');
-                  }}
-                  className={`p-3 rounded-xl border text-left transition flex items-center gap-2.5 cursor-pointer ${
-                    config.theme?.theme_mode === 'light'
-                      ? 'bg-slate-800/90 border-amber-500 shadow-md ring-1 ring-amber-500/40 text-white'
-                      : 'bg-slate-800/40 border-slate-700/60 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <div className="w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center shrink-0">
-                    <Sun size={16} className="text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold leading-tight">Modo Claro</p>
-                    <p className="text-[10px] text-slate-400">Luminoso / Editorial</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Estilo de Bordes
-                </label>
-                <select
-                  value={config.theme?.radius_style || 'rounded-3xl'}
-                  onChange={(e) => updateTheme('radius_style', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-white text-sm"
-                >
-                  <option value="rounded-3xl">Pill Ultra-Redondo (rounded-3xl)</option>
-                  <option value="rounded-2xl">Moderno (rounded-2xl)</option>
-                  <option value="rounded-xl">Estándar (rounded-xl)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-                  Efecto de Cursor
-                </label>
-                <select
-                  value={config.theme?.cursor_effect || 'cursor-trail'}
-                  onChange={(e) => updateTheme('cursor_effect', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-white text-sm"
-                >
-                  <option value="cursor-trail">Estrellas Mágicas (cursor-trail)</option>
-                  <option value="spotlight">Spotlight de Luz</option>
-                  <option value="none">Sin Efecto</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Live Preview Card */}
-          <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-pink-400" />
-                  <span>Vista Previa en Tiempo Real</span>
-                </h3>
-
-                {/* Preview Theme Toggle Button */}
-                <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-800 border border-slate-700">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewMode('dark')}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition ${
-                      previewMode === 'dark' 
-                        ? 'bg-slate-900 text-pink-400 shadow-sm' 
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <Moon size={12} />
-                    <span>Oscuro</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewMode('light')}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition ${
-                      previewMode === 'light' 
-                        ? 'bg-white text-slate-900 shadow-sm' 
-                        : 'text-slate-400 hover:text-slate-200'
-                    }`}
-                  >
-                    <Sun size={12} className="text-amber-500" />
-                    <span>Claro</span>
-                  </button>
-                </div>
-              </div>
-
-              <p className="text-xs text-slate-400 mb-6">
-                Así lucirá la experiencia con tu tema en modo <strong className="text-white capitalize">{previewMode}</strong>:
-              </p>
-
-              <div 
-                className={`p-6 rounded-3xl border transition-all duration-300 relative overflow-hidden`}
-                style={{ 
-                  borderColor: `${config.theme?.accent_color || '#ec4899'}40`,
-                  boxShadow: `0 0 30px ${config.theme?.accent_color || '#ec4899'}20`,
-                  backgroundColor: previewMode === 'dark' ? '#090d16' : '#ffffff'
-                }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: config.theme?.accent_color || '#ec4899' }}
-                    />
-                    <span className={`text-xs font-bold uppercase tracking-wider ${previewMode === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                      Plantilla Destacada
-                    </span>
-                  </div>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${previewMode === 'dark' ? 'bg-white/10 text-white' : 'bg-slate-100 text-slate-700 border border-slate-200'}`}>
-                    Romántico
-                  </span>
-                </div>
-
-                <h4 className={`text-xl font-extrabold mb-1 ${previewMode === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                  Galaxia de Amor Interactivo
-                </h4>
-                <p className={`text-xs mb-4 ${previewMode === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>
-                  Corazones en 3D flotando al ritmo de tu música favorita compartida por WhatsApp.
-                </p>
-
-                <button 
-                  className="w-full py-2.5 rounded-xl text-white font-bold text-xs uppercase tracking-wider transition shadow-md"
-                  style={{ backgroundColor: config.theme?.accent_color || '#ec4899' }}
-                >
-                  Personalizar y Compartir 🪄
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6 p-3 rounded-xl bg-slate-800/40 border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
-              <span>💡 Cambia entre Modo Claro y Oscuro para verificar contraste y legibilidad al 100%.</span>
-              <span className="font-mono text-pink-400 uppercase text-[10px] ml-2">Theme Engine 2.0</span>
-            </div>
-          </div>
-        </div>
+        <UnifiedThemeStudio
+          subdomain="magic"
+          subdomainTitle="Interactivo Magic"
+          port="3008"
+          localUrl="http://localhost:3008"
+          theme={config.theme}
+          presets={ACCENT_PRESETS}
+          onSaveTheme={async (newTheme: SubdomainTheme) => {
+            const updated = { ...config, theme: newTheme };
+            setConfig(updated);
+            const res = await saveMagicConfigAction(updated);
+            return res.success;
+          }}
+          saving={saving}
+        />
       )}
 
       {/* Tab 3: Branding & Textos */}
