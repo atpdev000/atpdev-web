@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useEffect } from 'react'
 import { FEATURES } from '@/lib/featureFlags'
 import { Platform } from '@/components/PlatformTabs'
 import { useI18n } from '@/lib/i18n/context'
@@ -99,25 +100,38 @@ export default function TopNav({ activePlatform, onPlatformChange, modules }: To
         return modules[key] !== false
     })
 
+    const activeTabRef = useRef<HTMLButtonElement | null>(null)
+
+    useEffect(() => {
+        if (activeTabRef.current) {
+            activeTabRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            })
+        }
+    }, [activePlatform])
+
     return (
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-slate-800 pt-2 pb-2 px-3 fixed top-14 left-0 right-0 z-30 overflow-x-auto no-scrollbar transition-colors">
-            <div className="flex space-x-2 min-w-max">
+        <div className="relative w-full py-2 px-3 overflow-x-auto no-scrollbar scroll-smooth transition-colors">
+            <div className="flex space-x-2 min-w-max items-center pr-4">
                 {tabs.map((tab) => {
                     const isActive = activePlatform === tab.id
                     return (
                         <button
                             key={tab.id}
+                            ref={isActive ? activeTabRef : null}
                             onClick={() => onPlatformChange(tab.id)}
-                            className={`flex items-center space-x-1.5 py-1.5 px-3.5 rounded-xl text-xs font-semibold transition-all duration-200 border whitespace-nowrap cursor-pointer ${
+                            className={`flex items-center space-x-1.5 py-2 px-3.5 rounded-xl text-xs font-semibold transition-all duration-200 border whitespace-nowrap cursor-pointer shrink-0 shadow-xs active:scale-95 ${
                                 isActive
                                     ? tab.activeClass
-                                    : 'bg-gray-100/80 dark:bg-slate-800/80 text-gray-700 dark:text-slate-300 border-gray-200/80 dark:border-slate-700 hover:bg-gray-200 dark:hover:bg-slate-700'
+                                    : 'bg-gray-100/90 dark:bg-slate-800/90 text-gray-700 dark:text-slate-300 border-gray-200/90 dark:border-slate-700 hover:bg-gray-200 dark:hover:bg-slate-700'
                             }`}
                         >
                             {tab.icon}
                             <span>{tab.label}</span>
                             {isActive && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5 shadow-[0_0_6px_#34d399]" />
                             )}
                         </button>
                     )

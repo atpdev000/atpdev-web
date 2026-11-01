@@ -115,11 +115,11 @@ export default function Home() {
   }, [isNative, showInterstitial])
 
   // 🔄 CAMBIAR PLATAFORMA + ANUNCIO
-  const handlePlatformChange = async (platform: Platform) => {
-    if (isNative) {
-      await showInterstitial()
-    }
+  const handlePlatformChange = (platform: Platform) => {
     setActivePlatform(platform)
+    if (isNative) {
+      showInterstitial().catch(() => {})
+    }
   }
 
   const handleClipboardDetected = (info: DetectedUrlInfo, autoSearch: boolean) => {
@@ -159,22 +159,35 @@ export default function Home() {
   // 📱 MODO APP NATIVA
   if (isNative) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe pt-32 transition-colors">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe transition-colors">
         <SmartClipboardDetector onDetected={handleClipboardDetected} />
-        <AppHeader />
-        <TopNav activePlatform={activePlatform} onPlatformChange={handlePlatformChange} modules={modules} />
+        
+        {/* 📱 HEADER NATIVO UNIFICADO Y STICKY (Sin solapamientos ni cortes) */}
+        <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-gray-200/80 dark:border-slate-800 transition-colors">
+          <AppHeader />
+          <TopNav activePlatform={activePlatform} onPlatformChange={handlePlatformChange} modules={modules} />
+        </header>
 
         {/* Contenido Centrado Limpio */}
-        <main className="container mx-auto px-4 py-6">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm p-6 border border-gray-100 dark:border-slate-800 transition-colors">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-gray-800 dark:text-white mb-6 text-center capitalize">
-              {t.toolsCard.title}
-            </h2>
+        <main className="container mx-auto px-3.5 sm:px-4 py-4 max-w-xl">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm p-4 sm:p-6 border border-gray-100 dark:border-slate-800 transition-colors">
+            {/* Selector de Plataformas Completo (100% visible a simple vista) */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between mb-2.5 px-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-slate-400">
+                  {t.toolsCard.subtitle || 'Selecciona una plataforma'}
+                </span>
+                <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-100 dark:border-blue-900/40">
+                  7 disponibles
+                </span>
+              </div>
+              <PlatformTabs activePlatform={activePlatform} onPlatformChange={handlePlatformChange} modules={modules} />
+            </div>
 
             {renderPlatform()}
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-6 text-center pb-6">
             <p className="text-xs text-gray-500 dark:text-slate-400">
               FTYDownloader Pro • v1.0.0
             </p>

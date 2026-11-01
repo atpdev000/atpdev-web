@@ -94,16 +94,19 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
   return (
     <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/80 dark:border-slate-800 p-2.5 transition-colors">
       <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2">
-        {platforms.map((platform) => {
+        {platforms.map((platform, index) => {
           const isActive = activePlatform === platform.id;
+          const isLastOdd = platforms.length % 2 !== 0 && index === platforms.length - 1;
           return (
             <button
               key={platform.id}
               onClick={() => onPlatformChange(platform.id)}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer ${
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer active:scale-95 ${
+                isLastOdd ? 'col-span-2 sm:col-span-1' : ''
+              } ${
                 isActive
                   ? platform.activeClass
-                  : 'bg-gray-100/80 dark:bg-slate-800/80 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white border border-transparent'
+                  : 'bg-gray-100/80 dark:bg-slate-800/80 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-slate-700/60'
               }`}
             >
               {platform.icon}

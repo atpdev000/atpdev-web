@@ -13,7 +13,7 @@ export default function AppHeader() {
 
     return (
         <>
-            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-slate-800 py-3 px-4 fixed top-0 left-0 right-0 z-40 flex items-center justify-between transition-colors">
+            <div className="py-2.5 px-4 flex items-center justify-between transition-colors border-b border-gray-100 dark:border-slate-800/80">
                 <h1 className="text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     FTY Downloader Pro
                 </h1>
