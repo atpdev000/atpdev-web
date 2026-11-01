@@ -21,6 +21,7 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
+  Smartphone,
   X
 } from 'lucide-react'
 import { NativeWhatsAppStatus as WhatsAppStatus, shareNativeMedia } from '@/lib/nativeBridge'
@@ -278,6 +279,76 @@ export default function WhatsappStatusDownloader() {
 
   return (
     <div className="space-y-4">
+      {/* 🌐 BANNER EXCLUSIVO EN VERSIÓN WEB: INVITACIÓN A INSTALAR LA APP */}
+      {!isNative && (
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500/15 via-slate-900/60 to-emerald-950/30 border border-emerald-500/40 p-5 sm:p-7 shadow-xl backdrop-blur-md">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2.5 text-center md:text-left flex-1">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold tracking-wide">
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>FUNCIÓN EXCLUSIVA PARA CELULARES ANDROID</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Guarda Estados de WhatsApp en tu Teléfono
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+                Por seguridad del navegador, los estados de WhatsApp solo pueden detectarse directamente en la memoria interna de tu dispositivo móvil. Descarga nuestra aplicación oficial para escanear, reproducir y guardar fotos y videos en alta definición de forma 100% anónima.
+              </p>
+              
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-semibold text-slate-300 pt-1">
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" /> Detección automática
+                </span>
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" /> 100% Anónimo
+                </span>
+                <span className="flex items-center gap-1.5 text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" /> WhatsApp & Business
+                </span>
+              </div>
+            </div>
+
+            {/* Botones de Descarga idénticos a la parte superior */}
+            <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0 w-full sm:w-auto">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.ftydownloader.pro&pcampaignid=web_share"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 bg-black hover:bg-slate-900 border border-slate-700 text-white px-5 py-2.5 rounded-2xl hover:scale-105 transition-all shadow-lg active:scale-95"
+              >
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3.609 1.814L13.792 12 3.61 22.186a2.156 2.156 0 0 1-.41-.708V2.522a2.156 2.156 0 0 1 .41-.708zm1.066-.341a2.13 2.13 0 0 1 1.763.15l13.064 7.625c.983.573.983 1.506 0 2.079L6.438 19.336a2.13 2.13 0 0 1-1.763.15L14.858 12 4.675 1.473zm-.11 20.31s-.001 0 0 0z" />
+                </svg>
+                <div className="text-left">
+                  <p className="text-[9px] uppercase leading-none text-slate-400 font-medium">Disponible en</p>
+                  <p className="text-sm font-bold leading-tight">Google Play</p>
+                </div>
+              </a>
+
+              <a
+                href="/FTYdownloaderPro.apk"
+                download
+                className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-emerald-600/30 active:scale-95 group"
+              >
+                <Download className="w-5 h-5 animate-bounce group-hover:animate-none" />
+                <div className="text-left">
+                  <p className="text-[9px] uppercase leading-none text-emerald-200 font-medium">Descarga Directa</p>
+                  <p className="text-sm font-bold leading-tight">Instalar APK</p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          {/* Separador hacia la vista previa interactiva */}
+          <div className="mt-6 pt-4 border-t border-emerald-500/20 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-medium flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              Vista previa interactiva de cómo funciona en el celular:
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* SELECTOR WHATSAPP NORMAL VS BUSINESS */}
       <div className="bg-gray-100 dark:bg-slate-800/80 p-1 rounded-2xl flex items-center justify-between border border-gray-200/60 dark:border-slate-700/60">
         <button
