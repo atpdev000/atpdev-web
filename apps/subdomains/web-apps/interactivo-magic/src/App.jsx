@@ -1688,7 +1688,7 @@ function App() {
                 style={{
                   width: '80px',
                   height: '80px',
-                  borderRadius: '50',
+                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -1758,45 +1758,31 @@ function App() {
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', justifyContent: 'space-between' }}>
                 {/* Search Bar */}
                 <div style={{ position: 'relative', flexGrow: 1, maxWidth: '500px' }}>
-                  <Search size={20} style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+                  <Search size={20} className="search-icon" style={{ position: 'absolute', left: '15px', top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type="text"
                     placeholder="Busca una plantilla... (ej: Marvel, Amor)"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
                     style={{
                       paddingLeft: '45px',
                       borderRadius: '15px',
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
                       width: '100%'
                     }}
                   />
                 </div>
 
                 {/* Categories */}
-                <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
+                <div style={{ display: 'flex', gap: '0.6rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
                   {CATEGORIES.map(cat => (
                     <button
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.6rem 1.2rem',
-                        borderRadius: '12px',
-                        whiteSpace: 'nowrap',
-                        background: activeCategory === cat.id ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                        border: '1px solid',
-                        borderColor: activeCategory === cat.id ? 'var(--primary)' : 'rgba(255,255,255,0.1)',
-                        color: 'white',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s'
-                      }}
+                      className={`category-chip ${activeCategory === cat.id ? 'active' : ''}`}
                     >
                       {cat.icon}
-                      <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{cat.name}</span>
+                      <span>{cat.name}</span>
                     </button>
                   ))}
                 </div>
@@ -1902,7 +1888,7 @@ function App() {
                     </div>
                   )}
 
-                  <div style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: 'var(--text-light)' }}>{tpl.icon}</div>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: tpl.color || 'var(--primary)' }}>{tpl.icon}</div>
                   <h3 style={{ fontSize: '1.4rem', marginBottom: '0.5rem', color: 'var(--text-light)' }}>{tpl.name}</h3>
                   <p style={{ color: 'var(--text-muted)', marginBottom: '2rem', fontSize: '1rem' }}>{tpl.description}</p>
                   <div className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
