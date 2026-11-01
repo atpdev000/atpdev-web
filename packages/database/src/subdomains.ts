@@ -353,13 +353,88 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
 function getDefaultConfig(id: string): SubdomainConfig {
   if (id === 'sorteos') return { ...DEFAULT_SORTEOS_CONFIG };
   if (id === 'descargador') return { ...DEFAULT_DESCARGADOR_CONFIG };
+  if (id === 'magic') return { ...DEFAULT_MAGIC_CONFIG };
   return { ...DEFAULT_CHAMBA_CONFIG };
 }
+
+export const DEFAULT_MAGIC_CONFIG: SubdomainConfig = {
+  id: 'magic',
+  name: 'Interactivo Magic',
+  slug: 'magic',
+  subdomain: 'magic',
+  full_domain: 'magic.atpdev.dev',
+  devPort: 3008,
+  category: 'Mensajes Interactivos & Tarjetas Mágicas',
+  status: 'active',
+  theme: {
+    accent_color: '#ec4899',
+    accent_name: 'custom',
+    theme_mode: 'dark',
+    radius_style: 'rounded-3xl',
+    radius_scale: 'full',
+    seed_color: '#ec4899',
+    color_theme: 'neon',
+    primary_color: '#ec4899',
+    secondary_color: '#8b5cf6',
+    tertiary_color: '#f43f5e',
+    neutral_color: '#0f172a',
+    font_headline: 'Outfit',
+    font_body: 'Outfit',
+    font_label: 'IBM Plex Mono',
+    glow_style: 'full-border',
+    neon_thickness: '4px',
+    cursor_effect: 'cursor-trail',
+    global_background_image: ''
+  },
+  branding: {
+    site_title: 'interactivo magic',
+    site_tagline: 'Crea Mensajes Mágicos e Interactivos para Sorprender en WhatsApp',
+    hero_badge: 'Tarjetas Interactivas • Propuestas • Felicitaciones Mágicas',
+    hero_title_prefix: 'Crea mensajes y tarjetas interactivas únicas con',
+    hero_title_highlight: 'Interactivo Magic',
+    hero_description: 'Sorprende a tus seres queridos con galaxias interactivas, cartas animadas, juegos de amor y felicitaciones personalizadas listas para compartir en WhatsApp.',
+    logo_url: '/logo.png',
+    favicon_url: '/logo.png',
+    announcement_text: '🪄 Más de 30 plantillas mágicas interactivas listas para compartir gratis.',
+    announcement_enabled: true
+  },
+  seo: {
+    meta_title: 'Interactivo Magic — Crea Mensajes Mágicos e Interactivos para WhatsApp',
+    meta_description: 'Plataforma para crear mensajes interactivos, propuestas de amor, rompecabezas, flores virtuales y felicitaciones de cumpleaños para compartir por WhatsApp.',
+    keywords: [
+      'mensajes interactivos',
+      'propuestas de amor',
+      'tarjetas virtuales whatsapp',
+      'felicitaciones interactivas',
+      'sorpresa digital whatsapp',
+      'galaxia de amor'
+    ],
+    canonical_url: 'https://magic.atpdev.dev'
+  },
+  modules: {
+    templates_enabled: true,
+    audio_upload_enabled: true,
+    custom_photos_enabled: true,
+    whatsapp_share_enabled: true,
+    html_download_enabled: true,
+    url_shortener_enabled: true,
+    admob_enabled: true,
+    adsense_enabled: true,
+    ezoic_enabled: true
+  },
+  contact: {
+    email: 'contacto@atpdev.dev',
+    whatsapp: '+51987654321',
+    support_url: 'https://atpdev.dev/contacto'
+  },
+  updated_at: new Date().toISOString()
+};
 
 let inMemoryConfigs: Record<string, SubdomainConfig> = {
   chamba: { ...DEFAULT_CHAMBA_CONFIG },
   sorteos: { ...DEFAULT_SORTEOS_CONFIG },
-  descargador: { ...DEFAULT_DESCARGADOR_CONFIG }
+  descargador: { ...DEFAULT_DESCARGADOR_CONFIG },
+  magic: { ...DEFAULT_MAGIC_CONFIG }
 };
 
 export function listSubdomains(): SubdomainConfig[] {

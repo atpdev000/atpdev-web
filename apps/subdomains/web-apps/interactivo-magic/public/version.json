@@ -1,0 +1,15 @@
+{
+    "version": "1.2.0",
+    "releaseDate": "2026-02-05",
+    "whatsNew": [
+        "✨ Nuevas vistas previas en alta calidad (PNG)",
+        "📖 Mejoras en la navegación del Libro del Amor",
+        "🚀 Optimización de carga y corrección de errores",
+        "💖 Más plantillas activadas con fotos reales"
+    ],
+    "minRequiredVersion": "1.0.0",
+    "downloadLinks": {
+        "playStore": "#",
+        "apkDirect": "https://interactivomagic.ftydownloader.com/downloads/app-release.apk"
+    }
+}

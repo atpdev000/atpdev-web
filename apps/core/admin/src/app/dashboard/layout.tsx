@@ -20,6 +20,7 @@ import {
   Briefcase,
   Gift,
   Download,
+  Sparkles,
   Sun,
   Moon
 } from "lucide-react";
@@ -130,6 +131,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           icon: <Download size={17} />, 
           href: "/dashboard/descargador",
           badge: "3007"
+        },
+        { 
+          label: "Interactivo Magic", 
+          icon: <Sparkles size={17} />, 
+          href: "/dashboard/magic",
+          badge: "3008"
         },
       ]
     },
