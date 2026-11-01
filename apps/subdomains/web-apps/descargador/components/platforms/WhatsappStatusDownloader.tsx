@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Capacitor } from '@capacitor/core'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
@@ -19,59 +20,38 @@ import {
   Smartphone,
   ExternalLink,
   Info,
-  Play
+  Play,
+  ShieldCheck,
+  Lock
 } from 'lucide-react'
 
 interface StatusItem {
   id: string
   name: string
   uri: string
+  nativePath?: string
   type: 'image' | 'video'
   size?: string
   date?: string
 }
 
-// Muestras demostrativas para navegación web y emulador
+// Muestras demostrativas exclusivamente para navegador web en desktop
 const DEMO_STATUSES: StatusItem[] = [
   {
     id: 'demo-1',
-    name: 'estado_viaje_montana.jpg',
+    name: 'estado_demo_1.jpg',
     uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80',
     type: 'image',
     size: '1.2 MB',
-    date: 'Hace 15 min'
+    date: 'Demostración'
   },
   {
     id: 'demo-2',
-    name: 'estado_playa_sunset.jpg',
+    name: 'estado_demo_2.jpg',
     uri: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80',
     type: 'image',
     size: '850 KB',
-    date: 'Hace 1 hora'
-  },
-  {
-    id: 'demo-3',
-    name: 'estado_cafe_manana.jpg',
-    uri: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&auto=format&fit=crop&q=80',
-    type: 'image',
-    size: '920 KB',
-    date: 'Hace 3 horas'
-  },
-  {
-    id: 'demo-4',
-    name: 'clip_evento_amigos.mp4',
-    uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    type: 'video',
-    size: '3.4 MB',
-    date: 'Hace 4 horas'
-  },
-  {
-    id: 'demo-5',
-    name: 'clip_mascota_jugando.mp4',
-    uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-    type: 'video',
-    size: '4.8 MB',
-    date: 'Hace 6 horas'
+    date: 'Demostración'
   }
 ]
 
@@ -87,37 +67,58 @@ export default function WhatsappStatusDownloader() {
   const [savingId, setSavingId] = useState<string | null>(null)
   const [selectedPreview, setSelectedPreview] = useState<StatusItem | null>(null)
   const [hasScanned, setHasScanned] = useState(false)
+  const [permissionDenied, setPermissionDenied] = useState(false)
 
-  // Rutas conocidas donde WhatsApp almacena los estados vistos en Android
+  // Rutas conocidas donde WhatsApp y WhatsApp Business almacenan los estados vistos en Android
   const WHATSAPP_PATHS = [
     'Android/media/com.whatsapp/WhatsApp/Media/.Statuses',
     'WhatsApp/Media/.Statuses',
     'Android/media/com.whatsapp.w4b/WhatsApp Business/Media/.Statuses',
-    'WhatsApp Business/Media/.Statuses'
+    'WhatsApp Business/Media/.Statuses',
+    'com.whatsapp/WhatsApp/Media/.Statuses'
   ]
+
+  const requestStoragePermission = async () => {
+    try {
+      const res = await Filesystem.requestPermissions()
+      if (res.publicStorage === 'granted') {
+        setPermissionDenied(false)
+        await scanStatuses()
+      } else {
+        setPermissionDenied(true)
+      }
+    } catch (e) {
+      console.warn('Error al solicitar permisos:', e)
+    }
+  }
 
   const scanStatuses = async () => {
     setLoading(true)
 
     if (!isNative) {
-      // Simulación fluida para navegador web
+      // Simulación fluida solo en navegador web de PC
       setTimeout(() => {
         setStatuses(DEMO_STATUSES)
         setLoading(false)
         setHasScanned(true)
-      }, 600)
+      }, 500)
       return
     }
 
-    // Modo Nativo en Teléfono Android
+    // Modo Nativo en Teléfono Android Oficial
     try {
       try {
         const perm = await Filesystem.checkPermissions()
         if (perm.publicStorage !== 'granted') {
-          await Filesystem.requestPermissions()
+          const requested = await Filesystem.requestPermissions()
+          if (requested.publicStorage !== 'granted') {
+            setPermissionDenied(true)
+          }
+        } else {
+          setPermissionDenied(false)
         }
       } catch (e) {
-        console.warn('Permiso storage warning:', e)
+        console.warn('Permiso storage check warning:', e)
       }
 
       const discovered: StatusItem[] = []
@@ -138,32 +139,50 @@ export default function WhatsappStatusDownloader() {
               const isVid = /\.(mp4|3gp|mov|mkv)$/i.test(fileName)
 
               if (isImg || isVid) {
-                const fullPath = `${basePath}/${fileName}`
-                discovered.push({
-                  id: `wa-${fileName}`,
-                  name: fileName,
-                  uri: fullPath,
-                  type: isImg ? 'image' : 'video',
-                  size: 'Estado HD',
-                  date: 'Detectado hoy'
-                })
+                const fullRelativePath = `${basePath}/${fileName}`
+                
+                try {
+                  // Obtener URI nativa y convertir a URL compatible con el WebView de Android
+                  const uriResult = await Filesystem.getUri({
+                    path: fullRelativePath,
+                    directory: Directory.ExternalStorage
+                  })
+                  
+                  const webviewUri = Capacitor.convertFileSrc(uriResult.uri)
+
+                  discovered.push({
+                    id: `wa-${fileName}`,
+                    name: fileName,
+                    uri: webviewUri,
+                    nativePath: fullRelativePath,
+                    type: isImg ? 'image' : 'video',
+                    size: isVid ? 'Video' : 'Foto',
+                    date: 'Visto hoy'
+                  })
+                } catch {
+                  discovered.push({
+                    id: `wa-${fileName}`,
+                    name: fileName,
+                    uri: fullRelativePath,
+                    nativePath: fullRelativePath,
+                    type: isImg ? 'image' : 'video',
+                    size: isVid ? 'Video' : 'Foto',
+                    date: 'Visto hoy'
+                  })
+                }
               }
             }
           }
-        } catch (dirErr) {
-          // Directorio no accesible o no existe para esta versión de WhatsApp
+        } catch {
+          // Directorio no accesible o no existe para esta variante
         }
       }
 
-      if (discovered.length > 0) {
-        setStatuses(discovered)
-      } else {
-        // Fallback a demostración con mensaje guiado
-        setStatuses(DEMO_STATUSES)
-      }
+      // En Android, mostrar únicamente estados REALES encontrados
+      setStatuses(discovered)
     } catch (err) {
-      console.error('Error escaneando estados:', err)
-      setStatuses(DEMO_STATUSES)
+      console.error('Error escaneando estados reales:', err)
+      setStatuses([])
     } finally {
       setLoading(false)
       setHasScanned(true)
@@ -208,7 +227,7 @@ export default function WhatsappStatusDownloader() {
           } else {
             // Copiar archivo local de WhatsApp a la carpeta de descargas
             await Filesystem.copy({
-              from: item.uri,
+              from: item.nativePath || item.uri,
               to: destPath,
               directory: Directory.ExternalStorage,
               toDirectory: Directory.ExternalStorage
@@ -289,7 +308,7 @@ export default function WhatsappStatusDownloader() {
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 shadow-inner">
               <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.772.82 2.791.82 3.181 0 5.768-2.587 5.768-5.766.001-3.182-2.585-5.806-5.768-5.806zm3.374 8.211c-.144.405-.837.774-1.17.824-.312.045-.694.06-2.001-.482-1.674-.693-2.736-2.42-2.82-2.53-.083-.11-.676-.901-.676-1.718 0-.818.431-1.218.583-1.385.153-.166.333-.208.444-.208.111 0 .222.002.319.006.102.005.239-.039.373.283.144.346.49 1.196.533 1.284.043.088.072.19.014.305-.058.115-.087.188-.173.289-.087.102-.183.228-.261.306-.087.087-.178.182-.077.355.101.173.45 1.742 1.488 2.666.804.717 1.48.939 1.69.1.043.21-.043.324-.117.41-.074.086-.168.201-.255.302-.087.1-.174.143-.246.216z"/>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
               </svg>
             </div>
             <div>
@@ -300,7 +319,7 @@ export default function WhatsappStatusDownloader() {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-emerald-100 mt-0.5">
-                Detecta y guarda fotos y videos de estados vistos en tu teléfono sin pedir permiso.
+                Detecta y guarda fotos y videos de estados vistos en tu teléfono en máxima calidad.
               </p>
             </div>
           </div>
@@ -452,23 +471,57 @@ export default function WhatsappStatusDownloader() {
           })}
         </div>
       ) : (
-        <div className="text-center py-12 bg-gray-50 dark:bg-slate-900/40 rounded-3xl border border-dashed border-gray-300 dark:border-slate-800 p-8">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-4">
-            <Smartphone className="w-8 h-8" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            No se detectaron estados recientes
-          </h3>
-          <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 max-w-md mx-auto mt-2">
-            Abre tu aplicación de WhatsApp en el celular, visualiza los estados que quieras guardar y luego pulsa el botón Actualizar.
-          </p>
-          <button
-            onClick={scanStatuses}
-            className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
-          >
-            <RefreshCw className="w-4 h-4" />
-            Actualizar Lista de Estados
-          </button>
+        <div className="text-center py-12 bg-white dark:bg-slate-900/60 rounded-3xl border border-dashed border-gray-200 dark:border-slate-800 p-8 shadow-sm">
+          {permissionDenied ? (
+            <div>
+              <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center mb-4">
+                <Lock className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                Permiso de Almacenamiento Necesario
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 max-w-md mx-auto mt-2">
+                Para detectar y guardar los estados de WhatsApp en tu galería, la app necesita acceso al almacenamiento del dispositivo.
+              </p>
+              <button
+                onClick={requestStoragePermission}
+                className="mt-5 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all cursor-pointer active:scale-95"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Conceder Permiso de Almacenamiento
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center mb-4">
+                <Smartphone className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                No se detectaron estados recientes
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 max-w-md mx-auto mt-2">
+                Abre WhatsApp en tu teléfono, mira los estados de tus contactos y luego presiona "Actualizar Estados".
+              </p>
+              
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+                <a
+                  href="whatsapp://"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Abrir WhatsApp
+                </a>
+                <button
+                  onClick={scanStatuses}
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 font-bold text-xs transition-all cursor-pointer"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                  Actualizar Estados
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

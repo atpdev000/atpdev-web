@@ -68,10 +68,10 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
       name: t.platforms.whatsapp,
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.54 1.772.82 2.791.82 3.181 0 5.768-2.587 5.768-5.766.001-3.182-2.585-5.806-5.768-5.806zm3.374 8.211c-.144.405-.837.774-1.17.824-.312.045-.694.06-2.001-.482-1.674-.693-2.736-2.42-2.82-2.53-.083-.11-.676-.901-.676-1.718 0-.818.431-1.218.583-1.385.153-.166.333-.208.444-.208.111 0 .222.002.319.006.102.005.239-.039.373.283.144.346.49 1.196.533 1.284.043.088.072.19.014.305-.058.115-.087.188-.173.289-.087.102-.183.228-.261.306-.087.087-.178.182-.077.355.101.173.45 1.742 1.488 2.666.804.717 1.48.939 1.69.1.043.21-.043.324-.117.41-.074.086-.168.201-.255.302-.087.1-.174.143-.246.216z"/>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
         </svg>
       ),
-      activeClass: 'bg-emerald-600 text-white shadow-xl shadow-emerald-500/40 ring-2 ring-emerald-400 font-bold scale-[1.02]'
+      activeClass: 'bg-[#25D366] text-white shadow-xl shadow-emerald-500/40 ring-2 ring-emerald-300 font-bold scale-[1.02]'
     },
     ...(FEATURES.YOUTUBE_ENABLED ? [{
       id: 'youtube' as Platform,
@@ -101,7 +101,7 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
             <button
               key={platform.id}
               onClick={() => onPlatformChange(platform.id)}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer active:scale-95 ${
+              className={`flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 justify-center w-full md:flex-1 cursor-pointer active:scale-95 ${
                 isLastOdd ? 'col-span-2 sm:col-span-1' : ''
               } ${
                 isActive
@@ -110,9 +110,9 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
               }`}
             >
               {platform.icon}
-              <span className="truncate">{platform.name}</span>
+              <span className="whitespace-nowrap overflow-hidden text-ellipsis">{platform.name}</span>
               {isActive && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 shadow-[0_0_8px_#34d399]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse shrink-0 shadow-[0_0_6px_#86efac]" />
               )}
             </button>
           );
