@@ -5,8 +5,16 @@ export function usePlatform() {
     const [isNative, setIsNative] = useState(false);
 
     useEffect(() => {
-        // Check if running on native platform (Android or iOS)
-        setIsNative(Capacitor.isNativePlatform());
+        if (typeof window === 'undefined') return;
+        const cap = (window as any).Capacitor;
+        const nativeCheck = Boolean(
+            Capacitor.isNativePlatform() ||
+            cap?.isNativePlatform?.() ||
+            cap?.getPlatform?.() === 'android' ||
+            cap?.getPlatform?.() === 'ios'
+        );
+        console.log('[usePlatform] isNative:', nativeCheck, 'Capacitor.getPlatform():', Capacitor.getPlatform(), 'window.Capacitor:', Boolean(cap));
+        setIsNative(nativeCheck);
     }, []);
 
     return { isNative };
