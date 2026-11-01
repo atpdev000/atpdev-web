@@ -1,6 +1,8 @@
 package com.ftydownloader.pro;
 
 import android.Manifest;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -345,6 +347,78 @@ public class WhatsAppStatusPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("Error al abrir medio: " + e.getMessage());
         }
+    }
+
+    @PluginMethod
+    public void shareFile(PluginCall call) {
+        String filePath = call.getString("filePath");
+        String title = call.getString("title", "Compartir con");
+
+        if (filePath == null || filePath.isEmpty()) {
+            call.reject("filePath es requerido");
+            return;
+        }
+
+        try {
+            if (filePath.startsWith("file://")) {
+                filePath = Uri.parse(filePath).getPath();
+            }
+
+            File file = new File(filePath);
+            if (!file.exists()) {
+                call.reject("El archivo no existe en el almacenamiento");
+                return;
+            }
+
+            String name = file.getName().toLowerCase();
+            boolean isVideo = name.endsWith(".mp4") || name.endsWith(".3gp") || name.endsWith(".mov") || name.endsWith(".mkv");
+            boolean isAudio = name.endsWith(".mp3") || name.endsWith(".m4a") || name.endsWith(".wav");
+            String mimeType = isVideo ? "video/*" : (isAudio ? "audio/*" : "image/*");
+
+            Uri contentUri = FileProvider.getUriForFile(
+                getContext(),
+                getContext().getPackageName() + ".fileprovider",
+                file
+            );
+
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType(mimeType);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            Intent chooser = Intent.createChooser(shareIntent, title);
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(chooser);
+
+            JSObject ret = new JSObject();
+            ret.put("success", true);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Error al compartir archivo: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void getClipboard(PluginCall call) {
+        getActivity().runOnUiThread(() -> {
+            try {
+                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard != null && clipboard.hasPrimaryClip() && clipboard.getPrimaryClip().getItemCount() > 0) {
+                    CharSequence text = clipboard.getPrimaryClip().getItemAt(0).getText();
+                    JSObject ret = new JSObject();
+                    ret.put("text", text != null ? text.toString() : "");
+                    call.resolve(ret);
+                } else {
+                    JSObject ret = new JSObject();
+                    ret.put("text", "");
+                    call.resolve(ret);
+                }
+            } catch (Exception e) {
+                JSObject ret = new JSObject();
+                ret.put("text", "");
+                call.resolve(ret);
+            }
+        });
     }
 
     private String getImageThumbnailBase64(String path) {

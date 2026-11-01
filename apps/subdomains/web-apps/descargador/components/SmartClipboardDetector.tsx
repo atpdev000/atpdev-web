@@ -6,6 +6,8 @@ import { detectPlatformFromUrl, DetectedUrlInfo } from '@/lib/clipboardDetector'
 import { Sparkles, CheckCircle2, ArrowRight, X, ClipboardPaste } from 'lucide-react'
 import { usePlatform } from '@/hooks/usePlatform'
 
+import { readNativeClipboard } from '@/lib/nativeBridge'
+
 interface SmartClipboardDetectorProps {
   onDetected: (info: DetectedUrlInfo, autoSearch: boolean) => void
 }
@@ -52,7 +54,6 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
   // 1. GLOBAL PASTE LISTENER (Ctrl+V anywhere on web or mobile browser)
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
-      // Don't intercept if user is typing into an active input/textarea
       const target = e.target as HTMLElement
       const isInput = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')
       
@@ -72,19 +73,16 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
     return () => window.removeEventListener('paste', handlePaste)
   }, [handleDetectedUrl])
 
-  // 2. WINDOW FOCUS / APP RESUME LISTENER
+  // 2. WINDOW FOCUS / APP RESUME LISTENER (Lectura nativa en Android y Web)
   useEffect(() => {
     const checkClipboardSilently = async () => {
       try {
-        if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.readText) {
-          // In some browsers, readText requires explicit user permission
-          const text = await navigator.clipboard.readText()
-          if (text) {
-            handleDetectedUrl(text, true)
-          }
+        const text = await readNativeClipboard()
+        if (text) {
+          handleDetectedUrl(text, true)
         }
       } catch (err) {
-        // Expected when user hasn't granted clipboard-read permission yet
+        console.warn('Silent clipboard check:', err)
       }
     }
 

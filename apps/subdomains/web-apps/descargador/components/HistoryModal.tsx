@@ -8,6 +8,9 @@ import { FileOpener } from '@capacitor-community/file-opener';
 import { Dialog } from '@capacitor/dialog';
 import { Share } from '@capacitor/share';
 
+import { Toast } from '@capacitor/toast';
+import { shareNativeMedia } from '@/lib/nativeBridge';
+
 interface HistoryModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -59,12 +62,14 @@ export default function HistoryModal({ isOpen, onClose, history, onClear, onDele
         e.stopPropagation(); // Evitar abrir el archivo
         try {
             if (item.filePath) {
-                await Share.share({
-                    title: item.title,
-                    text: `Mira este video descargado de ${item.platform}: ${item.title}`,
-                    url: item.filePath,
-                    dialogTitle: 'Compartir descarga'
-                });
+                const shared = await shareNativeMedia(item.filePath, item.title, item.originalUrl);
+                if (!shared && item.originalUrl) {
+                    await Share.share({
+                        title: item.title,
+                        url: item.originalUrl,
+                        dialogTitle: 'Compartir enlace'
+                    });
+                }
             } else if (item.originalUrl) {
                 await Share.share({
                     title: item.title,
@@ -79,15 +84,17 @@ export default function HistoryModal({ isOpen, onClose, history, onClear, onDele
 
     const handleDelete = async (e: React.MouseEvent, id: string) => {
         e.stopPropagation(); // Evitar abrir el archivo
-        const { value } = await Dialog.confirm({
-            title: '¿Eliminar del historial?',
-            message: 'Esto eliminará este registro de tu lista de descargas.',
-            okButtonTitle: 'Eliminar',
-            cancelButtonTitle: 'Cancelar'
-        });
-
-        if (value) {
+        try {
             onDelete(id);
+            try {
+                await Toast.show({
+                    text: 'Descarga eliminada del historial',
+                    duration: 'short',
+                    position: 'bottom'
+                });
+            } catch {}
+        } catch (error) {
+            console.error('Error al eliminar:', error);
         }
     };
 

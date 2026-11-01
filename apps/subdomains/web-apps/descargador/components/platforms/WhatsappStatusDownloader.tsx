@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Capacitor, registerPlugin } from '@capacitor/core'
+import { createPortal } from 'react-dom'
+import { Capacitor } from '@capacitor/core'
 import { usePlatform } from '@/hooks/usePlatform'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 import { useAdMobRewarded } from '@/hooks/useAdMobRewarded'
 import { Toast } from '@capacitor/toast'
-import { Share } from '@capacitor/share'
 import { 
   Download, 
   RefreshCw, 
@@ -18,36 +18,12 @@ import {
   ShieldCheck, 
   ExternalLink,
   FolderLock,
-  Layers,
   Sparkles,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  X
 } from 'lucide-react'
-
-// Interface del Plugin Nativo de Android para WhatsApp
-interface WhatsAppStatusPluginInterface {
-  checkPermission(): Promise<{ granted: boolean; isAllFiles: boolean; sdkVersion: number }>
-  requestPermission(): Promise<{ openedSettings?: boolean; type?: string }>
-  getStatuses(options?: { appType?: 'all' | 'whatsapp' | 'business' }): Promise<{
-    statuses: Array<{
-      id: string
-      name: string
-      path: string
-      type: 'image' | 'video'
-      app: 'whatsapp' | 'business'
-      sizeBytes: number
-      sizeFormatted: string
-      date: string
-      thumbnail?: string
-    }>
-    count: number
-  }>
-  saveToGallery(options: { filePath: string }): Promise<{ success: boolean; uri: string; fileName: string }>
-  openWhatsApp(options?: { target?: 'whatsapp' | 'business' }): Promise<{ success: boolean; package?: string }>
-  openMedia(options: { filePath: string }): Promise<{ success: boolean }>
-}
-
-const WhatsAppStatus = registerPlugin<WhatsAppStatusPluginInterface>('WhatsAppStatus')
+import { NativeWhatsAppStatus as WhatsAppStatus, shareNativeMedia } from '@/lib/nativeBridge'
 
 interface StatusItem {
   id: string
@@ -94,7 +70,7 @@ export default function WhatsappStatusDownloader() {
   const { addToHistory } = useDownloadHistory()
   const { showRewarded } = useAdMobRewarded()
 
-  // SnapNosh Style: Selector WhatsApp Normal vs WhatsApp Business
+  // Selector WhatsApp Normal vs WhatsApp Business
   const [selectedApp, setSelectedApp] = useState<'whatsapp' | 'business'>('whatsapp')
   const [activeFilter, setActiveFilter] = useState<'all' | 'images' | 'videos'>('all')
 
@@ -197,7 +173,7 @@ export default function WhatsappStatusDownloader() {
     }
   }
 
-  // 5. Guardar Estado en Galería de forma 100% profesional
+  // 5. Guardar Estado en Galería
   const handleSaveStatus = async (item: StatusItem) => {
     showRewarded(async () => {
       setSavingId(item.id)
@@ -234,6 +210,7 @@ export default function WhatsappStatusDownloader() {
           platform: 'whatsapp',
           thumbnail: item.thumbnail || item.uri,
           originalUrl: item.uri,
+          filePath: item.path,
           status: 'completed',
           format: item.type === 'video' ? 'Video MP4' : 'Foto HD',
           fileSize: item.sizeFormatted || 'HD',
@@ -253,16 +230,11 @@ export default function WhatsappStatusDownloader() {
     })
   }
 
-  // 6. Compartir Estado
+  // 6. Compartir Estado de manera 100% nativa con FileProvider
   const handleShare = async (item: StatusItem) => {
     try {
-      if (isNative && item.path) {
-        await Share.share({
-          title: 'Estado de WhatsApp',
-          text: 'Descargado con FTY Downloader Pro',
-          url: item.path,
-          dialogTitle: 'Compartir Estado'
-        })
+      if (item.path) {
+        await shareNativeMedia(item.path, `Estado: ${item.name}`, item.uri)
       } else if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
           title: 'Estado de WhatsApp',
@@ -272,8 +244,8 @@ export default function WhatsappStatusDownloader() {
       } else {
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent('Mira este estado: ' + item.name)}`, '_blank')
       }
-    } catch {
-      // Cancelado por el usuario
+    } catch (err) {
+      console.warn('Error al compartir estado:', err)
     }
   }
 
@@ -305,65 +277,47 @@ export default function WhatsappStatusDownloader() {
   const videoCount = statuses.filter(s => s.type === 'video').length
 
   return (
-    <div className="space-y-3.5 animate-in fade-in duration-300">
-      {/* BARRA SUPERIOR PROFESIONAL ESTILO SNAPNOSH */}
-      <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl p-2 sm:p-2.5 border border-gray-200/80 dark:border-slate-800 shadow-md flex items-center justify-between gap-2 overflow-hidden">
-        
-        {/* Toggle WhatsApp Normal vs WhatsApp Business */}
-        <div className="flex items-center bg-gray-100 dark:bg-slate-800/80 p-0.5 sm:p-1 rounded-xl shrink-0">
-          <button
-            onClick={() => setSelectedApp('whatsapp')}
-            className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              selectedApp === 'whatsapp'
-                ? 'bg-[#25D366] text-white shadow-sm'
-                : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-            </svg>
-            <span>WhatsApp</span>
-          </button>
+    <div className="space-y-4">
+      {/* SELECTOR WHATSAPP NORMAL VS BUSINESS */}
+      <div className="bg-gray-100 dark:bg-slate-800/80 p-1 rounded-2xl flex items-center justify-between border border-gray-200/60 dark:border-slate-700/60">
+        <button
+          onClick={() => {
+            setSelectedApp('whatsapp')
+            scanStatuses('whatsapp')
+          }}
+          className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            selectedApp === 'whatsapp'
+              ? 'bg-white dark:bg-slate-900 text-[#25D366] shadow-sm'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+          </svg>
+          <span className="truncate">WhatsApp</span>
+        </button>
 
-          <button
-            onClick={() => setSelectedApp('business')}
-            className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              selectedApp === 'business'
-                ? 'bg-teal-600 text-white shadow-sm'
-                : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5 shrink-0" />
-            <span>WA Business</span>
-          </button>
-        </div>
-
-        {/* Acciones Rápidas: Actualizar y Abrir WA */}
-        <div className="flex items-center justify-end gap-1.5 shrink-0">
-          <button
-            onClick={() => scanStatuses(selectedApp)}
-            disabled={loading}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
-            title="Actualizar Estados"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#25D366]' : ''}`} />
-            <span className="hidden xs:inline">{loading ? '...' : 'Actualizar'}</span>
-          </button>
-
-          <button
-            onClick={() => handleOpenWhatsApp(selectedApp)}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-xs font-bold transition-all cursor-pointer active:scale-95"
-            title="Abrir WhatsApp para ver más estados"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Abrir App</span>
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            setSelectedApp('business')
+            scanStatuses('business')
+          }}
+          className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+            selectedApp === 'business'
+              ? 'bg-white dark:bg-slate-900 text-[#25D366] shadow-sm'
+              : 'text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          <div className="w-4 h-4 rounded-full bg-[#25D366] text-white flex items-center justify-center text-[10px] font-black shrink-0">
+            B
+          </div>
+          <span className="truncate">WA Business</span>
+        </button>
       </div>
 
-      {/* FILTROS DE TIPO: TODOS / FOTOS / VIDEOS */}
-      <div className="flex items-center justify-between gap-2 px-0.5">
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+      {/* FILTROS (TODOS / FOTOS / VIDEOS) Y BOTÓN DE REFRESCO */}
+      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setActiveFilter('all')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
@@ -400,50 +354,70 @@ export default function WhatsappStatusDownloader() {
           </button>
         </div>
 
-        <span className="text-[11px] font-mono text-gray-400 dark:text-slate-500 hidden sm:inline shrink-0">
-          {filteredStatuses.length} detectados
-        </span>
+        <button
+          onClick={() => scanStatuses(selectedApp)}
+          disabled={loading}
+          className="p-2 rounded-xl bg-gray-100 dark:bg-slate-800/80 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 transition-all shrink-0 cursor-pointer"
+          title="Actualizar lista de estados"
+          aria-label="Actualizar estados"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#25D366]' : ''}`} />
+        </button>
       </div>
 
-      {/* TARJETA DE SOLICITUD DE PERMISO (Solo si no está concedido en Android) */}
-      {!permissionGranted && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm animate-in slide-in-from-top-2">
-          <div className="flex items-center gap-3 text-center sm:text-left">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
-              <FolderLock className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="font-bold text-xs sm:text-sm">Permiso de Acceso a Archivos Necesario</h4>
-              <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80">
-                Para detectar y guardar los estados de {selectedApp === 'whatsapp' ? 'WhatsApp' : 'WhatsApp Business'}, concede el acceso a los archivos.
-              </p>
+      {/* CASO 1: FALTA CONCEDER PERMISO DE ALMACENAMIENTO (Android 11+) */}
+      {!permissionGranted ? (
+        <div className="text-center py-10 px-4 bg-amber-500/10 dark:bg-amber-950/20 border-2 border-dashed border-amber-500/40 rounded-3xl p-6 shadow-sm animate-in fade-in">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center mb-3 shadow-inner">
+            <FolderLock className="w-8 h-8" />
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
+            Permiso de Acceso a Archivos Necesario
+          </h3>
+          <p className="text-xs text-gray-600 dark:text-slate-300 max-w-sm mx-auto mt-1.5 leading-relaxed">
+            Para detectar las fotos y videos de tus contactos de {selectedApp === 'whatsapp' ? 'WhatsApp' : 'WhatsApp Business'}, se requiere conceder el permiso de acceso al almacenamiento.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
+            <button
+              onClick={handleRequestPermission}
+              className="px-5 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Conceder Permiso Ahora</span>
+            </button>
+            <button
+              onClick={() => scanStatuses(selectedApp)}
+              className="px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-300 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Comprobar Permiso</span>
+            </button>
+          </div>
+        </div>
+      ) : loading && statuses.length === 0 ? (
+        /* CASO 2: ANIMACIÓN DE CARGA ELEGANTE */
+        <div className="text-center py-12 px-4 bg-white/70 dark:bg-slate-900/60 rounded-3xl border border-gray-200/80 dark:border-slate-800 shadow-sm animate-in fade-in">
+          <div className="relative w-14 h-14 mx-auto mb-3 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-3 border-[#25D366]/20 border-t-[#25D366] animate-spin"></div>
+            <div className="w-10 h-10 rounded-full bg-[#25D366]/10 text-[#25D366] flex items-center justify-center">
+              <RefreshCw className="w-5 h-5 animate-spin" />
             </div>
           </div>
-
-          <button
-            onClick={handleRequestPermission}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-md transition-all cursor-pointer active:scale-95 shrink-0 flex items-center justify-center gap-1.5"
-          >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Conceder Acceso</span>
-          </button>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">
+            Escaneando estados de {selectedApp === 'whatsapp' ? 'WhatsApp' : 'WA Business'}...
+          </h3>
+          <p className="text-xs text-gray-500 dark:text-slate-400 max-w-xs mx-auto mt-1">
+            Buscando fotos y videos vistos recientemente en tu dispositivo...
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 max-w-md mx-auto opacity-40">
+            {[1, 2, 3, 4].map(n => (
+              <div key={n} className="aspect-[9/16] bg-gray-200 dark:bg-slate-800 rounded-2xl animate-pulse"></div>
+            ))}
+          </div>
         </div>
-      )}
-
-      {/* ESTADO DE CARGA */}
-      {loading && statuses.length === 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map(n => (
-            <div key={n} className="aspect-[9/16] bg-gray-200 dark:bg-slate-800/60 rounded-2xl animate-pulse flex items-center justify-center">
-              <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* CUADRÍCULA DE FOTOS Y VIDEOS DIRECTA */}
-      {filteredStatuses.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
+      ) : filteredStatuses.length > 0 ? (
+        /* CASO 3: CUADRÍCULA DE FOTOS Y VIDEOS */
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in">
           {filteredStatuses.map((item) => {
             const isSaving = savingId === item.id
 
@@ -525,8 +499,9 @@ export default function WhatsappStatusDownloader() {
 
                   <button
                     onClick={() => handleShare(item)}
-                    className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 transition-colors cursor-pointer"
-                    title="Compartir"
+                    className="p-2 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-700 dark:text-slate-200 transition-colors cursor-pointer active:scale-95"
+                    title="Compartir Estado"
+                    aria-label="Compartir Estado"
                   >
                     <Share2 className="w-3.5 h-3.5" />
                   </button>
@@ -535,13 +510,13 @@ export default function WhatsappStatusDownloader() {
             )
           })}
         </div>
-      ) : !loading && (
-        /* ESTADO VACÍO ELEGANTE */
+      ) : (
+        /* CASO 4: ESTADO VACÍO (Con permisos ya otorgados) */
         <div className="text-center py-10 bg-white/90 dark:bg-slate-900/60 rounded-3xl border border-dashed border-gray-200 dark:border-slate-800 p-6 shadow-sm">
           <div className="w-14 h-14 rounded-2xl bg-[#25D366]/10 text-[#25D366] mx-auto flex items-center justify-center mb-3">
             <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-            </svg>
+          </svg>
           </div>
 
           <h3 className="text-base font-bold text-gray-900 dark:text-white">
@@ -571,12 +546,24 @@ export default function WhatsappStatusDownloader() {
         </div>
       )}
 
-      {/* MODAL VISOR EN PANTALLA COMPLETA CON REPRODUCTOR PROFESIONAL */}
-      {selectedPreview && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200">
-          <div className="relative max-w-lg w-full max-h-[95vh] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-800">
+      {/* MODAL VISOR EN PANTALLA COMPLETA CON REPRODUCTOR PROFESIONAL (Via Portal) */}
+      {selectedPreview && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
+          style={{
+            paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))',
+            paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setSelectedPreview(null)
+          }}
+        >
+          <div 
+            className="relative max-w-lg w-full max-h-[92vh] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header del Modal */}
-            <div className="p-3 sm:p-4 flex items-center justify-between text-white border-b border-slate-800/80 bg-slate-900/70">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between text-white border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-sm shrink-0">
               <div className="flex items-center gap-2 min-w-0 mr-2">
                 <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#25D366] text-white shrink-0">
                   {selectedPreview.type === 'video' ? 'VIDEO' : 'FOTO'}
@@ -585,9 +572,10 @@ export default function WhatsappStatusDownloader() {
               </div>
               <button
                 onClick={() => setSelectedPreview(null)}
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg text-xs font-bold cursor-pointer shrink-0 bg-slate-800/60 hover:bg-slate-800"
+                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-800/80 hover:bg-slate-700 text-sm font-bold cursor-pointer shrink-0 transition-colors active:scale-95"
+                aria-label="Cerrar visor"
               >
-                ✕ Cerrar
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -612,7 +600,7 @@ export default function WhatsappStatusDownloader() {
             </div>
 
             {/* Barra de Acciones del Modal */}
-            <div className="p-3 border-t border-slate-800/80 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2">
+            <div className="p-3 border-t border-slate-800/80 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2 shrink-0">
               {selectedPreview.type === 'video' && isNative && (
                 <button
                   onClick={() => handleOpenMedia(selectedPreview.path)}
@@ -627,7 +615,7 @@ export default function WhatsappStatusDownloader() {
               <div className="flex items-center gap-2 ml-auto">
                 <button
                   onClick={() => handleShare(selectedPreview)}
-                  className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-sm"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Compartir</span>
@@ -645,7 +633,8 @@ export default function WhatsappStatusDownloader() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

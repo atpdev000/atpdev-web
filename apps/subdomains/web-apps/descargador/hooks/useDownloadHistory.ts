@@ -108,29 +108,27 @@ export function useDownloadHistory() {
         }
     };
 
-    const deleteItem = async (id: string) => {
+    const deleteItem = (id: string) => {
         try {
             const stored = localStorage.getItem(HISTORY_KEY);
             if (stored) {
                 const currentItems: HistoryItem[] = JSON.parse(stored);
                 const itemToDelete = currentItems.find(i => i.id === id);
 
-                // 🔥 Borrar archivo físico si existe
-                if (itemToDelete?.filePath) {
-                    try {
-                        await Filesystem.deleteFile({
-                            path: itemToDelete.filePath
-                        });
-                        console.log('🗑️ Archivo físico eliminado:', itemToDelete.filePath);
-                    } catch (fsError) {
-                        console.warn('No se pudo borrar el archivo físico (tal vez ya no existe):', fsError);
-                    }
-                }
-
+                // ⚡ Actualización inmediata de UI y almacenamiento
                 const updated = currentItems.filter(i => i.id !== id);
                 setHistory(updated);
                 localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
                 window.dispatchEvent(new Event('history-updated'));
+
+                // 🔥 Borrar archivo físico en background si existe
+                if (itemToDelete?.filePath) {
+                    Filesystem.deleteFile({
+                        path: itemToDelete.filePath
+                    }).catch(fsError => {
+                        console.warn('No se pudo borrar el archivo físico:', fsError);
+                    });
+                }
             }
         } catch (error) {
             console.error('Error deleting item:', error);
