@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Moon, Sun, Wand2, Type, Square, ChevronDown, Sparkles, Loader2, Palette, X, Eye, Zap, Laptop, Tablet, Smartphone, RefreshCw, ExternalLink } from "lucide-react";
+import { Moon, Sun, Wand2, Type, Square, ChevronDown, Sparkles, Loader2, Palette, X, Eye, Zap, Laptop, Tablet, Smartphone, RefreshCw, ExternalLink, Monitor, Layers, AlertCircle } from "lucide-react";
 import { suggestThemeWithAI } from "./actions";
 
 // ==========================================
@@ -92,6 +92,8 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
   const hiddenIframeRef = useRef<HTMLIFrameElement>(null);
   const [portalUrl, setPortalUrl] = useState<string>("http://localhost:3000");
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('iframe');
+  const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -105,6 +107,30 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
       }
     }
   }, []);
+
+  // Prober de conexión para el portal :3000
+  useEffect(() => {
+    let active = true;
+    const checkConnection = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        await fetch(portalUrl, { mode: 'no-cors', signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (active) setIsServerOnline(true);
+      } catch {
+        if (active) setIsServerOnline(false);
+      }
+    };
+    if (isOpen) {
+      checkConnection();
+      const interval = setInterval(checkConnection, 8000);
+      return () => {
+        active = false;
+        clearInterval(interval);
+      };
+    }
+  }, [portalUrl, isOpen, iframeRefreshKey]);
 
   // States
   const [mode, setMode] = useState(initialConfig?.theme_mode || "dark");
@@ -777,63 +803,97 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
           {/* RIGHT PANEL: LIVE PREVIEW (ACTUAL PORTAL) */}
           <div className="flex-1 relative bg-[#070a12] hidden md:flex flex-col overflow-hidden">
             {/* Top Toolbar */}
-            <div className="h-14 border-b border-gray-800 bg-[#0c0c0e]/95 px-6 flex items-center justify-between z-10 backdrop-blur shrink-0">
+            <div className="h-14 border-b border-gray-800 bg-[#0c0c0e]/95 px-6 flex items-center justify-between z-10 backdrop-blur shrink-0 gap-4">
               <div className="flex items-center gap-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                <span className={`w-2.5 h-2.5 rounded-full ${isServerOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-amber-400'}`} />
                 <span className="text-xs font-bold text-white tracking-wider uppercase font-mono flex items-center gap-2">
-                  <Eye size={14} className="text-emerald-400" />
-                  Live Preview: <strong className="text-blue-400 font-semibold lowercase">portal.atpdev.dev (:3000)</strong>
+                  <Eye size={14} className={isServerOnline ? "text-emerald-400" : "text-amber-400"} />
+                  <span>{isServerOnline ? 'Live Preview:' : 'Simulación Activa:'}</span>
+                  <strong className="text-blue-400 font-semibold lowercase">portal.atpdev.dev (:3000)</strong>
                 </span>
               </div>
 
-              {/* Selector de Dispositivos Responsivo */}
+              {/* View Mode Selector: Iframe vs Components */}
               <div className="flex items-center p-1 rounded-xl bg-black border border-gray-800 shadow-inner">
                 <button
                   type="button"
-                  onClick={() => setPreviewDevice('desktop')}
+                  onClick={() => setPreviewMode('iframe')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    previewDevice === 'desktop'
+                    previewMode === 'iframe'
                       ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]'
                       : 'text-gray-400 hover:text-white'
                   }`}
-                  title="Laptop / Desktop (100%)"
                 >
-                  <Laptop size={14} />
-                  <span>100%</span>
+                  <Monitor size={13} />
+                  <span>Portal Completo</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setPreviewDevice('tablet')}
+                  onClick={() => setPreviewMode('components')}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    previewDevice === 'tablet'
+                    previewMode === 'components'
                       ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]'
                       : 'text-gray-400 hover:text-white'
                   }`}
-                  title="Tablet (768px)"
                 >
-                  <Tablet size={14} />
-                  <span>Tablet</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPreviewDevice('mobile')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    previewDevice === 'mobile'
-                      ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                  title="Móvil (390px)"
-                >
-                  <Smartphone size={14} />
-                  <span>Móvil</span>
+                  <Layers size={13} />
+                  <span>Componentes UI</span>
                 </button>
               </div>
+
+              {/* Selector de Dispositivos Responsivo */}
+              {previewMode === 'iframe' && (
+                <div className="flex items-center p-1 rounded-xl bg-black border border-gray-800 shadow-inner">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('desktop')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      previewDevice === 'desktop'
+                        ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                    title="Laptop / Desktop (100%)"
+                  >
+                    <Laptop size={14} />
+                    <span>100%</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('tablet')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      previewDevice === 'tablet'
+                        ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                    title="Tablet (768px)"
+                  >
+                    <Tablet size={14} />
+                    <span>Tablet</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDevice('mobile')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      previewDevice === 'mobile'
+                        ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(37,99,235,0.4)]'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                    title="Móvil (390px)"
+                  >
+                    <Smartphone size={14} />
+                    <span>Móvil</span>
+                  </button>
+                </div>
+              )}
 
               {/* Acciones de Recarga y Apertura Externa */}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setIframeRefreshKey(prev => prev + 1)}
+                  onClick={() => {
+                    setIsServerOnline(null);
+                    setIframeRefreshKey(prev => prev + 1);
+                  }}
                   className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/80 transition-colors border border-transparent hover:border-gray-700 cursor-pointer"
                   title="Recargar vista previa"
                 >
@@ -853,46 +913,191 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
 
             {/* Viewport de Previsualización Centrado */}
             <div className="flex-1 w-full bg-[#030712] p-4 md:p-6 flex items-center justify-center overflow-hidden">
-              <div
-                className={`transition-all duration-300 bg-[#070a12] shadow-2xl relative ${
-                  previewDevice === 'desktop'
-                    ? 'w-full h-full rounded-2xl border border-gray-800'
-                    : previewDevice === 'tablet'
-                    ? 'w-[768px] max-w-full h-full max-h-[92vh] rounded-2xl border-4 border-gray-700 ring-4 ring-black'
-                    : 'w-[390px] max-w-full h-full max-h-[844px] rounded-[44px] border-[10px] border-[#18181b] ring-4 ring-black relative overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)]'
-                }`}
-              >
-                {/* Notch simulado para vista móvil */}
-                {previewDevice === 'mobile' && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-5 bg-[#18181b] rounded-b-2xl z-20 flex items-center justify-center pointer-events-none">
-                    <div className="w-3 h-3 rounded-full bg-black border border-gray-800 mr-3" />
-                    <div className="w-12 h-1 bg-gray-900 rounded-full" />
-                  </div>
-                )}
+              {previewMode === 'iframe' ? (
+                <div
+                  className={`transition-all duration-300 bg-[#070a12] shadow-2xl relative ${
+                    previewDevice === 'desktop'
+                      ? 'w-full h-full rounded-2xl border border-gray-800'
+                      : previewDevice === 'tablet'
+                      ? 'w-[768px] max-w-full h-full max-h-[92vh] rounded-2xl border-4 border-gray-700 ring-4 ring-black'
+                      : 'w-[390px] max-w-full h-full max-h-[844px] rounded-[44px] border-[10px] border-[#18181b] ring-4 ring-black relative overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.9)]'
+                  }`}
+                >
+                  {/* Notch simulado para vista móvil */}
+                  {previewDevice === 'mobile' && (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-36 h-5 bg-[#18181b] rounded-b-2xl z-20 flex items-center justify-center pointer-events-none">
+                      <div className="w-3 h-3 rounded-full bg-black border border-gray-800 mr-3" />
+                      <div className="w-12 h-1 bg-gray-900 rounded-full" />
+                    </div>
+                  )}
 
-                <iframe 
-                  ref={iframeRef}
-                  key={iframeRefreshKey}
-                  src={portalUrl}
-                  className="w-full h-full border-0 bg-transparent"
-                  title="Portal Live Preview"
-                  onLoad={() => {
-                    if (iframeRef.current && iframeRef.current.contentWindow) {
-                      iframeRef.current.contentWindow.postMessage({
-                        type: "UPDATE_THEME_PREVIEW",
-                        payload: {
-                          mode, primary, secondary, tertiary, neutral, 
-                          fontHeadline, fontBody, fontLabel, radiusScale, 
-                          globalBackgroundImage, 
-                          glowStyle: mouseEffects.join(','),
-                          neonThickness,
-                          neonGlow: neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px"
+                  {isServerOnline === null ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#070b14] space-y-3">
+                      <Loader2 size={24} className="text-blue-400 animate-spin" />
+                      <div>
+                        <h4 className="text-sm font-bold text-white">Verificando conexión en :3000...</h4>
+                        <p className="text-xs text-slate-400 max-w-xs mt-1">Conectando con el portal principal en segundo plano.</p>
+                      </div>
+                    </div>
+                  ) : isServerOnline === false ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#070b14] space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <AlertCircle size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-white">Servidor local en puerto :3000 en pausa</h4>
+                        <p className="text-xs text-slate-400 max-w-xs mt-1">
+                          Para ver el portal completo interactivo en vivo, ejecuta <code className="text-blue-400 font-mono">npm run dev</code>.
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewMode('components')}
+                          className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 flex items-center gap-1.5 shadow-lg shadow-blue-500/20 cursor-pointer"
+                        >
+                          <Layers size={13} />
+                          <span>Ver Componentes UI Interactivos</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsServerOnline(null);
+                            setIframeRefreshKey(prev => prev + 1);
+                          }}
+                          className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <RefreshCw size={13} />
+                          <span>Reintentar</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <iframe 
+                      ref={iframeRef}
+                      key={iframeRefreshKey}
+                      src={portalUrl}
+                      className="w-full h-full border-0 bg-transparent"
+                      title="Portal Live Preview"
+                      onLoad={() => {
+                        if (iframeRef.current && iframeRef.current.contentWindow) {
+                          iframeRef.current.contentWindow.postMessage({
+                            type: "UPDATE_THEME_PREVIEW",
+                            payload: {
+                              mode, primary, secondary, tertiary, neutral, 
+                              fontHeadline, fontBody, fontLabel, radiusScale, 
+                              globalBackgroundImage, 
+                              glowStyle: mouseEffects.join(','),
+                              neonThickness,
+                              neonGlow: neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px"
+                            }
+                          }, "*");
                         }
-                      }, "*");
-                    }
+                      }}
+                    />
+                  )}
+                </div>
+              ) : (
+                /* Componentes UI Simulados de Alta Fidelidad del Portal ATP DEV */
+                <div className="w-full max-w-2xl bg-[#090d16] border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6 overflow-y-auto max-h-[85vh] custom-scrollbar"
+                  style={{
+                    backgroundColor: mode === 'dark' ? '#090d16' : '#ffffff',
+                    color: mode === 'dark' ? '#f8fafc' : '#0f172a',
+                    fontFamily: `"${fontBody}", sans-serif`,
+                    backgroundImage: globalBackgroundImage ? `url(${globalBackgroundImage})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
                   }}
-                />
-              </div>
+                >
+                  {/* Top Bar Mock */}
+                  <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-xs shadow-md"
+                        style={{ backgroundColor: primary }}>
+                        ⚡
+                      </div>
+                      <span className="font-extrabold text-sm tracking-wider" style={{ fontFamily: `"${fontHeadline}", sans-serif` }}>
+                        ATP DEV PORTAL
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full border font-bold"
+                      style={{ backgroundColor: `${primary}15`, color: primary, borderColor: `${primary}40` }}>
+                      {mode === 'dark' ? '🌙 Modo Oscuro' : '☀️ Modo Claro'}
+                    </span>
+                  </div>
+
+                  {/* Hero Showcase Card */}
+                  <div className="p-6 rounded-2xl border transition-all duration-300 relative overflow-hidden shadow-xl space-y-4"
+                    style={{
+                      backgroundColor: mode === 'dark' ? 'rgba(15, 23, 42, 0.7)' : 'rgba(248, 250, 252, 0.9)',
+                      borderColor: `${primary}40`,
+                      backdropFilter: 'blur(12px)',
+                      boxShadow: `0 0 30px ${primary}25`
+                    }}
+                  >
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+                        Arquitectura Cloud & Microservicios
+                      </span>
+                      <h3 className="text-2xl font-black leading-tight" style={{ fontFamily: `"${fontHeadline}", sans-serif`, color: mode === 'dark' ? '#ffffff' : '#0f172a' }}>
+                        Transformación Digital y Ecosistema de Subdominios
+                      </h3>
+                      <p className="text-xs leading-relaxed text-slate-400">
+                        Control central de temas cromáticos HSL, efectos neón {neonThickness} y sincronización en tiempo real.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                      <button
+                        type="button"
+                        className="py-2.5 px-5 rounded-xl font-bold text-xs text-white shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+                        style={{
+                          backgroundColor: primary,
+                          boxShadow: `0 0 18px ${primary}60`
+                        }}
+                      >
+                        <Zap size={14} />
+                        <span>Acción Primaria Neón</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="py-2.5 px-4 rounded-xl font-bold text-xs border transition-all flex items-center gap-2 cursor-pointer"
+                        style={{
+                          backgroundColor: mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#ffffff',
+                          borderColor: `${primary}40`,
+                          color: mode === 'dark' ? '#f8fafc' : '#0f172a'
+                        }}
+                      >
+                        <span>Explorar Módulos</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Subdomain Cards Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { name: 'Chamba Pro', port: ':3005', color: '#10b981', desc: 'Empleos & CAS' },
+                      { name: 'Sorteos Pro', port: ':3006', color: '#8b5cf6', desc: 'Ruleta y Sorteos' },
+                      { name: 'Descargador', port: ':3007', color: '#3b82f6', desc: 'Videos HD 1080p' },
+                      { name: 'Interactivo', port: ':3008', color: '#ec4899', desc: 'Tarjetas Mágicas' },
+                    ].map(sub => (
+                      <div key={sub.name} className="p-3.5 rounded-xl border transition-all space-y-1"
+                        style={{
+                          backgroundColor: mode === 'dark' ? 'rgba(15, 23, 42, 0.6)' : '#f8fafc',
+                          borderColor: mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: sub.color }} />
+                          <span className="text-[9px] font-mono text-slate-400">{sub.port}</span>
+                        </div>
+                        <p className="text-xs font-bold leading-tight mt-1">{sub.name}</p>
+                        <p className="text-[10px] text-slate-400">{sub.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

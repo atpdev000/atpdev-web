@@ -33,7 +33,11 @@ import {
   Flame,
   Award,
   Video,
-  Play
+  Play,
+  Zap,
+  Square,
+  Check,
+  X
 } from "lucide-react";
 import { SubdomainTheme } from "@atpdev/database";
 
@@ -118,7 +122,7 @@ function HSLToHex(h: number, s: number, l: number): string {
 
 function generateHarmonicPalette(seedHex: string, algorithm: string, mode: 'dark' | 'light') {
   if (algorithm === "custom") return null;
-  const [h, s] = hexToHSL(seedHex);
+  const [h, s, l] = hexToHSL(seedHex);
   const isDark = mode === "dark";
   let p = seedHex, sec = "", ter = "", neu = "";
 
@@ -162,10 +166,13 @@ export default function UnifiedThemeStudio({
   const [currentTheme, setCurrentTheme] = useState<SubdomainTheme>(theme);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('components'); // Default to components so user NEVER sees gray cloud!
+  const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('components');
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
   const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
+
+  // Gradient Builder Modal State
+  const [showGradientBuilder, setShowGradientBuilder] = useState(false);
 
   // AI Prompt Studio state
   const [aiPrompt, setAiPrompt] = useState("");
@@ -173,6 +180,7 @@ export default function UnifiedThemeStudio({
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const modalIframeRef = useRef<HTMLIFrameElement>(null);
+  const hiddenIframeRef = useRef<HTMLIFrameElement>(null);
 
   // Synchronize incoming prop updates
   useEffect(() => {
@@ -214,7 +222,22 @@ export default function UnifiedThemeStudio({
       active = false;
       clearInterval(interval);
     };
-  }, [localUrl]);
+  }, [localUrl, iframeRefreshKey]);
+
+  // Listen to Gradient Builder events from iframe modal
+  useEffect(() => {
+    const handleGradientMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'GRADIENT_GENERATED') {
+        updateThemeProp('global_background_image', e.data.payload);
+        setShowGradientBuilder(false);
+      }
+      if (e.data && e.data.type === 'GRADIENT_GENERATED_SILENTLY') {
+        updateThemeProp('global_background_image', e.data.payload);
+      }
+    };
+    window.addEventListener("message", handleGradientMessage);
+    return () => window.removeEventListener("message", handleGradientMessage);
+  }, [currentTheme]);
 
   // Broadcast theme update to iframes via postMessage
   const broadcastThemeToIframe = (themeData: SubdomainTheme) => {
@@ -230,7 +253,13 @@ export default function UnifiedThemeStudio({
       neutral_color: themeData.neutral_color || generatedPalette.neutral,
       accent_color: themeData.accent_color || activeSeedColor,
       theme_mode: themeData.theme_mode,
-      mode: themeData.theme_mode
+      mode: themeData.theme_mode,
+      glowStyle: themeData.glow_style,
+      neonThickness: themeData.neon_thickness,
+      fontHeadline: themeData.font_headline,
+      fontBody: themeData.font_body,
+      fontLabel: themeData.font_label,
+      radiusScale: themeData.radius_scale
     };
 
     const targetAction = `UPDATE_${subdomain.toUpperCase()}_THEME`;
@@ -275,67 +304,96 @@ export default function UnifiedThemeStudio({
     if (!aiPrompt.trim()) return;
     setAiLoading(true);
     setTimeout(() => {
-      // Pick random harmonic preset based on prompt keywords
       const promptLower = aiPrompt.toLowerCase();
-      let pickedHex = presets[0].hex;
-      if (promptLower.includes('azul') || promptLower.includes('cyan')) pickedHex = '#06b6d4';
-      else if (promptLower.includes('verde') || promptLower.includes('esmeralda')) pickedHex = '#10b981';
-      else if (promptLower.includes('oro') || promptLower.includes('dorado') || promptLower.includes('ambar')) pickedHex = '#f59e0b';
-      else if (promptLower.includes('morado') || promptLower.includes('violeta') || promptLower.includes('purpura')) pickedHex = '#8b5cf6';
-      else if (promptLower.includes('rosa') || promptLower.includes('fucsia') || promptLower.includes('magenta')) pickedHex = '#ec4899';
-      else if (promptLower.includes('rojo') || promptLower.includes('fuego')) pickedHex = '#ef4444';
+      let pickedHex = presets[0]?.hex || "#ec4899";
+      let pickedMode: 'dark' | 'light' = 'dark';
+      let pickedAlgo = "vibrant";
+
+      if (promptLower.includes('claro') || promptLower.includes('blanco') || promptLower.includes('luz')) {
+        pickedMode = 'light';
+      }
+      if (promptLower.includes('azul') || promptLower.includes('cyan')) {
+        pickedHex = '#06b6d4';
+      } else if (promptLower.includes('verde') || promptLower.includes('esmeralda')) {
+        pickedHex = '#10b981';
+      } else if (promptLower.includes('morado') || promptLower.includes('violeta') || promptLower.includes('purpura')) {
+        pickedHex = '#8b5cf6';
+      } else if (promptLower.includes('oro') || promptLower.includes('amarillo') || promptLower.includes('dorado')) {
+        pickedHex = '#f59e0b';
+      } else if (promptLower.includes('rosa') || promptLower.includes('fucsia') || promptLower.includes('amor')) {
+        pickedHex = '#ec4899';
+      }
 
       const updated: SubdomainTheme = {
         ...currentTheme,
         seed_color: pickedHex,
         accent_color: pickedHex,
         primary_color: pickedHex,
-        theme_mode: promptLower.includes('claro') || promptLower.includes('light') ? 'light' : 'dark',
-        color_theme: 'vibrant',
-        global_background_image: promptLower.includes('fondo') || promptLower.includes('wallpaper') ? WALLPAPER_PRESETS[1].url : currentTheme.global_background_image
+        theme_mode: pickedMode,
+        color_theme: pickedAlgo,
+        global_background_image: promptLower.includes('fondo') || promptLower.includes('animado') ? WALLPAPER_PRESETS[1].url : currentTheme.global_background_image
       };
 
       setCurrentTheme(updated);
       broadcastThemeToIframe(updated);
       setAiLoading(false);
-      setSaveSuccessMsg(`¡Tema generado con IA para "${aiPrompt.slice(0, 25)}..."!`);
-      setTimeout(() => setSaveSuccessMsg(null), 3500);
-    }, 700);
+    }, 600);
   };
 
-  // Render Subdomain Specific Mock Preview (Never broken!)
+  // Mouse effects array handling
+  const activeMouseEffects = useMemo(() => {
+    if (!currentTheme.glow_style) return ['spotlight-border'];
+    return currentTheme.glow_style.split(',').map(s => s.trim()).filter(Boolean);
+  }, [currentTheme.glow_style]);
+
+  const toggleMouseEffect = (effectId: string) => {
+    let next: string[] = [];
+    if (effectId === 'none') {
+      next = ['none'];
+    } else {
+      next = activeMouseEffects.filter(e => e !== 'none');
+      if (next.includes(effectId)) {
+        next = next.filter(e => e !== effectId);
+      } else {
+        next.push(effectId);
+      }
+      if (next.length === 0) next = ['none'];
+    }
+    updateThemeProp('glow_style', next.join(','));
+  };
+
+  // Subdomain specialized component mock preview
   const renderSubdomainComponentPreview = () => {
-    const primary = generatedPalette.primary || activeSeedColor;
     const isDark = activeThemeMode === 'dark';
-    const bgCard = isDark ? '#090d16' : '#ffffff';
-    const textColor = isDark ? '#f8fafc' : '#0f172a';
+    const primary = generatedPalette.primary;
+    const bgCard = isDark ? '#0f172a' : '#ffffff';
+    const textColor = isDark ? '#ffffff' : '#0f172a';
     const textMuted = isDark ? '#94a3b8' : '#64748b';
-    const borderCol = isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0';
+    const borderCol = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
 
     if (subdomain === 'magic') {
       return (
         <div className="space-y-4">
-          {/* Card 1: Interactive Template Showcase */}
           <div 
-            className="p-5 rounded-2xl border transition-all duration-300 shadow-xl relative overflow-hidden"
+            className="p-5 rounded-2xl border transition-all duration-300 shadow-xl space-y-3 relative overflow-hidden"
             style={{ 
               backgroundColor: bgCard, 
               borderColor: `${primary}50`,
               boxShadow: `0 8px 30px ${primary}20` 
             }}
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border"
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
                 style={{ backgroundColor: `${primary}18`, color: primary, borderColor: `${primary}40` }}>
-                ✨ Plantilla Interactiva Destacada
+                🪄 Plantilla Interactiva
               </span>
-              <span className="text-xs font-semibold" style={{ color: textMuted }}>Modo {activeThemeMode}</span>
+              <span className="text-xs font-bold" style={{ color: textMuted }}>30+ Mensajes</span>
             </div>
 
-            <div className="flex items-start gap-3.5 mb-3">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-md"
-                style={{ backgroundColor: `${primary}25`, color: primary }}>
-                <Heart size={24} />
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-md text-white font-bold"
+                style={{ backgroundColor: primary }}>
+                ❤️
               </div>
               <div>
                 <h4 className="text-base font-extrabold leading-tight mb-1" style={{ color: textColor }}>
@@ -347,7 +405,6 @@ export default function UnifiedThemeStudio({
               </div>
             </div>
 
-            {/* Chips de Categorías */}
             <div className="flex gap-1.5 mb-4 overflow-x-auto py-1">
               {['Todos', 'Amor', 'Juegos', 'Eventos'].map((c, i) => (
                 <span 
@@ -364,7 +421,6 @@ export default function UnifiedThemeStudio({
               ))}
             </div>
 
-            {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-2">
               <button 
                 type="button"
@@ -386,25 +442,6 @@ export default function UnifiedThemeStudio({
                 <Share2 size={14} style={{ color: primary }} />
                 <span>Compartir Link</span>
               </button>
-            </div>
-          </div>
-
-          {/* Mini Card: Music Player Mock */}
-          <div 
-            className="p-3.5 rounded-xl border flex items-center justify-between"
-            style={{ backgroundColor: bgCard, borderColor: borderCol }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${primary}20`, color: primary }}>
-                <Music size={16} />
-              </div>
-              <div>
-                <p className="text-xs font-bold leading-tight" style={{ color: textColor }}>Música de Fondo Activa</p>
-                <p className="text-[10px]" style={{ color: textMuted }}>Coldplay - Yellow (Instrumental)</p>
-              </div>
-            </div>
-            <div className="w-6 h-6 rounded-full flex items-center justify-center cursor-pointer shadow" style={{ backgroundColor: primary, color: '#fff' }}>
-              <Play size={10} />
             </div>
           </div>
         </div>
@@ -607,13 +644,13 @@ export default function UnifiedThemeStudio({
             </div>
             <div>
               <p className="text-xs font-bold leading-tight">Modo Claro</p>
-              <p className="text-[10px] text-slate-400">Editorial / Puro</p>
+              <p className="text-[10px] text-slate-400">Editorial / Luminoso</p>
             </div>
           </button>
         </div>
       </div>
 
-      {/* 3. SEED COLOR (BASE) & PRESETS & ALGORITMO CROMÁTICO */}
+      {/* 3. SEED COLOR & PRESETS DE MARCA */}
       <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
         <div>
           <h4 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider">
@@ -682,121 +719,294 @@ export default function UnifiedThemeStudio({
           </select>
         </div>
 
-        {/* Paleta Final Generada */}
-        <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-2">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Paleta Generada en Vivo</span>
-          <div className="grid grid-cols-4 gap-2 text-center">
-            <div>
-              <div className="w-full h-7 rounded-lg mb-1 shadow-sm border border-white/10" style={{ backgroundColor: generatedPalette.primary }} />
-              <span className="text-[9px] font-mono text-slate-300 block truncate">Primary</span>
-            </div>
-            <div>
-              <div className="w-full h-7 rounded-lg mb-1 shadow-sm border border-white/10" style={{ backgroundColor: generatedPalette.secondary }} />
-              <span className="text-[9px] font-mono text-slate-300 block truncate">Secundario</span>
-            </div>
-            <div>
-              <div className="w-full h-7 rounded-lg mb-1 shadow-sm border border-white/10" style={{ backgroundColor: generatedPalette.tertiary }} />
-              <span className="text-[9px] font-mono text-slate-300 block truncate">Terciario</span>
-            </div>
-            <div>
-              <div className="w-full h-7 rounded-lg mb-1 shadow-sm border border-white/10" style={{ backgroundColor: generatedPalette.neutral }} />
-              <span className="text-[9px] font-mono text-slate-300 block truncate">Neutral</span>
-            </div>
+        {/* Paleta Final Editable */}
+        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-3">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Paleta Final</span>
+          <div className="space-y-2">
+            {[
+              { label: 'Primary', val: currentTheme.primary_color || generatedPalette.primary, key: 'primary_color' as const },
+              { label: 'Secondary', val: currentTheme.secondary_color || generatedPalette.secondary, key: 'secondary_color' as const },
+              { label: 'Tertiary', val: currentTheme.tertiary_color || generatedPalette.tertiary, key: 'tertiary_color' as const },
+              { label: 'Neutral', val: currentTheme.neutral_color || generatedPalette.neutral, key: 'neutral_color' as const }
+            ].map(col => (
+              <div key={col.label} className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="color"
+                    value={col.val}
+                    onChange={(e) => updateThemeProp(col.key, e.target.value.toUpperCase())}
+                    className="w-5 h-5 rounded-full cursor-pointer border-0 p-0"
+                    style={{ clipPath: "circle(50%)" }}
+                  />
+                  <span className="text-xs font-medium text-slate-300">{col.label}</span>
+                </div>
+                <input
+                  type="text"
+                  value={col.val}
+                  onChange={(e) => updateThemeProp(col.key, e.target.value.toUpperCase())}
+                  className="font-mono text-xs text-white bg-slate-950 px-2 py-1 rounded border border-slate-800 w-20 text-center"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 4. FONDO GLOBAL Y WALLPAPERS */}
+      {/* 4. FONDO GLOBAL & GRADIENT BUILDER INTERACTIVO */}
+      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider">
+            <ImageIcon size={14} className="text-pink-400" />
+            <span>Fondo Global (Opcional)</span>
+          </h4>
+          {currentTheme.global_background_image && (
+            <button
+              type="button"
+              onClick={() => updateThemeProp('global_background_image', '')}
+              className="text-[10px] text-rose-400 hover:text-rose-300"
+            >
+              Quitar Fondo
+            </button>
+          )}
+        </div>
+
+        {/* Botón Diseñar Fondo Animado (Modal Gradient Builder) */}
+        <button
+          type="button"
+          onClick={() => setShowGradientBuilder(true)}
+          className="w-full p-3 rounded-xl border border-pink-500/30 bg-pink-500/10 hover:bg-pink-500/20 text-pink-300 font-bold text-xs flex items-center justify-between transition-all cursor-pointer shadow-md"
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-pink-500 to-purple-600 shadow-sm" />
+            <span>Diseñar Fondo Animado (Mesh Studio)</span>
+          </div>
+          <Sparkles size={14} className="text-pink-400" />
+        </button>
+
+        {/* Selector de Wallpapers Predefinidos */}
+        <div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Galería de Fondos Listos</span>
+          <select
+            value={currentTheme.global_background_image || ""}
+            onChange={(e) => updateThemeProp('global_background_image', e.target.value)}
+            className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-pink-500"
+          >
+            {WALLPAPER_PRESETS.map((w, idx) => (
+              <option key={idx} value={w.url}>{w.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* 5. TIPOGRAFÍAS (GOOGLE FONTS) */}
       <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
         <h4 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider">
-          <ImageIcon size={14} className="text-indigo-400" />
-          <span>Fondo Global (Wallpaper Opcional)</span>
+          <Type size={14} className="text-cyan-400" />
+          <span>Tipografías (Google Fonts)</span>
         </h4>
-        <select
-          value={currentTheme.global_background_image || ""}
-          onChange={(e) => updateThemeProp('global_background_image', e.target.value)}
-          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-semibold focus:outline-none focus:border-pink-500"
-        >
-          {WALLPAPER_PRESETS.map((w, idx) => (
-            <option key={idx} value={w.url}>{w.name}</option>
+        <div className="space-y-2.5">
+          {[
+            { label: 'Headline', val: currentTheme.font_headline || 'Space Grotesk', key: 'font_headline' as const, opts: ['Space Grotesk', 'Hanken Grotesk', 'Outfit', 'Inter', 'Syne', 'Orbitron'] },
+            { label: 'Body', val: currentTheme.font_body || 'Inter', key: 'font_body' as const, opts: ['Inter', 'Roboto', 'DM Sans', 'Open Sans', 'Manrope'] },
+            { label: 'Label', val: currentTheme.font_label || 'JetBrains Mono', key: 'font_label' as const, opts: ['JetBrains Mono', 'Fira Code', 'Space Mono', 'IBM Plex Mono'] }
+          ].map(font => (
+            <div key={font.label} className="flex items-center gap-2.5 bg-slate-900 border border-slate-800 rounded-xl p-2 pr-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center shrink-0 border border-slate-800">
+                <span className="text-slate-400 text-xs font-bold">Aa</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <select
+                  value={font.val}
+                  onChange={(e) => updateThemeProp(font.key, e.target.value)}
+                  className="w-full bg-transparent text-xs text-white font-bold focus:outline-none cursor-pointer"
+                >
+                  {font.opts.map(opt => <option key={opt} value={opt} className="bg-slate-900">{opt}</option>)}
+                </select>
+                <span className="text-[9px] text-slate-500 uppercase font-bold tracking-widest">{font.label}</span>
+              </div>
+            </div>
           ))}
-        </select>
+        </div>
       </div>
 
-      {/* 5. TIPOGRAFÍA & BORDES & EFECTOS NEÓN */}
-      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+      {/* 6. BORDES (RADIUS) */}
+      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bordes (Radius)</label>
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { id: 'rounded-none', label: 'none', class: 'rounded-none' },
+            { id: 'rounded-xl', label: 'xl', class: 'rounded-xl' },
+            { id: 'rounded-2xl', label: '2xl', class: 'rounded-2xl' },
+            { id: 'rounded-3xl', label: '3xl', class: 'rounded-3xl' },
+          ].map(r => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => updateThemeProp('radius_style', r.id as any)}
+              className={`h-11 border rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
+                (currentTheme.radius_style || 'rounded-3xl') === r.id
+                  ? 'border-pink-500 bg-pink-500/15 text-white shadow-md'
+                  : 'border-slate-800 bg-slate-900 hover:border-slate-700 text-slate-400'
+              }`}
+            >
+              <div className={`w-3.5 h-3.5 border-t-2 border-l-2 border-current ${r.class} translate-x-0.5 translate-y-0.5`} />
+              <span className="text-[9px] font-mono mt-0.5">{r.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 7. LABORATORIO DE INTERACCIÓN (MOUSE & CLIC) */}
+      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
         <h4 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider">
-          <Type size={14} className="text-cyan-400" />
-          <span>Tipografía & Estilos de Interfaz</span>
+          <Zap size={14} className="text-amber-400" />
+          <span>Laboratorio de Interacción (Mouse)</span>
         </h4>
+        <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col divide-y divide-slate-800/80">
+          {[
+            { id: 'spotlight-border', label: 'Reflector Neón', icon: <Sparkles size={13} className="text-pink-400" /> },
+            { id: 'full-border', label: 'Borde Neón Completo', icon: <Square size={13} className="text-purple-400" /> },
+            { id: 'spotlight-full', label: 'Relleno Neón', icon: <Sparkles size={13} className="text-indigo-400" /> },
+            { id: 'electric', label: 'Reflector Eléctrico', icon: <Zap size={13} className="text-amber-400" /> },
+            { id: 'electric-full', label: 'Borde Eléctrico Completo', icon: <Zap size={13} className="text-yellow-400" /> },
+            { id: 'tilt', label: 'Inclinación 3D', icon: <div className="w-2.5 h-2.5 border border-emerald-400 transform rotate-12 skew-x-12" /> },
+            { id: 'ripple', label: 'Ondas (Clic)', icon: <div className="w-2.5 h-2.5 rounded-full border border-cyan-400" /> },
+            { id: 'burst', label: 'Explosión (Clic)', icon: <div className="w-1.5 h-1.5 bg-amber-400 rounded-full shadow-[0_0_6px_#fbbf24]" /> },
+            { id: 'glitch', label: 'Texto Glitch', icon: <span className="text-rose-400 font-mono text-[9px] font-bold">X</span> },
+            { id: 'magnet', label: 'Magnetismo', icon: <div className="w-2.5 h-2.5 border-2 border-blue-400 rounded-t-full" /> },
+            { id: 'none', label: 'Ninguno', icon: <div className="w-2.5 h-0.5 bg-slate-500" /> }
+          ].map(effect => {
+            const isActive = activeMouseEffects.includes(effect.id) || (effect.id === 'none' && activeMouseEffects.length === 0);
+            return (
+              <button
+                key={effect.id}
+                type="button"
+                onClick={() => toggleMouseEffect(effect.id)}
+                className={`flex items-center gap-3 px-3.5 py-2.5 text-left transition-colors cursor-pointer ${
+                  isActive ? 'bg-pink-500/10 text-white' : 'hover:bg-slate-800/60 text-slate-400'
+                }`}
+              >
+                <div className={`w-4 h-4 flex items-center justify-center rounded border transition-all ${
+                  isActive ? 'bg-pink-500 border-pink-400 text-white' : 'bg-slate-950 border-slate-700'
+                }`}>
+                  {isActive && <Check size={11} />}
+                </div>
+                <div className="w-5 h-5 flex items-center justify-center rounded bg-slate-950 border border-slate-800">
+                  {effect.icon}
+                </div>
+                <span className="text-xs font-medium">{effect.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Bordes</label>
-            <select
-              value={currentTheme.radius_style || "rounded-3xl"}
-              onChange={(e) => updateThemeProp('radius_style', e.target.value as any)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-semibold"
+      {/* 8. ESTILO DEL NEÓN & INTENSIDAD */}
+      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <h4 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider">
+          <Sparkle size={14} className="text-pink-400" />
+          <span>Estilo del Neón</span>
+        </h4>
+        <div className="grid grid-cols-3 gap-2">
+          {['Monocolor', 'Armónico', 'Multicolor'].map(st => (
+            <button
+              key={st}
+              type="button"
+              className="py-2 rounded-xl text-xs font-bold border border-slate-800 bg-slate-900 hover:border-pink-500/50 text-slate-300"
             >
-              <option value="rounded-3xl">Pill Redondo (3xl)</option>
-              <option value="rounded-2xl">Moderno (2xl)</option>
-              <option value="rounded-xl">Estándar (xl)</option>
-              <option value="rounded-none">Cuadrado (none)</option>
-            </select>
-          </div>
+              {st}
+            </button>
+          ))}
+        </div>
 
-          <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Efecto Neón</label>
-            <select
-              value={currentTheme.neon_thickness || "4px"}
-              onChange={(e) => updateThemeProp('neon_thickness', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-semibold"
-            >
-              <option value="2px">Sutil (2px)</option>
-              <option value="4px">Neón Brillante (4px)</option>
-              <option value="6px">Intenso Cyberpunk (6px)</option>
-              <option value="none">Sin Resplandor</option>
-            </select>
+        <div className="pt-2">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Grosor e Intensidad del Neón</label>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { id: '2px', label: 'Fino' },
+              { id: '4px', label: 'Medio (4px)' },
+              { id: '6px', label: 'Grueso' },
+              { id: '8px', label: 'Ultra' }
+            ].map(th => (
+              <button
+                key={th.id}
+                type="button"
+                onClick={() => updateThemeProp('neon_thickness', th.id)}
+                className={`py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                  (currentTheme.neon_thickness || '4px') === th.id
+                    ? 'bg-pink-500/15 border-pink-500 text-white'
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                {th.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* BOTÓN APLICAR Y GUARDAR TEMA */}
-      <div className="pt-2">
+      {/* 9. CURSOR ANIMADO GLOBAL */}
+      <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+        <h4 className="text-xs font-bold text-white flex items-center gap-2 uppercase tracking-wider">
+          <MousePointer size={14} className="text-emerald-400" />
+          <span>Cursor Animado Global</span>
+        </h4>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {[
+            { id: 'cursor-trail', label: 'Estrellas Mágicas' },
+            { id: 'spotlight', label: 'Spotlight Luz' },
+            { id: 'bubbles', label: 'Burbujas' },
+            { id: 'laser', label: 'Mira Láser' },
+            { id: 'radar', label: 'Radar Pulso' },
+            { id: 'none', label: 'Nativo (OS)' }
+          ].map(cur => (
+            <button
+              key={cur.id}
+              type="button"
+              onClick={() => updateThemeProp('cursor_effect', cur.id)}
+              className={`p-2.5 rounded-xl border text-center transition cursor-pointer text-xs font-medium ${
+                (currentTheme.cursor_effect || 'cursor-trail') === cur.id
+                  ? 'bg-pink-500/15 border-pink-500 text-white shadow-sm'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+              }`}
+            >
+              {cur.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Action Button: Guardar Cambios */}
+      <div className="pt-2 sticky bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pb-1 z-10">
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="w-full py-3.5 px-4 rounded-xl text-white font-bold text-sm bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 shadow-lg shadow-pink-500/25 flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-400 hover:to-indigo-500 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-pink-500/25 transition-all disabled:opacity-50 cursor-pointer"
         >
           {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          <span>{saving ? 'Guardando en Base de Datos...' : `Aplicar y Guardar Tema de ${subdomainTitle}`}</span>
+          <span>{saving ? 'Guardando...' : `Guardar y Publicar Tema de ${subdomainTitle}`}</span>
         </button>
         {saveSuccessMsg && (
-          <p className="text-center text-xs text-emerald-400 font-bold mt-2 animate-pulse flex items-center justify-center gap-1.5">
-            <CheckCircle2 size={13} />
-            <span>{saveSuccessMsg}</span>
+          <p className="text-xs text-center text-emerald-400 font-bold mt-2 animate-fadeIn">
+            ✓ {saveSuccessMsg}
           </p>
         )}
       </div>
     </div>
   );
 
-  // Reusable Live Preview Column
+  // Reusable Preview Panel Column
   const renderPreviewColumn = (targetIframeRef: React.RefObject<HTMLIFrameElement | null>) => (
-    <div className="rounded-2xl bg-slate-900/60 border border-slate-800 p-5 flex flex-col justify-between space-y-4">
-      {/* Top Preview Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
-        {/* Status Indicator */}
+    <div className="bg-slate-900/60 border border-slate-800 rounded-2xl flex flex-col shadow-xl overflow-hidden">
+      {/* Top Bar Preview Toolbar */}
+      <div className="p-3.5 border-b border-slate-800 bg-slate-950 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${isServerOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-400'}`} />
-          <span className="text-xs font-mono font-bold text-slate-200">
-            {subdomainTitle} <span className="text-slate-400 font-normal">(:{port})</span>
-          </span>
-          <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
-            isServerOnline ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/30' : 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
-          }`}>
-            {isServerOnline ? 'Conectado' : 'Simulación UI'}
+          <span className={`w-2.5 h-2.5 rounded-full ${isServerOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-amber-400'}`} />
+          <span className="text-xs font-bold text-white tracking-wider uppercase font-mono flex items-center gap-1.5">
+            <Eye size={13} className={isServerOnline ? "text-emerald-400" : "text-amber-400"} />
+            <span>{isServerOnline ? 'En Vivo:' : 'Simulación Activa:'}</span>
+            <strong className="text-pink-400 font-semibold lowercase">:{port}</strong>
           </span>
         </div>
 
@@ -871,8 +1081,11 @@ export default function UnifiedThemeStudio({
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setIframeRefreshKey(prev => prev + 1)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            onClick={() => {
+              setIsServerOnline(null);
+              setIframeRefreshKey(prev => prev + 1);
+            }}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
             title="Recargar vista previa"
           >
             <RefreshCw size={13} />
@@ -889,7 +1102,7 @@ export default function UnifiedThemeStudio({
           <button
             type="button"
             onClick={() => setIsFullScreen(!isFullScreen)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 transition"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 transition cursor-pointer"
             title={isFullScreen ? "Cerrar pantalla completa" : "Pantalla completa"}
           >
             {isFullScreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
@@ -984,7 +1197,7 @@ export default function UnifiedThemeStudio({
   return (
     <div className="space-y-6">
       {/* Header Studio Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4">
+      <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 p-5 flex flex-wrap items-center justify-between gap-4 shadow-xl">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-pink-500/15 text-pink-400 border border-pink-500/30 uppercase">
@@ -996,7 +1209,7 @@ export default function UnifiedThemeStudio({
             Personalización de Color, Estética & Experiencia
           </h2>
           <p className="text-xs text-slate-400">
-            Ajusta la paleta de colores, modo visual ({activeThemeMode}) y fondos con vista previa responsiva en tiempo real.
+            Ajusta la paleta de colores, modo visual ({activeThemeMode}), efectos neón y laboratorio de interacción con vista previa responsiva.
           </p>
         </div>
 
@@ -1063,6 +1276,43 @@ export default function UnifiedThemeStudio({
           </div>
         </div>
       )}
+
+      {/* GRADIENT BUILDER STUDIO OVERLAY */}
+      {showGradientBuilder && (
+        <div className="fixed inset-0 z-[200] bg-black/90 flex flex-col p-4 md:p-10 backdrop-blur-md animate-in fade-in">
+          <div className="flex justify-between items-center mb-6 bg-[#111] p-4 md:p-6 rounded-2xl border border-gray-800 shadow-xl">
+            <div className="flex flex-col">
+              <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                <Sparkles className="text-pink-500" /> Diseñador de Fondo Global ({subdomainTitle})
+              </h3>
+              <p className="text-gray-400 text-xs mt-1">Crea un fondo mágico. Cuando termines, haz clic en el botón verde <strong>"Usar como Portada"</strong> dentro del editor.</p>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setShowGradientBuilder(false)} 
+              className="bg-red-500/10 text-red-500 border border-red-500/20 px-6 py-2.5 rounded-xl font-bold hover:bg-red-500/20 transition-all cursor-pointer"
+            >
+              Cancelar
+            </button>
+          </div>
+          
+          <iframe 
+            src="/gradient-builder.html" 
+            className="w-full flex-1 rounded-3xl border border-gray-800 shadow-2xl bg-black" 
+            title="Gradient Builder"
+          />
+        </div>
+      )}
+
+      {/* HIDDEN IFRAME FOR SILENT AI BACKGROUND GENERATION */}
+      <iframe 
+        ref={hiddenIframeRef}
+        src="/gradient-builder.html"
+        className="fixed top-[-10000px] left-[-10000px] w-[1600px] h-[1000px] opacity-0 pointer-events-none z-[-1]"
+        aria-hidden="true"
+        tabIndex={-1}
+        title="Gradient Builder Generator"
+      />
     </div>
   );
 }
