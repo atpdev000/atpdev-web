@@ -9,6 +9,7 @@ import { Dialog } from '@capacitor/dialog';
 import { Share } from '@capacitor/share';
 
 import { Toast } from '@capacitor/toast';
+import { Capacitor } from '@capacitor/core';
 import { shareNativeMedia } from '@/lib/nativeBridge';
 
 interface HistoryModalProps {
@@ -36,46 +37,52 @@ export default function HistoryModal({ isOpen, onClose, history, onClear, onDele
     if (!mounted || !isOpen || typeof document === 'undefined') return null;
 
     const handleItemClick = async (item: HistoryItem) => {
-        if (item.filePath) {
+        if (item.filePath && Capacitor.isNativePlatform()) {
             try {
                 await FileOpener.open({
                     filePath: item.filePath,
                     contentType: item.mimeType || 'video/mp4'
                 });
+                return;
             } catch (e) {
                 console.warn('Error abriendo archivo local:', e);
-                if (item.originalUrl) {
-                    window.open(item.originalUrl, '_blank');
-                } else {
-                    await Dialog.alert({
-                        title: 'No se puede abrir',
-                        message: 'El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.'
-                    });
-                }
             }
-        } else if (item.originalUrl) {
+        }
+        
+        if (item.originalUrl) {
             window.open(item.originalUrl, '_blank');
+        } else {
+            try {
+                await Dialog.alert({
+                    title: 'No se puede abrir',
+                    message: 'El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.'
+                });
+            } catch {
+                alert('El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.');
+            }
         }
     };
 
     const handleShare = async (e: React.MouseEvent, item: HistoryItem) => {
         e.stopPropagation(); // Evitar abrir el archivo
         try {
-            if (item.filePath) {
+            if (item.filePath && Capacitor.isNativePlatform()) {
                 const shared = await shareNativeMedia(item.filePath, item.title, item.originalUrl);
-                if (!shared && item.originalUrl) {
+                if (shared) return;
+            }
+            if (item.originalUrl) {
+                if (navigator.share) {
+                    await navigator.share({
+                        title: item.title,
+                        url: item.originalUrl
+                    });
+                } else {
                     await Share.share({
                         title: item.title,
                         url: item.originalUrl,
                         dialogTitle: 'Compartir enlace'
                     });
                 }
-            } else if (item.originalUrl) {
-                await Share.share({
-                    title: item.title,
-                    url: item.originalUrl,
-                    dialogTitle: 'Compartir enlace'
-                });
             }
         } catch (error) {
             console.error('Error al compartir:', error);
@@ -99,14 +106,20 @@ export default function HistoryModal({ isOpen, onClose, history, onClear, onDele
     };
 
     const handleClearAll = async () => {
-        const { value } = await Dialog.confirm({
-            title: '¿Borrar todo el historial?',
-            message: 'Se eliminarán todos los registros de descargas de la lista.',
-            okButtonTitle: 'Borrar Todo',
-            cancelButtonTitle: 'Cancelar'
-        });
+        let confirmed = false;
+        try {
+            const { value } = await Dialog.confirm({
+                title: '¿Borrar todo el historial?',
+                message: 'Se eliminarán todos los registros de descargas de la lista.',
+                okButtonTitle: 'Borrar Todo',
+                cancelButtonTitle: 'Cancelar'
+            });
+            confirmed = value;
+        } catch {
+            confirmed = window.confirm('¿Deseas eliminar todo el historial de descargas?');
+        }
 
-        if (value) {
+        if (confirmed) {
             onClear();
         }
     };

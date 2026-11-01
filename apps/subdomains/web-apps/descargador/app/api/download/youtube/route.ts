@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
 
 export const maxDuration = 60
 
@@ -27,6 +28,44 @@ function findYtDlpBinary(): string | null {
   }
 
   return 'yt-dlp'
+}
+
+function getCookiesArg(): string[] {
+  // 1. Archivo físico cookies.txt en el proyecto o bin
+  const candidatePaths = [
+    path.join(process.cwd(), 'cookies.txt'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'cookies.txt'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'cookies.txt'),
+    path.join(process.cwd(), 'bin', 'cookies.txt')
+  ]
+
+  for (const cp of candidatePaths) {
+    try {
+      if (fs.existsSync(cp)) {
+        console.log(`🍪 [YouTube] Usando archivo de cookies local: ${cp}`)
+        return ['--cookies', cp]
+      }
+    } catch {}
+  }
+
+  // 2. Variable de entorno YOUTUBE_COOKIES o YT_COOKIES (texto Netscape o Base64)
+  const envCookies = process.env.YOUTUBE_COOKIES || process.env.YT_COOKIES
+  if (envCookies) {
+    try {
+      const cookieFile = path.join(os.tmpdir(), 'yt_cookies.txt')
+      const isBase64 = envCookies.startsWith('data:') || (/^[A-Za-z0-9+/=]+$/.test(envCookies.trim()) && envCookies.length > 100)
+      const content = isBase64
+        ? Buffer.from(envCookies.trim(), 'base64').toString('utf-8')
+        : envCookies
+      fs.writeFileSync(cookieFile, content, 'utf-8')
+      console.log('🍪 [YouTube] Cookies cargadas desde variable de entorno')
+      return ['--cookies', cookieFile]
+    } catch (e: any) {
+      console.warn('⚠️ [YouTube] Error cargando cookies desde variable:', e.message)
+    }
+  }
+
+  return []
 }
 
 function formatBytes(bytes: number): string {
@@ -65,8 +104,10 @@ function cleanYoutubeUrl(url: string): string {
   }
 }
 
-async function extractMetadata(url: string, binPath: string): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'android,ios,mweb'): Promise<any> {
   const nodeBin = process.execPath || 'node'
+  const cookieArgs = getCookiesArg()
+
   return new Promise((resolve, reject) => {
     const args = [
       '--dump-json',
@@ -74,10 +115,12 @@ async function extractMetadata(url: string, binPath: string): Promise<any> {
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
+      '--extractor-args', `youtube:player_client=${playerClient}`,
+      ...cookieArgs,
       url
     ]
 
-    console.log(`🚀 [YouTube Serverless] Ejecutando: ${binPath} con ${url}`)
+    console.log(`🚀 [YouTube Serverless] Ejecutando: ${binPath} con ${url} (player_client=${playerClient})`)
     const ytProcess = spawn(binPath, args)
 
     let stdout = ''
@@ -137,10 +180,22 @@ export async function POST(request: NextRequest) {
 
     if (bin) {
       try {
-        rawInfo = await extractMetadata(cleanedUrl, bin)
+        // Intento 1 con clientes móviles InnerTube (bypasea el bloqueo bot de datacenters como Render)
+        rawInfo = await extractMetadata(cleanedUrl, bin, 'android,ios,mweb')
       } catch (err: any) {
-        console.warn('⚠️ [YouTube Serverless] Extractor local falló:', err.message)
-        extractionError = err
+        console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
+        // Si detecta desafío de bot o sign-in, intentar cliente alternativo TV / Android
+        if (err.message?.includes('Sign in to confirm') || err.message?.includes('bot')) {
+          try {
+            console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (tv,android)...')
+            rawInfo = await extractMetadata(cleanedUrl, bin, 'android,tv')
+          } catch (retryErr: any) {
+            console.error('❌ [YouTube Serverless] Reintento alternativo falló:', retryErr.message)
+            extractionError = retryErr
+          }
+        } else {
+          extractionError = err
+        }
       }
     }
 

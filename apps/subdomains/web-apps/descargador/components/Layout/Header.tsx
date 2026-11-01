@@ -1,18 +1,12 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { Clock } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageSelector } from './LanguageSelector'
 import { useI18n } from '@/lib/i18n/context'
-import HistoryModal from '@/components/HistoryModal'
-import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 
 export default function Header() {
   const { t } = useI18n()
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
-  const { history, unreadCount, markAllAsRead, clearHistory, deleteItem } = useDownloadHistory()
 
   const scrollToTools = () => {
     document.getElementById('herramientas')?.scrollIntoView({
@@ -88,21 +82,6 @@ export default function Header() {
               {/* Selector de Modo Oscuro / Claro */}
               <ThemeToggle />
 
-              {/* Botón de Historial de Descargas */}
-              <button
-                onClick={() => setIsHistoryOpen(true)}
-                className="p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative cursor-pointer shrink-0"
-                title="Historial de Descargas"
-                aria-label="Historial de Descargas"
-              >
-                <Clock className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-xs">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </div>
-                )}
-              </button>
-
               {/* Planes en móvil */}
               <Link
                 href="/planes"
@@ -122,15 +101,6 @@ export default function Header() {
           </div>
         </div>
       </header>
-
-      <HistoryModal
-        isOpen={isHistoryOpen}
-        onClose={() => setIsHistoryOpen(false)}
-        history={history}
-        onClear={clearHistory}
-        onDelete={deleteItem}
-        onOpen={markAllAsRead}
-      />
     </>
   )
 }
