@@ -16,6 +16,7 @@ import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useI18n } from '@/lib/i18n/context';
+import { NativeWhatsAppStatus } from '@/lib/nativeBridge';
 
 interface VideoFormat {
   quality: string
@@ -351,46 +352,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         throw new Error(errorMsg)
       }
 
-      const blob = await response.blob()
-
-      if (blob.size === 0) {
-        throw new Error('El archivo combinado está vacío')
-      }
-
-      console.log('✅ Archivo combinado recibido:', blob.size, 'bytes')
-
-      // Verificar headers por si hubo fallback
-      const combinedStatus = response.headers.get('X-Combined-Status')
-      if (combinedStatus === 'video_only_with_audio_available') {
-        const msg = 'Se descargó solo el video debido a límites del servidor. Intenta con 720p para tener audio.'
-        setError(msg)
-        if (isNative) {
-          scheduleNotification('Descarga Parcial', msg)
-        }
-      } else {
-        scheduleNotification('Descarga Completada', `El video ${filename} se ha guardado correctamente.`)
-        addToHistory({
-          title: videoInfo?.title || filename,
-          platform: 'youtube',
-          thumbnail: videoInfo?.thumbnail,
-          status: 'completed',
-          format: quality
-        })
-
-      }
-
-      const blobUrl = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = blobUrl
-      link.download = filename
-      link.style.display = 'none'
-
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000)
-      console.log('✅ Combinación por proxy completada')
+      console.log('✅ Archivo combinado recibido del proxy, iniciando flujo de descarga...')
+      await downloadStream(response, filename, `combined-${quality}`)
 
     } catch (error) {
       console.error('❌ Error en combinación por proxy:', error)
@@ -577,16 +540,26 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         // 1. Definir ruta y crear directorios
         const baseFolder = 'Download/FTYdownloaderPro/download';
         const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
-        const finalPath = `${baseFolder}/${typeFolder}/${filename}`;
+        let targetDirectory = Directory.ExternalStorage;
+        let finalPath = `${baseFolder}/${typeFolder}/${filename}`;
 
         try {
           await Filesystem.mkdir({
             path: `${baseFolder}/${typeFolder}`,
-            directory: Directory.ExternalStorage,
+            directory: targetDirectory,
             recursive: true
           });
         } catch (e) {
-          // Ignorar si ya existe
+          console.warn('⚠️ No se pudo crear directorio en ExternalStorage, usando Documents...', e);
+          try {
+            targetDirectory = Directory.Documents;
+            finalPath = `FTYdownloaderPro/${typeFolder}/${filename}`;
+            await Filesystem.mkdir({
+              path: `FTYdownloaderPro/${typeFolder}`,
+              directory: targetDirectory,
+              recursive: true
+            });
+          } catch {}
         }
 
         // 2. Función helper para convertir chunk a base64
@@ -610,7 +583,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         try {
           await Filesystem.deleteFile({
             path: finalPath,
-            directory: Directory.ExternalStorage
+            directory: targetDirectory
           });
         } catch (e) { }
 
@@ -626,14 +599,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             await Filesystem.writeFile({
               path: finalPath,
               data: base64Chunk,
-              directory: Directory.ExternalStorage
+              directory: targetDirectory
             });
           } else {
             // Siguientes chunks: Append
             await Filesystem.appendFile({
               path: finalPath,
               data: base64Chunk,
-              directory: Directory.ExternalStorage
+              directory: targetDirectory
             });
           }
 
@@ -646,11 +619,21 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         // 4. Obtener URI final
         const uriResult = await Filesystem.getUri({
           path: finalPath,
-          directory: Directory.ExternalStorage
+          directory: targetDirectory
         });
 
         const savedUri = uriResult.uri;
         console.log('✅ Archivo guardado correctamente en:', savedUri);
+
+        // Indexar en la galería de Android para que aparezca en Fotos/Videos
+        if (!isAudio && savedUri) {
+          try {
+            await NativeWhatsAppStatus.saveToGallery({ filePath: savedUri });
+            console.log('✅ Video indexado en la galería nativa de Android');
+          } catch (gErr) {
+            console.warn('No se pudo auto-indexar en galería nativa:', gErr);
+          }
+        }
 
         scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 
