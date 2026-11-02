@@ -673,3 +673,25 @@ async function handleCombinedDownloadBase64(fileContent: string, filename: strin
     }, { status: 500 })
   }
 }
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const url = searchParams.get('url')
+    const filename = searchParams.get('filename') || undefined
+    const quality = searchParams.get('quality') || undefined
+    const isAudio = searchParams.get('isAudio') === 'true'
+
+    if (!url) {
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 })
+    }
+
+    return POST(new NextRequest(request.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, filename, quality, isAudio })
+    }))
+  } catch (error: any) {
+    return NextResponse.json({ error: error?.message || 'Error in GET proxy' }, { status: 500 })
+  }
+}

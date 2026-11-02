@@ -4,7 +4,27 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import { getYtDlpWithFfmpeg } from '@/lib/server/binaries'
+import { Readable } from 'stream'
+import { finished } from 'stream/promises'
+import { getYtDlpWithFfmpeg, findFfmpegBinary } from '@/lib/server/binaries'
+
+async function downloadStreamToDisk(sourceUrl: string, destPath: string): Promise<void> {
+  const res = await fetch(sourceUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Referer': 'https://www.youtube.com/',
+      'Accept': '*/*'
+    }
+  })
+  if (!res.ok) {
+    throw new Error(`Error ${res.status} al descargar stream desde YouTube`)
+  }
+  if (!res.body) {
+    throw new Error('No se recibió cuerpo de respuesta multimedia desde YouTube')
+  }
+  const fileStream = fs.createWriteStream(destPath)
+  await finished(Readable.fromWeb(res.body as any).pipe(fileStream))
+}
 
 export const maxDuration = 300 // 5 minutos máximo para descargas grandes
 
@@ -139,85 +159,130 @@ export async function POST(request: NextRequest) {
     let realFile = expectedFile
 
     // 🚀 MÉTODO 1: Si el cliente ya nos envió las URLs directas extraídas (signed googlevideo.com URLs),
-    // combinamos directamente con FFmpeg sin pasar por el bot verification de YouTube!
+    // descargamos a disco de forma concurrente y combinamos ultra rápido con FFmpeg local
     if (video_url || (isAudioOnly && audio_url)) {
-      console.log('⚡ [YouTube Engine] Utilizando combinación ultra rápida directa con FFmpeg...')
-      if (downloadId && globalThis.__downloadProgressMap) {
-        globalThis.__downloadProgressMap.set(downloadId, {
-          percent: 30,
-          status: 'merging',
-          speed: 'FFmpeg Fast-Merge',
-          updatedAt: Date.now()
-        })
-      }
+      console.log('⚡ [YouTube Engine] Utilizando combinación ultra rápida y robusta con streams a disco...')
+      const tempVideoFile = path.join(tempDir, `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
+      const tempAudioFile = path.join(tempDir, `a_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
 
-      const mergeArgs: string[] = []
-      if (video_url) {
-        mergeArgs.push(
-          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n',
-          '-i', video_url
-        )
-      }
-      if (audio_url && !isAudioOnly) {
-        mergeArgs.push(
-          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n',
-          '-i', audio_url
-        )
-      } else if (isAudioOnly && audio_url) {
-        mergeArgs.push(
-          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n',
-          '-i', audio_url
-        )
-      }
-
-      if (isAudioOnly) {
-        if (finalExt === 'mp3') {
-          mergeArgs.push('-c:a', 'libmp3lame', '-b:a', '192k')
-        } else {
-          mergeArgs.push('-c:a', 'copy')
+      try {
+        if (downloadId && globalThis.__downloadProgressMap) {
+          globalThis.__downloadProgressMap.set(downloadId, {
+            percent: 25,
+            status: 'downloading',
+            speed: 'Descargando flujos...',
+            updatedAt: Date.now()
+          })
         }
-      } else {
-        mergeArgs.push(
-          '-c:v', 'copy',
-          audio_url ? '-c:a' : '-c:a',
-          audio_url ? 'aac' : 'copy'
-        )
-      }
 
-      mergeArgs.push('-movflags', '+faststart', '-y', realFile)
-
-      await new Promise<void>((resolve, reject) => {
-        const proc = spawn(ffmpegBin, mergeArgs, { windowsHide: true })
-        let stderr = ''
-        proc.stderr.on('data', (d) => {
-          stderr += d.toString()
-          if (downloadId && globalThis.__downloadProgressMap) {
-            const cur = globalThis.__downloadProgressMap.get(downloadId)
-            globalThis.__downloadProgressMap.set(downloadId, {
-              percent: Math.min((cur?.percent || 30) + 10, 95),
-              status: 'merging',
-              speed: 'FFmpeg Processing',
-              updatedAt: Date.now()
-            })
-          }
-        })
-        proc.on('close', (code) => {
-          if (code === 0 && fs.existsSync(realFile)) {
+        if (isAudioOnly && audio_url) {
+          await downloadStreamToDisk(audio_url, tempAudioFile)
+          if (finalExt === 'mp3') {
             if (downloadId && globalThis.__downloadProgressMap) {
               globalThis.__downloadProgressMap.set(downloadId, {
-                percent: 100,
-                status: 'completed',
+                percent: 85,
+                status: 'merging',
+                speed: 'Convirtiendo a MP3...',
                 updatedAt: Date.now()
               })
             }
-            resolve()
+            await new Promise<void>((resolve, reject) => {
+              const proc = spawn(ffmpegBin, ['-i', tempAudioFile, '-c:a', 'libmp3lame', '-b:a', '192k', '-y', realFile], { windowsHide: true })
+              let stderr = ''
+              proc.stderr.on('data', (d) => { stderr += d.toString() })
+              proc.on('close', (code) => {
+                if (code === 0 && fs.existsSync(realFile)) resolve()
+                else reject(new Error(`FFmpeg MP3 error (${code}): ${stderr.slice(-200)}`))
+              })
+              proc.on('error', reject)
+            })
           } else {
-            console.error('❌ FFmpeg direct merge error:', stderr.slice(-300))
-            reject(new Error(`FFmpeg falló con código ${code}: ${stderr.slice(-300)}`))
+            await fs.promises.copyFile(tempAudioFile, realFile)
           }
-        })
-        proc.on('error', (err) => reject(err))
-      })
+        } else if (video_url && audio_url) {
+          // Descargar video y audio en paralelo directamente con fetch nativo
+          if (downloadId && globalThis.__downloadProgressMap) {
+            globalThis.__downloadProgressMap.set(downloadId, {
+              percent: 30,
+              status: 'downloading',
+              speed: 'Descargando video + audio...',
+              updatedAt: Date.now()
+            })
+          }
+
+          await Promise.all([
+            downloadStreamToDisk(video_url, tempVideoFile),
+            downloadStreamToDisk(audio_url, tempAudioFile)
+          ])
+
+          if (downloadId && globalThis.__downloadProgressMap) {
+            globalThis.__downloadProgressMap.set(downloadId, {
+              percent: 85,
+              status: 'merging',
+              speed: 'Combinando audio y video...',
+              updatedAt: Date.now()
+            })
+          }
+
+          // Combinar archivos locales con FFmpeg (operación instantánea en disco local)
+          const mergeArgs = [
+            '-i', tempVideoFile,
+            '-i', tempAudioFile,
+            '-c:v', 'copy',
+            '-c:a', 'aac',
+            '-movflags', '+faststart',
+            '-y', realFile
+          ]
+
+          await new Promise<void>((resolve, reject) => {
+            const proc = spawn(ffmpegBin, mergeArgs, { windowsHide: true })
+            let stderr = ''
+            proc.stderr.on('data', (d) => {
+              stderr += d.toString()
+              if (downloadId && globalThis.__downloadProgressMap) {
+                const cur = globalThis.__downloadProgressMap.get(downloadId)
+                globalThis.__downloadProgressMap.set(downloadId, {
+                  percent: Math.min((cur?.percent || 85) + 3, 98),
+                  status: 'merging',
+                  speed: 'FFmpeg Processing',
+                  updatedAt: Date.now()
+                })
+              }
+            })
+            proc.on('close', (code) => {
+              if (code === 0 && fs.existsSync(realFile)) {
+                if (downloadId && globalThis.__downloadProgressMap) {
+                  globalThis.__downloadProgressMap.set(downloadId, {
+                    percent: 100,
+                    status: 'completed',
+                    updatedAt: Date.now()
+                  })
+                }
+                resolve()
+              } else {
+                console.error('❌ FFmpeg local merge error:', stderr.slice(-300))
+                reject(new Error(`FFmpeg falló con código ${code}: ${stderr.slice(-300)}`))
+              }
+            })
+            proc.on('error', (err) => reject(err))
+          })
+        } else if (video_url) {
+          // Solo video (video progresivo o formato simple)
+          await downloadStreamToDisk(video_url, tempVideoFile)
+          await fs.promises.copyFile(tempVideoFile, realFile)
+        }
+
+        if (downloadId && globalThis.__downloadProgressMap) {
+          globalThis.__downloadProgressMap.set(downloadId, {
+            percent: 100,
+            status: 'completed',
+            updatedAt: Date.now()
+          })
+        }
+      } finally {
+        try { if (fs.existsSync(tempVideoFile)) fs.unlinkSync(tempVideoFile) } catch {}
+        try { if (fs.existsSync(tempAudioFile)) fs.unlinkSync(tempAudioFile) } catch {}
+      }
 
     } else {
       // 🛠️ MÉTODO 2: Descarga completa mediante yt-dlp usando clientes anti-bot (visionos)

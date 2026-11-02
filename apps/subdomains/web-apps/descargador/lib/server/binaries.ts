@@ -31,7 +31,32 @@ export function findFfmpegBinary(): string | null {
   const isWin = process.platform === 'win32'
   const binName = isWin ? 'ffmpeg.exe' : 'ffmpeg'
 
-  // 2. Resolución física del paquete npm ffmpeg-static
+  // 2. En Linux / Docker / Render: SIEMPRE priorizar el paquete de sistema (/usr/bin/ffmpeg)
+  if (!isWin) {
+    const linuxSysBins = [
+      '/usr/bin/ffmpeg',
+      '/usr/local/bin/ffmpeg',
+      '/bin/ffmpeg',
+      '/opt/homebrew/bin/ffmpeg'
+    ]
+    for (const lb of linuxSysBins) {
+      if (fs.existsSync(lb)) {
+        cachedFfmpegPath = lb
+        return cachedFfmpegPath
+      }
+    }
+
+    try {
+      const output = execSync('which ffmpeg', { encoding: 'utf-8', timeout: 1500, stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+      const firstLine = output.split(/[\r\n]+/)[0]
+      if (firstLine && fs.existsSync(firstLine)) {
+        cachedFfmpegPath = firstLine
+        return cachedFfmpegPath
+      }
+    } catch {}
+  }
+
+  // 3. Resolución física del paquete npm ffmpeg-static (para Windows o fallback)
   try {
     const pkgJson = req.resolve('ffmpeg-static/package.json')
     const staticBin = path.join(path.dirname(pkgJson), binName)
@@ -44,7 +69,7 @@ export function findFfmpegBinary(): string | null {
     }
   } catch {}
 
-  // 3. Fallback directo require('ffmpeg-static')
+  // 4. Fallback directo require('ffmpeg-static')
   try {
     const staticPath = req('ffmpeg-static')
     if (staticPath && typeof staticPath === 'string' && fs.existsSync(staticPath)) {
@@ -56,23 +81,23 @@ export function findFfmpegBinary(): string | null {
     }
   } catch {}
 
-  // 4. Directorios conocidos del monorepo y sistema
+  // 4. Directorios conocidos del monorepo y sistema (priorizando sistema en Linux)
   const cwd = process.cwd()
   const candidates = [
-    // node_modules en monorepo o local
-    path.join(cwd, 'node_modules', 'ffmpeg-static', binName),
-    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'node_modules', 'ffmpeg-static', binName),
-    path.join(cwd, '..', '..', '..', 'node_modules', 'ffmpeg-static', binName),
-    path.join(cwd, '..', '..', '..', '..', 'node_modules', 'ffmpeg-static', binName),
-    // binario en carpetas bin del proyecto
-    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', binName),
-    path.join(cwd, 'bin', binName),
     // Rutas estándar en Linux / Docker / Render
     '/usr/bin/ffmpeg',
     '/usr/local/bin/ffmpeg',
     '/bin/ffmpeg',
     '/opt/homebrew/bin/ffmpeg',
-    '/tmp/ffmpeg'
+    '/tmp/ffmpeg',
+    // binario en carpetas bin del proyecto
+    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', binName),
+    path.join(cwd, 'bin', binName),
+    // node_modules en monorepo o local
+    path.join(cwd, 'node_modules', 'ffmpeg-static', binName),
+    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'node_modules', 'ffmpeg-static', binName),
+    path.join(cwd, '..', '..', '..', 'node_modules', 'ffmpeg-static', binName),
+    path.join(cwd, '..', '..', '..', '..', 'node_modules', 'ffmpeg-static', binName)
   ]
 
   for (const c of candidates) {
