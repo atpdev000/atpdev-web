@@ -11,13 +11,17 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const handleSelect = (code: Locale) => {
@@ -40,10 +44,17 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-40 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md">
-          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-            Idioma / Language
-          </div>
+        <>
+          {/* Mobile backdrop para asegurar cierre al tocar fuera */}
+          <div 
+            className="fixed inset-0 z-[99] sm:hidden" 
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute right-0 mt-2 w-44 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl py-2 z-[100] animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md">
+            <div className="px-3.5 py-1 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+              Idioma / Language
+            </div>
           {availableLocales.map((loc) => {
             const isSelected = loc.code === locale;
             return (
@@ -66,8 +77,9 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
             );
           })}
         </div>
-      )}
-    </div>
+      </>
+    )}
+  </div>
   );
 };
 
