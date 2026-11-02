@@ -576,7 +576,7 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
     <>
 
 
-      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors">
+      <div className={`${isNative ? 'p-1 sm:p-4 bg-transparent border-0 shadow-none' : 'bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-3.5 sm:p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors'}`}>
         <div className="text-center mb-6">
           <div className="bg-blue-100 dark:bg-blue-950/80 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-md">
             <svg className="h-8 w-8 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
@@ -639,7 +639,7 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
         </form>
 
         {videoInfo && (
-          <div className="mt-6 p-6 bg-green-50 rounded-xl border border-green-200">
+          <div className="mt-4 sm:mt-6 p-2.5 sm:p-4 md:p-6 bg-green-50/90 dark:bg-slate-800/90 rounded-2xl border border-green-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -763,7 +763,7 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
               <p className="text-gray-600 mb-4">- Calidades Disponibles</p>
 
               {/* MOBILE: Simplified Layout - Quality + Action */}
-              <div className={isNative ? 'block' : 'block md:hidden space-y-2'}>
+              <div className={isNative ? 'block space-y-2.5' : 'block md:hidden space-y-2.5'}>
                 {facebookQualities
                   .filter(q => q.id !== 'audio-only')
                   .map((quality) => {
@@ -772,38 +772,39 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
                     const formatInfo = getFormatInfo(quality.value)
 
                     return (
-                      <div key={quality.id} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
+                      <div key={quality.id} className={`flex items-center justify-between gap-2 border rounded-xl p-2.5 sm:p-3 overflow-hidden ${isAvailable ? 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800' : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 opacity-60'}`}>
                         {/* Quality Label */}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-gray-900">{quality.label}</p>
+                        <div className="flex-1 min-w-0 pr-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm leading-tight truncate">{quality.label}</p>
                             {isAvailable && (
                               formatInfo.hasAudio ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                  <Volume2 className="w-3 h-3 text-emerald-600" /> Video + Audio
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 shrink-0">
+                                  <Volume2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Audio OK
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-800 border border-orange-200">
-                                  <VolumeX className="w-3 h-3 text-orange-600" /> Solo Video
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-300 border border-orange-200 dark:border-orange-700 shrink-0">
+                                  <VolumeX className="w-3 h-3 text-orange-600 dark:text-orange-400" /> Solo Video
                                 </span>
                               )
                             )}
                           </div>
-                          {!isAvailable && <p className="text-xs text-red-500 mt-0.5">No disponible</p>}
+                          {!isAvailable && <p className="text-[11px] text-red-500 mt-0.5">No disponible</p>}
                         </div>
 
                         {/* Action Button */}
                         {isDownloading ? (
-                          <div className="w-36 min-w-[130px]">
+                          <div className="flex flex-col items-end shrink-0 min-w-[110px] max-w-[140px]">
                             <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                           </div>
                         ) : (
                           <button
+                            type="button"
                             onClick={() => handleVideoDownload(quality.id, quality.value, quality.ext)}
                             disabled={!isAvailable || !!downloading}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${isAvailable && !downloading
-                              ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            className={`shrink-0 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-bold text-xs whitespace-nowrap active:opacity-80 touch-manipulation cursor-pointer ${isAvailable && !downloading
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+                              : 'bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed'
                               }`}
                           >
                             {isAvailable ? 'Descargar' : 'N/A'}

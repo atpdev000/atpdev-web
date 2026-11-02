@@ -495,7 +495,7 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
 
       {/* Contenido principal */}
 
-      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors">
+      <div className={`${isNative ? 'p-1 sm:p-4 bg-transparent border-0 shadow-none' : 'bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-3.5 sm:p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors'}`}>
         <div className="text-center mb-6">
           <div className="bg-black dark:bg-slate-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10 shadow-md">
             <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -559,7 +559,7 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
 
         {/* Resultado del Video */}
         {videoInfo && (
-          <div className="mt-6 p-6 bg-green-50 rounded-xl border border-green-200">
+          <div className="mt-4 sm:mt-6 p-2.5 sm:p-4 md:p-6 bg-green-50/90 dark:bg-slate-800/90 rounded-2xl border border-green-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -633,7 +633,7 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
               <h4 className="text-lg font-bold text-gray-900 mb-4">Formatos Disponibles</h4>
 
               {/* MOBILE: Simplified Layout */}
-              <div className={isNative ? 'block' : 'block md:hidden space-y-2'}>
+              <div className={isNative ? 'block space-y-2.5' : 'block md:hidden space-y-2.5'}>
                 {predefinedQualities.map((quality) => {
                   const format = videoInfo.formats?.find(f =>
                     f.quality.toLowerCase().includes(quality.value) ||
@@ -644,29 +644,30 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
                   const isDownloading = downloading === quality.value
 
                   return (
-                    <div key={quality.value} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'}`}>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-semibold text-gray-900">{quality.label}</p>
+                    <div key={quality.value} className={`flex items-center justify-between gap-2 border rounded-xl p-2.5 sm:p-3 overflow-hidden ${isAvailable ? 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800' : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 opacity-60'}`}>
+                      <div className="flex-1 min-w-0 pr-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm leading-tight truncate">{quality.label}</p>
                           {quality.value === 'audio' ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                              <Music className="w-3 h-3 text-purple-600" /> Solo Audio
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700 shrink-0">
+                              <Music className="w-3 h-3 text-purple-600 dark:text-purple-400" /> Solo Audio
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                              <Volume2 className="w-3 h-3 text-emerald-600" /> Video + Audio
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 shrink-0">
+                              <Volume2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> Video + Audio
                             </span>
                           )}
                         </div>
-                        {!isAvailable && <p className="text-xs text-red-500 mt-0.5">No disponible</p>}
+                        {!isAvailable && <p className="text-[11px] text-red-500 mt-0.5">No disponible</p>}
                       </div>
 
                       {isDownloading ? (
-                        <div className="w-40 min-w-[140px]">
+                        <div className="flex flex-col items-end shrink-0 min-w-[110px] max-w-[140px]">
                           <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                         </div>
                       ) : (
                         <button
+                          type="button"
                           onClick={() => {
                             if (format) {
                               handleDownload(format.url, quality.value, quality.ext);
@@ -675,9 +676,9 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
                             }
                           }}
                           disabled={!isAvailable || isDownloading}
-                          className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${isAvailable && !isDownloading
-                            ? 'bg-black hover:bg-gray-800 text-white'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          className={`shrink-0 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-bold text-xs whitespace-nowrap active:opacity-80 touch-manipulation cursor-pointer ${isAvailable && !isDownloading
+                            ? 'bg-black dark:bg-pink-600 hover:bg-gray-800 dark:hover:bg-pink-700 text-white shadow-xs'
+                            : 'bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed'
                             }`}
                         >
                           {isAvailable ? 'Descargar' : 'N/A'}

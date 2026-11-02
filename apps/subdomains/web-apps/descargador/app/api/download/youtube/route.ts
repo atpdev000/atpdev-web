@@ -4,31 +4,9 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import { findYtDlpBinary } from '@/lib/server/binaries'
 
 export const maxDuration = 60
-
-function findYtDlpBinary(): string | null {
-  const isWindows = process.platform === 'win32'
-  const binaryName = isWindows ? 'yt-dlp.exe' : 'yt-dlp'
-
-  const searchLocations = [
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', binaryName),
-    path.join(process.cwd(), 'bin', binaryName),
-    path.join(process.cwd(), 'node_modules', 'yt-dlp-exec', 'bin', binaryName)
-  ]
-
-  for (const location of searchLocations) {
-    try {
-      if (fs.existsSync(location)) {
-        return location
-      }
-    } catch {
-      // Continuar buscando
-    }
-  }
-
-  return 'yt-dlp'
-}
 
 function getCookiesArg(): string[] {
   // 1. Archivo físico cookies.txt en el proyecto o bin

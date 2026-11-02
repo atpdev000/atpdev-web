@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Filesystem } from '@capacitor/filesystem';
 
 export interface HistoryItem {
@@ -11,117 +12,58 @@ export interface HistoryItem {
     status: 'completed' | 'failed';
     format?: string;
     read?: boolean;
-    fileSize?: string; // "14MB"
-    duration?: string; // "04:20"
-    filePath?: string; // "file:///storage/..."
-    mimeType?: string; // "video/mp4"
+    fileSize?: string;
+    duration?: string;
+    filePath?: string;
+    mimeType?: string;
 }
 
-const HISTORY_KEY = 'fty_download_history';
 const MAX_ITEMS = 50;
+const HISTORY_KEY = 'fty_download_history';
 
-export function useDownloadHistory() {
-    const [history, setHistory] = useState<HistoryItem[]>([]);
+interface HistoryState {
+    history: HistoryItem[];
+    addToHistory: (item: Omit<HistoryItem, 'id' | 'date'>) => void;
+    clearHistory: () => void;
+    deleteItem: (id: string) => void;
+    markAllAsRead: () => void;
+}
 
-    useEffect(() => {
-        const loadHistory = () => {
-            try {
-                const stored = localStorage.getItem(HISTORY_KEY);
-                if (stored) {
-                    try {
-                        const parsed = JSON.parse(stored);
-                        // Validar que sea un array
-                        if (Array.isArray(parsed)) {
-                            setHistory(parsed);
-                        } else {
-                            console.warn('Historia corrupta, limpiando...');
-                            localStorage.removeItem(HISTORY_KEY);
-                            setHistory([]);
-                        }
-                    } catch (parseError) {
-                        console.error('Error parsing history, limpiando...', parseError);
-                        // Si hay error al parsear, limpiar el localStorage
-                        localStorage.removeItem(HISTORY_KEY);
-                        setHistory([]);
-                    }
-                } else {
-                    setHistory([]);
-                }
-            } catch (storageError) {
-                console.error('Error accediendo a localStorage:', storageError);
-                setHistory([]);
-            }
-        };
+export const useHistoryStore = create<HistoryState>()(
+    persist(
+        (set, get) => ({
+            history: [],
 
-        loadHistory();
+            addToHistory: (item) => {
+                const newItem: HistoryItem = {
+                    ...item,
+                    id: typeof crypto !== 'undefined' && crypto.randomUUID
+                        ? crypto.randomUUID()
+                        : `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+                    date: Date.now(),
+                    read: false,
+                };
+                set((state) => {
+                    const current = Array.isArray(state.history) ? state.history : [];
+                    const filtered = current.filter(i => i.id !== newItem.id);
+                    return {
+                        history: [newItem, ...filtered].slice(0, MAX_ITEMS)
+                    };
+                });
+            },
 
-        const handleStorageChange = () => {
-            try {
-                loadHistory();
-            } catch (e) {
-                console.error('Error en handleStorageChange:', e);
-            }
-        };
+            clearHistory: () => {
+                set({ history: [] });
+            },
 
-        // Listen to custom event for intra-app updates and storage event for cross-tab
-        window.addEventListener('history-updated', handleStorageChange);
-        window.addEventListener('storage', handleStorageChange);
+            deleteItem: (id: string) => {
+                const current = Array.isArray(get().history) ? get().history : [];
+                const itemToDelete = current.find(i => i.id === id);
 
-        return () => {
-            window.removeEventListener('history-updated', handleStorageChange);
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    }, []);
+                set({
+                    history: current.filter(i => i.id !== id)
+                });
 
-    const addToHistory = (item: Omit<HistoryItem, 'id' | 'date'>) => {
-        try {
-            const newItem: HistoryItem = {
-                ...item,
-                id: crypto.randomUUID(),
-                date: Date.now(),
-            };
-
-            const stored = localStorage.getItem(HISTORY_KEY);
-            const currentHistory: HistoryItem[] = stored ? JSON.parse(stored) : [];
-
-            const updated = [newItem, ...currentHistory].slice(0, MAX_ITEMS);
-            localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-
-            // Update local state
-            setHistory(updated);
-
-            // Notify other components
-            window.dispatchEvent(new Event('history-updated'));
-            console.log('✅ History updated:', newItem.title);
-        } catch (error) {
-            console.error('Error adding to history:', error);
-        }
-    };
-
-    const clearHistory = () => {
-        try {
-            setHistory([]);
-            localStorage.removeItem(HISTORY_KEY);
-            window.dispatchEvent(new Event('history-updated'));
-        } catch (error) {
-            console.error('Error clearing history:', error);
-        }
-    };
-
-    const deleteItem = (id: string) => {
-        try {
-            const stored = localStorage.getItem(HISTORY_KEY);
-            if (stored) {
-                const currentItems: HistoryItem[] = JSON.parse(stored);
-                const itemToDelete = currentItems.find(i => i.id === id);
-
-                // ⚡ Actualización inmediata de UI y almacenamiento
-                const updated = currentItems.filter(i => i.id !== id);
-                setHistory(updated);
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-                window.dispatchEvent(new Event('history-updated'));
-
-                // 🔥 Borrar archivo físico en background si existe
                 if (itemToDelete?.filePath) {
                     Filesystem.deleteFile({
                         path: itemToDelete.filePath
@@ -129,24 +71,66 @@ export function useDownloadHistory() {
                         console.warn('No se pudo borrar el archivo físico:', fsError);
                     });
                 }
-            }
-        } catch (error) {
-            console.error('Error deleting item:', error);
-        }
-    };
+            },
 
-    const markAllAsRead = () => {
-        try {
-            setHistory(prev => {
-                const updated = prev.map(item => ({ ...item, read: true }));
-                localStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-                window.dispatchEvent(new Event('history-updated'));
-                return updated;
-            });
-        } catch (error) {
-            console.error('Error marking as read:', error);
+            markAllAsRead: () => {
+                const current = Array.isArray(get().history) ? get().history : [];
+                const hasUnread = current.some(i => !i.read);
+                if (!hasUnread) return;
+
+                set({
+                    history: current.map(i => i.read ? i : { ...i, read: true })
+                });
+            }
+        }),
+        {
+            name: HISTORY_KEY,
+            storage: {
+                getItem: (name) => {
+                    if (typeof window === 'undefined') return null;
+                    try {
+                        const str = localStorage.getItem(name);
+                        if (!str) return null;
+                        const parsed = JSON.parse(str);
+                        // Compatibilidad retroactiva: si ya estaba guardado como array directo
+                        if (Array.isArray(parsed)) {
+                            return { state: { history: parsed }, version: 0 };
+                        }
+                        if (parsed && typeof parsed === 'object' && 'state' in parsed) {
+                            return parsed;
+                        }
+                        return null;
+                    } catch (e) {
+                        console.warn('Error leyendo localStorage history:', e);
+                        try { localStorage.removeItem(name); } catch {}
+                        return null;
+                    }
+                },
+                setItem: (name, value) => {
+                    if (typeof window === 'undefined') return;
+                    try {
+                        localStorage.setItem(name, JSON.stringify(value));
+                    } catch (e) {
+                        console.warn('Error guardando history en localStorage:', e);
+                    }
+                },
+                removeItem: (name) => {
+                    if (typeof window === 'undefined') return;
+                    try {
+                        localStorage.removeItem(name);
+                    } catch {}
+                }
+            }
         }
-    };
+    )
+);
+
+export function useDownloadHistory() {
+    const history = useHistoryStore((state) => state.history) || [];
+    const addToHistory = useHistoryStore((state) => state.addToHistory);
+    const clearHistory = useHistoryStore((state) => state.clearHistory);
+    const deleteItem = useHistoryStore((state) => state.deleteItem);
+    const markAllAsRead = useHistoryStore((state) => state.markAllAsRead);
 
     const unreadCount = history.filter(item => !item.read).length;
 

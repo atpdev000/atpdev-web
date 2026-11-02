@@ -23,7 +23,10 @@ export default function AppHeader() {
                     <ThemeToggle />
 
                     <button
-                        onClick={() => setIsHistoryOpen(true)}
+                        onClick={() => {
+                            markAllAsRead()
+                            setIsHistoryOpen(true)
+                        }}
                         className="p-1.5 sm:p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative shrink-0 cursor-pointer"
                         title="Historial de Descargas"
                         aria-label="Historial de Descargas"
@@ -44,7 +47,6 @@ export default function AppHeader() {
                 history={history}
                 onClear={clearHistory}
                 onDelete={deleteItem}
-                onOpen={markAllAsRead}
             />
         </>
     )

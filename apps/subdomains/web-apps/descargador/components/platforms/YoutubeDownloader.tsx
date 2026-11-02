@@ -62,11 +62,11 @@ const predefinedQualities: { value: string, label: string, ext?: string, isPro?:
   { label: '2160p (4K UHD)', value: '2160p', ext: 'mp4', isPro: true },
   { label: '1440p (2K QHD)', value: '1440p', ext: 'mp4', isPro: true },
   { label: '1080p (Full HD)', value: '1080p', ext: 'mp4', isPro: true },
-  { label: '720p (HD Gratis)', value: '720p', ext: 'mp4', isPro: false },
-  { label: '480p (.mp4)', value: '480p', ext: 'mp4', isPro: false },
-  { value: '360p', label: '360p (.mp4)', ext: 'mp4', isPro: false },
-  { value: '240p', label: '240p (.mp4)', ext: 'mp4', isPro: false },
-  { value: '144p', label: '144p (.mp4)', ext: 'mp4', isPro: false }
+  { label: '720p (HD)', value: '720p', ext: 'mp4', isPro: false },
+  { label: '480p (SD)', value: '480p', ext: 'mp4', isPro: false },
+  { value: '360p', label: '360p (MP4)', ext: 'mp4', isPro: false },
+  { value: '240p', label: '240p (MP4)', ext: 'mp4', isPro: false },
+  { value: '144p', label: '144p (MP4)', ext: 'mp4', isPro: false }
 ]
 
 export interface DownloaderProps {
@@ -1230,7 +1230,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     <>
 
 
-      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-6 md:p-8 border border-gray-200/80 dark:border-slate-800 transition-colors">
+      <div className={`${isNative ? 'p-1 sm:p-4 bg-transparent border-0 shadow-none' : 'bg-white/80 dark:bg-slate-900/90 backdrop-blur-md rounded-2xl shadow-lg p-3 sm:p-6 md:p-8 border border-gray-200/80 dark:border-slate-800'} transition-colors`}>
         <div className="text-center mb-6">
           <div className="bg-red-100 dark:bg-red-950/80 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20 shadow-md">
             <svg className="h-8 w-8 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 24 24">
@@ -1293,7 +1293,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         </form>
 
         {videoInfo && (
-          <div className="mt-6 p-6 bg-green-50 rounded-xl border border-green-200">
+          <div className="mt-4 sm:mt-6 p-2.5 sm:p-4 md:p-6 bg-green-50/90 dark:bg-slate-800/90 rounded-2xl border border-green-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
                 <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1414,43 +1414,39 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                   </div>
 
                   {/* MOBILE: Simplified Layout - Only Quality + Action */}
-                  <div className="block md:hidden space-y-2">
+                  <div className={isNative ? 'block space-y-2' : 'block md:hidden space-y-2'}>
                     {predefinedQualities.map((quality) => {
                       const isAvailable = isQualityAvailable(quality.value)
                       const isDownloading = downloading === `simple-${quality.value}`
                       const formatInfo = getFormatInfo(quality.value, true)
 
                       return (
-                        <div key={quality.value} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? 'border-gray-300 bg-white' : 'border-gray-200 bg-gray-50 opacity-60'} `}>
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-900">{quality.label}</p>
-                            {!isAvailable && <p className="text-xs text-red-500">No disponible</p>}
+                        <div key={quality.value} className={`flex items-center justify-between gap-2 border rounded-xl p-2 sm:p-2.5 overflow-hidden ${isAvailable ? 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800' : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 opacity-60'} `}>
+                          <div className="flex-1 min-w-0 pr-1">
+                            <p className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm truncate">{quality.label}</p>
+                            {!isAvailable && <p className="text-[10px] text-red-500 mt-0.5">No disponible</p>}
                           </div>
 
                           {isDownloading ? (
-                            <div className="flex flex-col items-end min-w-[130px]">
-                              <div className="w-28 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="flex flex-col items-end shrink-0 min-w-[95px] max-w-[125px]">
+                              <div className="w-20 sm:w-24 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                 <div
                                   className="h-full bg-blue-500 transition-all duration-300"
                                   style={{ width: `${Math.min(Math.max(downloadProgress, 0), 100)}%` }}
                                 />
                               </div>
-                              <span className="text-[11px] text-blue-600 font-bold mt-1">
+                              <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold mt-0.5">
                                 {Math.round(downloadProgress)}%
                               </span>
-                              {downloadDetails && (
-                                <span className="text-[9px] text-gray-500 text-right truncate max-w-[130px]">
-                                  {downloadDetails}
-                                </span>
-                              )}
                             </div>
                           ) : (
                             <button
+                              type="button"
                               onClick={() => handleSimpleDownload(quality.value, quality.ext || 'mp4')}
                               disabled={!isAvailable || downloading !== null}
-                              className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${isAvailable && !downloading
-                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              className={`shrink-0 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-bold text-xs whitespace-nowrap active:opacity-75 touch-manipulation cursor-pointer ${isAvailable && !downloading
+                                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+                                : 'bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed'
                                 }`}
                             >
                               {isAvailable ? 'Descargar' : 'N/A'}
@@ -1575,7 +1571,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                   )}
 
                   {/* MOBILE: Simplified Layout - Only Quality + Action */}
-                  <div className={isNative ? 'block' : 'block md:hidden space-y-2'}>
+                  <div className={isNative ? 'block space-y-2' : 'block md:hidden space-y-2'}>
                     {predefinedQualities.map((quality) => {
                       const isAvailable = isQualityAvailable(quality.value)
                       const isDownloading = downloading === `combined-${quality.value}`
@@ -1583,46 +1579,42 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                       const isLocked = isProTier && !isPro
 
                       return (
-                        <div key={quality.value} className={`flex items-center gap-3 border rounded-lg p-3 ${isAvailable ? (isProTier ? 'border-amber-200 bg-amber-50/30' : 'border-gray-300 bg-white') : 'border-gray-200 bg-gray-50 opacity-60'}`}>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="font-semibold text-gray-900">{quality.label}</p>
+                        <div key={quality.value} className={`flex items-center justify-between gap-2 border rounded-xl p-2 sm:p-2.5 overflow-hidden ${isAvailable ? (isProTier ? 'border-amber-200 dark:border-amber-700/60 bg-amber-50/40 dark:bg-amber-950/20' : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800') : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 opacity-60'}`}>
+                          <div className="flex-1 min-w-0 pr-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm leading-tight truncate">{quality.label}</p>
                               {isProTier && (
-                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-900/50 dark:text-amber-300 dark:border-amber-700 shrink-0">
                                   👑 PRO
                                 </span>
                               )}
                               {!isProTier && (
-                                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-green-100 text-green-700">
+                                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 shrink-0">
                                   Gratis
                                 </span>
                               )}
                             </div>
-                            {!isAvailable && <p className="text-xs text-red-500">No disponible para este video</p>}
+                            {!isAvailable && <p className="text-[10px] text-red-500 mt-0.5">No disponible para este video</p>}
                             {isAvailable && isLocked && (
-                              <p className="text-xs text-amber-700 font-medium mt-0.5">🔒 Requiere Plan PRO</p>
+                              <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium mt-0.5">🔒 Requiere Plan PRO</p>
                             )}
                           </div>
 
                           {isDownloading ? (
-                            <div className="flex flex-col items-end min-w-[140px]">
-                              <div className="w-28 h-2.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                            <div className="flex flex-col items-end shrink-0 min-w-[95px] max-w-[125px]">
+                              <div className="w-20 sm:w-24 h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
                                 <div
                                   className="h-full bg-gradient-to-r from-emerald-500 to-green-600 transition-all duration-300"
                                   style={{ width: `${Math.min(Math.max(downloadProgress, 0), 100)}%` }}
                                 />
                               </div>
-                              <span className="text-[11px] text-green-700 font-bold mt-1">
+                              <span className="text-[10px] text-green-700 dark:text-green-400 font-bold mt-0.5">
                                 {Math.round(downloadProgress)}%
                               </span>
-                              {downloadDetails && (
-                                <span className="text-[9px] text-gray-500 font-medium text-right max-w-[140px] truncate">
-                                  {downloadDetails}
-                                </span>
-                              )}
                             </div>
                           ) : (
                             <button
+                              type="button"
                               onClick={() => {
                                 if (isLocked) {
                                   setTargetProQuality(quality.value)
@@ -1632,9 +1624,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                                 }
                               }}
                               disabled={!isAvailable || !!downloading}
-                              className={`px-4 py-2 rounded-lg font-semibold text-xs whitespace-nowrap transition-all shadow-sm ${
+                              className={`shrink-0 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg font-bold text-xs whitespace-nowrap active:opacity-75 touch-manipulation cursor-pointer ${
                                 !isAvailable
-                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  ? 'bg-gray-300 dark:bg-slate-700 text-gray-500 dark:text-slate-400 cursor-not-allowed'
                                   : isLocked
                                   ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white'
                                   : isProTier
@@ -1647,8 +1639,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                                 : isLocked
                                 ? '👑 Desbloquear'
                                 : isProTier
-                                ? '⚡ Descargar PRO'
-                                : 'Descargar Gratis'}
+                                ? '⚡ Descargar'
+                                : 'Descargar'}
                             </button>
                           )}
                         </div>

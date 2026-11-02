@@ -2,23 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
-
-function findFfmpegBinary(): string | null {
-  try {
-    const staticPath = require('ffmpeg-static')
-    if (staticPath && fs.existsSync(staticPath)) return staticPath
-  } catch {}
-
-  const candidates = [
-    path.join(process.cwd(), 'bin', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'),
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'),
-    'D:\\PROYECTOS\\atpdev-web\\apps\\subdomains\\web-apps\\descargador\\bin\\ffmpeg.exe'
-  ]
-  for (const c of candidates) {
-    if (fs.existsSync(c)) return c
-  }
-  return null
-}
+import { findFfmpegBinary } from '@/lib/server/binaries'
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
 const COMBINE_TIMEOUT = 300000 // 5 minutos para combinación
@@ -435,9 +419,10 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
     const ffmpegPath = findFfmpegBinary();
 
     if (ffmpegPath) {
+      console.log('✅ [Proxy] FFmpeg localizado en:', ffmpegPath);
       ffmpeg.setFfmpegPath(ffmpegPath);
     } else {
-      throw new Error('ffmpeg binary not found in system or bin directory');
+      console.warn('⚠️ [Proxy] No se encontró ruta fija de FFmpeg. Intentando usar ffmpeg del PATH del sistema...');
     }
 
     const { PassThrough } = require('stream');
@@ -450,13 +435,11 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
       const command = ffmpeg()
         .input(videoUrl)
         .inputOptions([
-          '-headers', getFfmpegHeadersString(videoUrl),
-          '-re'
+          '-headers', getFfmpegHeadersString(videoUrl)
         ])
         .input(audioUrl)
         .inputOptions([
-          '-headers', getFfmpegHeadersString(audioUrl),
-          '-re'
+          '-headers', getFfmpegHeadersString(audioUrl)
         ])
         .outputOptions([
           '-c:v copy',
@@ -518,6 +501,31 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
 
   } catch (error: any) {
     console.error('💥 [Proxy] Error en combinación FFmpeg:', error)
+
+    // Fallback de contingencia: si la combinación falló, enviar el stream de video directo con header de aviso
+    if (videoUrl && isValidDownloadUrl(videoUrl)) {
+      try {
+        console.log('🔄 [Proxy] Realizando fallback a streaming directo de video debido a error en FFmpeg...')
+        const fallbackRes = await fetch(videoUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Referer': 'https://www.youtube.com/'
+          }
+        })
+        if (fallbackRes.ok && fallbackRes.body) {
+          let finalFilename = filename || `youtube_${quality || 'video'}_${Date.now()}.mp4`
+          if (!finalFilename.endsWith('.mp4')) finalFilename += '.mp4'
+          const headers = new Headers()
+          headers.set('Content-Type', 'video/mp4')
+          headers.set('Content-Disposition', `attachment; filename="${finalFilename}"`)
+          headers.set('X-Combined-Status', 'video_only_with_audio_available')
+          return new NextResponse(fallbackRes.body as any, { status: 200, headers })
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback también falló:', fallbackErr)
+      }
+    }
+
     return NextResponse.json({
       error: 'Error combinando audio y video: ' + (error instanceof Error ? error.message : 'Unknown error'),
       details: 'El servidor no pudo procesar la combinación.',

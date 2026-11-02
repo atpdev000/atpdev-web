@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { findFfmpegBinary } from '@/lib/server/binaries';
 
 export async function POST(request: NextRequest) {
   try {
@@ -204,9 +205,11 @@ async function handleAudioWithThumbnail(audioUrl: string, thumbnailUrl: string, 
   try {
     console.log('🎨 [Facebook Proxy] Incrustando miniatura con FFmpeg...');
     const ffmpeg = require('fluent-ffmpeg');
-    const ffmpegPath = require('ffmpeg-static');
+    const ffmpegPath = findFfmpegBinary();
 
-    if (ffmpegPath) ffmpeg.setFfmpegPath(ffmpegPath);
+    if (ffmpegPath) {
+      ffmpeg.setFfmpegPath(ffmpegPath);
+    }
 
     const { PassThrough } = require('stream');
     const outputStream = new PassThrough();

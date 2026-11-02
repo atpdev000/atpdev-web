@@ -4,30 +4,9 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import { getYtDlpWithFfmpeg } from '@/lib/server/binaries'
 
 export const maxDuration = 300 // 5 minutos máximo para descargas grandes
-
-function getBinPaths() {
-  const cwd = process.cwd()
-  const possibleYtDlp = [
-    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'yt-dlp.exe'),
-    path.join(cwd, 'bin', 'yt-dlp.exe'),
-    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'yt-dlp'),
-    path.join(cwd, 'bin', 'yt-dlp')
-  ]
-  const possibleFfmpeg = [
-    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'ffmpeg.exe'),
-    path.join(cwd, 'bin', 'ffmpeg.exe'),
-    path.join(cwd, 'node_modules', 'ffmpeg-static', 'ffmpeg.exe'),
-    path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'ffmpeg')
-  ]
-
-  const ytDlp = possibleYtDlp.find(p => fs.existsSync(p)) || 'yt-dlp'
-  const ffmpeg = possibleFfmpeg.find(p => fs.existsSync(p)) || 'ffmpeg'
-  const binDir = path.dirname(ffmpeg)
-
-  return { ytDlp, ffmpeg, binDir }
-}
 
 function getCookiesArg(): string[] {
   const candidatePaths = [
@@ -94,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const cleanedUrl = cleanUrl(url)
-    const { ytDlp, binDir } = getBinPaths()
+    const { ytDlp, ffmpeg, ffmpegArgs, binDir } = getYtDlpWithFfmpeg()
 
     console.log('🎬 [YouTube Combined Engine] Iniciando descarga real...', {
       url: cleanedUrl,
@@ -103,7 +82,8 @@ export async function POST(request: NextRequest) {
       video_itag,
       audio_itag,
       downloadId,
-      binDir
+      binDir,
+      ffmpegLocation: ffmpeg
     })
 
     const isAudioOnly = quality === 'audio' || (!video_itag && !!audio_itag) || format_type === 'mp3' || format_type === 'm4a'
@@ -148,7 +128,7 @@ export async function POST(request: NextRequest) {
     const nodeBin = process.execPath || 'node'
     const cookieArgs = getCookiesArg()
     const ytArgs: string[] = [
-      '--ffmpeg-location', binDir,
+      ...ffmpegArgs,
       '--js-runtimes', `node:${nodeBin}`,
       '--newline',
       '--no-playlist',

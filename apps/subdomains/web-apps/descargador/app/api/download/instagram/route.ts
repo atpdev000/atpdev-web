@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
+import { findYtDlpBinary } from '@/lib/server/binaries';
 
 export const maxDuration = 60;
 
@@ -25,21 +26,6 @@ interface InstagramMediaResult {
   duration: number;
   uploader: string;
   formats: InstagramFormat[];
-}
-
-function findYtDlpBinary(): string | null {
-  const possiblePaths = [
-    path.join(process.cwd(), 'bin', process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp'),
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp'),
-    process.platform === 'win32'
-      ? 'D:\\PROYECTOS\\atpdev-web\\apps\\subdomains\\web-apps\\descargador\\bin\\yt-dlp.exe'
-      : '/usr/local/bin/yt-dlp'
-  ];
-
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) return p;
-  }
-  return null;
 }
 
 // 1. Extractor con yt-dlp local
