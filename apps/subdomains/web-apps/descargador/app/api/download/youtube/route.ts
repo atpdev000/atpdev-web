@@ -104,7 +104,98 @@ function cleanYoutubeUrl(url: string): string {
   }
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'android,ios,mweb'): Promise<any> {
+function extractVideoId(url: string): string | null {
+  try {
+    const urlObj = new URL(url)
+    const v = urlObj.searchParams.get('v')
+    if (v) return v
+    if (url.includes('youtu.be/')) {
+      const parts = urlObj.pathname.split('/').filter(Boolean)
+      if (parts[0]) return parts[0]
+    }
+    if (url.includes('/shorts/')) {
+      const parts = urlObj.pathname.split('/').filter(Boolean)
+      const idx = parts.indexOf('shorts')
+      if (idx !== -1 && parts[idx + 1]) return parts[idx + 1]
+    }
+    const match = url.match(/(?:v=|\/|be\/|shorts\/)([a-zA-Z0-9_-]{11})/)
+    return match ? match[1] : null
+  } catch {
+    const match = url.match(/(?:v=|\/|be\/|shorts\/)([a-zA-Z0-9_-]{11})/)
+    return match ? match[1] : null
+  }
+}
+
+async function extractWithInvidious(url: string): Promise<any> {
+  const videoId = extractVideoId(url)
+  if (!videoId) return null
+
+  const invidiousHosts = [
+    'https://yt.chocolatemoo53.com',
+    'https://inv.nadeko.net',
+    'https://invidious.nerdvpn.de',
+    'https://invidious.tiekoetter.com'
+  ]
+
+  for (const host of invidiousHosts) {
+    try {
+      console.log(`🌐 [YouTube Invidious Fallback] Consultando: ${host}/api/v1/videos/${videoId}`)
+      const res = await fetch(`${host}/api/v1/videos/${videoId}`, {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        signal: AbortSignal.timeout(6000)
+      })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (!data || !data.title || !(data.adaptiveFormats?.length || data.formatStreams?.length)) {
+        continue
+      }
+
+      const rawAdaptive = data.adaptiveFormats || []
+      const rawStreams = data.formatStreams || []
+      const all = [...rawStreams, ...rawAdaptive]
+
+      const formats = all.filter((f: any) => f.url).map((f: any) => {
+        const isVideo = f.type ? f.type.startsWith('video/') : !!f.resolution
+        const isAudio = f.type ? f.type.startsWith('audio/') : !f.resolution
+        const height = f.resolution ? parseInt(f.resolution.replace('p', '')) : (f.qualityLabel ? parseInt(f.qualityLabel) : null)
+
+        return {
+          format_id: String(f.itag || ''),
+          url: f.url,
+          ext: f.container || (isAudio ? 'm4a' : 'mp4'),
+          height: height,
+          width: null,
+          resolution: f.resolution || (height ? `${height}p` : (isAudio ? 'Audio' : null)),
+          format_note: f.qualityLabel || (height ? `${height}p` : (isAudio ? (f.audioQuality || 'Audio') : null)),
+          filesize: f.clen ? parseInt(f.clen) : null,
+          vcodec: isVideo ? (f.encoding || 'h264') : 'none',
+          acodec: isAudio ? (f.encoding || 'aac') : (rawStreams.includes(f) ? 'aac' : 'none'),
+          fps: f.fps || null
+        }
+      })
+
+      console.log(`✅ [YouTube Invidious Fallback] Éxito con ${host}: "${data.title}" (${formats.length} formatos)`)
+      return {
+        id: videoId,
+        title: data.title,
+        thumbnail: data.videoThumbnails?.find((t: any) => t.quality === 'maxres')?.url || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        duration: data.lengthSeconds || 0,
+        uploader: data.author,
+        channel: data.author,
+        view_count: data.viewCount || 0,
+        formats
+      }
+    } catch (e: any) {
+      console.warn(`⚠️ [YouTube Invidious Fallback] ${host} falló:`, e.message)
+    }
+  }
+  return null
+}
+
+async function extractMetadata(url: string, binPath: string, playerClient = 'tv_embedded,android_creator'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
@@ -180,26 +271,34 @@ export async function POST(request: NextRequest) {
 
     if (bin) {
       try {
-        // Intento 1 con clientes móviles InnerTube (bypasea el bloqueo bot de datacenters como Render)
-        rawInfo = await extractMetadata(cleanedUrl, bin, 'android,ios,mweb')
+        // Intento 1 con clientes TV embedded + Android Creator (bypasea el bloqueo bot de datacenters como Render)
+        rawInfo = await extractMetadata(cleanedUrl, bin, 'tv_embedded,android_creator')
       } catch (err: any) {
         console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
-        // Si detecta desafío de bot o sign-in, intentar cliente alternativo TV / Android
-        if (err.message?.includes('Sign in to confirm') || err.message?.includes('bot')) {
-          try {
-            console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (tv,android)...')
-            rawInfo = await extractMetadata(cleanedUrl, bin, 'android,tv')
-          } catch (retryErr: any) {
-            console.error('❌ [YouTube Serverless] Reintento alternativo falló:', retryErr.message)
-            extractionError = retryErr
-          }
-        } else {
-          extractionError = err
+        try {
+          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (android_creator,tv)...')
+          rawInfo = await extractMetadata(cleanedUrl, bin, 'android_creator,tv')
+        } catch (retryErr: any) {
+          console.error('❌ [YouTube Serverless] Reintento alternativo falló:', retryErr.message)
+          extractionError = retryErr
         }
       }
     }
 
-    // Fallback a API externa si está configurada y local falló
+    // Fallback 1 a Invidious API resolver de alta velocidad (bypasea 100% bloqueos de IP en datacenters)
+    if (!rawInfo) {
+      try {
+        console.log('🔄 [YouTube] Intentando fallback con Invidious API...')
+        rawInfo = await extractWithInvidious(cleanedUrl)
+        if (rawInfo) {
+          console.log('🎉 [YouTube] Fallback con Invidious exitoso')
+        }
+      } catch (invidiousErr: any) {
+        console.error('❌ [YouTube] Invidious fallback falló:', invidiousErr.message)
+      }
+    }
+
+    // Fallback 2 a API externa Python si está configurada
     const PYTHON_API_URL = process.env.PYTHON_API_URL?.replace(/\/$/, '')
     if (!rawInfo && PYTHON_API_URL) {
       try {

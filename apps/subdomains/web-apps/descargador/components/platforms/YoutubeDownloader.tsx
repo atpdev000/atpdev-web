@@ -272,6 +272,16 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         } catch {
           errorMsg = errorText.substring(0, 100) || errorMsg
         }
+
+        // 🔄 Fallback automático: Combinar usando URLs directas a través del proxy
+        if (format.url && (format.recommended_audio as any)?.url) {
+          console.log('🔄 Intentando fallback con Proxy Combiner...')
+          setDownloadDetails('Servidor ocupado. Combinando flujos de audio y video...')
+          const fallbackFilename = `youtube_${quality}_${Date.now()}.mp4`
+          await downloadCombinedWithProxy(format.url, (format.recommended_audio as any).url, fallbackFilename, quality)
+          return
+        }
+
         setError(errorMsg)
         return
       }
@@ -458,6 +468,21 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           } catch {
             errorMsg = errorText.substring(0, 100) || errorMsg
           }
+
+          // 🔄 Fallback automático para descarga simple mediante proxy
+          if (format.url) {
+            console.log('🔄 Intentando descarga simple mediante proxy fallback...')
+            setDownloadDetails('Descargando archivo mediante proxy seguro...')
+            const fallbackFilename = `youtube_simple_${quality}_${Date.now()}.${fileExt}`
+            const proxyRes = await fetch(`/api/download/proxy?url=${encodeURIComponent(format.url)}&filename=${encodeURIComponent(fallbackFilename)}`)
+            if (proxyRes.ok) {
+              pollActive = false
+              setDownloadDetails('Finalizando...')
+              await downloadStream(proxyRes, fallbackFilename, `simple-${quality}`)
+              return
+            }
+          }
+
           setError(errorMsg)
           return
         }

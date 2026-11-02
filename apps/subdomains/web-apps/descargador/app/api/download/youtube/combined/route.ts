@@ -29,6 +29,38 @@ function getBinPaths() {
   return { ytDlp, ffmpeg, binDir }
 }
 
+function getCookiesArg(): string[] {
+  const candidatePaths = [
+    path.join(process.cwd(), 'cookies.txt'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'cookies.txt'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'cookies.txt'),
+    path.join(process.cwd(), 'bin', 'cookies.txt')
+  ]
+
+  for (const cp of candidatePaths) {
+    try {
+      if (fs.existsSync(cp)) {
+        return ['--cookies', cp]
+      }
+    } catch {}
+  }
+
+  const envCookies = process.env.YOUTUBE_COOKIES || process.env.YT_COOKIES
+  if (envCookies) {
+    try {
+      const cookieFile = path.join(os.tmpdir(), 'yt_cookies.txt')
+      const isBase64 = envCookies.startsWith('data:') || (/^[A-Za-z0-9+/=]+$/.test(envCookies.trim()) && envCookies.length > 100)
+      const content = isBase64
+        ? Buffer.from(envCookies.trim(), 'base64').toString('utf-8')
+        : envCookies
+      fs.writeFileSync(cookieFile, content, 'utf-8')
+      return ['--cookies', cookieFile]
+    } catch {}
+  }
+
+  return []
+}
+
 function cleanUrl(inputUrl: string): string {
   try {
     const urlObj = new URL(inputUrl)
@@ -114,6 +146,7 @@ export async function POST(request: NextRequest) {
     const tempOutputPattern = `${tempFileBase}.%(ext)s`
 
     const nodeBin = process.execPath || 'node'
+    const cookieArgs = getCookiesArg()
     const ytArgs: string[] = [
       '--ffmpeg-location', binDir,
       '--js-runtimes', `node:${nodeBin}`,
@@ -123,6 +156,8 @@ export async function POST(request: NextRequest) {
       '--no-part',
       '--no-check-certificates',
       '--geo-bypass',
+      '--extractor-args', 'youtube:player_client=tv_embedded,android_creator',
+      ...cookieArgs,
       '-f', formatArg,
       '-o', tempOutputPattern,
     ]
