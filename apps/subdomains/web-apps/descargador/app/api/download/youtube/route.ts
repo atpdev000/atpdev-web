@@ -173,7 +173,7 @@ async function extractWithInvidious(url: string): Promise<any> {
   return null
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'tv_embedded,android_creator'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,ios'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
@@ -249,16 +249,22 @@ export async function POST(request: NextRequest) {
 
     if (bin) {
       try {
-        // Intento 1 con clientes TV embedded + Android Creator (bypasea el bloqueo bot de datacenters como Render)
-        rawInfo = await extractMetadata(cleanedUrl, bin, 'tv_embedded,android_creator')
+        // Intento 1 con clientes visionos,ios (bypasea el bloqueo bot de datacenters como Render)
+        rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos,ios')
       } catch (err: any) {
         console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
         try {
-          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (android_creator,tv)...')
-          rawInfo = await extractMetadata(cleanedUrl, bin, 'android_creator,tv')
+          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (visionos)...')
+          rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos')
         } catch (retryErr: any) {
-          console.error('❌ [YouTube Serverless] Reintento alternativo falló:', retryErr.message)
-          extractionError = retryErr
+          console.error('❌ [YouTube Serverless] Reintento visionos falló:', retryErr.message)
+          try {
+            console.log('🔄 [YouTube Serverless] Reintentando con cliente ios,mweb...')
+            rawInfo = await extractMetadata(cleanedUrl, bin, 'ios,mweb')
+          } catch (retry2Err: any) {
+            console.error('❌ [YouTube Serverless] Reintento ios,mweb falló:', retry2Err.message)
+            extractionError = retry2Err
+          }
         }
       }
     }
