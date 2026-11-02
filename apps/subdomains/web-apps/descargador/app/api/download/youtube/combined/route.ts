@@ -45,9 +45,24 @@ function cleanUrl(inputUrl: string): string {
     const urlObj = new URL(inputUrl)
     const videoId = urlObj.searchParams.get('v')
     if (videoId) return `https://www.youtube.com/watch?v=${videoId}`
-    return inputUrl.split('&')[0]
+
+    // Detectar YouTube Shorts (/shorts/ID)
+    const shortsMatch = urlObj.pathname.match(/\/shorts\/([a-zA-Z0-9_-]+)/)
+    if (shortsMatch && shortsMatch[1]) {
+      return `https://www.youtube.com/watch?v=${shortsMatch[1]}`
+    }
+
+    // Detectar enlaces cortos youtu.be/ID
+    if (urlObj.hostname.includes('youtu.be')) {
+      const parts = urlObj.pathname.split('/').filter(Boolean)
+      if (parts[0]) {
+        return `https://www.youtube.com/watch?v=${parts[0]}`
+      }
+    }
+
+    return inputUrl.split(/[?&]/)[0]
   } catch {
-    return inputUrl.split('&')[0]
+    return inputUrl.split(/[?&]/)[0]
   }
 }
 
@@ -136,7 +151,6 @@ export async function POST(request: NextRequest) {
       '--no-part',
       '--no-check-certificates',
       '--geo-bypass',
-      '--extractor-args', 'youtube:player_client=tv_embedded,android_creator',
       ...cookieArgs,
       '-f', formatArg,
       '-o', tempOutputPattern,

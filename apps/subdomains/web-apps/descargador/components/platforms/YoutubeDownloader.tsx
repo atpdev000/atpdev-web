@@ -203,11 +203,15 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
-    showRewarded(async () => {
-      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-      setDownloading(`combined-${quality}`)
-      setDownloadProgress(1)
-      setDownloadDetails('Iniciando descarga en el servidor...')
+    // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
+    if (isNative) {
+      showRewarded(() => {}).catch(() => {})
+    }
+
+    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+    setDownloading(`combined-${quality}`)
+    setDownloadProgress(1)
+    setDownloadDetails('Iniciando descarga en el servidor...')
 
       let pollActive = true
       const pollProgress = async () => {
@@ -317,7 +321,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         setDownloadDetails('')
       }, 1500)
     }
-    })
   }
 
   // ✅ FUNCIÓN PARA COMBINACIÓN CON PROXY (FALLBACK)
@@ -370,11 +373,15 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
-    showRewarded(async () => {
-      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-      setDownloadProgress(1)
-      setDownloading(`simple-${quality}`)
-      setDownloadDetails('Iniciando descarga en el servidor...')
+    // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
+    if (isNative) {
+      showRewarded(() => {}).catch(() => {})
+    }
+
+    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+    setDownloadProgress(1)
+    setDownloading(`simple-${quality}`)
+    setDownloadDetails('Iniciando descarga en el servidor...')
 
       let pollActive = true
       const pollProgress = async () => {
@@ -479,8 +486,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           setDownloadDetails('')
         }, 1500)
       }
-    })
-  }
+    }
 
 
   // ✅ LECTOR DE STREAM PARA PROGRESO EN TIEMPO REAL
@@ -525,6 +531,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     }
 
     const blob = new Blob(chunks as any, { type: (response.headers.get('Content-Type') as string) || 'video/mp4' })
+
+    if (blob.size === 0) {
+      throw new Error('El archivo recibido está vacío (0 bytes). Por favor intenta nuevamente.')
+    }
 
     setDownloadProgress(100)
 
@@ -641,9 +651,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           title: videoInfo?.title || filename,
           platform: 'youtube',
           thumbnail: videoInfo?.thumbnail || '',
-          originalUrl: originalUrl,
+          originalUrl: originalUrl || url,
           status: 'completed',
-          format: quality,
+          format: quality.replace(/^combined-|^simple-|^audio-/, '').toUpperCase(),
           fileSize: formatBytes(blob.size),
           duration: videoInfo?.duration ? String(videoInfo.duration) : undefined,
           filePath: savedUri, // URI REAL para reproducción
@@ -680,8 +690,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         title: videoInfo?.title || filename,
         platform: 'youtube',
         thumbnail: videoInfo?.thumbnail || '',
+        originalUrl: originalUrl || url,
         status: 'completed',
-        format: quality,
+        format: quality.replace(/^combined-|^simple-|^audio-/, '').toUpperCase(),
         fileSize: formatBytes(blob.size)
       })
     }
@@ -903,11 +914,15 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
-    showRewarded(async () => {
-      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-      setDownloading(`audio-${audioFormat.itag}`)
-      setDownloadProgress(1)
-      setDownloadDetails('Extrayendo audio en el servidor...')
+    // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
+    if (isNative) {
+      showRewarded(() => {}).catch(() => {})
+    }
+
+    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+    setDownloading(`audio-${audioFormat.itag}`)
+    setDownloadProgress(1)
+    setDownloadDetails('Extrayendo audio en el servidor...')
 
       let pollActive = true
       const pollProgress = async () => {
@@ -992,8 +1007,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           setDownloadDetails('')
         }, 1500)
       }
-    })
-  }
+    }
 
   // ✅ FUNCIONES AUXILIARES
   const findBestFormatForQuality = (qualityLabel: string, preferVideoOnly: boolean = false): {

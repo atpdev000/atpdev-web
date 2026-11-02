@@ -87,7 +87,7 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
         e.preventDefault();
 
         try {
-            // 1. Archivo nativo en Android (WhatsApp o app externa)
+            // 1. Archivo nativo en Android (WhatsApp, Telegram o app externa mediante FileProvider)
             if (item.filePath && Capacitor.isNativePlatform()) {
                 try {
                     const shared = await shareNativeMedia(item.filePath, item.title, item.originalUrl);
@@ -95,9 +95,28 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
                 } catch (e) {
                     console.warn('Fallo en shareNativeMedia:', e);
                 }
+
+                // Intento alternativo con Capacitor Share pasando el archivo directamente
+                try {
+                    await Share.share({
+                        title: item.title || 'Compartir archivo',
+                        url: item.filePath,
+                        dialogTitle: 'Compartir archivo de video'
+                    });
+                    return;
+                } catch {}
             }
 
-            // 2. Enlace compartido mediante Capacitor Share o Web Share
+            // Si el archivo en nativo está vacío o no se guardó
+            if (Capacitor.isNativePlatform() && (!item.filePath || item.fileSize === '0 Bytes' || item.fileSize === '0 B')) {
+                await Dialog.alert({
+                    title: 'Archivo no disponible',
+                    message: 'El archivo no se encuentra guardado en el teléfono o la descarga no finalizó. Por favor vuelve a descargarlo para poder compartir el video.'
+                });
+                return;
+            }
+
+            // 2. Enlace compartido mediante Capacitor Share o Web Share como último recurso
             const shareUrl = item.originalUrl || item.filePath || (typeof window !== 'undefined' ? window.location.href : '');
             const shareTitle = item.title || 'FTY Downloader Pro';
 
