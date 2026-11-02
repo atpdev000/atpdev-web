@@ -91,6 +91,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
   const [downloading, setDownloading] = useState<string | null>(null)
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [downloadDetails, setDownloadDetails] = useState('')
+  const [downloadCompletedInfo, setDownloadCompletedInfo] = useState<{
+    title: string;
+    filename: string;
+    filePath?: string;
+  } | null>(null)
 
   const [isProModalOpen, setIsProModalOpen] = useState(false)
   const [targetProQuality, setTargetProQuality] = useState('1080p')
@@ -203,8 +208,13 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
+    const cleanTitle = (videoInfo?.title || 'video').replace(/[/\\?%*:|"<>]/g, '_').trim()
+    const defaultFilename = `${cleanTitle}_${quality}.mp4`
+    const audioCandidate = format.recommended_audio?.url ? format.recommended_audio : findBestAudioFormat()
+
     // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
     if (isNative) {
+      Toast.show({ text: `⬇️ Descargando ${quality} en segundo plano...`, duration: 'short' }).catch(() => {})
       showRewarded(() => {}).catch(() => {})
     }
 
@@ -254,11 +264,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         body: JSON.stringify({
           url: originalUrl || url,
           quality: quality,
+          video_url: format.url,
+          audio_url: audioCandidate?.url,
           video_itag: format.itag,
-          audio_itag: (format.recommended_audio as any)?.itag || 140,
+          audio_itag: (audioCandidate as any)?.itag || (format.recommended_audio as any)?.itag || 140,
           is_pro: isPro,
           plan: plan,
-          downloadId
+          downloadId,
+          filename: defaultFilename
         })
       })
 
@@ -279,14 +292,17 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         }
 
         // 🔄 Fallback automático: Combinar usando URLs directas a través del proxy
-        if (format.url && (format.recommended_audio as any)?.url) {
+        const fallbackAudioUrl = (format.recommended_audio as any)?.url || findBestAudioFormat()?.url
+        if (format.url && fallbackAudioUrl) {
           console.log('🔄 Intentando fallback con Proxy Combiner...')
           setDownloadDetails('Servidor ocupado. Combinando flujos de audio y video...')
-          const fallbackFilename = `youtube_${quality}_${Date.now()}.mp4`
-          await downloadCombinedWithProxy(format.url, (format.recommended_audio as any).url, fallbackFilename, quality)
+          await downloadCombinedWithProxy(format.url, fallbackAudioUrl, defaultFilename, quality)
           return
         }
 
+        if (isNative) {
+          Dialog.alert({ title: 'Error en la descarga', message: errorMsg }).catch(() => {})
+        }
         setError(errorMsg)
         return
       }
@@ -312,7 +328,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
     } catch (error) {
       console.error('❌ Error en descarga combinada:', error)
-      setError(error instanceof Error ? error.message : 'Error en la descarga combinada')
+      const msg = error instanceof Error ? error.message : 'Error en la descarga combinada'
+      if (isNative) {
+        Dialog.alert({ title: 'Error en la descarga', message: msg }).catch(() => {})
+      }
+      setError(msg)
     } finally {
       pollActive = false
       setTimeout(() => {
@@ -373,8 +393,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
+    const cleanTitle = (videoInfo?.title || 'video').replace(/[/\\?%*:|"<>]/g, '_').trim()
+    const defaultFilename = `${cleanTitle}_${quality}.${fileExt}`
+
     // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
     if (isNative) {
+      Toast.show({ text: `⬇️ Descargando ${quality} (${fileExt}) en segundo plano...`, duration: 'short' }).catch(() => {})
       showRewarded(() => {}).catch(() => {})
     }
 
@@ -421,10 +445,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           body: JSON.stringify({
             url: originalUrl,
             quality: quality,
+            video_url: format.url,
             video_itag: format.itag, // ENVIAR SOLO VIDEO_ITAG
             audio_itag: null,        // DESHABILITAR AUDIO
             format_type: fileExt,
-            downloadId
+            downloadId,
+            filename: defaultFilename
           })
         })
 
@@ -443,16 +469,18 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           if (format.url) {
             console.log('🔄 Intentando descarga simple mediante proxy fallback...')
             setDownloadDetails('Descargando archivo mediante proxy seguro...')
-            const fallbackFilename = `youtube_simple_${quality}_${Date.now()}.${fileExt}`
-            const proxyRes = await fetch(`/api/download/proxy?url=${encodeURIComponent(format.url)}&filename=${encodeURIComponent(fallbackFilename)}`)
+            const proxyRes = await fetch(`/api/download/proxy?url=${encodeURIComponent(format.url)}&filename=${encodeURIComponent(defaultFilename)}`)
             if (proxyRes.ok) {
               pollActive = false
               setDownloadDetails('Finalizando...')
-              await downloadStream(proxyRes, fallbackFilename, `simple-${quality}`)
+              await downloadStream(proxyRes, defaultFilename, `simple-${quality}`)
               return
             }
           }
 
+          if (isNative) {
+            Dialog.alert({ title: 'Error en la descarga', message: errorMsg }).catch(() => {})
+          }
           setError(errorMsg)
           return
         }
@@ -465,7 +493,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         }
 
         const cd = response.headers.get('content-disposition') || ''
-        let filename = `youtube_simple_${quality}_${Date.now()}.${fileExt}`
+        let filename = defaultFilename
         const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
         if (match && match[1]) {
           try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
@@ -477,7 +505,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
       } catch (error) {
         console.error('❌ Error en descarga simple backend:', error)
-        setError(error instanceof Error ? error.message : 'Error en descarga simple')
+        const msg = error instanceof Error ? error.message : 'Error en descarga simple'
+        if (isNative) {
+          Dialog.alert({ title: 'Error en la descarga', message: msg }).catch(() => {})
+        }
+        setError(msg)
       } finally {
         pollActive = false
         setTimeout(() => {
@@ -647,6 +679,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
         scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 
+        await Toast.show({
+          text: `✅ ¡Descarga completada! Guardado en Galería (${typeFolder}).`,
+          duration: 'long'
+        }).catch(() => {});
+
         addToHistory({
           title: videoInfo?.title || filename,
           platform: 'youtube',
@@ -660,12 +697,24 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           mimeType: isAudio ? 'audio/mpeg' : 'video/mp4'
         });
 
+        setDownloadCompletedInfo({
+          title: videoInfo?.title || filename,
+          filename,
+          filePath: savedUri
+        });
+        setTimeout(() => setDownloadCompletedInfo(null), 8000);
+
         setDownloading(null);
         setDownloadProgress(0);
       } catch (error: any) {
         console.error('Error en guardado por chunks:', error);
         setDownloading(null);
         setDownloadProgress(0);
+
+        await Toast.show({
+          text: `❌ Error al guardar archivo: ${error.message || 'Error desconocido'}`,
+          duration: 'long'
+        }).catch(() => {});
 
         await Dialog.alert({
           title: 'Error al Guardar',
@@ -914,8 +963,13 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
+    const cleanTitle = (videoInfo?.title || 'audio').replace(/[/\\?%*:|"<>]/g, '_').trim()
+    const ext = audioFormat.format.toLowerCase().includes('mp3') ? 'mp3' : 'm4a'
+    const defaultFilename = `${cleanTitle}.${ext}`
+
     // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
     if (isNative) {
+      Toast.show({ text: '🎵 Descargando audio en segundo plano...', duration: 'short' }).catch(() => {})
       showRewarded(() => {}).catch(() => {})
     }
 
@@ -951,7 +1005,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       pollProgress()
 
       try {
-        const ext = audioFormat.format.toLowerCase().includes('mp3') ? 'mp3' : 'm4a'
         console.log('🎵 Descargando audio:', audioFormat.itag)
 
         const response = await fetch('/api/download/youtube/combined', {
@@ -960,10 +1013,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           body: JSON.stringify({
             url: originalUrl, // USAR ESTADO originalUrl
             quality: 'audio',
+            audio_url: audioFormat.url,
             video_itag: null,
             audio_itag: audioFormat.itag,
             format_type: ext,
-            downloadId
+            downloadId,
+            filename: defaultFilename
           })
         })
 
@@ -976,6 +1031,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           } catch {
             errorMsg = errorText.substring(0, 100) || errorMsg
           }
+          if (isNative) {
+            Dialog.alert({ title: 'Error en la descarga', message: errorMsg }).catch(() => {})
+          }
           setError(errorMsg)
           return
         }
@@ -987,7 +1045,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         }
 
         const cd = response.headers.get('content-disposition') || ''
-        let filename = `audio_${audioFormat.itag}_${Date.now()}.${ext}`
+        let filename = defaultFilename
         const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
         if (match && match[1]) {
           try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
@@ -998,7 +1056,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         await downloadStream(response, filename, `audio-${audioFormat.itag}`)
       } catch (error: any) {
         console.error('❌ Error en descarga de audio backend:', error)
-        setError(error.message || 'Error en descarga de audio')
+        const msg = error.message || 'Error en descarga de audio'
+        if (isNative) {
+          Dialog.alert({ title: 'Error en la descarga', message: msg }).catch(() => {})
+        }
+        setError(msg)
       } finally {
         pollActive = false
         setTimeout(() => {
@@ -1806,6 +1868,58 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           downloadCombined('720p')
         }}
       />
+
+      {/* 📥 FLOATING ACTIVE DOWNLOAD BAR (Garantiza visibilidad en cualquier parte de la pantalla) */}
+      {downloading && (
+        <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl border border-emerald-500/40 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <span className="relative flex h-3 w-3 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <p className="text-xs font-bold text-slate-100 truncate">
+                Descargando: {videoInfo?.title || 'video'}
+              </p>
+            </div>
+            <span className="text-xs font-mono font-extrabold text-emerald-400 shrink-0 ml-2">
+              {Math.round(downloadProgress)}%
+            </span>
+          </div>
+          <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden shadow-inner">
+            <div
+              className="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-green-400 transition-all duration-300"
+              style={{ width: `${Math.min(Math.max(downloadProgress, 1), 100)}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1.5 font-medium">
+            <span className="truncate">{downloadDetails || 'Descarga en segundo plano...'}</span>
+            <span className="text-emerald-400 font-semibold shrink-0 ml-2">Segundo plano activo</span>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ FLOATING DOWNLOAD COMPLETED NOTIFIER */}
+      {downloadCompletedInfo && !downloading && (
+        <div className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto bg-emerald-900/95 text-white p-3.5 rounded-2xl shadow-2xl border border-emerald-400/50 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <span className="text-xl shrink-0">✅</span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">¡Descarga Completada con Éxito!</p>
+                <p className="text-[11px] text-emerald-200 truncate">Guardado en Galería: {downloadCompletedInfo.filename}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setDownloadCompletedInfo(null)}
+              className="ml-2 px-2.5 py-1 text-xs font-semibold bg-emerald-700/60 hover:bg-emerald-600 rounded-lg text-white shrink-0"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

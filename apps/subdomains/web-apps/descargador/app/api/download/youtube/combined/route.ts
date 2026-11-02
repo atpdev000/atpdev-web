@@ -69,10 +69,20 @@ function cleanUrl(inputUrl: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}))
-    const { url, quality = '1080p', format_type = 'mp4', video_itag, audio_itag, downloadId } = body
+    const {
+      url,
+      quality = '1080p',
+      format_type = 'mp4',
+      video_itag,
+      audio_itag,
+      downloadId,
+      video_url,
+      audio_url,
+      filename: customFilename
+    } = body
 
-    if (!url) {
-      return NextResponse.json({ error: 'URL es requerida' }, { status: 400 })
+    if (!url && !video_url && !audio_url) {
+      return NextResponse.json({ error: 'URL o enlaces de medios son requeridos' }, { status: 400 })
     }
 
     if (!globalThis.__downloadProgressMap) {
@@ -87,8 +97,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    const cleanedUrl = cleanUrl(url)
+    const cleanedUrl = url ? cleanUrl(url) : (video_url || '')
     const { ytDlp, ffmpeg, ffmpegArgs, binDir } = getYtDlpWithFfmpeg()
+    const ffmpegBin = ffmpeg || 'ffmpeg'
 
     console.log('🎬 [YouTube Combined Engine] Iniciando descarga real...', {
       url: cleanedUrl,
@@ -96,12 +107,14 @@ export async function POST(request: NextRequest) {
       format_type,
       video_itag,
       audio_itag,
+      hasDirectVideo: !!video_url,
+      hasDirectAudio: !!audio_url,
       downloadId,
       binDir,
       ffmpegLocation: ffmpeg
     })
 
-    const isAudioOnly = quality === 'audio' || (!video_itag && !!audio_itag) || format_type === 'mp3' || format_type === 'm4a'
+    const isAudioOnly = quality === 'audio' || (!video_itag && !!audio_itag) || (!video_url && !!audio_url) || format_type === 'mp3' || format_type === 'm4a'
     const targetHeight = parseInt(quality.match(/\d+/)?.[0] || '1080')
     const finalExt = isAudioOnly ? (format_type === 'mp3' ? 'mp3' : 'm4a') : 'mp4'
 
@@ -120,144 +133,224 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // Formular el selector de formato yt-dlp
-    let formatArg = ''
-    if (isAudioOnly) {
-      if (audio_itag) {
-        formatArg = `${audio_itag}/bestaudio[ext=m4a]/bestaudio/best`
-      } else {
-        formatArg = 'bestaudio[ext=m4a]/bestaudio/best'
-      }
-    } else if (video_itag && audio_itag) {
-      formatArg = `${video_itag}+${audio_itag}/${video_itag}+bestaudio/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
-    } else if (video_itag && !audio_itag) {
-      formatArg = `${video_itag}/bestvideo[height<=${targetHeight}]/best`
-    } else {
-      formatArg = `bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
-    }
-
     const tempDir = os.tmpdir()
     const tempFileBase = path.join(tempDir, `ytdl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`)
-    const tempOutputPattern = `${tempFileBase}.%(ext)s`
+    const expectedFile = `${tempFileBase}.${finalExt}`
+    let realFile = expectedFile
 
-    const nodeBin = process.execPath || 'node'
-    const cookieArgs = getCookiesArg()
-    const ytArgs: string[] = [
-      ...ffmpegArgs,
-      '--js-runtimes', `node:${nodeBin}`,
-      '--newline',
-      '--no-playlist',
-      '--no-warnings',
-      '--no-part',
-      '--no-check-certificates',
-      '--geo-bypass',
-      '--extractor-args', 'youtube:player_client=visionos,ios',
-      ...cookieArgs,
-      '-f', formatArg,
-      '-o', tempOutputPattern,
-    ]
+    // 🚀 MÉTODO 1: Si el cliente ya nos envió las URLs directas extraídas (signed googlevideo.com URLs),
+    // combinamos directamente con FFmpeg sin pasar por el bot verification de YouTube!
+    if (video_url || (isAudioOnly && audio_url)) {
+      console.log('⚡ [YouTube Engine] Utilizando combinación ultra rápida directa con FFmpeg...')
+      if (downloadId && globalThis.__downloadProgressMap) {
+        globalThis.__downloadProgressMap.set(downloadId, {
+          percent: 30,
+          status: 'merging',
+          speed: 'FFmpeg Fast-Merge',
+          updatedAt: Date.now()
+        })
+      }
 
-    if (isAudioOnly) {
-      ytArgs.push('-x', '--audio-format', finalExt)
-    } else {
-      ytArgs.push('--merge-output-format', 'mp4')
-    }
+      const mergeArgs: string[] = []
+      if (video_url) {
+        mergeArgs.push(
+          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n',
+          '-i', video_url
+        )
+      }
+      if (audio_url && !isAudioOnly) {
+        mergeArgs.push(
+          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n',
+          '-i', audio_url
+        )
+      } else if (isAudioOnly && audio_url) {
+        mergeArgs.push(
+          '-headers', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n',
+          '-i', audio_url
+        )
+      }
 
-    ytArgs.push(cleanedUrl)
+      if (isAudioOnly) {
+        if (finalExt === 'mp3') {
+          mergeArgs.push('-c:a', 'libmp3lame', '-b:a', '192k')
+        } else {
+          mergeArgs.push('-c:a', 'copy')
+        }
+      } else {
+        mergeArgs.push(
+          '-c:v', 'copy',
+          audio_url ? '-c:a' : '-c:a',
+          audio_url ? 'aac' : 'copy'
+        )
+      }
 
-    console.log('🚀 [YouTube Engine] Ejecutando comando:', ytDlp, ytArgs.join(' '))
+      mergeArgs.push('-movflags', '+faststart', '-y', realFile)
 
-    // Ejecutar yt-dlp
-    await new Promise<void>((resolve, reject) => {
-      const proc = spawn(ytDlp, ytArgs, {
-        windowsHide: true,
-        stdio: ['ignore', 'pipe', 'pipe']
+      await new Promise<void>((resolve, reject) => {
+        const proc = spawn(ffmpegBin, mergeArgs, { windowsHide: true })
+        let stderr = ''
+        proc.stderr.on('data', (d) => {
+          stderr += d.toString()
+          if (downloadId && globalThis.__downloadProgressMap) {
+            const cur = globalThis.__downloadProgressMap.get(downloadId)
+            globalThis.__downloadProgressMap.set(downloadId, {
+              percent: Math.min((cur?.percent || 30) + 10, 95),
+              status: 'merging',
+              speed: 'FFmpeg Processing',
+              updatedAt: Date.now()
+            })
+          }
+        })
+        proc.on('close', (code) => {
+          if (code === 0 && fs.existsSync(realFile)) {
+            if (downloadId && globalThis.__downloadProgressMap) {
+              globalThis.__downloadProgressMap.set(downloadId, {
+                percent: 100,
+                status: 'completed',
+                updatedAt: Date.now()
+              })
+            }
+            resolve()
+          } else {
+            console.error('❌ FFmpeg direct merge error:', stderr.slice(-300))
+            reject(new Error(`FFmpeg falló con código ${code}: ${stderr.slice(-300)}`))
+          }
+        })
+        proc.on('error', (err) => reject(err))
       })
 
-      const parseProgress = (chunk: Buffer | string) => {
-        const text = chunk.toString()
-        const lines = text.split(/[\r\n]+/)
-        for (const line of lines) {
-          if (line.includes('[download]') && line.includes('%')) {
-            process.stdout.write(`\r${line.trim()}`)
+    } else {
+      // 🛠️ MÉTODO 2: Descarga completa mediante yt-dlp usando clientes anti-bot (visionos)
+      let formatArg = ''
+      if (isAudioOnly) {
+        if (audio_itag) {
+          formatArg = `${audio_itag}/bestaudio[ext=m4a]/bestaudio/best`
+        } else {
+          formatArg = 'bestaudio[ext=m4a]/bestaudio/best'
+        }
+      } else if (video_itag && audio_itag) {
+        formatArg = `${video_itag}+${audio_itag}/${video_itag}+bestaudio/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+      } else if (video_itag && !audio_itag) {
+        formatArg = `${video_itag}/bestvideo[height<=${targetHeight}]/best`
+      } else {
+        formatArg = `bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+      }
 
-            if (downloadId && globalThis.__downloadProgressMap) {
-              const pMatch = line.match(/\[download\]\s+([\d\.]+)%/i)
-              const speedMatch = line.match(/at\s+([^\s]+)/i)
-              const etaMatch = line.match(/ETA\s+([^\s\r\n]+)/i)
+      const tempOutputPattern = `${tempFileBase}.%(ext)s`
+      const nodeBin = process.execPath || 'node'
+      const cookieArgs = getCookiesArg()
+      const ytArgs: string[] = [
+        ...ffmpegArgs,
+        '--js-runtimes', `node:${nodeBin}`,
+        '--newline',
+        '--no-playlist',
+        '--no-warnings',
+        '--no-part',
+        '--no-check-certificates',
+        '--geo-bypass',
+        '--extractor-args', 'youtube:player_client=visionos',
+        ...cookieArgs,
+        '-f', formatArg,
+        '-o', tempOutputPattern,
+      ]
 
-              if (pMatch) {
-                const percent = Math.min(Math.max(parseFloat(pMatch[1]) || 0, 0), 100)
+      if (isAudioOnly) {
+        ytArgs.push('-x', '--audio-format', finalExt)
+      } else {
+        ytArgs.push('--merge-output-format', 'mp4')
+      }
+
+      ytArgs.push(cleanedUrl)
+
+      console.log('🚀 [YouTube Engine] Ejecutando comando yt-dlp:', ytDlp, ytArgs.join(' '))
+
+      await new Promise<void>((resolve, reject) => {
+        const proc = spawn(ytDlp, ytArgs, {
+          windowsHide: true,
+          stdio: ['ignore', 'pipe', 'pipe']
+        })
+
+        const parseProgress = (chunk: Buffer | string) => {
+          const text = chunk.toString()
+          const lines = text.split(/[\r\n]+/)
+          for (const line of lines) {
+            if (line.includes('[download]') && line.includes('%')) {
+              process.stdout.write(`\r${line.trim()}`)
+
+              if (downloadId && globalThis.__downloadProgressMap) {
+                const pMatch = line.match(/\[download\]\s+([\d\.]+)%/i)
+                const speedMatch = line.match(/at\s+([^\s]+)/i)
+                const etaMatch = line.match(/ETA\s+([^\s\r\n]+)/i)
+
+                if (pMatch) {
+                  const percent = Math.min(Math.max(parseFloat(pMatch[1]) || 0, 0), 100)
+                  globalThis.__downloadProgressMap.set(downloadId, {
+                    percent,
+                    speed: speedMatch ? speedMatch[1] : undefined,
+                    eta: etaMatch ? etaMatch[1] : undefined,
+                    status: percent >= 100 ? 'merging' : 'downloading',
+                    updatedAt: Date.now()
+                  })
+                }
+              }
+            } else if (line.includes('[Merger]') || line.includes('ffmpeg') || line.includes('Destination')) {
+              if (downloadId && globalThis.__downloadProgressMap) {
+                const current = globalThis.__downloadProgressMap.get(downloadId)
                 globalThis.__downloadProgressMap.set(downloadId, {
-                  percent,
-                  speed: speedMatch ? speedMatch[1] : undefined,
-                  eta: etaMatch ? etaMatch[1] : undefined,
-                  status: percent >= 100 ? 'merging' : 'downloading',
+                  percent: Math.max(current?.percent || 90, 95),
+                  status: 'merging',
                   updatedAt: Date.now()
                 })
               }
             }
-          } else if (line.includes('[Merger]') || line.includes('ffmpeg') || line.includes('Destination')) {
+          }
+        }
+
+        let stderr = ''
+        proc.stderr.on('data', (d) => {
+          stderr += d.toString()
+          parseProgress(d)
+        })
+        proc.stdout.on('data', (d) => {
+          parseProgress(d)
+        })
+
+        proc.on('close', (code) => {
+          if (code === 0) {
             if (downloadId && globalThis.__downloadProgressMap) {
-              const current = globalThis.__downloadProgressMap.get(downloadId)
               globalThis.__downloadProgressMap.set(downloadId, {
-                percent: Math.max(current?.percent || 90, 95),
-                status: 'merging',
+                percent: 100,
+                status: 'completed',
                 updatedAt: Date.now()
               })
             }
+            resolve()
+          } else {
+            if (downloadId && globalThis.__downloadProgressMap) {
+              globalThis.__downloadProgressMap.set(downloadId, {
+                percent: 0,
+                status: 'error',
+                updatedAt: Date.now()
+              })
+            }
+            console.error('❌ [YouTube Engine] Error en yt-dlp stderr:', stderr)
+            reject(new Error(stderr || `yt-dlp finalizó con código ${code}`))
           }
-        }
-      }
+        })
 
-      let stderr = ''
-      proc.stderr.on('data', (d) => {
-        stderr += d.toString()
-        parseProgress(d)
-      })
-      proc.stdout.on('data', (d) => {
-        parseProgress(d)
+        proc.on('error', (err) => {
+          reject(err)
+        })
       })
 
-      proc.on('close', (code) => {
-        if (code === 0) {
-          if (downloadId && globalThis.__downloadProgressMap) {
-            globalThis.__downloadProgressMap.set(downloadId, {
-              percent: 100,
-              status: 'completed',
-              updatedAt: Date.now()
-            })
-          }
-          resolve()
+      // Encontrar el archivo generado por yt-dlp
+      if (!fs.existsSync(realFile)) {
+        const files = fs.readdirSync(tempDir).filter(f => f.startsWith(path.basename(tempFileBase)))
+        if (files.length > 0) {
+          realFile = path.join(tempDir, files[0])
         } else {
-          if (downloadId && globalThis.__downloadProgressMap) {
-            globalThis.__downloadProgressMap.set(downloadId, {
-              percent: 0,
-              status: 'error',
-              updatedAt: Date.now()
-            })
-          }
-          console.error('❌ [YouTube Engine] Error en yt-dlp stderr:', stderr)
-          reject(new Error(stderr || `yt-dlp finalizó con código ${code}`))
+          throw new Error('El archivo procesado no fue encontrado en el disco temporal')
         }
-      })
-
-      proc.on('error', (err) => {
-        reject(err)
-      })
-    })
-
-    // Encontrar el archivo generado
-    const expectedFile = `${tempFileBase}.${finalExt}`
-    let realFile = expectedFile
-
-    if (!fs.existsSync(realFile)) {
-      // Buscar cualquier archivo que empiece con tempFileBase
-      const files = fs.readdirSync(tempDir).filter(f => f.startsWith(path.basename(tempFileBase)))
-      if (files.length > 0) {
-        realFile = path.join(tempDir, files[0])
-      } else {
-        throw new Error('El archivo procesado no fue encontrado en el disco temporal')
       }
     }
 
@@ -301,9 +394,9 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    const downloadFilename = isAudioOnly
+    const downloadFilename = customFilename || (isAudioOnly
       ? `audio_${quality}_${Date.now()}.${finalExt}`
-      : `youtube_combined_${quality}_${Date.now()}.mp4`
+      : `youtube_combined_${quality}_${Date.now()}.mp4`)
 
     return new Response(webStream, {
       status: 200,
