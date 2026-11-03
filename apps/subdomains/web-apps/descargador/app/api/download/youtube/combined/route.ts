@@ -159,9 +159,10 @@ export async function POST(request: NextRequest) {
     let realFile = expectedFile
 
     // 🚀 MÉTODO 1: Si el cliente ya nos envió las URLs directas extraídas (signed googlevideo.com URLs),
-    // descargamos a disco de forma concurrente y combinamos ultra rápido con FFmpeg local
+    // intentamos descargarlas a disco de forma concurrente y combinarlas ultra rápido con FFmpeg local
+    let method1Done = false
     if (video_url || (isAudioOnly && audio_url)) {
-      console.log('⚡ [YouTube Engine] Utilizando combinación ultra rápida y robusta con streams a disco...')
+      console.log('⚡ [YouTube Engine] Intentando combinación ultra rápida de streams directos...')
       const tempVideoFile = path.join(tempDir, `v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
       const tempAudioFile = path.join(tempDir, `a_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
 
@@ -251,13 +252,6 @@ export async function POST(request: NextRequest) {
             })
             proc.on('close', (code) => {
               if (code === 0 && fs.existsSync(realFile)) {
-                if (downloadId && globalThis.__downloadProgressMap) {
-                  globalThis.__downloadProgressMap.set(downloadId, {
-                    percent: 100,
-                    status: 'completed',
-                    updatedAt: Date.now()
-                  })
-                }
                 resolve()
               } else {
                 console.error('❌ FFmpeg local merge error:', stderr.slice(-300))
@@ -272,20 +266,27 @@ export async function POST(request: NextRequest) {
           await fs.promises.copyFile(tempVideoFile, realFile)
         }
 
-        if (downloadId && globalThis.__downloadProgressMap) {
-          globalThis.__downloadProgressMap.set(downloadId, {
-            percent: 100,
-            status: 'completed',
-            updatedAt: Date.now()
-          })
+        if (fs.existsSync(realFile) && fs.statSync(realFile).size > 0) {
+          method1Done = true
+          if (downloadId && globalThis.__downloadProgressMap) {
+            globalThis.__downloadProgressMap.set(downloadId, {
+              percent: 100,
+              status: 'completed',
+              updatedAt: Date.now()
+            })
+          }
         }
+      } catch (streamErr: any) {
+        console.warn('⚠️ [YouTube Engine] Descarga directa de stream falló (' + streamErr.message + '), pasando automáticamente al motor yt-dlp...')
       } finally {
         try { if (fs.existsSync(tempVideoFile)) fs.unlinkSync(tempVideoFile) } catch {}
         try { if (fs.existsSync(tempAudioFile)) fs.unlinkSync(tempAudioFile) } catch {}
       }
+    }
 
-    } else {
-      // 🛠️ MÉTODO 2: Descarga completa mediante yt-dlp usando clientes anti-bot (visionos)
+    if (!method1Done) {
+      // 🛠️ MÉTODO 2: Descarga completa mediante yt-dlp usando clientes anti-bot y forzando IPv4
+      console.log('🚀 [YouTube Engine] Ejecutando motor de descarga robusta yt-dlp...')
       let formatArg = ''
       if (isAudioOnly) {
         if (audio_itag) {
@@ -306,6 +307,7 @@ export async function POST(request: NextRequest) {
       const cookieArgs = getCookiesArg()
       const ytArgs: string[] = [
         ...ffmpegArgs,
+        '--force-ipv4',
         '--js-runtimes', `node:${nodeBin}`,
         '--newline',
         '--no-playlist',
@@ -313,7 +315,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=visionos',
+        '--extractor-args', 'youtube:player_client=visionos,ios,android,web',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,

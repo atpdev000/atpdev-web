@@ -490,9 +490,24 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
       }
     });
 
-    ffmpegPromise.catch(err => {
-      console.error('💥 [Proxy] FFmpeg Background Error:', err);
-    });
+    // Esperar primer chunk o error para evitar enviar 200 OK con flujo vacío (0 bytes)
+    await new Promise<void>((resolve, reject) => {
+      const onData = () => {
+        cleanup()
+        resolve()
+      }
+      const onError = (err: any) => {
+        cleanup()
+        reject(err)
+      }
+      const cleanup = () => {
+        outputStream.removeListener('data', onData)
+        outputStream.removeListener('error', onError)
+      }
+      outputStream.once('data', onData)
+      outputStream.once('error', onError)
+      ffmpegPromise.catch(onError)
+    })
 
     return new NextResponse(webStream, {
       status: 200,
