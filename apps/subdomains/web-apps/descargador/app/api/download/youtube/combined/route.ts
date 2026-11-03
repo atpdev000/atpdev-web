@@ -315,7 +315,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=visionos,ios,android,web',
+        '--extractor-args', 'youtube:player_client=visionos,ios',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,
