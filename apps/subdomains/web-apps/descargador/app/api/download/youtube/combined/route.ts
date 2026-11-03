@@ -9,15 +9,17 @@ import { finished } from 'stream/promises'
 import { getYtDlpWithFfmpeg, findFfmpegBinary } from '@/lib/server/binaries'
 
 async function downloadStreamToDisk(sourceUrl: string, destPath: string): Promise<void> {
-  const res = await fetch(sourceUrl, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-      'Referer': 'https://www.youtube.com/',
-      'Accept': '*/*'
-    }
-  })
+  const headers: Record<string, string> = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': '*/*'
+  }
+  if (!sourceUrl.includes('latest_version') && !sourceUrl.includes('googlevideo.com')) {
+    headers['Referer'] = 'https://www.youtube.com/'
+  }
+
+  const res = await fetch(sourceUrl, { headers })
   if (!res.ok) {
-    throw new Error(`Error ${res.status} al descargar stream desde YouTube`)
+    throw new Error(`Error ${res.status} al descargar stream (${sourceUrl.slice(0, 60)}...)`)
   }
   if (!res.body) {
     throw new Error('No se recibió cuerpo de respuesta multimedia desde YouTube')

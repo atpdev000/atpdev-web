@@ -135,14 +135,18 @@ async function extractWithInvidious(url: string): Promise<any> {
       const rawStreams = data.formatStreams || []
       const all = [...rawStreams, ...rawAdaptive]
 
-      const formats = all.filter((f: any) => f.url).map((f: any) => {
+      const formats = all.filter((f: any) => f.url || f.itag).map((f: any) => {
         const isVideo = f.type ? f.type.startsWith('video/') : !!f.resolution
         const isAudio = f.type ? f.type.startsWith('audio/') : !f.resolution
         const height = f.resolution ? parseInt(f.resolution.replace('p', '')) : (f.qualityLabel ? parseInt(f.qualityLabel) : null)
 
+        // Usar stream proxy de Invidious para eludir 403 Forbidden por bloqueo de IP
+        const streamUrl = f.itag ? `${host}/latest_version?id=${videoId}&itag=${f.itag}` : f.url
+
         return {
           format_id: String(f.itag || ''),
-          url: f.url,
+          url: streamUrl,
+          direct_url: f.url,
           ext: f.container || (isAudio ? 'm4a' : 'mp4'),
           height: height,
           width: null,

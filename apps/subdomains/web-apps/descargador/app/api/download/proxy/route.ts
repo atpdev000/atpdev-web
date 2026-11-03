@@ -140,6 +140,9 @@ function getFfmpegHeadersString(url: string): string {
   if (url.includes('tiktokcdn.com') || url.includes('tiktok.com') || url.includes('tikwm.com')) {
     return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.tiktok.com/\r\n'
   }
+  if (url.includes('latest_version') || url.includes('/api/v1/videos/')) {
+    return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nAccept: */*\r\n'
+  }
   return 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36\r\nReferer: https://www.youtube.com/\r\n'
 }
 
@@ -435,11 +438,17 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
       const command = ffmpeg()
         .input(videoUrl)
         .inputOptions([
-          '-headers', getFfmpegHeadersString(videoUrl)
+          '-headers', getFfmpegHeadersString(videoUrl),
+          '-reconnect', '1',
+          '-reconnect_streamed', '1',
+          '-reconnect_delay_max', '5'
         ])
         .input(audioUrl)
         .inputOptions([
-          '-headers', getFfmpegHeadersString(audioUrl)
+          '-headers', getFfmpegHeadersString(audioUrl),
+          '-reconnect', '1',
+          '-reconnect_streamed', '1',
+          '-reconnect_delay_max', '5'
         ])
         .outputOptions([
           '-c:v copy',
