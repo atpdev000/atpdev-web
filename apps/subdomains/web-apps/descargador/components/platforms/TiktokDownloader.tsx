@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
+import { saveNativeMediaFile } from '@/lib/nativeBridge'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -243,63 +244,14 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
         const blob = await readStreamWithProgress(response, fileExt === 'mp3' ? 'audio/mpeg' : 'video/mp4')
 
         if (isNative) {
-          // 📱 NATIVE: Usar Chunked Write para TikTok
+          // 📱 NATIVE: Usar saveNativeMediaFile seguro para TikTok
           try {
-            console.log(`💾 TikTok: Iniciando guardado por chunks de ${formatBytes(blob.size)}...`);
+            console.log(`💾 TikTok: Iniciando guardado nativo seguro de ${formatBytes(blob.size)}...`);
+            const isAudio = fileExt === 'mp3';
+            const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (pct) => setDownloadProgress(pct));
+            const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
 
-            const baseFolder = 'Download/FTYdownloaderPro/download';
-            const typeFolder = fileExt === 'mp3' ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
-            const finalPath = `${baseFolder}/${typeFolder}/${filename}`;
-
-            try {
-              await Filesystem.mkdir({
-                path: `${baseFolder}/${typeFolder}`,
-                directory: Directory.ExternalStorage,
-                recursive: true
-              });
-            } catch (e) { }
-
-            // Helper
-            const blobToBase64 = (blob: Blob): Promise<string> => {
-              return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  const res = reader.result as string;
-                  resolve(res.split(',')[1]);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-              });
-            };
-
-            const CHUNK_SIZE = 1024 * 1024 * 5;
-            const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
-
-            try {
-              await Filesystem.deleteFile({ path: finalPath, directory: Directory.ExternalStorage });
-            } catch (e) { }
-
-            for (let i = 0; i < totalChunks; i++) {
-              const start = i * CHUNK_SIZE;
-              const end = Math.min(start + CHUNK_SIZE, blob.size);
-              const chunk = blob.slice(start, end);
-              const base64Chunk = await blobToBase64(chunk);
-
-              if (i === 0) {
-                await Filesystem.writeFile({ path: finalPath, data: base64Chunk, directory: Directory.ExternalStorage });
-              } else {
-                await Filesystem.appendFile({ path: finalPath, data: base64Chunk, directory: Directory.ExternalStorage });
-              }
-
-              // Actualizar progreso (simulado o basado en chunks)
-              const progress = Math.round(((i + 1) / totalChunks) * 100);
-              setDownloadProgress(progress);
-              if (i % 5 === 0) console.log(`💾 TK Chunk ${i + 1}/${totalChunks}`);
-            }
-
-            const uriResult = await Filesystem.getUri({ path: finalPath, directory: Directory.ExternalStorage });
-
-            console.log('✅ TK Guardado en:', uriResult.uri);
+            console.log('✅ TK Guardado en:', saveRes.uri);
             scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 
             addToHistory({
@@ -311,8 +263,8 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
               format: 'HD',
               fileSize: formatBytes(blob.size),
               duration: undefined,
-              filePath: uriResult.uri, // ✅ URI REAL
-              mimeType: fileExt === 'mp3' ? 'audio/mpeg' : 'video/mp4'
+              filePath: saveRes.uri, // ✅ URI REAL
+              mimeType: isAudio ? 'audio/mpeg' : 'video/mp4'
             });
 
             setDownloading(null);

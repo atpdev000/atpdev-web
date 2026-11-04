@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
+import { saveNativeMediaFile } from '@/lib/nativeBridge'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -233,65 +234,13 @@ export default function TwitterDownloader({ initialUrl, autoSearch }: Downloader
 
         if (isNative) {
           try {
-            const baseFolder = 'Download/FTYdownloaderPro/download';
-            const typeFolder = format.isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
-            const finalPath = `${baseFolder}/${typeFolder}/${filename}`;
-
-            try {
-              await Filesystem.mkdir({
-                path: `${baseFolder}/${typeFolder}`,
-                directory: Directory.ExternalStorage,
-                recursive: true
-              });
-            } catch { }
-
-            const blobToBase64 = (b: Blob): Promise<string> => {
-              return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  const res = reader.result as string;
-                  resolve(res.split(',')[1]);
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(b);
-              });
-            };
-
-            const CHUNK_SIZE = 1024 * 1024 * 5;
-            const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
-
-            try {
-              await Filesystem.deleteFile({ path: finalPath, directory: Directory.ExternalStorage });
-            } catch { }
-
-            for (let i = 0; i < totalChunks; i++) {
-              const start = i * CHUNK_SIZE;
-              const end = Math.min(start + CHUNK_SIZE, blob.size);
-              const chunk = blob.slice(start, end);
-              const base64Chunk = await blobToBase64(chunk);
-
-              await Filesystem.appendFile({
-                path: finalPath,
-                data: base64Chunk,
-                directory: Directory.ExternalStorage
-              });
-            }
-
-            if (!format.isAudio) {
-              try {
-                const fullUri = await Filesystem.getUri({
-                  path: finalPath,
-                  directory: Directory.ExternalStorage
-                });
-                await Media.saveVideo({ path: fullUri.uri });
-              } catch (mediaErr) {
-                console.warn('Media save warning:', mediaErr);
-              }
-            }
+            const isAudio = Boolean(format.isAudio);
+            const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (pct) => setDownloadProgress(pct));
+            const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
 
             await scheduleNotification(
               '¡Descarga completada!',
-              `Tu archivo ${filename} se guardó en la carpeta de descargas`
+              `Tu archivo ${filename} se guardó en ${typeFolder}`
             );
 
             await Toast.show({

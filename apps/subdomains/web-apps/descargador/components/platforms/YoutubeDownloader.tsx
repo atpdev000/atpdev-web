@@ -16,7 +16,7 @@ import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useI18n } from '@/lib/i18n/context';
-import { NativeWhatsAppStatus } from '@/lib/nativeBridge';
+import { NativeWhatsAppStatus, saveNativeMediaFile } from '@/lib/nativeBridge';
 
 interface VideoFormat {
   quality: string
@@ -575,112 +575,22 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     const isAudio = filename.toLowerCase().includes('audio') || filename.toLowerCase().includes('.mp3') || filename.toLowerCase().includes('.m4a')
 
     if (isNative) {
-      // 📱 NATIVE: Guardar usando Filesystem en chunks para evitar OOM y mantener ruta personalizada
+      // 📱 NATIVE: Guardar usando saveNativeMediaFile por fragmentos seguros y MediaStore
       try {
-        console.log(`💾 Iniciando guardado por chunks de ${formatBytes(blob.size)}...`);
+        console.log(`💾 Iniciando guardado nativo seguro de ${formatBytes(blob.size)}...`);
+        setDownloadDetails('Guardando archivo en el teléfono...');
 
-        // 1. Definir ruta y crear directorios
-        const baseFolder = 'Download/FTYdownloaderPro/download';
-        const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
-        let targetDirectory = Directory.ExternalStorage;
-        let finalPath = `${baseFolder}/${typeFolder}/${filename}`;
-
-        try {
-          await Filesystem.mkdir({
-            path: `${baseFolder}/${typeFolder}`,
-            directory: targetDirectory,
-            recursive: true
-          });
-        } catch (e) {
-          console.warn('⚠️ No se pudo crear directorio en ExternalStorage, usando Documents...', e);
-          try {
-            targetDirectory = Directory.Documents;
-            finalPath = `FTYdownloaderPro/${typeFolder}/${filename}`;
-            await Filesystem.mkdir({
-              path: `FTYdownloaderPro/${typeFolder}`,
-              directory: targetDirectory,
-              recursive: true
-            });
-          } catch {}
-        }
-
-        // 2. Función helper para convertir chunk a base64
-        const blobToBase64 = (blob: Blob): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const res = reader.result as string;
-              resolve(res.split(',')[1]);
-            };
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          });
-        };
-
-        // 3. Escribir archivo por chunks (5MB)
-        const CHUNK_SIZE = 1024 * 1024 * 5;
-        const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
-
-        // Eliminar archivo si existe
-        try {
-          await Filesystem.deleteFile({
-            path: finalPath,
-            directory: targetDirectory
-          });
-        } catch (e) { }
-
-        // Loop de escritura
-        for (let i = 0; i < totalChunks; i++) {
-          const start = i * CHUNK_SIZE;
-          const end = Math.min(start + CHUNK_SIZE, blob.size);
-          const chunk = blob.slice(start, end);
-          const base64Chunk = await blobToBase64(chunk);
-
-          if (i === 0) {
-            // Primer chunk: Crear archivo
-            await Filesystem.writeFile({
-              path: finalPath,
-              data: base64Chunk,
-              directory: targetDirectory
-            });
-          } else {
-            // Siguientes chunks: Append
-            await Filesystem.appendFile({
-              path: finalPath,
-              data: base64Chunk,
-              directory: targetDirectory
-            });
-          }
-
-          // Log progreso interno
-          if (i % 5 === 0 || i === totalChunks - 1) {
-            console.log(`💾 Guardando chunk ${i + 1}/${totalChunks}`);
-          }
-        }
-
-        // 4. Obtener URI final
-        const uriResult = await Filesystem.getUri({
-          path: finalPath,
-          directory: targetDirectory
+        const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (chunkPct) => {
+          setDownloadProgress(chunkPct);
         });
 
-        const savedUri = uriResult.uri;
-        console.log('✅ Archivo guardado correctamente en:', savedUri);
-
-        // Indexar en la galería de Android para que aparezca en Fotos/Videos
-        if (!isAudio && savedUri) {
-          try {
-            await NativeWhatsAppStatus.saveToGallery({ filePath: savedUri });
-            console.log('✅ Video indexado en la galería nativa de Android');
-          } catch (gErr) {
-            console.warn('No se pudo auto-indexar en galería nativa:', gErr);
-          }
-        }
+        const savedUri = saveRes.uri;
+        const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
 
         scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 
         await Toast.show({
-          text: `✅ ¡Descarga completada! Guardado en Galería (${typeFolder}).`,
+          text: `✅ ¡Descarga completada! Guardado en ${isAudio ? 'Música' : 'Galería'} (${typeFolder}).`,
           duration: 'long'
         }).catch(() => {});
 
@@ -707,7 +617,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         setDownloading(null);
         setDownloadProgress(0);
       } catch (error: any) {
-        console.error('Error en guardado por chunks:', error);
+        console.error('Error en guardado nativo:', error);
         setDownloading(null);
         setDownloadProgress(0);
 
@@ -831,75 +741,46 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         setDownloadProgress(100)
 
         if (isNative) {
-          // 📱 NATIVE: Guardar usando Filesystem
+          // 📱 NATIVE: Guardar usando saveNativeMediaFile por fragmentos seguros y MediaStore
           try {
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = async () => {
-              const base64Data = (reader.result as string).split(',')[1];
-              // Definir carpetas personalizadas dentro de Download (carpeta pública)
-              const baseFolder = 'Download/FTYdownloaderPro/download';
-              const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
-              const finalPath = `${baseFolder}/${typeFolder}/${filename}`;
+            const saveRes = await saveNativeMediaFile(blob, filename, isAudio);
+            const savedUri = saveRes.uri;
+            const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
 
-              let savedUri = '';
+            scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 
-              try {
-                // 1. Guardar archivo fisicamente en la ruta solicitada
-                const result = await Filesystem.writeFile({
-                  path: finalPath,
-                  data: base64Data,
-                  directory: Directory.ExternalStorage, // ⚠️ Changed from Documents
-                  recursive: true
-                });
-                savedUri = result.uri;
-                console.log('[DEBUG-PATH] Guardado EXITO en:', savedUri);
+            await Toast.show({
+              text: `✅ ¡Descarga completada! Guardado en ${isAudio ? 'Música' : 'Galería'} (${typeFolder}).`,
+              duration: 'long'
+            }).catch(() => {});
 
-                // 2. Intentar indexar en Galería (solo videos)
-                if (!isAudio) {
-                  try {
-                    // Nota: Media.saveVideo suele mover el archivo.
-                    // Si queremos mantener la estructura personalizada, mejor confiamos en que
-                    // Android escanee Documents eventualmente, o usamos un plugin de scanner.
-                    // Por ahora, solo guardamos ahí.
-                  } catch (e) {
-                    console.warn('No se pudo indexar', e);
-                  }
-                }
+            addToHistory({
+              title: videoInfo?.title || filename,
+              platform: 'youtube',
+              thumbnail: videoInfo?.thumbnail || '',
+              originalUrl: downloadUrl,
+              status: 'completed',
+              format: quality,
+              fileSize: formatBytes(blob.size),
+              duration: videoInfo?.duration ? String(videoInfo.duration) : undefined,
+              filePath: savedUri,
+              mimeType: isAudio ? 'audio/mpeg' : 'video/mp4'
+            });
 
-                scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
+            setDownloadCompletedInfo({
+              title: videoInfo?.title || filename,
+              filename,
+              filePath: savedUri
+            });
+            setTimeout(() => setDownloadCompletedInfo(null), 8000);
 
-              } catch (writeErr: any) {
-                console.error('[DEBUG-PATH] Fallo escritura carpetas:', writeErr);
-                await Dialog.alert({
-                  title: 'Error Guardando',
-                  message: `No se pudo crear la carpeta ${typeFolder}.\n${writeErr.message}`
-                });
-                throw writeErr;
-              }
-
-              const mimeType = isAudio ? 'audio/mpeg' : 'video/mp4';
-
-              addToHistory({
-                title: videoInfo?.title || filename,
-                platform: 'youtube',
-                thumbnail: videoInfo?.thumbnail || '',
-                originalUrl: downloadUrl,
-                status: 'completed',
-                format: quality,
-                fileSize: formatBytes(blob.size),
-                duration: videoInfo?.duration ? String(videoInfo.duration) : undefined,
-                filePath: savedUri, // USAMOS LA URI REAL
-                mimeType: mimeType
-              })
-            };
           } catch (writeError: any) {
             console.error('Error guardando archivo nativo:', writeError);
             await Dialog.alert({
-              title: 'Error Crítico',
-              message: `Fallo al iniciar guardado: ${writeError.message}`
+              title: 'Error Guardando',
+              message: `No se pudo guardar el archivo en el dispositivo: ${writeError.message}`
             });
-            throw new Error('No se pudo guardar el archivo en el dispositivo');
+            throw writeError;
           }
 
         } else {

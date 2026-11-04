@@ -1,4 +1,5 @@
 import { registerPlugin, Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export interface WhatsAppStatusPluginInterface {
   checkPermission(): Promise<{ granted: boolean; isAllFiles: boolean; sdkVersion: number }>;
@@ -78,4 +79,117 @@ export async function readNativeClipboard(): Promise<string> {
   }
 
   return '';
+}
+
+/**
+ * Guarda un Blob en el almacenamiento del dispositivo Android de forma segura,
+ * por fragmentos para evitar saturación de memoria (OOM), con fallback automático
+ * de directorios y registro en la Galería / Biblioteca de música nativa vía MediaStore.
+ */
+export async function saveNativeMediaFile(
+  blob: Blob,
+  filename: string,
+  isAudio: boolean = false,
+  onProgress?: (progress: number) => void
+): Promise<{ success: boolean; uri: string; path: string }> {
+  const baseFolder = 'Download/FTYdownloaderPro/download';
+  const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+  
+  let targetDirectory = Directory.ExternalStorage;
+  let finalPath = `${baseFolder}/${typeFolder}/${filename}`;
+
+  try {
+    await Filesystem.mkdir({
+      path: `${baseFolder}/${typeFolder}`,
+      directory: targetDirectory,
+      recursive: true
+    });
+  } catch (e) {
+    console.warn('⚠️ No se pudo crear en ExternalStorage, probando Documents...', e);
+    try {
+      targetDirectory = Directory.Documents;
+      finalPath = `FTYdownloaderPro/${typeFolder}/${filename}`;
+      await Filesystem.mkdir({
+        path: `FTYdownloaderPro/${typeFolder}`,
+        directory: targetDirectory,
+        recursive: true
+      });
+    } catch (docErr) {
+      console.warn('⚠️ No se pudo crear en Documents, usando almacenamiento interno seguro Data...', docErr);
+      targetDirectory = Directory.Data;
+      finalPath = `${typeFolder}/${filename}`;
+      await Filesystem.mkdir({
+        path: typeFolder,
+        directory: targetDirectory,
+        recursive: true
+      });
+    }
+  }
+
+  const blobToBase64 = (b: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const res = reader.result as string;
+        resolve(res.split(',')[1] || '');
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(b);
+    });
+  };
+
+  const CHUNK_SIZE = 1024 * 1024 * 4; // 4MB por chunk
+  const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
+
+  try {
+    await Filesystem.deleteFile({ path: finalPath, directory: targetDirectory });
+  } catch {}
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
+    const end = Math.min(start + CHUNK_SIZE, blob.size);
+    const chunk = blob.slice(start, end);
+    const base64Chunk = await blobToBase64(chunk);
+
+    if (i === 0) {
+      await Filesystem.writeFile({
+        path: finalPath,
+        data: base64Chunk,
+        directory: targetDirectory
+      });
+    } else {
+      await Filesystem.appendFile({
+        path: finalPath,
+        data: base64Chunk,
+        directory: targetDirectory
+      });
+    }
+
+    if (onProgress) {
+      const pct = Math.round(((i + 1) / totalChunks) * 100);
+      onProgress(pct);
+    }
+  }
+
+  const uriResult = await Filesystem.getUri({
+    path: finalPath,
+    directory: targetDirectory
+  });
+
+  const savedUri = uriResult.uri;
+  console.log('✅ Archivo físico escrito en:', savedUri);
+
+  // Auto-indexar en Android MediaStore (Galería de videos o Biblioteca de música)
+  try {
+    const galleryResult = await NativeWhatsAppStatus.saveToGallery({ filePath: savedUri });
+    console.log('✅ Indexado en MediaStore de Android:', galleryResult);
+  } catch (gErr) {
+    console.warn('⚠️ No se pudo indexar en MediaStore, el archivo sigue accesible en su ruta:', gErr);
+  }
+
+  return {
+    success: true,
+    uri: savedUri,
+    path: finalPath
+  };
 }

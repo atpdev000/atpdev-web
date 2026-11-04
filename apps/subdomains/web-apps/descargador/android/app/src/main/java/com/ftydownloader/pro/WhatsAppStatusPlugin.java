@@ -208,6 +208,19 @@ public class WhatsAppStatusPlugin extends Plugin {
         call.resolve(res);
     }
 
+    private File resolveFile(String filePath) {
+        if (filePath == null || filePath.isEmpty()) return null;
+        try {
+            if (filePath.startsWith("file://")) {
+                filePath = Uri.parse(filePath).getPath();
+            }
+            filePath = java.net.URLDecoder.decode(filePath, "UTF-8");
+            return new File(filePath);
+        } catch (Exception e) {
+            return new File(filePath);
+        }
+    }
+
     @PluginMethod
     public void saveToGallery(PluginCall call) {
         String filePath = call.getString("filePath");
@@ -216,9 +229,9 @@ public class WhatsAppStatusPlugin extends Plugin {
             return;
         }
 
-        File sourceFile = new File(filePath);
-        if (!sourceFile.exists()) {
-            call.reject("El archivo original no existe");
+        File sourceFile = resolveFile(filePath);
+        if (sourceFile == null || !sourceFile.exists()) {
+            call.reject("El archivo original no existe: " + filePath);
             return;
         }
 
@@ -226,29 +239,53 @@ public class WhatsAppStatusPlugin extends Plugin {
             String name = sourceFile.getName();
             String lower = name.toLowerCase();
             boolean isVideo = lower.endsWith(".mp4") || lower.endsWith(".3gp") || lower.endsWith(".mov") || lower.endsWith(".mkv");
-            String mimeType = isVideo ? "video/mp4" : "image/jpeg";
+            boolean isAudio = lower.endsWith(".mp3") || lower.endsWith(".m4a") || lower.endsWith(".wav") || lower.endsWith(".aac") || lower.endsWith(".ogg");
+            boolean isImage = lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp");
+
+            String mimeType = "application/octet-stream";
+            Uri collection;
+            String relativeSubDir;
+
+            if (isVideo) {
+                mimeType = "video/mp4";
+                collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                relativeSubDir = Environment.DIRECTORY_MOVIES + "/FTY Downloader Pro";
+            } else if (isAudio) {
+                mimeType = lower.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg";
+                collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                relativeSubDir = Environment.DIRECTORY_MUSIC + "/FTY Downloader Pro";
+            } else if (isImage) {
+                mimeType = "image/jpeg";
+                collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                relativeSubDir = Environment.DIRECTORY_PICTURES + "/FTY Downloader Pro";
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                } else {
+                    collection = MediaStore.Files.getContentUri("external");
+                }
+                relativeSubDir = Environment.DIRECTORY_DOWNLOADS + "/FTY Downloader Pro";
+            }
 
             ContentValues values = new ContentValues();
             values.put(MediaStore.MediaColumns.DISPLAY_NAME, "FTY_" + name);
             values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, 
-                    isVideo ? Environment.DIRECTORY_MOVIES + "/FTY Downloader Pro" : Environment.DIRECTORY_PICTURES + "/FTY Downloader Pro");
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeSubDir);
                 values.put(MediaStore.MediaColumns.IS_PENDING, 1);
             }
 
-            Uri collection = isVideo ? MediaStore.Video.Media.EXTERNAL_CONTENT_URI : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             Uri itemUri = getContext().getContentResolver().insert(collection, values);
 
             if (itemUri == null) {
-                call.reject("No se pudo crear la entrada en la galería");
+                call.reject("No se pudo crear la entrada en el almacenamiento público");
                 return;
             }
 
             try (InputStream in = new FileInputStream(sourceFile);
                  OutputStream out = getContext().getContentResolver().openOutputStream(itemUri)) {
-                byte[] buffer = new byte[8192];
+                byte[] buffer = new byte[16384];
                 int bytesRead;
                 while ((bytesRead = in.read(buffer)) > 0) {
                     out.write(buffer, 0, bytesRead);
@@ -269,7 +306,7 @@ public class WhatsAppStatusPlugin extends Plugin {
             ret.put("fileName", "FTY_" + name);
             call.resolve(ret);
         } catch (Exception e) {
-            call.reject("Error al guardar en galería: " + e.getMessage());
+            call.reject("Error al guardar en galería/música: " + e.getMessage());
         }
     }
 
@@ -315,15 +352,18 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
 
         try {
-            File file = new File(filePath);
-            if (!file.exists()) {
-                call.reject("El archivo no existe");
+            File file = resolveFile(filePath);
+            if (file == null || !file.exists()) {
+                call.reject("El archivo no existe: " + filePath);
                 return;
             }
 
             String name = file.getName().toLowerCase();
             boolean isVideo = name.endsWith(".mp4") || name.endsWith(".3gp") || name.endsWith(".mov") || name.endsWith(".mkv");
-            String mimeType = isVideo ? "video/*" : "image/*";
+            boolean isAudio = name.endsWith(".mp3") || name.endsWith(".m4a") || name.endsWith(".wav") || name.endsWith(".aac");
+            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp");
+
+            String mimeType = isVideo ? "video/*" : (isAudio ? "audio/*" : (isImage ? "image/*" : "*/*"));
 
             Uri contentUri;
             try {
@@ -360,20 +400,18 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
 
         try {
-            if (filePath.startsWith("file://")) {
-                filePath = Uri.parse(filePath).getPath();
-            }
-
-            File file = new File(filePath);
-            if (!file.exists()) {
-                call.reject("El archivo no existe en el almacenamiento");
+            File file = resolveFile(filePath);
+            if (file == null || !file.exists()) {
+                call.reject("El archivo no existe en el almacenamiento: " + filePath);
                 return;
             }
 
             String name = file.getName().toLowerCase();
             boolean isVideo = name.endsWith(".mp4") || name.endsWith(".3gp") || name.endsWith(".mov") || name.endsWith(".mkv");
-            boolean isAudio = name.endsWith(".mp3") || name.endsWith(".m4a") || name.endsWith(".wav");
-            String mimeType = isVideo ? "video/*" : (isAudio ? "audio/*" : "image/*");
+            boolean isAudio = name.endsWith(".mp3") || name.endsWith(".m4a") || name.endsWith(".wav") || name.endsWith(".aac");
+            boolean isImage = name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png") || name.endsWith(".webp");
+
+            String mimeType = isVideo ? "video/*" : (isAudio ? "audio/*" : (isImage ? "image/*" : "*/*"));
 
             Uri contentUri = FileProvider.getUriForFile(
                 getContext(),
@@ -393,6 +431,10 @@ public class WhatsAppStatusPlugin extends Plugin {
             JSObject ret = new JSObject();
             ret.put("success", true);
             call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("Error al compartir archivo: " + e.getMessage());
+        }
+    }
         } catch (Exception e) {
             call.reject("Error al compartir archivo: " + e.getMessage());
         }
