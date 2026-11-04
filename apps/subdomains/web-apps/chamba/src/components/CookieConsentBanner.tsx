@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Cookie, ShieldCheck, Check, X } from 'lucide-react';
+import { Cookie, ShieldCheck, Check } from 'lucide-react';
 
 export function CookieConsentBanner() {
   const [show, setShow] = useState(false);
@@ -10,7 +10,17 @@ export function CookieConsentBanner() {
   useEffect(() => {
     try {
       const consent = localStorage.getItem('chamba_cookie_consent');
-      if (!consent) {
+      if (consent) {
+        // Notificar a Google Consent Mode v2 si ya existe consentimiento previo
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('consent', 'update', {
+            'ad_storage': consent === 'all' ? 'granted' : 'denied',
+            'ad_user_data': consent === 'all' ? 'granted' : 'denied',
+            'ad_personalization': consent === 'all' ? 'granted' : 'denied',
+            'analytics_storage': 'granted',
+          });
+        }
+      } else {
         // Mostrar con un leve delay estético para no afectar el First Contentful Paint
         const timer = setTimeout(() => setShow(true), 1200);
         return () => clearTimeout(timer);
@@ -23,6 +33,15 @@ export function CookieConsentBanner() {
   const handleAccept = (type: 'all' | 'essential') => {
     try {
       localStorage.setItem('chamba_cookie_consent', type);
+      // Actualizar Google Consent Mode v2 según elección del usuario
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('consent', 'update', {
+          'ad_storage': type === 'all' ? 'granted' : 'denied',
+          'ad_user_data': type === 'all' ? 'granted' : 'denied',
+          'ad_personalization': type === 'all' ? 'granted' : 'denied',
+          'analytics_storage': 'granted',
+        });
+      }
       setShow(false);
     } catch (e) {
       setShow(false);

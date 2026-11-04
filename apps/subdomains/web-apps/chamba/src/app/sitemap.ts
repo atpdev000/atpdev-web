@@ -10,15 +10,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const todayIso = new Date().toISOString().split('T')[0];
 
-  const jobUrls = jobs.map((job) => {
-    const isExpired = job.status === 'Finalizado' || (job.end_date && job.end_date < todayIso);
-    return {
-      url: `${baseUrl}/empleos/${job.slug}`,
-      lastModified: new Date(job.created_at || Date.now()),
-      changeFrequency: (isExpired ? 'monthly' : 'daily') as MetadataRoute.Sitemap[number]['changeFrequency'],
-      priority: isExpired ? 0.4 : 0.9,
-    };
+  // Google AdSense & Search Central: Solo indexar en el sitemap ofertas VIGENTES con alto valor real
+  // Las ofertas finalizadas se excluyen del sitemap para no diluir el crawl budget con contenido expirado
+  const activeJobs = jobs.filter((job) => {
+    const isExpired = job.status === 'Finalizado' || (job.end_date && job.end_date.trim() < todayIso);
+    return !isExpired;
   });
+
+  const jobUrls = activeJobs.map((job) => ({
+    url: `${baseUrl}/empleos/${job.slug}`,
+    lastModified: new Date(job.created_at || Date.now()),
+    changeFrequency: 'daily' as const,
+    priority: 0.9,
+  }));
 
   const guiasUrls = guias.map((guia) => ({
     url: `${baseUrl}/guias/${guia.slug}`,

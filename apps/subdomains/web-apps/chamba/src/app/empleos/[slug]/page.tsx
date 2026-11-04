@@ -47,6 +47,9 @@ export async function generateMetadata({
     ? `${rawDesc.slice(0, 152).trim()}...`
     : rawDesc;
 
+  const todayIso = new Date().toISOString().split('T')[0];
+  const isExpired = job.status === 'Finalizado' || (job.end_date && job.end_date.trim() < todayIso);
+
   return {
     title,
     description,
@@ -60,6 +63,20 @@ export async function generateMetadata({
       "bases oficiales",
       "chamba pro",
     ],
+    robots: isExpired ? {
+      index: false,
+      follow: true,
+    } : {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     alternates: {
       canonical: pageUrl,
     },

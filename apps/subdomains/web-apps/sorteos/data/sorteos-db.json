@@ -1,0 +1,71 @@
+{
+  "users": [
+    {
+      "id": "usr_superadmin_seed",
+      "name": "Super Admin",
+      "email": "admin@sorteos.pro",
+      "passwordHash": "5744fc29dec1459f79e42f8e479a8d5aefef8c621fc0493b76a01dff0ebcb8092225e295d1f72fec025fc3188bc7df772a20875ebbaa43f9bd744f8d827926d8",
+      "salt": "seed-admin-salt-01",
+      "role": "super-admin",
+      "status": "active",
+      "plan": "enterprise",
+      "language": "es",
+      "createdAt": "2026-11-04T14:06:29.551Z",
+      "updatedAt": "2026-11-04T14:06:29.551Z"
+    },
+    {
+      "id": "usr_demo_demodefault",
+      "name": "Creador Demo",
+      "email": "demo-default@demo.sorteos.local",
+      "passwordHash": "demo",
+      "salt": "demo",
+      "role": "user",
+      "status": "active",
+      "plan": "pro",
+      "language": "es",
+      "createdAt": "2026-11-04T14:06:29.663Z",
+      "updatedAt": "2026-11-04T14:06:29.663Z"
+    },
+    {
+      "id": "usr_demo_demoofu47j",
+      "name": "Creador Demo",
+      "email": "demo-ofu47j@demo.sorteos.local",
+      "passwordHash": "demo",
+      "salt": "demo",
+      "role": "user",
+      "status": "active",
+      "plan": "pro",
+      "language": "es",
+      "createdAt": "2026-11-04T14:10:45.853Z",
+      "updatedAt": "2026-11-04T14:10:45.853Z"
+    },
+    {
+      "id": "usr_demo_demon7wggb",
+      "name": "Creador Demo",
+      "email": "demo-n7wggb@demo.sorteos.local",
+      "passwordHash": "demo",
+      "salt": "demo",
+      "role": "user",
+      "status": "active",
+      "plan": "pro",
+      "language": "es",
+      "createdAt": "2026-11-04T14:29:47.462Z",
+      "updatedAt": "2026-11-04T14:29:47.462Z"
+    }
+  ],
+  "socialAccounts": [],
+  "giveaways": [],
+  "certificates": [],
+  "cms": [
+    {
+      "id": "cms-1",
+      "slug": "guia-sorteo-instagram-2026",
+      "title": "Cómo hacer un sorteo en Instagram legal y transparente",
+      "excerpt": "Normas de promoción de Meta y certificación de ganadores.",
+      "body": "# Guía Instagram\n\nContenido editorial gestionado sin desplegar código (RF-035).",
+      "category": "Instagram & Meta",
+      "status": "published",
+      "updatedAt": "2026-11-04T14:06:29.551Z"
+    }
+  ]
+}

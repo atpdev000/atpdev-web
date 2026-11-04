@@ -404,7 +404,7 @@ export const CANONICAL_ENTITIES: CanonicalEntityInfo[] = [
   {
     name: 'PROGRAMA NACIONAL CUNA MÁS',
     shortName: 'CUNA MÁS',
-    convocatoriasUrl: 'https://www.gob.pe/institucion/cunamas/colecciones/287-convocatorias-de-trabajo',
+    convocatoriasUrl: 'http://extranet.cunamas.gob.pe/jobs',
     portalName: 'Cuna Más - Convocatorias de Trabajo',
     officialRuc: '20546592237',
     searchPattern: '"cuna mas"'

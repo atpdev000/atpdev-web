@@ -1293,3 +1293,10 @@ html.light footer a:hover {
   80% { transform: translate(1px, -2px); text-shadow: -2px 0 #ff0055, 2px 0 #00ffff; }
   100% { transform: translate(0); text-shadow: none; }
 }
+
+
+/* Google AdSense: Prevenir colisión entre Anuncios de Anclaje (Anchor Ads) y barra flotante móvil */
+ins.adsbygoogle[data-anchor-status="displayed"] ~ #mobile-job-cta,
+body:has(ins.adsbygoogle[data-anchor-status="displayed"]) #mobile-job-cta {
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 60px) !important;
+}

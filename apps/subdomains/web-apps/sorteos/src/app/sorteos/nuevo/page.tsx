@@ -32,7 +32,8 @@ import {
   Info,
   Download,
   FolderOpen,
-  Copy
+  Copy,
+  Camera
 } from 'lucide-react';
 import { InstagramIcon, FacebookIcon, YoutubeIcon, TikTokIcon, XIcon, ThreadsIcon } from '@/components/SocialIcons';
 import { SocialNetwork, GiveawayRules, Participant, Giveaway } from '@/lib/types';
@@ -42,6 +43,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { api, setToken } from '@/lib/api';
 import { AppSorteosConfigCard, COLOR_PALETTES } from '@/components/AppSorteosConfigCard';
 import { Countdown3DOverlay } from '@/components/Countdown3DOverlay';
+import { WinnerExportModal } from '@/components/WinnerExportModal';
 
 interface SocialAccount {
   id: string;
@@ -327,6 +329,7 @@ interface AdditionalSource {
 
   // Modal para conectar/verificar cuenta social directamente desde aquí
   const [connectModalOpen, setConnectModalOpen] = useState<boolean>(false);
+  const [showWinnerExportModal, setShowWinnerExportModal] = useState<boolean>(false);
   const [customHandle, setCustomHandle] = useState<string>('');
   const [customPassword, setCustomPassword] = useState<string>('');
   const [oauthLoading, setOauthLoading] = useState<boolean>(false);
@@ -2255,23 +2258,35 @@ interface AdditionalSource {
 
       {/* STEP 1: Select Network & Post URL */}
       {step === 1 && (
-        <div
-          className="rounded-3xl p-6 sm:p-10 text-white shadow-2xl space-y-8 border border-white/20 transition-all duration-500"
-          style={{ background: `linear-gradient(135deg, ${currentThemeColor} 0%, #1e1b4b 160%)` }}
-        >
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl transition-all duration-500 space-y-8">
+          {/* Ambient glowing radial lights based on brand accent color */}
+          <div 
+            className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
+            style={{ backgroundColor: currentThemeColor }}
+          />
+          <div 
+            className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
+            style={{ backgroundColor: currentThemeColor }}
+          />
+          {/* Top subtle laser highlight bar */}
+          <div 
+            className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
+            style={{ background: `linear-gradient(90deg, transparent, ${currentThemeColor}, transparent)` }}
+          />
+
           {/* Selector de Color de Marca Principal (AppSorteos Signature Style) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 space-y-3">
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/60 backdrop-blur-md border border-slate-800/80 shadow-sm space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-base">🎨</span>
-                <span className="text-xs sm:text-sm font-bold font-display tracking-wide uppercase text-white">
+                <span className="text-xs sm:text-sm font-bold font-sans tracking-wide uppercase text-slate-200">
                   Color de Marca y Estilo del Sorteo
                 </span>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/20 text-white font-semibold">
+                <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold border border-slate-700">
                   Personalización en Vivo
                 </span>
               </div>
-              <span className="text-xs font-mono text-white/80">
+              <span className="text-xs font-sans text-slate-400">
                 Seleccionado: <strong className="text-white uppercase">{COLOR_PALETTES.find(p => p.hex.toLowerCase() === currentThemeColor.toLowerCase())?.label || currentThemeColor}</strong>
               </span>
             </div>
@@ -2287,8 +2302,8 @@ interface AdditionalSource {
                     title={`${palette.label} (${palette.hex})`}
                     className={`group relative w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center ${
                       isSelected
-                        ? 'ring-3 ring-white ring-offset-2 ring-offset-[#1e1b4b] scale-110 shadow-lg'
-                        : 'opacity-80 hover:opacity-100 hover:scale-105'
+                        ? 'ring-3 ring-white ring-offset-2 ring-offset-slate-900 scale-110 shadow-lg'
+                        : 'opacity-70 hover:opacity-100 hover:scale-105'
                     }`}
                     style={{ backgroundColor: palette.hex }}
                   >
@@ -2307,7 +2322,7 @@ interface AdditionalSource {
                 {t('wizard_step1_title')}
               </h2>
               {mounted && connectedAccounts.length > 0 && (
-                <span className="text-xs font-mono text-emerald-300 flex items-center gap-1.5 font-semibold bg-emerald-500/20 px-2.5 py-1 rounded-full border border-emerald-400/30">
+                <span className="text-xs font-sans text-emerald-300 flex items-center gap-1.5 font-semibold bg-emerald-500/15 px-2.5 py-1 rounded-full border border-emerald-400/30">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                   {connectedAccounts.length} cuenta{connectedAccounts.length > 1 ? 's' : ''} oficial{connectedAccounts.length > 1 ? 'es' : ''} vinculada{connectedAccounts.length > 1 ? 's' : ''}
                 </span>
@@ -2326,35 +2341,44 @@ interface AdditionalSource {
                     key={net.id}
                     type="button"
                     onClick={() => handleSelectNetwork(net.id)}
-                    className={`p-4 sm:p-5 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
+                    className={`p-4 sm:p-5 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer relative overflow-hidden group ${
                       isSelected
-                        ? 'bg-white text-slate-900 shadow-2xl ring-4 ring-white/50 scale-[1.02] border-white'
-                        : 'border-white/20 bg-white/10 hover:bg-white/15 text-white backdrop-blur-md'
+                        ? 'bg-slate-800/90 border-2 shadow-xl scale-[1.02]'
+                        : 'bg-slate-950/40 hover:bg-slate-800/50 border-slate-800 hover:border-slate-700 text-slate-300'
                     }`}
+                    style={
+                      isSelected
+                        ? {
+                            borderColor: net.id === 'youtube' ? '#ef4444' : net.id === 'instagram' ? '#ec4899' : net.id === 'tiktok' ? '#06b6d4' : net.id === 'facebook' ? '#3b82f6' : net.id === 'threads' ? '#a855f7' : '#e2e8f0',
+                            boxShadow: `0 10px 25px -5px ${net.id === 'youtube' ? 'rgba(239,68,68,0.25)' : net.id === 'instagram' ? 'rgba(236,72,153,0.25)' : net.id === 'tiktok' ? 'rgba(6,182,212,0.25)' : net.id === 'facebook' ? 'rgba(59,130,246,0.25)' : 'rgba(168,85,247,0.25)'}`
+                          }
+                        : undefined
+                    }
                   >
                     <div className="flex items-center justify-between">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${net.iconBg}`}>
                         <IconComponent className="w-5 h-5" />
                       </div>
                       {isSelected && (
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span 
+                          className="w-2.5 h-2.5 rounded-full animate-pulse shadow-sm"
+                          style={{
+                            backgroundColor: net.id === 'youtube' ? '#ef4444' : net.id === 'instagram' ? '#ec4899' : net.id === 'tiktok' ? '#06b6d4' : net.id === 'facebook' ? '#3b82f6' : net.id === 'threads' ? '#a855f7' : '#e2e8f0'
+                          }}
+                        />
                       )}
                     </div>
                     <div>
-                      <div className={`font-bold text-sm ${isSelected ? 'text-slate-900' : 'text-white'}`}>{net.name}</div>
+                      <div className="font-bold text-sm text-white">{net.name}</div>
                       
                       {acc ? (
-                        <div className={`mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold max-w-full ${
-                          isSelected
-                            ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-700'
-                            : 'bg-emerald-500/20 border border-emerald-400/30 text-emerald-300'
-                        }`}>
+                        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-sans font-semibold max-w-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
                           <Check className="w-3 h-3 shrink-0" />
                           <span className="truncate">{acc.name || acc.handle}</span>
                         </div>
                       ) : (
                         <div className="flex items-center justify-between mt-1 text-xs">
-                          <span className={`truncate ${isSelected ? 'text-slate-600' : 'text-white/70'}`}>
+                          <span className="truncate text-slate-400">
                             {t(net.subtitleKey)}
                           </span>
                           <span
@@ -2362,9 +2386,7 @@ interface AdditionalSource {
                               e.stopPropagation();
                               handleOAuthConnect(net.id);
                             }}
-                            className={`text-[10px] font-mono font-semibold underline cursor-pointer ml-1.5 shrink-0 ${
-                              isSelected ? 'text-pink-600 hover:text-pink-700' : 'text-white hover:text-white/80'
-                            }`}
+                            className="text-[10px] font-sans font-semibold text-slate-400 hover:text-white underline cursor-pointer ml-1.5 shrink-0"
                             title={`Iniciar sesión y conectar ${net.name}`}
                           >
                             + Vincular
@@ -2380,17 +2402,17 @@ interface AdditionalSource {
             {/* Account Status Banner */}
             {currentConnectedAccount ? (
               <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm text-white">
+                <div className="p-4 rounded-2xl bg-slate-950/60 backdrop-blur-md border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm text-white">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold shrink-0">
-                      <ShieldCheck className="w-5 h-5 text-emerald-300" />
+                    <div className="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center font-bold shrink-0 border border-slate-700">
+                      <ShieldCheck className="w-5 h-5 text-emerald-400" />
                     </div>
                     <div>
-                      <div className="text-xs font-mono font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <div className="text-xs font-sans font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                         <span>Cuenta Vinculada Oficial: {currentConnectedAccount.name}</span>
                       </div>
                       <div className="text-sm font-semibold text-white">
-                        {currentConnectedAccount.handle.startsWith('@share') ? `@${currentConnectedAccount.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}` : currentConnectedAccount.handle} <span className="text-xs font-mono font-normal text-white/70">• Sincronización Oficial OAuth 2.0</span>
+                        {currentConnectedAccount.handle.startsWith('@share') ? `@${currentConnectedAccount.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}` : currentConnectedAccount.handle} <span className="text-xs font-sans font-normal text-slate-400">• Sincronización Oficial OAuth 2.0</span>
                       </div>
                     </div>
                   </div>
@@ -2398,7 +2420,7 @@ interface AdditionalSource {
                     <button
                       type="button"
                       onClick={() => handleDisconnectAccount(currentConnectedAccount.id)}
-                      className="text-xs font-mono font-medium text-rose-300 hover:text-rose-100 hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-sans font-medium text-rose-400 hover:text-rose-200 hover:underline flex items-center gap-1 cursor-pointer"
                       title="Desvincular esta cuenta para conectar tu cuenta real"
                     >
                       <span>Desvincular</span>
@@ -2406,7 +2428,7 @@ interface AdditionalSource {
                     <button
                       type="button"
                       onClick={() => handleOAuthConnect(network)}
-                      className="text-xs font-mono font-medium text-white hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-sans font-medium text-slate-300 hover:text-white hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <span>Cambiar o editar cuenta</span>
                       <ExternalLink className="w-3 h-3" />
@@ -2415,13 +2437,13 @@ interface AdditionalSource {
                 </div>
 
                 {/* Publicaciones y URLs de la cuenta vinculada */}
-                <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 space-y-2 text-white">
-                  <div className="text-xs font-mono font-bold text-white flex items-center justify-between">
+                <div className="p-3.5 rounded-xl bg-slate-950/50 backdrop-blur-md border border-slate-800/80 space-y-2 text-white">
+                  <div className="text-xs font-sans font-bold text-slate-200 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                       <span>Publicaciones y URLs de tu cuenta vinculada:</span>
                     </span>
-                    <span className="text-[10px] text-white/70 font-normal">Haz clic para autocompletar</span>
+                    <span className="text-[10px] text-slate-400 font-normal">Haz clic para autocompletar</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {network === 'facebook' && (
@@ -2433,7 +2455,7 @@ interface AdditionalSource {
                             setPostUrl(`https://www.facebook.com/${slug}/posts/latest`);
                             setGiveawayTitle(`Sorteo en Fanpage — ${currentConnectedAccount.name}`);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-mono text-white flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-sans text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                         >
                           <span>📝 Post de la Fanpage Oficial</span>
                         </button>
@@ -2444,7 +2466,7 @@ interface AdditionalSource {
                             setPostUrl(`https://www.facebook.com/${slug}/reel/`);
                             setGiveawayTitle(`Sorteo en Reel Oficial — ${currentConnectedAccount.name}`);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-mono text-white flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-sans text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                         >
                           <span>🎬 Reel de tu Fanpage</span>
                         </button>
@@ -2458,7 +2480,7 @@ interface AdditionalSource {
                             setPostUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
                             setGiveawayTitle(`Sorteo en Canal Oficial — ${currentConnectedAccount.name}`);
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-mono text-white flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-sans text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                         >
                           <span>📹 Video / En Vivo de tu Canal</span>
                         </button>
@@ -2472,7 +2494,7 @@ interface AdditionalSource {
                             setPostUrl('https://www.tiktok.com/@codehistory.daily/photo/7672967059881364743');
                             setGiveawayTitle('Sorteo Oficial TikTok — @codehistory.daily');
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-mono text-white flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-sans text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                         >
                           <span>📱 Publicación de TikTok (@codehistory.daily)</span>
                         </button>
@@ -2493,7 +2515,7 @@ interface AdditionalSource {
                           setPostUrl(targetUrl);
                           setGiveawayTitle(`Sorteo Oficial — ${currentConnectedAccount.name}`);
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-mono text-white flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-sans text-slate-200 flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs"
                       >
                         <span>📌 Publicación de {currentConnectedAccount.name}</span>
                       </button>
@@ -2502,9 +2524,9 @@ interface AdditionalSource {
                 </div>
               </div>
             ) : (
-              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-white">
-                <div className="text-white/80 flex items-center gap-2.5">
-                  <HelpCircle className="w-5 h-5 text-white/70 shrink-0" />
+              <div className="p-4 rounded-2xl bg-slate-950/60 backdrop-blur-md border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+                <div className="text-slate-300 flex items-center gap-2.5">
+                  <HelpCircle className="w-5 h-5 text-slate-400 shrink-0" />
                   <span>
                     No tienes una cuenta de <strong className="text-white">{NETWORK_CONFIGS.find(n => n.id === network)?.name}</strong> vinculada. Puedes verificarla aquí mismo ahora o pegar cualquier enlace público.
                   </span>
@@ -2512,9 +2534,9 @@ interface AdditionalSource {
                 <button
                   type="button"
                   onClick={() => handleOAuthConnect(network)}
-                  className="bg-white hover:bg-slate-100 text-slate-900 text-xs py-2.5 px-4 rounded-xl flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 shadow-md transition-transform hover:scale-105"
+                  className="bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 text-xs py-2.5 px-4 rounded-xl flex items-center gap-1.5 font-bold cursor-pointer whitespace-nowrap shrink-0 shadow-sm transition-all hover:scale-105"
                 >
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span>+ Vincular {NETWORK_CONFIGS.find(n => n.id === network)?.name.split(' ')[0]} Ahora</span>
                 </button>
               </div>
@@ -2523,7 +2545,7 @@ interface AdditionalSource {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="giveaway-title" className="block text-xs font-mono font-medium text-white/90 mb-2">
+              <label htmlFor="giveaway-title" className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
                 {t('wizard_campaign_title_label')}
               </label>
               <input
@@ -2534,13 +2556,13 @@ interface AdditionalSource {
                 onChange={(e) => setGiveawayTitle(e.target.value)}
                 placeholder="Ej: Sorteo Oficial de Aniversario"
                 aria-label="Título o Nombre de la Campaña"
-                className="w-full px-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/25 text-white placeholder-white/50 font-medium focus:outline-none focus:border-white focus:bg-white/15 transition-all shadow-inner"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 font-sans text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label htmlFor="post-url" className="text-xs font-mono font-medium text-white/90">
+                <label htmlFor="post-url" className="text-xs font-semibold uppercase tracking-wider text-slate-300">
                   {t('wizard_post_url_label')}
                 </label>
                 <button
@@ -2549,7 +2571,7 @@ interface AdditionalSource {
                     const sample = NETWORK_CONFIGS.find((c) => c.id === network)?.sampleUrl || '';
                     setPostUrl(sample);
                   }}
-                  className="text-[11px] font-mono text-white/90 hover:text-white underline cursor-pointer"
+                  className="text-[11px] font-sans text-slate-400 hover:text-white underline cursor-pointer"
                 >
                   Probar con URL de ejemplo
                 </button>
@@ -2565,7 +2587,7 @@ interface AdditionalSource {
                 }}
                 placeholder={NETWORK_CONFIGS.find((c) => c.id === network)?.placeholder}
                 aria-label="URL de la Publicación, Video o @cuenta"
-                className="w-full px-4 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/25 text-white placeholder-white/50 font-mono text-sm focus:outline-none focus:border-white focus:bg-white/15 transition-all shadow-inner"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner"
               />
 
               {/* Alerta de discrepancia de plataforma en la URL */}
@@ -2576,9 +2598,9 @@ interface AdditionalSource {
                 const detectedCfg = NETWORK_CONFIGS.find((n) => n.id === detectedPlat);
                 const currentCfg = NETWORK_CONFIGS.find((n) => n.id === network);
                 return (
-                  <div className="mt-2.5 p-3 rounded-xl bg-amber-500/20 border border-amber-300/40 text-white text-xs font-mono flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="mt-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-sans flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                     <div className="flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-300" />
+                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
                       <span>
                         El enlace parece ser de <strong>{detectedCfg?.name || detectedPlat}</strong>, pero seleccionaste <strong>{currentCfg?.name || network}</strong>.
                       </span>
@@ -2587,14 +2609,14 @@ interface AdditionalSource {
                       <button
                         type="button"
                         onClick={() => handleSelectNetwork(detectedPlat)}
-                        className="px-2.5 py-1 rounded-lg bg-white text-slate-900 font-bold text-[11px] transition-colors cursor-pointer shadow-sm hover:bg-slate-100"
+                        className="px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold text-[11px] transition-colors cursor-pointer shadow-sm hover:bg-amber-400"
                       >
                         Cambiar a {detectedCfg?.name.split(' ')[0] || detectedPlat}
                       </button>
                       <button
                         type="button"
                         onClick={() => setPostUrl('')}
-                        className="text-[11px] text-white/80 underline hover:text-white cursor-pointer"
+                        className="text-[11px] text-amber-300 underline hover:text-amber-100 cursor-pointer"
                       >
                         Limpiar URL
                       </button>
@@ -2604,13 +2626,13 @@ interface AdditionalSource {
               })()}
 
               <div className="flex items-center justify-between flex-wrap gap-2 mt-2">
-                <p className="text-xs text-white/70 font-mono">
+                <p className="text-xs text-slate-400 font-sans">
                   {t('wizard_tip_public_post')}
                 </p>
                 <button
                   type="button"
                   onClick={() => setShowManualPaste(!showManualPaste)}
-                  className="text-xs font-mono text-white/80 hover:text-white underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-sans text-slate-400 hover:text-white underline flex items-center gap-1 cursor-pointer"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>{showManualPaste ? 'Ocultar entrada manual' : 'O pegar participantes manualmente'}</span>
@@ -2619,17 +2641,17 @@ interface AdditionalSource {
             </div>
 
             {/* Modo Multi-Red Switcher */}
-            <div className="p-4 sm:p-5 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-950/60 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center font-bold shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold shrink-0 shadow-md">
                   <Sparkles className="w-5 h-5 text-amber-300" />
                 </div>
                 <div>
                   <div className="text-xs font-bold text-white flex items-center gap-2">
                     <span>Sorteo Multi-Red Dinámico (Combina múltiples redes y publicaciones)</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/20 text-white font-bold">PRO</span>
+                    <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">PRO</span>
                   </div>
-                  <p className="text-[11px] text-white/75 mt-0.5">
+                  <p className="text-[11px] text-slate-400 mt-0.5">
                     ¿Publicaste en 2, 3 o más redes (YouTube + TikTok + Instagram + Facebook + X)? Combina todos los comentarios en una sola lista justa.
                   </p>
                 </div>
@@ -2637,10 +2659,10 @@ interface AdditionalSource {
               <button
                 type="button"
                 onClick={() => setIsMultiNetwork(!isMultiNetwork)}
-                className={`px-4 py-2 rounded-xl font-mono text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                className={`px-4 py-2.5 rounded-xl font-sans text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 shadow-sm ${
                   isMultiNetwork
-                    ? 'bg-white text-slate-900 shadow-md ring-2 ring-white/60'
-                    : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-600/20'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
                 }`}
               >
                 {isMultiNetwork ? '✓ Modo Multi-Red Activo' : '+ Activar Sorteo Multi-Red'}
@@ -2656,11 +2678,11 @@ interface AdditionalSource {
                   return (
                     <div
                       key={source.id}
-                      className="p-4 sm:p-5 rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md space-y-3"
+                      className="p-4 sm:p-5 rounded-2xl border border-slate-800 bg-slate-950/50 backdrop-blur-md space-y-3"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5 uppercase">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <div className="text-xs font-sans font-bold text-slate-200 flex items-center gap-1.5 uppercase tracking-wide">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                           <span>Red Social #{idx + 2} para Combinar:</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -2673,10 +2695,10 @@ interface AdditionalSource {
                                   key={net.id}
                                   type="button"
                                   onClick={() => handleUpdateSourceNetwork(source.id, net.id)}
-                                  className={`px-2 py-1 rounded-lg border text-xs flex items-center gap-1 cursor-pointer transition-all ${
+                                  className={`px-2.5 py-1 rounded-lg border text-xs flex items-center gap-1.5 cursor-pointer transition-all ${
                                     isSelected
-                                      ? 'border-white bg-white text-slate-900 font-bold shadow-md'
-                                      : 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+                                      ? 'border-purple-500 bg-purple-600 text-white font-bold shadow-sm'
+                                      : 'border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800'
                                   }`}
                                 >
                                   <NetIcon className="w-3 h-3" />
@@ -2689,7 +2711,7 @@ interface AdditionalSource {
                             <button
                               type="button"
                               onClick={() => handleRemoveSource(source.id)}
-                              className="p-1 rounded-lg text-rose-300 hover:text-white hover:bg-white/10 transition-colors ml-1 cursor-pointer"
+                              className="p-1 rounded-lg text-rose-400 hover:text-rose-200 hover:bg-slate-800 transition-colors ml-1 cursor-pointer"
                               title="Eliminar esta red"
                             >
                               <X className="w-4 h-4" />
@@ -2706,7 +2728,7 @@ interface AdditionalSource {
                         }}
                         placeholder={`Pega el enlace de ${netConfig?.name} (${netConfig?.placeholder})`}
                         aria-label={`URL de ${netConfig?.name}`}
-                        className="w-full px-4 py-3 rounded-xl bg-white/10 backdrop-blur-md border border-white/25 text-white placeholder-white/50 font-mono text-xs focus:outline-none focus:border-white focus:bg-white/15 shadow-inner"
+                        className="w-full px-4 py-3 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 font-mono text-xs focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-inner"
                       />
                     </div>
                   );
@@ -2716,7 +2738,7 @@ interface AdditionalSource {
                   <button
                     type="button"
                     onClick={handleAddSource}
-                    className="text-xs font-mono font-bold text-white hover:text-white/90 flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition-all cursor-pointer shadow-xs"
+                    className="text-xs font-sans font-bold text-slate-200 hover:text-white flex items-center gap-1.5 py-2 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all cursor-pointer shadow-xs"
                   >
                     <span>+ Añadir otra Red Social / Publicación al Sorteo</span>
                   </button>
@@ -2726,15 +2748,15 @@ interface AdditionalSource {
 
             {/* Error Banner */}
             {fetchError && (
-              <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-300/40 text-white text-xs flex items-start gap-3 backdrop-blur-md">
-                <AlertCircle className="w-5 h-5 text-rose-300 shrink-0 mt-0.5" />
+              <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs flex items-start gap-3 backdrop-blur-md">
+                <AlertCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
                 <div className="space-y-1.5 flex-1">
-                  <div className="font-bold">No se pudieron extraer comentarios automáticos</div>
-                  <p className="text-white/85">{fetchError}</p>
+                  <div className="font-bold text-rose-100">No se pudieron extraer comentarios automáticos</div>
+                  <p className="text-rose-200/90">{fetchError}</p>
                   <button
                     type="button"
                     onClick={() => setShowManualPaste(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-rose-900 font-mono text-xs font-bold hover:bg-rose-50 transition-colors mt-1 cursor-pointer shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-sans text-xs font-bold transition-colors mt-1 cursor-pointer shadow-sm"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     <span>Pegar comentarios / participantes manualmente</span>
@@ -2745,29 +2767,29 @@ interface AdditionalSource {
 
             {/* Drawer de entrada manual opcional (JSON / CSV / Texto) */}
             {showManualPaste && (
-              <div className="p-5 rounded-2xl bg-black/30 backdrop-blur-md border border-white/20 space-y-4 animate-in fade-in duration-200 text-white">
+              <div className="p-5 rounded-2xl bg-slate-950/70 backdrop-blur-md border border-slate-800 space-y-4 animate-in fade-in duration-200 text-white">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="text-xs font-bold font-mono text-white uppercase tracking-wider flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-pink-300" />
+                  <div className="text-xs font-bold font-sans text-white uppercase tracking-wider flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-purple-400" />
                     <span>Importar Participantes (JSON / CSV / Texto)</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowManualPaste(false)}
-                    className="text-[11px] font-mono text-white/70 hover:text-white cursor-pointer"
+                    className="text-[11px] font-sans text-slate-400 hover:text-white cursor-pointer"
                   >
                     ✕ Cerrar entrada manual
                   </button>
                 </div>
 
                 <div className="flex items-center justify-between gap-2 pb-1">
-                  <span className="text-[11px] font-mono text-white/80">
+                  <span className="text-[11px] font-sans text-slate-300">
                     Copia y pega los participantes o comentarios:
                   </span>
                   <button
                     type="button"
                     onClick={handlePasteClipboard}
-                    className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white border border-white/25 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-[11px] font-sans font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs"
                   >
                     <Clipboard className="w-3.5 h-3.5" />
                     <span>📋 Pegar desde Portapapeles</span>
@@ -2779,12 +2801,12 @@ interface AdditionalSource {
                   value={manualText}
                   onChange={(e) => setManualText(e.target.value)}
                   placeholder={`Pega aquí nombres de usuario, comentarios o formato JSON/CSV:\n• Formato simple: "@usuario1", "@usuario2" (uno por línea)\n• Formato Facebook copiado: "Nombre · 2 días \\n Texto del comentario"\n• Formato "Usuario: Comentario"\n• JSON exportado: [{ "author": "...", "text": "..." }]`}
-                  className="w-full p-3.5 rounded-xl bg-black/40 border border-white/20 text-white placeholder-white/40 font-mono text-xs focus:outline-none focus:border-white"
+                  className="w-full p-3.5 rounded-xl bg-slate-950/80 border border-slate-700/80 text-white placeholder-slate-500 font-mono text-xs focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                 />
 
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-white/20 text-xs font-mono text-white hover:bg-white/10 cursor-pointer transition-colors shadow-2xs">
-                    <FileText className="w-3.5 h-3.5 text-pink-300" />
+                  <label className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-700 text-xs font-sans text-slate-200 hover:bg-slate-800 cursor-pointer transition-colors shadow-xs">
+                    <FileText className="w-3.5 h-3.5 text-pink-400" />
                     <span>Subir archivo (.json, .csv o .txt)</span>
                     <input
                       type="file"
@@ -2797,7 +2819,7 @@ interface AdditionalSource {
                     type="button"
                     onClick={handleImportManual}
                     disabled={!manualText.trim()}
-                    className="bg-white hover:bg-slate-100 text-slate-900 font-bold font-mono text-xs py-2 px-5 rounded-xl cursor-pointer disabled:opacity-50 shadow-md"
+                    className="bg-purple-600 hover:bg-purple-500 text-white font-bold font-sans text-xs py-2 px-5 rounded-xl cursor-pointer disabled:opacity-50 shadow-md"
                   >
                     <span>Procesar e Importar</span>
                   </button>
@@ -2807,11 +2829,11 @@ interface AdditionalSource {
           </div>
 
           {/* Bottom Action Bar — 100% Uniforme para todas las redes (RF-011 / UX) */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/15">
-            <div className="text-xs text-white/70 font-mono">
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800/80">
+            <div className="text-xs text-slate-400 font-sans">
               {isMultiNetwork ? (
-                <span className="text-white font-bold flex items-center gap-1.5 flex-wrap">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span className="text-slate-200 font-bold flex items-center gap-1.5 flex-wrap">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                   <span>
                     Sorteo Multi-Red ({[network, ...additionalSources.map((s) => s.network)].map((n) => NETWORK_CONFIGS.find((c) => c.id === n)?.name.split(' ')[0] || n).join(' + ')})
                   </span>
@@ -2831,14 +2853,22 @@ interface AdditionalSource {
                   (isMultiNetwork && additionalSources.some((s) => !s.postUrl.trim()))
                 }
                 onClick={handleImportComments}
-                className={`bg-white hover:bg-slate-100 text-slate-900 font-bold font-display text-sm sm:text-base py-3.5 px-8 rounded-2xl cursor-pointer flex items-center gap-2.5 shadow-xl transition-all ${
+                className={`font-bold font-sans text-sm sm:text-base py-3.5 px-8 rounded-2xl cursor-pointer flex items-center gap-2.5 shadow-xl transition-all text-white ${
                   isLoadingComments ||
                   !postUrl ||
                   Boolean(detectUrlPlatform(postUrl) && detectUrlPlatform(postUrl) !== network) ||
                   (isMultiNetwork && additionalSources.some((s) => !s.postUrl.trim()))
-                    ? 'opacity-50 cursor-not-allowed !transform-none'
-                    : 'hover:scale-[1.02] hover:shadow-2xl'
+                    ? 'opacity-50 cursor-not-allowed !transform-none bg-slate-800 text-slate-400 border border-slate-700'
+                    : 'hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]'
                 }`}
+                style={
+                  !isLoadingComments && postUrl
+                    ? {
+                        background: `linear-gradient(135deg, ${currentThemeColor} 0%, #4f46e5 100%)`,
+                        boxShadow: `0 10px 30px -5px ${currentThemeColor}50`
+                      }
+                    : undefined
+                }
               >
                 <RefreshCw className={`w-4 h-4 ${isLoadingComments ? 'animate-spin' : ''}`} />
                 <span>
@@ -2857,10 +2887,21 @@ interface AdditionalSource {
 
       {/* STEP 2: Preview Extracted Comments */}
       {step === 2 && (
-        <div
-          className="rounded-3xl p-6 sm:p-10 text-white shadow-2xl space-y-8 border border-white/20 transition-all duration-500"
-          style={{ background: `linear-gradient(135deg, ${currentThemeColor} 0%, #1e1b4b 160%)` }}
-        >
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl transition-all duration-500 space-y-8">
+          {/* Ambient glowing radial lights based on brand accent color */}
+          <div 
+            className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
+            style={{ backgroundColor: currentThemeColor }}
+          />
+          <div 
+            className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
+            style={{ backgroundColor: currentThemeColor }}
+          />
+          {/* Top subtle laser highlight bar */}
+          <div 
+            className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
+            style={{ background: `linear-gradient(90deg, transparent, ${currentThemeColor}, transparent)` }}
+          />
           <div className="flex items-center justify-between flex-wrap gap-4 border-b border-white/15 pb-4">
             <div>
               <h2 className="text-lg sm:text-xl font-bold font-display text-white">
@@ -4553,7 +4594,11 @@ interface AdditionalSource {
             <button
               type="button"
               onClick={handleApplyRules}
-              className="bg-white hover:bg-slate-100 text-slate-900 font-bold font-display text-sm sm:text-base py-3.5 px-8 rounded-2xl flex items-center gap-2 cursor-pointer shadow-xl hover:scale-[1.02] transition-all"
+              className="font-bold font-sans text-sm sm:text-base py-3.5 px-8 rounded-2xl flex items-center gap-2 cursor-pointer shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-white"
+              style={{
+                background: `linear-gradient(135deg, ${currentThemeColor} 0%, #4f46e5 100%)`,
+                boxShadow: `0 10px 30px -5px ${currentThemeColor}50`
+              }}
             >
               <span>{t('wizard_btn_configure_rules')}</span>
               <ArrowRight className="w-4 h-4" />
@@ -4596,10 +4641,21 @@ interface AdditionalSource {
 
       {/* STEP 4: Draw Finished & Verifiable Certificate */}
       {step === 4 && finishedGiveaway && (
-        <div
-          className="rounded-3xl p-6 sm:p-10 text-white shadow-2xl space-y-8 text-center border border-white/20 transition-all duration-500"
-          style={{ background: `linear-gradient(135deg, ${currentThemeColor} 0%, #1e1b4b 160%)` }}
-        >
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl transition-all duration-500 space-y-8 text-center">
+          {/* Ambient glowing radial lights based on brand accent color */}
+          <div 
+            className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
+            style={{ backgroundColor: currentThemeColor }}
+          />
+          <div 
+            className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
+            style={{ backgroundColor: currentThemeColor }}
+          />
+          {/* Top subtle laser highlight bar */}
+          <div 
+            className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
+            style={{ background: `linear-gradient(90deg, transparent, ${currentThemeColor}, transparent)` }}
+          />
           <div className="space-y-3">
             <div className="w-16 h-16 rounded-3xl gold-gradient-badge mx-auto flex items-center justify-center shadow-xl shadow-amber-500/20">
               <Trophy className="w-8 h-8 text-amber-950" />
@@ -4670,6 +4726,15 @@ interface AdditionalSource {
           {/* Action CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <button
+              type="button"
+              onClick={() => setShowWinnerExportModal(true)}
+              className="bg-gradient-to-r from-amber-400 via-pink-500 to-purple-600 hover:opacity-95 text-white font-black font-display text-sm py-4 px-8 rounded-2xl flex items-center gap-2.5 cursor-pointer shadow-xl hover:scale-105 transition-all active:scale-[0.98]"
+            >
+              <Camera className="w-4 h-4 text-white" />
+              <span>🎬 Descargar Tarjeta / Video Story</span>
+            </button>
+
+            <button
               onClick={() => router.push(`/sorteo/${finishedGiveaway.id}`)}
               className="bg-white hover:bg-slate-100 text-slate-900 font-bold font-display text-sm py-4 px-8 rounded-2xl flex items-center gap-2 cursor-pointer shadow-xl hover:scale-105 transition-all"
             >
@@ -4685,6 +4750,18 @@ interface AdditionalSource {
               <span>{t('wizard_view_cert')}</span>
             </button>
           </div>
+
+          {/* Modal de Exportación de Tarjeta y Video Animado */}
+          {showWinnerExportModal && (
+            <WinnerExportModal
+              isOpen={showWinnerExportModal}
+              onClose={() => setShowWinnerExportModal(false)}
+              winnerName={finishedGiveaway.winners[0]?.participant.username || 'Ganador Oficial'}
+              drawTitle={giveawayTitle || finishedGiveaway.title}
+              auditHash={finishedGiveaway.verificationHash || 'hash-verificado-sorteos-pro'}
+              platform={network}
+            />
+          )}
         </div>
       )}
 

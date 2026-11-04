@@ -662,6 +662,24 @@ async function fetchMetaLive(
   return null;
 }
 
+async function fetchYoutubeOEmbed(videoId: string): Promise<{ title: string; author: string; thumbnail: string } | null> {
+  try {
+    const res = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${encodeURIComponent(videoId)}&format=json`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as any;
+    return {
+      title: data.title || 'Video de YouTube',
+      author: data.author_name || 'Canal de YouTube',
+      thumbnail: data.thumbnail_url || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function fetchYoutubeInnertubeLive(
   videoId: string,
   maxPages: number = 25,
@@ -685,14 +703,38 @@ async function fetchYoutubeInnertubeLive(
       },
       signal: AbortSignal.timeout(8000),
     });
-    if (!pageRes.ok) return { comments: null };
+    if (!pageRes.ok) {
+      const oembed = await fetchYoutubeOEmbed(videoId);
+      return {
+        comments: null,
+        meta: oembed ? {
+          title: oembed.title,
+          author: oembed.author,
+          thumbnail: oembed.thumbnail,
+          postId: videoId,
+          requiresAuth: false,
+        } : undefined,
+      };
+    }
     const html = await pageRes.text();
 
     const apiKeyMatch = html.match(/"INNERTUBE_API_KEY":"([^"]+)"/);
     const clientVersionMatch = html.match(/"INNERTUBE_CLIENT_VERSION":"([^"]+)"/);
     const continuationMatch = html.match(/"continuationCommand":\{"token":"([^"]+)"/);
 
-    if (!apiKeyMatch) return { comments: null };
+    if (!apiKeyMatch) {
+      const oembed = await fetchYoutubeOEmbed(videoId);
+      return {
+        comments: null,
+        meta: oembed ? {
+          title: oembed.title,
+          author: oembed.author,
+          thumbnail: oembed.thumbnail,
+          postId: videoId,
+          requiresAuth: false,
+        } : undefined,
+      };
+    }
 
     apiKey = apiKeyMatch[1];
     if (clientVersionMatch) clientVersion = clientVersionMatch[1];

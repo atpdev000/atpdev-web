@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Download, Copy, Check, X, Sparkles, Trophy, Share2, Camera } from 'lucide-react';
+import { Download, Copy, Check, X, Sparkles, Trophy, Share2, Camera, Film, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export interface WinnerExportModalProps {
@@ -25,6 +25,8 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
   const [format, setFormat] = useState<'story' | 'post'>('story');
   const [copied, setCopied] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
+  const [videoProgress, setVideoProgress] = useState<number>(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const drawCard = useCallback(() => {
@@ -182,6 +184,203 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
     setIsGenerating(false);
   };
 
+  const handleDownloadVideo = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (typeof window === 'undefined' || !(canvas as any).captureStream || typeof MediaRecorder === 'undefined') {
+      alert('Tu navegador no soporta grabación directa de video. Te recomendamos usar Google Chrome o Microsoft Edge.');
+      return;
+    }
+
+    setIsRecordingVideo(true);
+    setVideoProgress(5);
+
+    try {
+      const width = format === 'story' ? 720 : 720;
+      const height = format === 'story' ? 1280 : 720;
+      canvas.width = width;
+      canvas.height = height;
+
+      const stream = (canvas as any).captureStream(30);
+      let mimeType = 'video/webm;codecs=vp9';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 2500000 });
+      const chunks: Blob[] = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.start();
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('No canvas context');
+
+      const totalFrames = 120; // 4 seconds at 30fps
+      const confettiParticles: Array<{ x: number; y: number; vx: number; vy: number; color: string; size: number }> = [];
+      const colors = ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981', '#38bdf8', '#fbbf24'];
+
+      for (let i = 0; i < 70; i++) {
+        confettiParticles.push({
+          x: Math.random() * width,
+          y: Math.random() * height - height / 2,
+          vx: (Math.random() - 0.5) * 6,
+          vy: Math.random() * 5 + 3,
+          color: colors[i % colors.length],
+          size: Math.random() * 8 + 4,
+        });
+      }
+
+      for (let frame = 0; frame < totalFrames; frame++) {
+        setVideoProgress(Math.round(((frame + 1) / totalFrames) * 90));
+
+        // Draw background
+        const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+        bgGrad.addColorStop(0, '#070a12');
+        bgGrad.addColorStop(0.3, '#160d2b');
+        bgGrad.addColorStop(0.7, '#0d1326');
+        bgGrad.addColorStop(1, '#05070d');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        const pad = 24;
+        ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(pad, pad, width - pad * 2, height - pad * 2);
+
+        // Header
+        const topY = format === 'story' ? 140 : 90;
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 18px sans-serif';
+        ctx.fillStyle = '#fbbf24';
+        ctx.fillText('✨ SORTEOS PRO • VERIFICADO OFICIAL ✨', width / 2, topY);
+
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(drawTitle.toUpperCase().slice(0, 32), width / 2, topY + 40);
+
+        if (frame < 45) {
+          // Phase 1: Countdown 3... 2... 1...
+          const count = 3 - Math.floor(frame / 15);
+          const phaseProgress = (frame % 15) / 15;
+          const radius = 60 + phaseProgress * 20;
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(width / 2, height / 2, radius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(236, 72, 153, ${1 - phaseProgress})`;
+          ctx.lineWidth = 6;
+          ctx.stroke();
+
+          ctx.font = 'bold 80px sans-serif';
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#ec4899';
+          ctx.shadowBlur = 30;
+          ctx.fillText(String(count), width / 2, height / 2 + 28);
+          ctx.restore();
+
+          ctx.font = 'bold 20px sans-serif';
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText('SORTEANDO GANADOR OFICIAL...', width / 2, height / 2 + 120);
+        } else {
+          // Phase 2: Winner Reveal with Confetti
+          const revealProgress = Math.min(1, (frame - 45) / 15);
+
+          // Update & draw confetti
+          for (const p of confettiParticles) {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.y > height) p.y = -10;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size * 0.6);
+          }
+
+          // Card
+          const cardW = width - 80;
+          const cardH = format === 'story' ? 480 : 320;
+          const cardY = format === 'story' ? topY + 160 : topY + 110;
+          const cardX = (width - cardW) / 2;
+
+          ctx.save();
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+          ctx.shadowColor = 'rgba(139, 92, 246, 0.6)';
+          ctx.shadowBlur = 25 * revealProgress;
+          ctx.beginPath();
+          ctx.roundRect(cardX, cardY, cardW, cardH, 24);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+          ctx.restore();
+
+          // Trophy
+          const centerY = cardY + (format === 'story' ? 100 : 70);
+          ctx.font = format === 'story' ? '60px sans-serif' : '48px sans-serif';
+          ctx.fillText('🏆', width / 2, centerY);
+
+          ctx.font = 'bold 20px sans-serif';
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillText('¡FELICIDADES AL GANADOR!', width / 2, centerY + 45);
+
+          // Winner name
+          ctx.save();
+          ctx.font = `900 ${format === 'story' ? '46px' : '36px'} sans-serif`;
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#ec4899';
+          ctx.shadowBlur = 20;
+          const maxLen = 22;
+          const displayName = winnerName.length > maxLen ? winnerName.substring(0, maxLen) + '...' : winnerName;
+          ctx.fillText(displayName, width / 2, centerY + (format === 'story' ? 120 : 100));
+          ctx.restore();
+
+          ctx.font = 'bold 16px sans-serif';
+          ctx.fillStyle = '#34d399';
+          ctx.fillText('✓ Selección Aleatoria Auditada Inmutable', width / 2, centerY + (format === 'story' ? 175 : 145));
+
+          const footerY = format === 'story' ? height - 160 : height - 80;
+          ctx.font = 'bold 15px monospace';
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(`AUDIT: ${auditHash.slice(0, 24)}...`, width / 2, footerY);
+
+          ctx.font = 'bold 18px sans-serif';
+          ctx.fillStyle = '#a855f7';
+          ctx.fillText('sorteospro.com', width / 2, footerY + 30);
+        }
+
+        // Wait 33ms per frame (~30fps)
+        await new Promise((r) => setTimeout(r, 33));
+      }
+
+      setVideoProgress(95);
+
+      await new Promise<void>((resolve) => {
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `sorteo-animado-${winnerName.replace(/\s+/g, '-').toLowerCase()}-${format}.webm`;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+          resolve();
+        };
+        recorder.stop();
+      });
+
+      setVideoProgress(100);
+    } catch (err: any) {
+      alert(`Error al generar video: ${err.message || 'Error desconocido'}`);
+    } finally {
+      setIsRecordingVideo(false);
+      setVideoProgress(0);
+      drawCard();
+    }
+  };
+
   const handleCopy = async () => {
     const canvas = canvasRef.current;
     if (!canvas || !navigator.clipboard) return;
@@ -226,10 +425,10 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
             <span>Compartir en Redes Sociales</span>
           </div>
           <h2 className="text-2xl font-bold font-display text-white">
-            Tarjeta Oficial del Ganador
+            Tarjeta y Video Oficial del Ganador
           </h2>
           <p className="text-sm text-zinc-400">
-            Descarga una imagen de alta resolución lista para publicar en tus historias o feed.
+            Descarga una imagen de alta resolución o un video animado listo para publicar en tus historias o feed.
           </p>
         </div>
 
@@ -260,34 +459,68 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
         </div>
 
         {/* Canvas Preview Area */}
-        <div className="flex justify-center items-center bg-black/40 rounded-2xl p-4 border border-white/5 overflow-hidden">
+        <div className="flex justify-center items-center bg-black/40 rounded-2xl p-4 border border-white/5 overflow-hidden relative">
           <canvas
             ref={canvasRef}
             className={`rounded-xl shadow-2xl transition-all border border-white/10 max-h-[380px] w-auto object-contain ${
               format === 'story' ? 'aspect-[9/16]' : 'aspect-square'
             }`}
           />
+          {isRecordingVideo && (
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center space-y-3 z-20">
+              <Film className="w-10 h-10 text-purple-400 animate-pulse" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-white font-mono">Renderizando video animado ({videoProgress}%)</p>
+                <p className="text-xs text-zinc-400 font-mono">Capturando fotogramas con confeti y sello oficial...</p>
+              </div>
+              <div className="w-48 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-100" 
+                  style={{ width: `${videoProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             type="button"
-            disabled={isGenerating}
+            disabled={isGenerating || isRecordingVideo}
             onClick={handleDownload}
-            className="btn-pro-primary flex-1 py-3.5 rounded-xl text-base flex items-center justify-center gap-2"
+            className="btn-pro-primary flex-1 py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-[0.98]"
           >
-            <Download className="w-5 h-5" />
-            <span>{t('btn_export')}</span>
+            <Download className="w-4 h-4" />
+            <span>Descargar Imagen (PNG)</span>
           </button>
 
           <button
             type="button"
-            disabled={isGenerating}
-            onClick={handleCopy}
-            className="btn-pro-secondary py-3.5 px-6 rounded-xl text-base flex items-center justify-center gap-2"
+            disabled={isGenerating || isRecordingVideo}
+            onClick={handleDownloadVideo}
+            className="py-3.5 px-5 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-500 via-pink-600 to-purple-600 hover:opacity-90 text-white shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+            {isRecordingVideo ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Grabando ({videoProgress}%)</span>
+              </>
+            ) : (
+              <>
+                <Film className="w-4 h-4" />
+                <span>🎬 Video Story (.webm)</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            disabled={isGenerating || isRecordingVideo}
+            onClick={handleCopy}
+            className="btn-pro-secondary py-3.5 px-5 rounded-xl text-sm flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             <span>{copied ? t('btn_copied') : t('btn_copy')}</span>
           </button>
         </div>

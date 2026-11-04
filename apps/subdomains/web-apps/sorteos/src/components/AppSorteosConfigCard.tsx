@@ -274,13 +274,23 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
         </p>
       </div>
 
-      {/* ─── 2. TARJETA PRINCIPAL DE CONFIGURACIÓN (Screenshot 2 Magenta Card) ── */}
+      {/* ─── 2. TARJETA PRINCIPAL DE CONFIGURACIÓN (AppSorteos Luxury Dark Card) ── */}
       <div 
-        className="rounded-3xl p-6 sm:p-10 text-white shadow-xl space-y-6 transition-all duration-300"
-        style={{
-          background: `linear-gradient(135deg, ${selectedColor} 0%, #1e1b4b 160%)`
-        }}
+        className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl space-y-6 transition-all duration-300"
       >
+        {/* Ambient Glowing Highlights */}
+        <div 
+          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
+          style={{ backgroundColor: selectedColor }}
+        />
+        <div 
+          className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
+          style={{ backgroundColor: selectedColor }}
+        />
+        <div 
+          className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
+          style={{ background: `linear-gradient(90deg, transparent, ${selectedColor}, transparent)` }}
+        />
         {/* Ganadores Stepper */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex items-center justify-between gap-4">
           <div>
@@ -763,13 +773,23 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
         </div>
       </div>
 
-      {/* ─── 5. FILTROS AVANZADOS (Screenshot 4 Bottom) ────────────────────── */}
+      {/* ─── 5. FILTROS AVANZADOS (AppSorteos Luxury Dark Card) ────────────────────── */}
       <div 
-        className="rounded-3xl p-6 sm:p-10 text-white shadow-xl space-y-6 transition-all duration-300"
-        style={{
-          background: `linear-gradient(135deg, ${selectedColor} 0%, #1e1b4b 160%)`
-        }}
+        className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl space-y-6 transition-all duration-300"
       >
+        {/* Ambient Glowing Highlights */}
+        <div 
+          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
+          style={{ backgroundColor: selectedColor }}
+        />
+        <div 
+          className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
+          style={{ backgroundColor: selectedColor }}
+        />
+        <div 
+          className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
+          style={{ background: `linear-gradient(90deg, transparent, ${selectedColor}, transparent)` }}
+        />
         <div className="text-center space-y-1">
           <h3 className="text-2xl sm:text-3xl font-black font-display tracking-tight">
             Filtros avanzados
@@ -1048,7 +1068,8 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
           onClick={onExecute}
           className="w-full sm:w-auto px-10 py-5 rounded-2xl text-white font-black font-display text-lg tracking-wide transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 cursor-pointer flex items-center justify-center gap-3"
           style={{
-            background: `linear-gradient(135deg, ${selectedColor} 0%, #4338ca 100%)`
+            background: `linear-gradient(135deg, ${selectedColor} 0%, #4338ca 100%)`,
+            boxShadow: `0 10px 30px -5px ${selectedColor}60`
           }}
         >
           <Sparkles className="w-6 h-6 animate-pulse" />

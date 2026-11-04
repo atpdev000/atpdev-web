@@ -242,7 +242,7 @@ export default async function EmpleosPage({
           {filteredJobs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {filteredJobs.map((job) => (
-                <JobCard key={job.id} job={job} />
+                <JobCard key={job.id || job.slug} job={job} />
               ))}
             </div>
           ) : (

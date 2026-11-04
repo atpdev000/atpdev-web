@@ -122,7 +122,61 @@ export interface FeatureFlags {
   [flagId: string]: FeatureFlagsSnapshot;
 }
 
-// --- Repositorio genérico (en memoria o Postgres) -------------------------
+// --- Repositorio genérico (con persistencia en disco y Postgres opcional) -------------------------
+
+function getSafeNodeModules() {
+  try {
+    if (typeof process === 'undefined' || !process.versions?.node) {
+      return { fs: null, path: null };
+    }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fsMod = require('node:fs') as typeof import('node:fs');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pathMod = require('node:path') as typeof import('node:path');
+    return { fs: fsMod, path: pathMod };
+  } catch {
+    return { fs: null, path: null };
+  }
+}
+
+function getDatabaseFilePath(): string | null {
+  try {
+    const { fs: fsMod, path: pathMod } = getSafeNodeModules();
+    if (!fsMod || !pathMod) return null;
+
+    const cwd = process.cwd();
+    const possiblePaths = [
+      pathMod.resolve(cwd, 'data/sorteos-db.json'),
+      pathMod.resolve(cwd, 'apps/subdomains/web-apps/sorteos/data/sorteos-db.json'),
+      pathMod.resolve(cwd, 'packages/database/src/sorteos_data.json'),
+      pathMod.resolve(cwd, '../packages/database/src/sorteos_data.json'),
+      pathMod.resolve(cwd, '../../packages/database/src/sorteos_data.json')
+    ];
+
+    for (const p of possiblePaths) {
+      if (fsMod.existsSync(p)) return p;
+    }
+    
+    // Default to data/sorteos-db.json in current directory
+    const defaultTarget = possiblePaths[0];
+    const dir = pathMod.dirname(defaultTarget);
+    if (!fsMod.existsSync(dir)) {
+      fsMod.mkdirSync(dir, { recursive: true });
+    }
+    return defaultTarget;
+  } catch {
+    return null;
+  }
+}
+
+interface DiskSnapshot {
+  users?: UserRecord[];
+  socialAccounts?: SocialAccountRecord[];
+  giveaways?: GiveawayRecord[];
+  certificates?: CertificateRecord[];
+  cms?: CmsPost[];
+  flags?: FeatureFlags;
+}
 
 interface UserRepo {
   get(id: string): UserRecord | undefined;
@@ -244,6 +298,76 @@ function newDb(): Store {
 
   for (const [id, v] of Object.entries(seedFlags)) flags.set(id, v);
 
+  function loadFromDisk(): boolean {
+    try {
+      const { fs: fsMod } = getSafeNodeModules();
+      if (!fsMod) return false;
+      const filePath = getDatabaseFilePath();
+      if (!filePath || !fsMod.existsSync(filePath)) return false;
+
+      const raw = fsMod.readFileSync(filePath, 'utf-8');
+      const data: DiskSnapshot = JSON.parse(raw);
+
+      if (Array.isArray(data.users)) {
+        for (const u of data.users) {
+          users.set(u.id, u);
+          if (u.email) usersByEmail.set(u.email.toLowerCase(), u.id);
+        }
+      }
+
+      if (Array.isArray(data.socialAccounts)) {
+        for (const s of data.socialAccounts) socialAccounts.set(s.id, s);
+      }
+
+      if (Array.isArray(data.giveaways)) {
+        for (const g of data.giveaways) giveaways.set(g.id, g);
+      }
+
+      if (Array.isArray(data.certificates)) {
+        for (const c of data.certificates) certificates.set(c.id, c);
+      }
+
+      if (Array.isArray(data.cms)) {
+        for (const post of data.cms) cms.set(post.slug || post.id, post);
+      }
+
+      return true;
+    } catch (e) {
+      console.warn('[sorteos] Failed to load disk snapshot:', e);
+      return false;
+    }
+  }
+
+  let saveTimer: NodeJS.Timeout | null = null;
+  function persistToDisk(): void {
+    if (saveTimer) return;
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      try {
+        const { fs: fsMod, path: pathMod } = getSafeNodeModules();
+        if (!fsMod || !pathMod) return;
+        const filePath = getDatabaseFilePath();
+        if (!filePath) return;
+        const dir = pathMod.dirname(filePath);
+        if (!fsMod.existsSync(dir)) fsMod.mkdirSync(dir, { recursive: true });
+
+        const snapshot: DiskSnapshot = {
+          users: Array.from(users.values()),
+          socialAccounts: Array.from(socialAccounts.values()),
+          giveaways: Array.from(giveaways.values()),
+          certificates: Array.from(certificates.values()),
+          cms: Array.from(cms.values()),
+        };
+
+        fsMod.writeFileSync(filePath, JSON.stringify(snapshot, null, 2), 'utf-8');
+      } catch (err) {
+        console.error('[sorteos] Error persisting to disk:', err);
+      }
+    }, 200);
+  }
+
+  loadFromDisk();
+
   function seedIfEmpty(): void {
     if (cms.has('guia-sorteo-instagram-2026')) return;
     const now = new Date().toISOString();
@@ -297,11 +421,11 @@ function newDb(): Store {
     users: {
       get(id: string) { return users.get(id); },
       getByEmail(email: string) { return usersByEmail.get(email); },
-      set(rec: UserRecord) { users.set(rec.id, rec); },
+      set(rec: UserRecord) { users.set(rec.id, rec); persistToDisk(); },
       has(id: string) { return users.has(id); },
       list() { return Array.from(users.values()); },
       count() { return users.size; },
-      delete(id: string) { return users.delete(id); },
+      delete(id: string) { const res = users.delete(id); persistToDisk(); return res; },
     },
     usersByEmail: {
       get(id: string) { return usersByEmail.get(id); },
@@ -311,17 +435,17 @@ function newDb(): Store {
       count() { return usersByEmail.size; },
     },
     socialAccounts: {
-      set(rec: SocialAccountRecord) { socialAccounts.set(rec.id, rec); },
+      set(rec: SocialAccountRecord) { socialAccounts.set(rec.id, rec); persistToDisk(); },
       listByUser(userId: string) { return Array.from(socialAccounts.values()).filter((a) => a.userId === userId); },
       get(id: string) { return socialAccounts.get(id); },
       list() { return Array.from(socialAccounts.values()); },
-      delete(id: string) { return socialAccounts.delete(id); },
+      delete(id: string) { const res = socialAccounts.delete(id); persistToDisk(); return res; },
     },
     giveaways: {
       get(id: string) { return giveaways.get(id); },
       getByUser(userId: string) { return Array.from(giveaways.values()).filter((g) => g.userId === userId); },
       list() { return Array.from(giveaways.values()); },
-      set(rec: GiveawayRecord) { giveaways.set(rec.id, rec); },
+      set(rec: GiveawayRecord) { giveaways.set(rec.id, rec); persistToDisk(); },
       countByUser(userId: string) { return Array.from(giveaways.values()).filter((g) => g.userId === userId).length; },
       get size() { return giveaways.size; },
     },
@@ -337,12 +461,12 @@ function newDb(): Store {
     },
     certificates: {
       get(id: string) { return certificates.get(id); },
-      set(rec: CertificateRecord) { certificates.set(rec.id, rec); },
+      set(rec: CertificateRecord) { certificates.set(rec.id, rec); persistToDisk(); },
       listByUser(userId: string) { return Array.from(certificates.values()).filter((c) => c.userId === userId); },
     },
     cms: {
       values() { return Array.from(cms.values()); },
-      set(rec: CmsPost) { cms.set(rec.id, rec); },
+      set(rec: CmsPost) { cms.set(rec.id, rec); persistToDisk(); },
       listPublished() { return Array.from(cms.values()).filter((p) => p.status === 'published'); },
       getBySlug(slug: string, tenantId?: string) { return cms.get(slug); },
     },

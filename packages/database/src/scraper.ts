@@ -333,6 +333,8 @@ function parsePlazasFromHtml(html: string): { plazas: JobPlaza[]; globalBasesUrl
     if (headerEnd === -1) continue;
     const header = sec.substring(0, headerEnd).replace(/<[^>]+>/g, '').trim();
     if (!/CAS|PUESTO|PLAZA|276|728|N[ºo°]/i.test(header)) continue;
+    // Evitar capturar widgets de noticias o posts recomendados como si fueran plazas del puesto
+    if (/ - Convocatoria/i.test(header) || /requiere \d+ practicante/i.test(header) || /Hay plazas para:/i.test(sec)) continue;
 
     const body = sec.substring(headerEnd + 5);
     const headerParts = header.split(/(?:&#9658;|►)/);
@@ -500,10 +502,18 @@ async function refreshLiveFeedInBackground(): Promise<void> {
       }
 
       const locMatch = contentHtml.match(/Ubicaci[oó]n:[\s\S]*?<\/strong>[\s\S]*?(?:<br\s*\/?>)?\s*([^<]+)/i);
-      const region = locMatch ? locMatch[1].replace(/<[^>]+>/g, '').trim() : 'Nacional';
+      let region = locMatch ? locMatch[1].replace(/<[^>]+>/g, '').trim() : 'Nacional';
+      if (region.length > 35 || /(?:t[ií]tulo|bachiller|secundaria|t[eé]cnico|universitario|egresad|educaci[oó]n|salud|ciencias|colegiado)/i.test(region)) {
+        const depMatch = fullTitle.match(/\b(Amazonas|Áncash|Ancash|Apurímac|Arequipa|Ayacucho|Cajamarca|Callao|Cusco|Huancavelica|Huánuco|Huanuco|Ica|Junín|Junin|La Libertad|Lambayeque|Lima|Loreto|Madre de Dios|Moquegua|Pasco|Piura|Puno|San Martín|San Martin|Tacna|Tumbes|Ucayali)\b/i) ||
+                         fuente_url.match(/-(amazonas|ancash|apurimac|arequipa|ayacucho|cajamarca|callao|cusco|huancavelica|huanuco|ica|junin|la-libertad|lambayeque|lima|loreto|madre-de-dios|moquegua|pasco|piura|puno|san-martin|tacna|tumbes|ucayali)-/i);
+        region = depMatch ? depMatch[1].charAt(0).toUpperCase() + depMatch[1].slice(1).toLowerCase() : 'Lima';
+      }
 
       const salMatch = contentHtml.match(/Salario:[\s\S]*?<\/strong>[\s\S]*?(?:<br\s*\/?>)?\s*([^<]+)/i);
-      const salary_text = salMatch ? salMatch[1].replace(/<[^>]+>/g, '').trim() : 'Según plaza convocada';
+      let salary_text = salMatch ? salMatch[1].replace(/<[^>]+>/g, '').trim() : 'Según plaza convocada';
+      if (!salary_text || /compartir/i.test(salary_text) || salary_text.length > 50) {
+        salary_text = 'Según bases de la convocatoria';
+      }
 
       const pubMatch = contentHtml.match(/Fecha de Publicaci[oó]n:[\s\S]*?<\/strong>[\s\S]*?(?:<br\s*\/?>)?\s*([^<]+)/i);
       const vigMatch = contentHtml.match(/Vigente:[\s\S]*?<\/strong>[\s\S]*?Hasta el\s*([^<]+)/i);
@@ -882,9 +892,11 @@ export async function refreshConvocatoriasDeTrabajoInBackground(): Promise<JobPo
                          content.match(/icon-mapa\d?['"]><\/i>\s*<span>\s*([^<]+)<\/span>/i);
         if (pinMatch) {
           region = pinMatch[1].trim();
-        } else {
-          const depMatch = rawTitle.match(/\b(Amazonas|Áncash|Ancash|Apurímac|Arequipa|Ayacucho|Cajamarca|Callao|Cusco|Huancavelica|Huánuco|Huanuco|Ica|Junín|Junin|La Libertad|Lambayeque|Lima|Loreto|Madre de Dios|Moquegua|Pasco|Piura|Puno|San Martín|San Martin|Tacna|Tumbes|Ucayali)\b/i);
-          if (depMatch) region = depMatch[1];
+        }
+        if (region.length > 35 || /(?:t[ií]tulo|bachiller|secundaria|t[eé]cnico|universitario|egresad|educaci[oó]n|salud|ciencias|colegiado)/i.test(region)) {
+          const depMatch = rawTitle.match(/\b(Amazonas|Áncash|Ancash|Apurímac|Arequipa|Ayacucho|Cajamarca|Callao|Cusco|Huancavelica|Huánuco|Huanuco|Ica|Junín|Junin|La Libertad|Lambayeque|Lima|Loreto|Madre de Dios|Moquegua|Pasco|Piura|Puno|San Martín|San Martin|Tacna|Tumbes|Ucayali)\b/i) ||
+                           fuente_url.match(/-(amazonas|ancash|apurimac|arequipa|ayacucho|cajamarca|callao|cusco|huancavelica|huanuco|ica|junin|la-libertad|lambayeque|lima|loreto|madre-de-dios|moquegua|pasco|piura|puno|san-martin|tacna|tumbes|ucayali)-/i);
+          region = depMatch ? depMatch[1].charAt(0).toUpperCase() + depMatch[1].slice(1).toLowerCase() : 'Lima';
         }
 
         // Salario / Remuneración
@@ -894,6 +906,9 @@ export async function refreshConvocatoriasDeTrabajoInBackground(): Promise<JobPo
                           content.match(/<span>(Entre\s+S\/?\.?\s*[\d,.]+(?:\s*(?:y|a|-)\s*S\/?\.?\s*[\d,.]+)?\s*Soles?|S\/?\.?\s*[\d,.]+\s*Soles?)<\/span>/i);
         if (coinMatch) {
           salary_text = coinMatch[1].trim();
+        }
+        if (!salary_text || /compartir/i.test(salary_text) || salary_text.length > 50) {
+          salary_text = 'Según bases de la convocatoria';
         }
 
         // Total de vacantes / plazas reales de la convocatoria
@@ -964,9 +979,11 @@ export async function refreshConvocatoriasDeTrabajoInBackground(): Promise<JobPo
         const slug = makeSlugFromUrl(fuente_url, `${entity}-${rawTitle}`);
         if (!slug || jobsMap.has(slug)) continue;
 
+        const slugNum = slug.match(/(\d+)$/)?.[1];
+        const uniqueId = slugNum ? `job-cd-${slugNum}` : `job-cd-${counter}`;
         counter++;
         jobsMap.set(slug, {
-          id: `job-cd-${counter}`,
+          id: uniqueId,
           title: rawTitle,
           slug,
           entity_name: entity,

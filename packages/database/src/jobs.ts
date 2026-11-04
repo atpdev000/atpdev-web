@@ -2551,7 +2551,9 @@ export function isDeadOrBrokenUrl(url?: string): boolean {
     low.includes('gob.pe/munipueblo') ||
     low.includes('gob.pe/muniazngaro') ||
     low.includes('gob.pe/muniandrs') ||
-    low.includes('institucion/ugelpaucar/informes-publicaciones')
+    low.includes('institucion/ugelpaucar/informes-publicaciones') ||
+    low.includes('287-convocatorias-de-trabajo') ||
+    (low.includes('cunamas') && low.includes('colecciones'))
   );
 }
 
@@ -2560,6 +2562,9 @@ export function fixDeadDomainUrl(url?: string, entityName?: string, sectorType?:
   const low = url.toLowerCase().trim();
   const entUpper = (entityName || '').toUpperCase();
 
+  if (low.includes('287-convocatorias-de-trabajo') || (low.includes('cunamas') && low.includes('colecciones'))) {
+    return 'http://extranet.cunamas.gob.pe/jobs';
+  }
   if (low.includes('institucion/ugelpaucar/informes-publicaciones') || (entUpper.includes('PAUCAR') && entUpper.includes('SARA'))) {
     return 'https://www.gob.pe/institucion/ugelpaucardelsarasara/informes-publicaciones';
   }
@@ -2995,14 +3000,23 @@ export async function getJobPostings(): Promise<JobPosting[]> {
     const cleanGuia = (j.guia_postulante_url && (isCompetitorUrl(j.guia_postulante_url) || isGenericPublicationUrl(j.guia_postulante_url) || isDeadOrBrokenUrl(j.guia_postulante_url)))
       ? undefined
       : j.guia_postulante_url;
-    const cleanPlazas = j.plazas ? j.plazas.map(p => ({
-      ...p,
-      title: cleanPlazaText(p.title) || p.title,
-      education: cleanPlazaText(p.education),
-      experience: cleanPlazaText(p.experience),
-      salary: cleanPlazaSalary(p.salary),
-      bases_url: sanitizeOfficialUrl(p.bases_url, cleanBases || cleanApply, j.entity_name, j.sector_type)
-    })) : undefined;
+    const cleanPlazas = j.plazas ? j.plazas
+      .filter(p => {
+        const pTitle = (p.title || '').trim();
+        // Filtrar widgets o recomendaciones del sidebar (ej: "MINISTERIO DE CULTURA requiere...", "- Convocatoria noviembre")
+        if (/ - Convocatoria/i.test(pTitle) || /Hay plazas para:/i.test(pTitle) || /requiere \d+ practicante/i.test(pTitle)) {
+          return false;
+        }
+        return true;
+      })
+      .map(p => ({
+        ...p,
+        title: cleanPlazaText(p.title) || p.title,
+        education: cleanPlazaText(p.education),
+        experience: cleanPlazaText(p.experience),
+        salary: cleanPlazaSalary(p.salary),
+        bases_url: sanitizeOfficialUrl(p.bases_url, cleanBases || cleanApply, j.entity_name, j.sector_type)
+      })) : undefined;
 
     const today = new Date().toISOString().split('T')[0];
     let normalizedStartDate = j.start_date;
@@ -3014,8 +3028,31 @@ export async function getJobPostings(): Promise<JobPosting[]> {
       normalizedStatus = 'Finalizado';
     }
 
+    // Saneamiento de salario adulterado ("Compartir" o vacío)
+    let healedSalary = j.salary_text;
+    if (!healedSalary || /compartir/i.test(healedSalary) || healedSalary.length > 50) {
+      healedSalary = cleanPlazas?.find(p => p.salary && !/compartir/i.test(p.salary))?.salary || 'Según bases de la convocatoria';
+    }
+
+    // Saneamiento de región adulterada con perfil académico
+    let healedRegion = j.region;
+    if (!healedRegion || healedRegion.length > 35 || /(?:t[ií]tulo|bachiller|secundaria|t[eé]cnico|universitario|egresad|educaci[oó]n|salud|ciencias)/i.test(healedRegion)) {
+      const slugNorm = (j.slug || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const REGION_KEYS = ['amazonas', 'ancash', 'apurimac', 'arequipa', 'ayacucho', 'cajamarca', 'callao', 'cusco', 'huancavelica', 'huanuco', 'ica', 'junin', 'la-libertad', 'lambayeque', 'lima', 'loreto', 'madre-de-dios', 'moquegua', 'pasco', 'piura', 'puno', 'san-martin', 'tacna', 'tumbes', 'ucayali'];
+      let foundReg = 'Lima';
+      for (const rk of REGION_KEYS) {
+        if (new RegExp('[-_]' + rk + '[-_0-9]').test(slugNorm) || slugNorm.endsWith('-' + rk)) {
+          foundReg = rk.charAt(0).toUpperCase() + rk.slice(1);
+          break;
+        }
+      }
+      healedRegion = foundReg;
+    }
+
     return {
       ...j,
+      region: healedRegion,
+      salary_text: healedSalary,
       start_date: normalizedStartDate,
       end_date: normalizedEndDate,
       status: normalizedStatus,
@@ -3043,9 +3080,14 @@ export async function getJobPostings(): Promise<JobPosting[]> {
   // Garantizar unicidad absoluta de id en todo el dataset unificado
   const seenJobIds = new Set<string>();
   const uniqueResults: JobPosting[] = [];
+  let dupCount = 0;
   for (const j of results) {
     if (seenJobIds.has(j.id)) {
-      j.id = `${j.id}-${j.slug ? j.slug.slice(0, 20) : Math.random().toString(36).substring(2, 7)}`;
+      dupCount++;
+      const uniqueSuffix = (j.slug && j.slug.match(/(\d+)$/))
+        ? j.slug.match(/(\d+)$/)![1]
+        : (j.slug ? j.slug.replace(/[^a-z0-9]/gi, '').slice(-12) : String(dupCount));
+      j.id = `${j.id}-${uniqueSuffix}-${dupCount}`;
     }
     seenJobIds.add(j.id);
     uniqueResults.push(j);

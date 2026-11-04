@@ -180,6 +180,24 @@ export default function RootLayout({
             href={`https://fonts.googleapis.com/css2?${[theme.font_headline, theme.font_body, theme.font_label].filter((f): f is string => Boolean(f)).map((f: string) => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800;900`).join('&')}&display=swap`}
           />
         )}
+        {/* Google Consent Mode v2 Default Signals (AdSense & GA4 Compliance) */}
+        <script
+          id="google-consent-mode-default"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'granted',
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+
         {/* Google Analytics 4 (GA4) & Google Ads Tag */}
         {(gaId || googleAdsId) && (
           <>
