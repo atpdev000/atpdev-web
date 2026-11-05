@@ -1,5 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server';
+import { getSafeContentDisposition } from '@/lib/server/binaries';
 
 export async function POST(request: NextRequest) {
     try {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
                 responseHeaders.set('Content-Length', contentLength);
                 responseHeaders.set('X-File-Size', contentLength);
             }
-            responseHeaders.set('Content-Disposition', `attachment; filename="${filename}"`);
+            responseHeaders.set('Content-Disposition', getSafeContentDisposition(filename));
             responseHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
 
             console.log('✅ [TikTok Proxy] Transmitiendo flujo en tiempo real:', {

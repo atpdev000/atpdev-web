@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
-import { findFfmpegBinary } from '@/lib/server/binaries'
+import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
 const COMBINE_TIMEOUT = 300000 // 5 minutos para combinación
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
 
       const responseHeaders = new Headers()
       responseHeaders.set('Content-Type', contentType)
-      responseHeaders.set('Content-Disposition', `attachment; filename="${finalFilename}"`)
+      responseHeaders.set('Content-Disposition', getSafeContentDisposition(finalFilename))
       responseHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate')
       if (upstreamContentLength) {
         responseHeaders.set('Content-Length', upstreamContentLength)
@@ -461,7 +461,7 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
     // Configurar encabezados de respuesta
     const responseHeaders = new Headers();
     responseHeaders.set('Content-Type', 'video/mp4');
-    responseHeaders.set('Content-Disposition', `attachment; filename="${finalFilename}"`);
+    responseHeaders.set('Content-Disposition', getSafeContentDisposition(finalFilename));
 
     const webStream = new ReadableStream({
       start(controller) {
@@ -519,7 +519,7 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
           if (!finalFilename.endsWith('.mp4')) finalFilename += '.mp4'
           const headers = new Headers()
           headers.set('Content-Type', 'video/mp4')
-          headers.set('Content-Disposition', `attachment; filename="${finalFilename}"`)
+          headers.set('Content-Disposition', getSafeContentDisposition(finalFilename))
           headers.set('X-Combined-Status', 'video_only_with_audio_available')
           return new NextResponse(fallbackRes.body as any, { status: 200, headers })
         }
@@ -584,7 +584,7 @@ async function handleAudioWithThumbnail(audioUrl: string, thumbnailUrl: string, 
 
     const responseHeaders = new Headers();
     responseHeaders.set('Content-Type', 'audio/mp4');
-    responseHeaders.set('Content-Disposition', `attachment; filename="${finalFilename}"`);
+    responseHeaders.set('Content-Disposition', getSafeContentDisposition(finalFilename));
 
     // Stream response
     const webStream = new ReadableStream({
@@ -659,7 +659,7 @@ async function handleCombinedDownloadBase64(fileContent: string, filename: strin
       status: 200,
       headers: {
         'Content-Type': 'video/mp4',
-        'Content-Disposition': `attachment; filename="${finalFilename}"`,
+        'Content-Disposition': getSafeContentDisposition(finalFilename),
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Content-Length': fileBuffer.length.toString(),
         'X-File-Size': fileBuffer.length.toString(),

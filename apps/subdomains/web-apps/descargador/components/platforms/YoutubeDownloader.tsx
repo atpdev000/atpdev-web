@@ -311,7 +311,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
       const cd = response.headers.get('content-disposition') || ''
       let filename = `youtube_combined_${quality}_${Date.now()}.mp4`
-      const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+      const utfMatch = cd.match(/filename\*=UTF-8''([^;\r\n"']+)/i)
+      const match = utfMatch || cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
       if (match && match[1]) {
         try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
       }
@@ -494,7 +495,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
         const cd = response.headers.get('content-disposition') || ''
         let filename = defaultFilename
-        const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+        const utfMatch = cd.match(/filename\*=UTF-8''([^;\r\n"']+)/i)
+      const match = utfMatch || cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
         if (match && match[1]) {
           try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
         }
@@ -932,7 +934,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
         const cd = response.headers.get('content-disposition') || ''
         let filename = defaultFilename
-        const match = cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
+        const utfMatch = cd.match(/filename\*=UTF-8''([^;\r\n"']+)/i)
+      const match = utfMatch || cd.match(/filename\*?=['"]?(?:UTF-\d['"]*)?([^;\r\n"']*)['"]?/i)
         if (match && match[1]) {
           try { filename = decodeURIComponent(match[1]) } catch { filename = match[1] }
         }

@@ -6,7 +6,7 @@ import fs from 'fs'
 import os from 'os'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
-import { getYtDlpWithFfmpeg, findFfmpegBinary } from '@/lib/server/binaries'
+import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
 
 async function downloadStreamToDisk(
   sourceUrl: string,
@@ -508,7 +508,7 @@ export async function POST(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': isAudioOnly ? (finalExt === 'mp3' ? 'audio/mpeg' : 'audio/mp4') : 'video/mp4',
-        'Content-Disposition': `attachment; filename="${downloadFilename}"`,
+        'Content-Disposition': getSafeContentDisposition(downloadFilename),
         'Content-Length': stat.size.toString(),
         'X-File-Size': stat.size.toString(),
         'X-Combined': 'true',

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { findFfmpegBinary } from '@/lib/server/binaries';
+import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries';
 
 export async function POST(request: NextRequest) {
   try {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         headers.set('Content-Length', contentLength);
         headers.set('X-File-Size', contentLength);
       }
-      headers.set('Content-Disposition', `attachment; filename="${filename}"`);
+      headers.set('Content-Disposition', getSafeContentDisposition(filename));
       headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
       headers.set('X-Content-Type-Options', 'nosniff');
 
@@ -183,7 +183,7 @@ async function handleAudioWithExternalBackend(audioUrl: string, thumbnailUrl: st
     // Pasar headers del backend al cliente
     const responseHeaders = new Headers();
     responseHeaders.set('Content-Type', response.headers.get('Content-Type') || 'audio/mp4');
-    responseHeaders.set('Content-Disposition', response.headers.get('Content-Disposition') || `attachment; filename="${filename}"`);
+    responseHeaders.set('Content-Disposition', response.headers.get('Content-Disposition') || getSafeContentDisposition(filename));
     responseHeaders.set('Content-Length', response.headers.get('Content-Length') || '');
 
     // Stream directo sin cargar en memoria
@@ -242,7 +242,7 @@ async function handleAudioWithThumbnail(audioUrl: string, thumbnailUrl: string, 
 
     const responseHeaders = new Headers();
     responseHeaders.set('Content-Type', 'audio/mp4');
-    responseHeaders.set('Content-Disposition', `attachment; filename="${finalFilename}"`);
+    responseHeaders.set('Content-Disposition', getSafeContentDisposition(finalFilename));
 
     // Stream response
     const webStream = new ReadableStream({

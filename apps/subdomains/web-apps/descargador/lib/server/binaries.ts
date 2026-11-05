@@ -30,6 +30,22 @@ export function findFfmpegBinary(): string | null {
 
   const isWin = process.platform === 'win32'
   const binName = isWin ? 'ffmpeg.exe' : 'ffmpeg'
+  const cwd = process.cwd()
+
+  // 1.5. En Windows: SIEMPRE priorizar el binario funcional local en descargador/bin/ffmpeg.exe
+  if (isWin) {
+    const winBins = [
+      path.join(cwd, 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'ffmpeg.exe'),
+      path.join(cwd, 'bin', 'ffmpeg.exe'),
+      'D:\\PROYECTOS\\atpdev-web\\apps\\subdomains\\web-apps\\descargador\\bin\\ffmpeg.exe',
+    ]
+    for (const wb of winBins) {
+      if (fs.existsSync(wb)) {
+        cachedFfmpegPath = wb
+        return cachedFfmpegPath
+      }
+    }
+  }
 
   // 2. En Linux / Docker / Render: SIEMPRE priorizar el paquete de sistema (/usr/bin/ffmpeg)
   if (!isWin) {
@@ -82,7 +98,6 @@ export function findFfmpegBinary(): string | null {
   } catch {}
 
   // 4. Directorios conocidos del monorepo y sistema (priorizando sistema en Linux)
-  const cwd = process.cwd()
   const candidates = [
     // Rutas estándar en Linux / Docker / Render
     '/usr/bin/ffmpeg',
@@ -232,3 +247,27 @@ export function getYtDlpWithFfmpeg(): {
 
   return { ytDlp, ffmpeg, ffmpegArgs, binDir }
 }
+
+/**
+ * Genera un encabezado Content-Disposition 100% compatible con RFC 5987 / RFC 6266.
+ * Garantiza que el valor del encabezado contenga solo caracteres ASCII (ByteString)
+ * en el fallback filename="...", mientras que preserva caracteres UTF-8 (emojis, tildes,
+ * caracteres chinos, á, é, í, etc.) en filename*=UTF-8''... para navegadores modernos y móviles.
+ * Evita el error fatal: "Cannot convert argument to a ByteString because the character has a value greater than 255".
+ */
+export function getSafeContentDisposition(filename: string, dispositionType: 'attachment' | 'inline' = 'attachment'): string {
+  const cleanName = (filename || 'download.mp4').trim()
+
+  // ASCII fallback: elimina emojis y caracteres fuera del rango ASCII imprimible (0x20 a 0x7E)
+  // Reemplaza comillas dobles, barras invertidas y puntos y coma para prevenir inyección de headers
+  const asciiFallback = cleanName
+    .replace(/[^\x20-\x7E]/g, '_')
+    .replace(/["\\;]/g, '_')
+    .trim() || 'download.mp4'
+
+  // Codificación RFC 5987 UTF-8 para navegadores modernos
+  const utf8Encoded = encodeURIComponent(cleanName)
+
+  return `${dispositionType}; filename="${asciiFallback}"; filename*=UTF-8''${utf8Encoded}`
+}
+
