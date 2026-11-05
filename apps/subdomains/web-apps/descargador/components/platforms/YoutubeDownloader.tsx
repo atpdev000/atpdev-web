@@ -655,6 +655,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       setTimeout(() => URL.revokeObjectURL(url), 10000)
 
       console.log(`✅ Descarga completada: ${filename} (${formatBytes(blob.size)})`)
+      setDownloadCompletedInfo({
+        title: videoInfo?.title || filename,
+        filename,
+        filePath: 'Descargas'
+      })
+      setTimeout(() => setDownloadCompletedInfo(null), 8000)
       scheduleNotification('Descarga Completada', `${filename} se ha guardado correctamente.`)
 
       addToHistory({
@@ -1806,7 +1812,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               <span className="text-xl shrink-0">✅</span>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-white truncate">¡Descarga Completada con Éxito!</p>
-                <p className="text-[11px] text-emerald-200 truncate">Guardado en Galería: {downloadCompletedInfo.filename}</p>
+                <p className="text-[11px] text-emerald-200 truncate">{isNative ? 'Guardado en Galería/Música: ' : 'Guardado en tu carpeta de Descargas: '}{downloadCompletedInfo.filename}</p>
               </div>
             </div>
             <button

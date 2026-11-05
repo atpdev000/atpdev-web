@@ -473,7 +473,7 @@ export async function POST(request: NextRequest) {
       try {
         if (fs.existsSync(realFile)) {
           fs.unlinkSync(realFile)
-          console.log('🧹 [YouTube Engine] Archivo temporal limpiado:', realFile)
+          console.log('🧹 [YouTube Engine] Transmisión enviada con éxito al cliente. Temporal del servidor liberado:', realFile)
         }
       } catch (e) {
         console.warn('Advertencia limpiando archivo temporal:', e)
