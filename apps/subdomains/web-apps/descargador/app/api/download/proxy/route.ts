@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
+import os from 'os'
+import { spawn } from 'child_process'
 import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
@@ -388,131 +390,124 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// ✅ FUNCIÓN PARA MANEJAR COMBINACIÓN DE AUDIO Y VIDEO (IMPLEMENTACIÓN REAL CON FFMPEG)
+// ✅ FUNCIÓN PARA MANEJAR COMBINACIÓN DE AUDIO Y VIDEO CON DESCARGA A DISCO (SIN ERROR 403)
 async function handleCombinedDownload(videoUrl: string, audioUrl: string, filename: string, quality?: string) {
+  const tempDir = os.tmpdir()
+  const tempVideoFile = path.join(tempDir, `proxy_v_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
+  const tempAudioFile = path.join(tempDir, `proxy_a_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
+  const tempOutputFile = path.join(tempDir, `proxy_out_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.mp4`)
+
+  const cleanup = () => {
+    try { if (fs.existsSync(tempVideoFile)) fs.unlinkSync(tempVideoFile) } catch {}
+    try { if (fs.existsSync(tempAudioFile)) fs.unlinkSync(tempAudioFile) } catch {}
+    try { if (fs.existsSync(tempOutputFile)) fs.unlinkSync(tempOutputFile) } catch {}
+  }
+
   try {
-    console.log('🎵 [Proxy] Iniciando combinación REAL con FFmpeg...')
+    console.log('🎵 [Proxy] Iniciando descarga concurrente a disco de flujos...')
     console.log('📹 Video URL:', videoUrl.substring(0, 100) + '...')
     console.log('🎶 Audio URL:', audioUrl.substring(0, 100) + '...')
 
-    // Importaciones dinámicas para evitar problemas en build time si no se usan
-    const ffmpeg = require('fluent-ffmpeg');
-    const ffmpegPath = findFfmpegBinary();
-
-    if (ffmpegPath) {
-      console.log('✅ [Proxy] FFmpeg localizado en:', ffmpegPath);
-      ffmpeg.setFfmpegPath(ffmpegPath);
-    } else {
-      console.warn('⚠️ [Proxy] No se encontró ruta fija de FFmpeg. Intentando usar ffmpeg del PATH del sistema...');
+    const downloadStreamFile = async (url: string, destPath: string) => {
+      const headers = getPlatformHeaders(url, false, false)
+      const res = await fetch(url, { headers, redirect: 'follow', signal: AbortSignal.timeout(120000) })
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status} al descargar stream`)
+      }
+      if (!res.body) {
+        throw new Error('No se recibió cuerpo de respuesta multimedia')
+      }
+      const fileStream = fs.createWriteStream(destPath)
+      const reader = res.body.getReader()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        fileStream.write(value)
+      }
+      fileStream.end()
+      await new Promise<void>((resolve, reject) => {
+        fileStream.on('finish', resolve)
+        fileStream.on('error', reject)
+      })
     }
 
-    const { PassThrough } = require('stream');
+    // Descargar ambos flujos en paralelo a archivos temporales locales
+    await Promise.all([
+      downloadStreamFile(videoUrl, tempVideoFile),
+      downloadStreamFile(audioUrl, tempAudioFile)
+    ])
 
-    // Crear streams de salida
-    const outputStream = new PassThrough();
+    console.log('🔄 [Proxy] Flujos descargados. Combinando localmente con FFmpeg...')
+    const ffmpegPath = findFfmpegBinary() || 'ffmpeg'
 
-    // Promesa para manejar el proceso de ffmpeg
-    const ffmpegPromise = new Promise<void>((resolve, reject) => {
-      const command = ffmpeg()
-        .input(videoUrl)
-        .inputOptions([
-          '-headers', getFfmpegHeadersString(videoUrl),
-          '-reconnect', '1',
-          '-reconnect_streamed', '1',
-          '-reconnect_delay_max', '5'
-        ])
-        .input(audioUrl)
-        .inputOptions([
-          '-headers', getFfmpegHeadersString(audioUrl),
-          '-reconnect', '1',
-          '-reconnect_streamed', '1',
-          '-reconnect_delay_max', '5'
-        ])
-        .outputOptions([
-          '-c:v copy',
-          '-c:a aac',
-          '-strict experimental',
-          '-movflags frag_keyframe+empty_moov'
-        ])
-        .format('mp4')
-        .on('start', (commandLine: string) => {
-          console.log('🚀 [FFmpeg] Spawned Ffmpeg with command: ' + commandLine);
-        })
-        .on('error', (err: Error, stdout: string, stderr: string) => {
-          console.error('❌ [FFmpeg] Error:', err.message);
-          console.error('❌ [FFmpeg] Stderr:', stderr);
-          reject(err);
-        })
-        .on('end', () => {
-          console.log('✅ [FFmpeg] Processing finished!');
-          resolve();
-        });
+    await new Promise<void>((resolve, reject) => {
+      const proc = spawn(ffmpegPath, [
+        '-i', tempVideoFile,
+        '-i', tempAudioFile,
+        '-c:v', 'copy',
+        '-c:a', 'aac',
+        '-movflags', '+faststart',
+        '-y', tempOutputFile
+      ], { windowsHide: true })
 
-      // Pipe to output stream
-      command.pipe(outputStream, { end: true });
-    });
+      let stderr = ''
+      proc.stderr.on('data', (d) => { stderr += d.toString() })
+      proc.on('close', (code) => {
+        if (code === 0 && fs.existsSync(tempOutputFile)) {
+          resolve()
+        } else {
+          reject(new Error(`FFmpeg merge error (${code}): ${stderr.slice(-200)}`))
+        }
+      })
+      proc.on('error', reject)
+    })
 
-    // Crear nombre de archivo final
+    const stat = await fs.promises.stat(tempOutputFile)
+    if (stat.size === 0) {
+      throw new Error('El archivo combinado resultante tiene tamaño 0')
+    }
+
     let finalFilename = filename || `youtube_${quality || 'combined'}_${Date.now()}.mp4`
     if (!finalFilename.endsWith('.mp4')) {
       finalFilename += '.mp4'
     }
 
-    // Configurar encabezados de respuesta
-    const responseHeaders = new Headers();
-    responseHeaders.set('Content-Type', 'video/mp4');
-    responseHeaders.set('Content-Disposition', getSafeContentDisposition(finalFilename));
-
+    const nodeStream = fs.createReadStream(tempOutputFile)
     const webStream = new ReadableStream({
       start(controller) {
-        outputStream.on('data', (chunk: any) => {
-          controller.enqueue(chunk);
-        });
-        outputStream.on('end', () => {
-          controller.close();
-        });
-        outputStream.on('error', (err: any) => {
-          controller.error(err);
-        });
-      }
-    });
-
-    // Esperar primer chunk o error para evitar enviar 200 OK con flujo vacío (0 bytes)
-    await new Promise<void>((resolve, reject) => {
-      const onData = () => {
+        nodeStream.on('data', (chunk) => controller.enqueue(chunk))
+        nodeStream.on('end', () => { controller.close(); cleanup() })
+        nodeStream.on('error', (err) => { controller.error(err); cleanup() })
+      },
+      cancel() {
+        nodeStream.destroy()
         cleanup()
-        resolve()
       }
-      const onError = (err: any) => {
-        cleanup()
-        reject(err)
-      }
-      const cleanup = () => {
-        outputStream.removeListener('data', onData)
-        outputStream.removeListener('error', onError)
-      }
-      outputStream.once('data', onData)
-      outputStream.once('error', onError)
-      ffmpegPromise.catch(onError)
     })
 
-    return new NextResponse(webStream, {
+    const responseHeaders = new Headers()
+    responseHeaders.set('Content-Type', 'video/mp4')
+    responseHeaders.set('Content-Disposition', getSafeContentDisposition(finalFilename))
+    responseHeaders.set('Content-Length', stat.size.toString())
+    responseHeaders.set('X-File-Size', stat.size.toString())
+    responseHeaders.set('X-Combined', 'true')
+
+    return new NextResponse(webStream as any, {
       status: 200,
       headers: responseHeaders
-    });
+    })
 
   } catch (error: any) {
+    cleanup()
     console.error('💥 [Proxy] Error en combinación FFmpeg:', error)
 
     // Fallback de contingencia: si la combinación falló, enviar el stream de video directo con header de aviso
     if (videoUrl && isValidDownloadUrl(videoUrl)) {
       try {
-        console.log('🔄 [Proxy] Realizando fallback a streaming directo de video debido a error en FFmpeg...')
+        console.log('🔄 [Proxy] Realizando fallback a streaming directo de video...')
         const fallbackRes = await fetch(videoUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Referer': 'https://www.youtube.com/'
-          }
+          headers: getPlatformHeaders(videoUrl, false, true),
+          signal: AbortSignal.timeout(30000)
         })
         if (fallbackRes.ok && fallbackRes.body) {
           let finalFilename = filename || `youtube_${quality || 'video'}_${Date.now()}.mp4`
@@ -528,10 +523,14 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
       }
     }
 
+    let errorClean = 'Error al procesar la combinación de audio y video.'
+    if (error?.message?.includes('403') || error?.message?.includes('Forbidden')) {
+      errorClean = 'YouTube restringió temporalmente el enlace directo. Por favor reintenta en unos instantes.'
+    }
+
     return NextResponse.json({
-      error: 'Error combinando audio y video: ' + (error instanceof Error ? error.message : 'Unknown error'),
-      details: 'El servidor no pudo procesar la combinación.',
-      fallback_url: videoUrl
+      error: errorClean,
+      details: error?.message?.slice(0, 150) || 'Error en servidor de proxy'
     }, { status: 500 })
   }
 }

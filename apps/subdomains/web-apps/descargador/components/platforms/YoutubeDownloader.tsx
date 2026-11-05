@@ -70,6 +70,23 @@ const predefinedQualities: { value: string, label: string, ext?: string, isPro?:
   { value: '144p', label: '144p (MP4)', ext: 'mp4', isPro: false }
 ]
 
+function formatUserFriendlyError(rawMsg: string): string {
+  if (!rawMsg) return 'Error al procesar la descarga'
+  if (rawMsg.includes('403') || rawMsg.includes('Forbidden') || rawMsg.includes('access denied')) {
+    return 'YouTube restringió temporalmente este formato. Por favor selecciona otra calidad (como 720p o 480p) o vuelve a intentar en unos segundos.'
+  }
+  if (rawMsg.includes('Sign in to confirm') || rawMsg.includes('bot')) {
+    return 'YouTube solicitó verificación temporal. Por favor reintenta la descarga ahora.'
+  }
+  if (rawMsg.includes('ffmpeg') || rawMsg.includes('combinando')) {
+    return 'No se pudo combinar este flujo específico. Por favor prueba con otra calidad o descarga simple.'
+  }
+  if (rawMsg.length > 140) {
+    return rawMsg.substring(0, 140) + '...'
+  }
+  return rawMsg
+}
+
 export interface DownloaderProps {
   initialUrl?: string
   autoSearch?: boolean
@@ -295,10 +312,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           return
         }
 
+        const cleanMsg = formatUserFriendlyError(errorMsg)
         if (isNative) {
-          Dialog.alert({ title: 'Error en la descarga', message: errorMsg }).catch(() => {})
+          Dialog.alert({ title: 'Error en la descarga', message: cleanMsg }).catch(() => {})
         }
-        setError(errorMsg)
+        setError(cleanMsg)
         return
       }
 
@@ -324,7 +342,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
     } catch (error) {
       console.error('❌ Error en descarga combinada:', error)
-      const msg = error instanceof Error ? error.message : 'Error en la descarga combinada'
+      const rawMsg = error instanceof Error ? error.message : 'Error en la descarga combinada'
+      const msg = formatUserFriendlyError(rawMsg)
       if (isNative) {
         Dialog.alert({ title: 'Error en la descarga', message: msg }).catch(() => {})
       }
@@ -479,10 +498,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             }
           }
 
+          const cleanMsg = formatUserFriendlyError(errorMsg)
           if (isNative) {
-            Dialog.alert({ title: 'Error en la descarga', message: errorMsg }).catch(() => {})
+            Dialog.alert({ title: 'Error en la descarga', message: cleanMsg }).catch(() => {})
           }
-          setError(errorMsg)
+          setError(cleanMsg)
           return
         }
 
@@ -507,7 +527,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
       } catch (error) {
         console.error('❌ Error en descarga simple backend:', error)
-        const msg = error instanceof Error ? error.message : 'Error en descarga simple'
+        const rawMsg = error instanceof Error ? error.message : 'Error en descarga simple'
+        const msg = formatUserFriendlyError(rawMsg)
         if (isNative) {
           Dialog.alert({ title: 'Error en la descarga', message: msg }).catch(() => {})
         }
@@ -925,10 +946,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           } catch {
             errorMsg = errorText.substring(0, 100) || errorMsg
           }
+          const cleanMsg = formatUserFriendlyError(errorMsg)
           if (isNative) {
-            Dialog.alert({ title: 'Error en la descarga', message: errorMsg }).catch(() => {})
+            Dialog.alert({ title: 'Error en la descarga', message: cleanMsg }).catch(() => {})
           }
-          setError(errorMsg)
+          setError(cleanMsg)
           return
         }
         // Verificar que la respuesta sea binaria y no un error JSON
@@ -951,7 +973,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         await downloadStream(response, filename, `audio-${audioFormat.itag}`)
       } catch (error: any) {
         console.error('❌ Error en descarga de audio backend:', error)
-        const msg = error.message || 'Error en descarga de audio'
+        const rawMsg = error.message || 'Error en descarga de audio'
+        const msg = formatUserFriendlyError(rawMsg)
         if (isNative) {
           Dialog.alert({ title: 'Error en la descarga', message: msg }).catch(() => {})
         }

@@ -177,13 +177,14 @@ async function extractWithInvidious(url: string): Promise<any> {
   return null
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,ios,android,web'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,ios'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
   return new Promise((resolve, reject) => {
     const args = [
       '--force-ipv4',
+      '--socket-timeout', '10',
       '--dump-json',
       '--js-runtimes', `node:${nodeBin}`,
       '--no-warnings',
@@ -199,6 +200,15 @@ async function extractMetadata(url: string, binPath: string, playerClient = 'vis
 
     let stdout = ''
     let stderr = ''
+    let isDone = false
+
+    const timer = setTimeout(() => {
+      if (!isDone) {
+        isDone = true
+        try { ytProcess.kill('SIGKILL') } catch {}
+        reject(new Error(`Timeout de 14s extrayendo con ${playerClient}`))
+      }
+    }, 14000)
 
     ytProcess.stdout.on('data', (chunk) => {
       stdout += chunk.toString()
@@ -209,10 +219,16 @@ async function extractMetadata(url: string, binPath: string, playerClient = 'vis
     })
 
     ytProcess.on('error', (err) => {
+      if (isDone) return
+      isDone = true
+      clearTimeout(timer)
       reject(new Error(`No se pudo ejecutar el extractor (${err.message})`))
     })
 
     ytProcess.on('close', (code) => {
+      if (isDone) return
+      isDone = true
+      clearTimeout(timer)
       if (code === 0 && stdout) {
         try {
           const parsed = JSON.parse(stdout)
@@ -259,17 +275,11 @@ export async function POST(request: NextRequest) {
       } catch (err: any) {
         console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
         try {
-          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (visionos)...')
-          rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos')
+          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (ios,mweb)...')
+          rawInfo = await extractMetadata(cleanedUrl, bin, 'ios,mweb')
         } catch (retryErr: any) {
-          console.error('❌ [YouTube Serverless] Reintento visionos falló:', retryErr.message)
-          try {
-            console.log('🔄 [YouTube Serverless] Reintentando con cliente ios,mweb...')
-            rawInfo = await extractMetadata(cleanedUrl, bin, 'ios,mweb')
-          } catch (retry2Err: any) {
-            console.error('❌ [YouTube Serverless] Reintento ios,mweb falló:', retry2Err.message)
-            extractionError = retry2Err
-          }
+          console.error('❌ [YouTube Serverless] Reintento ios,mweb falló:', retryErr.message)
+          extractionError = retryErr
         }
       }
     }

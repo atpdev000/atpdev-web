@@ -16,12 +16,10 @@ async function downloadStreamToDisk(
   const headers: Record<string, string> = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept': '*/*',
-    'Referer': 'https://www.youtube.com/',
-    'Origin': 'https://www.youtube.com',
     'Range': 'bytes=0-'
   }
 
-  const res = await fetch(sourceUrl, { headers, redirect: 'follow' })
+  const res = await fetch(sourceUrl, { headers, redirect: 'follow', signal: AbortSignal.timeout(60000) })
   if (!res.ok) {
     throw new Error(`Error ${res.status} al descargar stream (${sourceUrl.slice(0, 60)}...)`)
   }
@@ -334,11 +332,11 @@ export async function POST(request: NextRequest) {
           formatArg = 'bestaudio[ext=m4a]/bestaudio/best'
         }
       } else if (video_itag && audio_itag) {
-        formatArg = `${video_itag}+${audio_itag}/${video_itag}+bestaudio/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+        formatArg = `${video_itag}+${audio_itag}/${video_itag}+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best`
       } else if (video_itag && !audio_itag) {
-        formatArg = `${video_itag}/bestvideo[height<=${targetHeight}]/best`
+        formatArg = `${video_itag}/bestvideo[height<=${targetHeight}][ext=mp4]/bestvideo[height<=${targetHeight}]/best`
       } else {
-        formatArg = `bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best[height<=${targetHeight}]/best`
+        formatArg = `bestvideo[height<=${targetHeight}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio[ext=m4a]/bestvideo[height<=${targetHeight}]+bestaudio/best`
       }
 
       const tempOutputPattern = `${tempFileBase}.%(ext)s`
@@ -347,6 +345,7 @@ export async function POST(request: NextRequest) {
       const ytArgs: string[] = [
         ...ffmpegArgs,
         '--force-ipv4',
+        '--socket-timeout', '15',
         '--js-runtimes', `node:${nodeBin}`,
         '--newline',
         '--no-playlist',
@@ -354,7 +353,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=visionos,ios,android,web',
+        '--extractor-args', 'youtube:player_client=ios,mweb,visionos',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,
@@ -364,6 +363,7 @@ export async function POST(request: NextRequest) {
         ytArgs.push('-x', '--audio-format', finalExt)
       } else {
         ytArgs.push('--merge-output-format', 'mp4')
+        ytArgs.push('--postprocessor-args', 'ffmpeg:-c:a aac -b:a 192k')
       }
 
       ytArgs.push(cleanedUrl)
