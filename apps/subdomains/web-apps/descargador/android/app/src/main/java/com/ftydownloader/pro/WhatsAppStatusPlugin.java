@@ -435,10 +435,6 @@ public class WhatsAppStatusPlugin extends Plugin {
             call.reject("Error al compartir archivo: " + e.getMessage());
         }
     }
-        } catch (Exception e) {
-            call.reject("Error al compartir archivo: " + e.getMessage());
-        }
-    }
 
     @PluginMethod
     public void getClipboard(PluginCall call) {
