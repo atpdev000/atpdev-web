@@ -8,15 +8,17 @@ import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 import { getYtDlpWithFfmpeg, findFfmpegBinary } from '@/lib/server/binaries'
 
-async function downloadStreamToDisk(sourceUrl: string, destPath: string): Promise<void> {
+async function downloadStreamToDisk(
+  sourceUrl: string,
+  destPath: string,
+  onProgress?: (loaded: number, total: number) => void
+): Promise<void> {
   const headers: Record<string, string> = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': '*/*'
-  }
-  if (sourceUrl.includes('googlevideo.com') || sourceUrl.includes('youtube.com')) {
-    headers['Referer'] = 'https://www.youtube.com/'
-    headers['Origin'] = 'https://www.youtube.com'
-    headers['Range'] = 'bytes=0-'
+    'Accept': '*/*',
+    'Referer': 'https://www.youtube.com/',
+    'Origin': 'https://www.youtube.com',
+    'Range': 'bytes=0-'
   }
 
   const res = await fetch(sourceUrl, { headers, redirect: 'follow' })
@@ -26,8 +28,27 @@ async function downloadStreamToDisk(sourceUrl: string, destPath: string): Promis
   if (!res.body) {
     throw new Error('No se recibió cuerpo de respuesta multimedia desde YouTube')
   }
+
+  const total = parseInt(res.headers.get('content-length') || '0', 10)
+  let loaded = 0
   const fileStream = fs.createWriteStream(destPath)
-  await finished(Readable.fromWeb(res.body as any).pipe(fileStream))
+  const reader = res.body.getReader()
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    fileStream.write(value)
+    loaded += value.length
+    if (onProgress) {
+      onProgress(loaded, total)
+    }
+  }
+
+  fileStream.end()
+  await new Promise<void>((resolve, reject) => {
+    fileStream.on('finish', resolve)
+    fileStream.on('error', reject)
+  })
 }
 
 export const maxDuration = 300 // 5 minutos máximo para descargas grandes
@@ -206,18 +227,32 @@ export async function POST(request: NextRequest) {
           }
         } else if (video_url && audio_url) {
           // Descargar video y audio en paralelo directamente con fetch nativo
-          if (downloadId && globalThis.__downloadProgressMap) {
-            globalThis.__downloadProgressMap.set(downloadId, {
-              percent: 30,
-              status: 'downloading',
-              speed: 'Descargando video + audio...',
-              updatedAt: Date.now()
-            })
+          let vLoaded = 0, vTotal = 0
+          let aLoaded = 0, aTotal = 0
+
+          const updateDualProgress = () => {
+            if (downloadId && globalThis.__downloadProgressMap) {
+              const totalBytes = vTotal + aTotal
+              const loadedBytes = vLoaded + aLoaded
+              const pct = totalBytes > 0
+                ? Math.min(30 + Math.round((loadedBytes / totalBytes) * 50), 80)
+                : 35
+              globalThis.__downloadProgressMap.set(downloadId, {
+                percent: pct,
+                status: 'downloading',
+                speed: `Descargando: ${(loadedBytes / (1024 * 1024)).toFixed(1)} MB`,
+                updatedAt: Date.now()
+              })
+            }
           }
 
           await Promise.all([
-            downloadStreamToDisk(video_url, tempVideoFile),
-            downloadStreamToDisk(audio_url, tempAudioFile)
+            downloadStreamToDisk(video_url, tempVideoFile, (l, t) => {
+              vLoaded = l; vTotal = t; updateDualProgress()
+            }),
+            downloadStreamToDisk(audio_url, tempAudioFile, (l, t) => {
+              aLoaded = l; aTotal = t; updateDualProgress()
+            })
           ])
 
           if (downloadId && globalThis.__downloadProgressMap) {

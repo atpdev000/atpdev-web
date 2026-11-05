@@ -110,9 +110,9 @@ async function extractWithInvidious(url: string): Promise<any> {
 
   const invidiousHosts = [
     'https://yt.chocolatemoo53.com',
+    'https://invidious.projectsegfau.lt',
     'https://inv.nadeko.net',
-    'https://invidious.nerdvpn.de',
-    'https://invidious.tiekoetter.com'
+    'https://invidious.nerdvpn.de'
   ]
 
   for (const host of invidiousHosts) {
@@ -141,7 +141,7 @@ async function extractWithInvidious(url: string): Promise<any> {
         const height = f.resolution ? parseInt(f.resolution.replace('p', '')) : (f.qualityLabel ? parseInt(f.qualityLabel) : null)
 
         // Usar stream proxy de Invidious para eludir 403 Forbidden por bloqueo de IP
-        const streamUrl = f.itag ? `${host}/latest_version?id=${videoId}&itag=${f.itag}` : f.url
+        const streamUrl = f.url || (f.itag ? `${host}/latest_version?id=${videoId}&itag=${f.itag}` : '')
 
         return {
           format_id: String(f.itag || ''),
