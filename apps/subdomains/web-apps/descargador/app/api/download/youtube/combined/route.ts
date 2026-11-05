@@ -13,11 +13,13 @@ async function downloadStreamToDisk(sourceUrl: string, destPath: string): Promis
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept': '*/*'
   }
-  if (!sourceUrl.includes('latest_version') && !sourceUrl.includes('googlevideo.com')) {
+  if (sourceUrl.includes('googlevideo.com') || sourceUrl.includes('youtube.com')) {
     headers['Referer'] = 'https://www.youtube.com/'
+    headers['Origin'] = 'https://www.youtube.com'
+    headers['Range'] = 'bytes=0-'
   }
 
-  const res = await fetch(sourceUrl, { headers })
+  const res = await fetch(sourceUrl, { headers, redirect: 'follow' })
   if (!res.ok) {
     throw new Error(`Error ${res.status} al descargar stream (${sourceUrl.slice(0, 60)}...)`)
   }

@@ -24,11 +24,9 @@ export function useAdMobRewarded() {
             setIsLoading(true);
             const options: RewardAdOptions = {
                 adId: REWARDED_AD_UNIT_ID,
-                // isTesting: true // Descomentar para pruebas si es necesario (generalmente usa IDs de prueba)
             };
 
             await AdMob.prepareRewardVideoAd(options);
-            // El evento onRewardedVideoAdLoaded manejará el estado isLoaded
         } catch (error) {
             console.error('Error cargando Rewarded Ad:', error);
             setIsLoading(false);
@@ -54,8 +52,6 @@ export function useAdMobRewarded() {
         const dismissedListener = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
             console.log('💰 Rewarded Ad Dismissed');
             setIsLoaded(false);
-            // Opcional: Recargar automáticamente
-            // loadRewarded(); 
         });
 
         // Cargar inicial
@@ -68,7 +64,7 @@ export function useAdMobRewarded() {
         };
     }, [isNative, loadRewarded]);
 
-    // Mostrar anuncio y ejecutar callback si el usuario recibe la recompensa
+    // Mostrar anuncio y ejecutar callback cuando el anuncio se complete y cierre
     const showRewarded = async (onReward: () => void) => {
         if (!isNative) {
             onReward(); // En web ejecuta directo
@@ -76,24 +72,55 @@ export function useAdMobRewarded() {
         }
 
         if (isLoaded) {
-            // Listener temporal para la recompensa específica de esta llamada
-            const rewardListenerPromise = AdMob.addListener(RewardAdPluginEvents.Rewarded, (rewardItem) => {
-                console.log('🎁 Usuario recompensado:', rewardItem);
-                onReward();
-                rewardListenerPromise.then(h => h.remove());
+            let executed = false;
+            let safetyTimeout: any = null;
+
+            const executeOnce = () => {
+                if (!executed) {
+                    executed = true;
+                    if (safetyTimeout) clearTimeout(safetyTimeout);
+                    onReward();
+                }
+            };
+
+            // Escuchar cuando el anuncio es cerrado por el usuario (Dismissed)
+            // Esto garantiza que el WebView de la app esté 100% activo en PRIMER PLANO
+            // evitando que Android congele las descargas pesadas o interrumpa sockets TCP.
+            const dismissedListener = AdMob.addListener(RewardAdPluginEvents.Dismissed, () => {
+                console.log('💰 Rewarded Ad Dismissed -> Iniciando acción en primer plano');
+                setIsLoaded(false);
+                executeOnce();
+                dismissedListener.then(h => h.remove());
+                // Pre-cargar el siguiente anuncio para la próxima descarga
+                setTimeout(() => loadRewarded(), 1000);
             });
+
+            // Si el evento Rewarded se dispara antes
+            const rewardedListener = AdMob.addListener(RewardAdPluginEvents.Rewarded, (rewardItem) => {
+                console.log('🎁 Usuario recompensado:', rewardItem);
+                rewardedListener.then(h => h.remove());
+            });
+
+            const failedListener = AdMob.addListener(RewardAdPluginEvents.FailedToLoad, (error: AdMobError) => {
+                console.warn('💰 Error mostrando Rewarded:', error);
+                executeOnce();
+                failedListener.then(h => h.remove());
+            });
+
+            // Timeout de seguridad por si AdMob no emite Dismissed (45s)
+            safetyTimeout = setTimeout(() => {
+                console.log('⏱️ Timeout de seguridad de Rewarded -> liberando acción');
+                executeOnce();
+            }, 45000);
 
             try {
                 await AdMob.showRewardVideoAd();
             } catch (e) {
                 console.error('Error mostrando Rewarded:', e);
-                // Si falla al mostrar, podemos decidir si dejarlo pasar o no. 
-                // Generalmente mejor no bloquear al usuario si falla el anuncio.
-                rewardListenerPromise.then(h => h.remove());
-                onReward();
+                executeOnce();
             }
         } else {
-            console.log('⚠️ Rewarded no listo, intentando cargar para la próxima...');
+            console.log('⚠️ Rewarded no listo previamente, ejecutando acción directa...');
             loadRewarded();
             onReward(); // Si no está listo, dejamos pasar al usuario (mejor UX)
         }

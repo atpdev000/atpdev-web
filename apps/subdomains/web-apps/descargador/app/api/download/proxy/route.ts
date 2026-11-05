@@ -11,43 +11,21 @@ const CONNECT_TIMEOUT = 60000   // 60 segundos para conexión inicial
 
 // ✅ FUNCIÓN PARA VALIDAR URLs DE DESCARGA
 function isValidDownloadUrl(url: string): boolean {
-  if (!url || !url.startsWith('http')) return false
+  if (!url || typeof url !== 'string' || !url.startsWith('http')) return false
 
-  // Evitar páginas HTML de visualización (no son archivos de medios)
+  // Evitar páginas HTML de visualización (no son streams directos)
   const isWebPage = 
-    url.includes('youtube.com/watch') || 
-    url.includes('youtu.be/') ||
-    url.includes('youtube.com/shorts') ||
-    url.includes('facebook.com/watch') ||
-    url.includes('fb.watch/') ||
-    (url.includes('tiktok.com/@') && !url.includes('tiktokcdn.com'))
+    (url.includes('youtube.com/watch') && !url.includes('videoplayback')) || 
+    (url.includes('youtu.be/') && !url.includes('latest_version') && !url.includes('videoplayback')) ||
+    (url.includes('youtube.com/shorts') && !url.includes('videoplayback')) ||
+    (url.includes('facebook.com/watch') && !url.includes('fbcdn.net')) ||
+    (url.includes('fb.watch/') && !url.includes('fbcdn.net')) ||
+    (url.includes('tiktok.com/@') && !url.includes('tiktokcdn.com') && !url.includes('tikwm.com'))
 
   if (isWebPage) return false
 
-  // Permitir cualquier CDN o URL directa de medios
-  const validDomains = [
-    'googlevideo.com',
-    'videoplayback',
-    'rr',
-    'fbcdn.net',
-    'facebook.com',
-    'fbsbx.com',
-    'tiktokcdn.com',
-    'tikwm.com',
-    'tiktok.com',
-    'cdninstagram.com',
-    'instagram.com',
-    'threads.net',
-    'threads.com',
-    'twimg.com',
-    'twitter.com',
-    'x.com',
-    'snapcdn.app',
-    'fxtwitter.com',
-    'vxtwitter.com'
-  ]
-
-  return validDomains.some(domain => url.includes(domain)) || url.includes('.mp4') || url.includes('.m4a') || url.includes('.mp3') || url.includes('.webm')
+  // Cualquier URL http/https directa o con parámetros de stream (CDN, Invidious, proxy) es válida
+  return true
 }
 
 // ✅ ENCABEZADOS ADAPTATIVOS SEGÚN PLATAFORMA (Evita bloqueos 403 Forbidden por Hotlinking/Cross-Origin)

@@ -212,16 +212,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     const defaultFilename = `${cleanTitle}_${quality}.mp4`
     const audioCandidate = format.recommended_audio?.url ? format.recommended_audio : findBestAudioFormat()
 
-    // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
-    if (isNative) {
-      Toast.show({ text: `⬇️ Descargando ${quality} en segundo plano...`, duration: 'short' }).catch(() => {})
-      showRewarded(() => {}).catch(() => {})
-    }
-
-    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-    setDownloading(`combined-${quality}`)
-    setDownloadProgress(1)
-    setDownloadDetails('Iniciando descarga en el servidor...')
+    const startDownload = async () => {
+      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+      setDownloading(`combined-${quality}`)
+      setDownloadProgress(1)
+      setDownloadDetails('Iniciando descarga en el servidor...')
 
       let pollActive = true
       const pollProgress = async () => {
@@ -343,6 +338,16 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     }
   }
 
+  if (isNative && !isPro) {
+    Toast.show({ text: `Preparando descarga de ${quality}...`, duration: 'short' }).catch(() => {})
+    showRewarded(startDownload).catch(() => {
+      startDownload()
+    })
+  } else {
+    startDownload()
+  }
+}
+
   // ✅ FUNCIÓN PARA COMBINACIÓN CON PROXY (FALLBACK)
   const downloadCombinedWithProxy = async (videoUrl: string, audioUrl: string, filename: string, quality: string) => {
     try {
@@ -396,16 +401,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     const cleanTitle = (videoInfo?.title || 'video').replace(/[/\\?%*:|"<>]/g, '_').trim()
     const defaultFilename = `${cleanTitle}_${quality}.${fileExt}`
 
-    // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
-    if (isNative) {
-      Toast.show({ text: `⬇️ Descargando ${quality} (${fileExt}) en segundo plano...`, duration: 'short' }).catch(() => {})
-      showRewarded(() => {}).catch(() => {})
-    }
-
-    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-    setDownloadProgress(1)
-    setDownloading(`simple-${quality}`)
-    setDownloadDetails('Iniciando descarga en el servidor...')
+    const startSimpleDownload = async () => {
+      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+      setDownloadProgress(1)
+      setDownloading(`simple-${quality}`)
+      setDownloadDetails('Iniciando descarga en el servidor...')
 
       let pollActive = true
       const pollProgress = async () => {
@@ -519,6 +519,16 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         }, 1500)
       }
     }
+
+    if (isNative && !isPro) {
+      Toast.show({ text: `Preparando descarga de ${quality}...`, duration: 'short' }).catch(() => {})
+      showRewarded(startSimpleDownload).catch(() => {
+        startSimpleDownload()
+      })
+    } else {
+      startSimpleDownload()
+    }
+  }
 
 
   // ✅ LECTOR DE STREAM PARA PROGRESO EN TIEMPO REAL
@@ -848,16 +858,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     const ext = audioFormat.format.toLowerCase().includes('mp3') ? 'mp3' : 'm4a'
     const defaultFilename = `${cleanTitle}.${ext}`
 
-    // 🎬 Mostrar anuncio en paralelo mientras la descarga comienza inmediatamente en segundo plano
-    if (isNative) {
-      Toast.show({ text: '🎵 Descargando audio en segundo plano...', duration: 'short' }).catch(() => {})
-      showRewarded(() => {}).catch(() => {})
-    }
-
-    const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
-    setDownloading(`audio-${audioFormat.itag}`)
-    setDownloadProgress(1)
-    setDownloadDetails('Extrayendo audio en el servidor...')
+    const startAudioDownload = async () => {
+      const downloadId = 'dl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)
+      setDownloading(`audio-${audioFormat.itag}`)
+      setDownloadProgress(1)
+      setDownloadDetails('Extrayendo audio en el servidor...')
 
       let pollActive = true
       const pollProgress = async () => {
@@ -951,6 +956,16 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         }, 1500)
       }
     }
+
+    if (isNative && !isPro) {
+      Toast.show({ text: 'Preparando descarga de audio...', duration: 'short' }).catch(() => {})
+      showRewarded(startAudioDownload).catch(() => {
+        startAudioDownload()
+      })
+    } else {
+      startAudioDownload()
+    }
+  }
 
   // ✅ FUNCIONES AUXILIARES
   const findBestFormatForQuality = (qualityLabel: string, preferVideoOnly: boolean = false): {
