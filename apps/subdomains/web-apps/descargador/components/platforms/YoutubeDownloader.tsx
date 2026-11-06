@@ -225,6 +225,13 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
+    // 💡 SI EL FORMATO YA CONTIENE AUDIO (por ejemplo 360p itag 18 o progresivo),
+    // descargar directamente sin gastar recursos en combinarlo
+    if (format.hasAudio) {
+      console.log(`⚡ Formato ${quality} ya contiene audio integrado (itag: ${format.itag}). Descargando directo...`)
+      return handleSimpleDownload(quality)
+    }
+
     const cleanTitle = (videoInfo?.title || 'video').replace(/[/\\?%*:|"<>]/g, '_').trim()
     const defaultFilename = `${cleanTitle}_${quality}.mp4`
     const audioCandidate = format.recommended_audio?.url ? format.recommended_audio : findBestAudioFormat()

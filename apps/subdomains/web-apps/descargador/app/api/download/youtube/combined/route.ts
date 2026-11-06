@@ -16,10 +16,16 @@ async function downloadStreamToDisk(
   const headers: Record<string, string> = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept': '*/*',
-    'Range': 'bytes=0-'
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'identity',
+    'Range': 'bytes=0-',
+    'Referer': 'https://www.youtube.com/',
+    'Origin': 'https://www.youtube.com',
+    'Sec-Fetch-Dest': 'video',
+    'Sec-Fetch-Mode': 'cors'
   }
 
-  const res = await fetch(sourceUrl, { headers, redirect: 'follow', signal: AbortSignal.timeout(60000) })
+  const res = await fetch(sourceUrl, { headers, redirect: 'follow', signal: AbortSignal.timeout(120000) })
   if (!res.ok) {
     throw new Error(`Error ${res.status} al descargar stream (${sourceUrl.slice(0, 60)}...)`)
   }
@@ -46,6 +52,72 @@ async function downloadStreamToDisk(
   await new Promise<void>((resolve, reject) => {
     fileStream.on('finish', resolve)
     fileStream.on('error', reject)
+  })
+}
+
+async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,ios'): Promise<any> {
+  const nodeBin = process.execPath || 'node'
+  const cookieArgs = getCookiesArg()
+
+  return new Promise((resolve, reject) => {
+    const args = [
+      '--force-ipv4',
+      '--socket-timeout', '10',
+      '--dump-json',
+      '--js-runtimes', `node:${nodeBin}`,
+      '--no-warnings',
+      '--no-check-certificates',
+      '--geo-bypass',
+      '--extractor-args', `youtube:player_client=${playerClient}`,
+      ...cookieArgs,
+      url
+    ]
+
+    console.log(`🚀 [YouTube Serverless] Extrayendo metadatos: ${binPath} con ${url} (player_client=${playerClient})`)
+    const ytProcess = spawn(binPath, args)
+
+    let stdout = ''
+    let stderr = ''
+    let isDone = false
+
+    const timer = setTimeout(() => {
+      if (!isDone) {
+        isDone = true
+        try { ytProcess.kill('SIGKILL') } catch {}
+        reject(new Error(`Timeout de 14s extrayendo con ${playerClient}`))
+      }
+    }, 14000)
+
+    ytProcess.stdout.on('data', (chunk) => {
+      stdout += chunk.toString()
+    })
+
+    ytProcess.stderr.on('data', (chunk) => {
+      stderr += chunk.toString()
+    })
+
+    ytProcess.on('error', (err) => {
+      if (isDone) return
+      isDone = true
+      clearTimeout(timer)
+      reject(new Error(`No se pudo ejecutar el extractor (${err.message})`))
+    })
+
+    ytProcess.on('close', (code) => {
+      if (isDone) return
+      isDone = true
+      clearTimeout(timer)
+      if (code === 0 && stdout) {
+        try {
+          const parsed = JSON.parse(stdout)
+          resolve(parsed)
+        } catch (e: any) {
+          reject(new Error(`JSON de respuesta inválido: ${e.message}`))
+        }
+      } else {
+        reject(new Error(stderr || `Extractor terminó con código ${code}`))
+      }
+    })
   })
 }
 
@@ -142,7 +214,7 @@ export async function POST(request: NextRequest) {
 
     const cleanedUrl = url ? cleanUrl(url) : (video_url || '')
     const { ytDlp, ffmpeg, ffmpegArgs, binDir } = getYtDlpWithFfmpeg()
-    const ffmpegBin = ffmpeg || 'ffmpeg'
+    const ffmpegBin = findFfmpegBinary() || ffmpeg || 'ffmpeg'
 
     console.log('🎬 [YouTube Combined Engine] Iniciando descarga real...', {
       url: cleanedUrl,
@@ -321,9 +393,146 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!method1Done && cleanedUrl && cleanedUrl.startsWith('http')) {
+      // 🚀 MÉTODO 2: Extracción fresca con cliente anti-bloqueo iOS/visionOS + descarga directa a disco y merge FFmpeg
+      console.log('🚀 [YouTube Engine] Método 2: Extrayendo streams frescos con cliente anti-bloqueo (visionos,ios)...')
+      const tempVideoFile = path.join(tempDir, `v_m2_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
+      const tempAudioFile = path.join(tempDir, `a_m2_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.tmp`)
+
+      try {
+        if (downloadId && globalThis.__downloadProgressMap) {
+          globalThis.__downloadProgressMap.set(downloadId, {
+            percent: 15,
+            status: 'downloading',
+            speed: 'Conectando con YouTube...',
+            updatedAt: Date.now()
+          })
+        }
+
+        const metadata = await extractMetadata(cleanedUrl, ytDlp, 'visionos,ios')
+        const formats: any[] = metadata.formats || []
+
+        if (isAudioOnly) {
+          const aFormat = formats.find((f: any) =>
+            (audio_itag ? String(f.format_id) === String(audio_itag) : false) ||
+            (f.acodec !== 'none' && f.vcodec === 'none' && String(f.format_id) === '140')
+          ) || formats.find((f: any) => f.acodec !== 'none' && f.vcodec === 'none')
+
+          if (aFormat?.url) {
+            await downloadStreamToDisk(aFormat.url, tempAudioFile)
+            if (finalExt === 'mp3') {
+              await new Promise<void>((resolve, reject) => {
+                const proc = spawn(ffmpegBin, ['-i', tempAudioFile, '-c:a', 'libmp3lame', '-b:a', '192k', '-y', realFile], { windowsHide: true })
+                let stderr = ''
+                proc.stderr.on('data', (d) => { stderr += d.toString() })
+                proc.on('close', (code) => {
+                  if (code === 0 && fs.existsSync(realFile)) resolve()
+                  else reject(new Error(`FFmpeg MP3 error (${code}): ${stderr.slice(-200)}`))
+                })
+                proc.on('error', reject)
+              })
+            } else {
+              await fs.promises.copyFile(tempAudioFile, realFile)
+            }
+            if (fs.existsSync(realFile) && fs.statSync(realFile).size > 0) {
+              method1Done = true
+            }
+          }
+        } else {
+          // Seleccionar formato de video según resolución solicitada
+          const vFormat = formats.find((f: any) =>
+            (video_itag ? String(f.format_id) === String(video_itag) : false) ||
+            (f.vcodec !== 'none' && f.height === targetHeight)
+          ) || formats.find((f: any) => f.vcodec !== 'none' && f.height && f.height <= targetHeight) || formats.find((f: any) => f.vcodec !== 'none')
+
+          // Seleccionar mejor formato de audio
+          const aFormat = formats.find((f: any) =>
+            (audio_itag ? String(f.format_id) === String(audio_itag) : false) ||
+            (f.acodec !== 'none' && f.vcodec === 'none' && String(f.format_id) === '140')
+          ) || formats.find((f: any) => f.acodec !== 'none' && f.vcodec === 'none')
+
+          if (vFormat?.url && aFormat?.url) {
+            console.log(`⚡ [YouTube Engine M2] Streams encontrados (Video: ${vFormat.format_id} ${vFormat.height}p, Audio: ${aFormat.format_id}). Descargando...`)
+            let vLoaded = 0, vTotal = 0
+            let aLoaded = 0, aTotal = 0
+
+            const updateDualProgress = () => {
+              if (downloadId && globalThis.__downloadProgressMap) {
+                const totalBytes = vTotal + aTotal
+                const loadedBytes = vLoaded + aLoaded
+                const pct = totalBytes > 0
+                  ? Math.min(25 + Math.round((loadedBytes / totalBytes) * 55), 80)
+                  : 35
+                globalThis.__downloadProgressMap.set(downloadId, {
+                  percent: pct,
+                  status: 'downloading',
+                  speed: `Descargando: ${(loadedBytes / (1024 * 1024)).toFixed(1)} MB`,
+                  updatedAt: Date.now()
+                })
+              }
+            }
+
+            await Promise.all([
+              downloadStreamToDisk(vFormat.url, tempVideoFile, (l, t) => {
+                vLoaded = l; vTotal = t; updateDualProgress()
+              }),
+              downloadStreamToDisk(aFormat.url, tempAudioFile, (l, t) => {
+                aLoaded = l; aTotal = t; updateDualProgress()
+              })
+            ])
+
+            if (downloadId && globalThis.__downloadProgressMap) {
+              globalThis.__downloadProgressMap.set(downloadId, {
+                percent: 85,
+                status: 'merging',
+                speed: 'Combinando audio y video con FFmpeg...',
+                updatedAt: Date.now()
+              })
+            }
+
+            const mergeArgs = [
+              '-i', tempVideoFile,
+              '-i', tempAudioFile,
+              '-c:v', 'copy',
+              '-c:a', 'aac',
+              '-movflags', '+faststart',
+              '-y', realFile
+            ]
+
+            await new Promise<void>((resolve, reject) => {
+              const proc = spawn(ffmpegBin, mergeArgs, { windowsHide: true })
+              let stderr = ''
+              proc.stderr.on('data', (d) => { stderr += d.toString() })
+              proc.on('close', (code) => {
+                if (code === 0 && fs.existsSync(realFile)) resolve()
+                else reject(new Error(`FFmpeg merge error (${code}): ${stderr.slice(-200)}`))
+              })
+              proc.on('error', reject)
+            })
+
+            if (fs.existsSync(realFile) && fs.statSync(realFile).size > 0) {
+              method1Done = true
+              if (downloadId && globalThis.__downloadProgressMap) {
+                globalThis.__downloadProgressMap.set(downloadId, {
+                  percent: 100,
+                  status: 'completed',
+                  updatedAt: Date.now()
+                })
+              }
+            }
+          }
+        }
+      } catch (err: any) {
+        console.warn('⚠️ [YouTube Engine] Método 2 falló (' + err.message + '), pasando a yt-dlp directo...')
+      } finally {
+        try { if (fs.existsSync(tempVideoFile)) fs.unlinkSync(tempVideoFile) } catch {}
+        try { if (fs.existsSync(tempAudioFile)) fs.unlinkSync(tempAudioFile) } catch {}
+      }
+    }
+
     if (!method1Done) {
-      // 🛠️ MÉTODO 2: Descarga completa mediante yt-dlp usando clientes anti-bot y forzando IPv4
-      console.log('🚀 [YouTube Engine] Ejecutando motor de descarga robusta yt-dlp...')
+      // 🛠️ MÉTODO 3: Fallback de descarga completa mediante yt-dlp usando cliente visionos,ios
+      console.log('🚀 [YouTube Engine] Ejecutando motor de descarga robusta yt-dlp (Método 3)...')
       let formatArg = ''
       if (isAudioOnly) {
         if (audio_itag) {
@@ -353,7 +562,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=ios,mweb,visionos',
+        '--extractor-args', 'youtube:player_client=visionos,ios',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,
