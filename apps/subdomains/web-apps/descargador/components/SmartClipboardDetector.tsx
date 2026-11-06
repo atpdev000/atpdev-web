@@ -5,7 +5,6 @@ import { Platform } from './PlatformTabs'
 import { detectPlatformFromUrl, DetectedUrlInfo } from '@/lib/clipboardDetector'
 import { Sparkles, CheckCircle2, ArrowRight, X, ClipboardPaste } from 'lucide-react'
 import { usePlatform } from '@/hooks/usePlatform'
-
 import { readNativeClipboard } from '@/lib/nativeBridge'
 
 interface SmartClipboardDetectorProps {
@@ -20,6 +19,7 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
   } | null>(null)
   
   const lastProcessedUrl = useRef<string>('')
+  const lastProcessedTime = useRef<number>(0)
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const showToast = useCallback((info: DetectedUrlInfo, autoSearching: boolean) => {
@@ -33,14 +33,19 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
   }, [])
 
   const handleDetectedUrl = useCallback((rawText: string, autoSearch = true) => {
+    if (!rawText || typeof rawText !== 'string') return false
     const info = detectPlatformFromUrl(rawText)
     if (!info) return false
 
-    // Avoid repeatedly processing the identical URL on rapid focus
-    if (lastProcessedUrl.current === info.url) return false
+    const now = Date.now()
+    // Evitar re-procesamiento continuo únicamente si es exactamente la misma URL procesada hace menos de 4 segundos
+    if (lastProcessedUrl.current === info.url && now - lastProcessedTime.current < 4000) {
+      return false
+    }
     lastProcessedUrl.current = info.url
+    lastProcessedTime.current = now
 
-    // Scroll to downloader section smoothly
+    // Scroll suave hacia la sección de descarga
     const toolsEl = document.getElementById('herramientas')
     if (toolsEl) {
       toolsEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -51,7 +56,7 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
     return true
   }, [onDetected, showToast])
 
-  // 1. GLOBAL PASTE LISTENER (Ctrl+V anywhere on web or mobile browser)
+  // 1. GLOBAL PASTE LISTENER (Ctrl+V en cualquier lugar de la web o app)
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       const target = e.target as HTMLElement
@@ -73,7 +78,7 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
     return () => window.removeEventListener('paste', handlePaste)
   }, [handleDetectedUrl])
 
-  // 2. WINDOW FOCUS / APP RESUME LISTENER (Lectura nativa en Android y Web)
+  // 2. WINDOW FOCUS / APP RESUME LISTENER (Lectura automática al volver a la app en Android y Web)
   useEffect(() => {
     const checkClipboardSilently = async () => {
       try {
@@ -90,18 +95,24 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
       checkClipboardSilently()
     }
 
-    window.addEventListener('focus', onFocus)
-    document.addEventListener('visibilitychange', () => {
+    const onVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         checkClipboardSilently()
       }
-    })
+    }
 
-    // Check once upon mounting
-    checkClipboardSilently()
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisibilityChange)
+
+    // Chequeo inicial con ligero delay para asegurar que el WebView nativo esté listo
+    const timer = setTimeout(() => {
+      checkClipboardSilently()
+    }, 600)
 
     return () => {
       window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      clearTimeout(timer)
     }
   }, [handleDetectedUrl])
 

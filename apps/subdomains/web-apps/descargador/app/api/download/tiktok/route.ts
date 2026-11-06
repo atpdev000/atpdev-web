@@ -1,21 +1,16 @@
 // app/api/download/tiktok/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 
-export const maxDuration = 80; // Máximo 30 segundos para Vercel
+export const maxDuration = 80;
 
-// Validación directa en el archivo (temporal)
 function isValidTiktokUrl(url: string): boolean {
-  if (!url) return false
-  
-  const tiktokPatterns = [
-    /https?:\/\/(www\.)?tiktok\.com\/@[\w.-]+\/video\/\d+/,
-    /https?:\/\/(www\.)?tiktok\.com\/[\w.-]+\/video\/\d+/,
-    /https?:\/\/vm\.tiktok\.com\/[\w-]+\//,
-    /https?:\/\/vt\.tiktok\.com\/[\w-]+\//,
-    /https?:\/\/(www\.)?tiktok\.com\/t\/[\w-]+\//,
-  ]
-  
-  return tiktokPatterns.some(pattern => pattern.test(url))
+  if (!url || typeof url !== 'string') return false
+  const clean = url.trim().toLowerCase()
+  return (
+    clean.includes('tiktok.com') ||
+    clean.includes('vm.tiktok.com') ||
+    clean.includes('vt.tiktok.com')
+  )
 }
 
 // Servicios para obtener datos de TikTok
@@ -99,7 +94,7 @@ async function getTikTokVideoInfo(url: string): Promise<any> {
     // Intentar con la primera API
     const api1Response = await fetch(`${TIKTOK_APIS.NO_WATERMARK}?url=${encodeURIComponent(url)}`, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'application/json',
       }
     })

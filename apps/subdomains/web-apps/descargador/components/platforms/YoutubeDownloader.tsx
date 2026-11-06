@@ -16,7 +16,8 @@ import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useI18n } from '@/lib/i18n/context';
-import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative } from '@/lib/nativeBridge';
+import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative, readNativeClipboard } from '@/lib/nativeBridge';
+import { extractUrlFromText } from '@/lib/clipboardDetector';
 
 interface VideoFormat {
   quality: string
@@ -131,11 +132,13 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
   }
 
   const processUrl = async (urlToFetch: string) => {
-    if (!urlToFetch.includes('youtube.com') && !urlToFetch.includes('youtu.be')) {
+    const cleanTargetUrl = extractUrlFromText(urlToFetch) || urlToFetch.trim()
+    if (!cleanTargetUrl || (!cleanTargetUrl.includes('youtube.com') && !cleanTargetUrl.includes('youtu.be'))) {
       setError('Por favor, ingresa un enlace válido de YouTube')
       return
     }
 
+    setUrl(cleanTargetUrl)
     setIsLoading(true)
     setError(null)
     setVideoInfo(null)
@@ -147,7 +150,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: urlToFetch })
+        body: JSON.stringify({ url: cleanTargetUrl })
       })
 
       const data = await response.json()
@@ -157,21 +160,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       }
 
       if (data.status === 'success') {
-        console.log('📦 [DATA DEBUG] Respuesta completa del servidor:', data);
-        console.log(`📊 [DATA DEBUG] Total formatos recibidos: ${data.formats?.length || 0}`);
-
-        if (data.formats?.length > 0) {
-          console.table(data.formats.map((f: any) => ({
-            q: f.quality,
-            res: f.resolution,
-            url: f.url ? 'SI' : 'NO',
-            audio: f.hasAudio,
-            video: f.hasVideo
-          })));
-        }
-
         setVideoInfo(data)
-        setOriginalUrl(urlToFetch);
+        setOriginalUrl(cleanTargetUrl);
       } else {
         throw new Error(data.message || 'Error desconocido')
       }
@@ -183,6 +173,17 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     }
   }
 
+  const handlePaste = async () => {
+    try {
+      const text = await readNativeClipboard()
+      if (text) {
+        const clean = extractUrlFromText(text) || text.trim()
+        setUrl(clean)
+        processUrl(clean)
+      }
+    } catch {}
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     processUrl(url)
@@ -190,9 +191,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
   useEffect(() => {
     if (initialUrl) {
-      setUrl(initialUrl)
+      const clean = extractUrlFromText(initialUrl) || initialUrl.trim()
+      setUrl(clean)
       if (autoSearch) {
-        processUrl(initialUrl)
+        processUrl(clean)
       }
     }
   }, [initialUrl, autoSearch])
@@ -274,8 +276,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
 
-        // 📱 PRIORIDAD 1 (MÓVIL): Combinador nativo por hardware con MediaMuxer en Android
-        if (isNative && format.url && format.url.startsWith('http')) {
+        // 📱 PRIORIDAD 1 (MÓVIL): Combinador nativo para flujos no encriptados por IP de YouTube
+        const isIpBound = format.url && format.url.includes('googlevideo.com')
+        if (isNative && format.url && format.url.startsWith('http') && !isIpBound) {
           console.log('📱 [Android] Descargando y combinando nativamente con MediaMuxer...')
           setDownloadDetails('Descargando y combinando con aceleración nativa...')
           setDownloadProgress(35)
@@ -505,8 +508,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('📥 Iniciando descarga simple...', quality)
 
-        // 🚀 PRIORIDAD 1: Si tenemos la URL directa del stream en el cliente, intentar descarga directa nativa
-        if (format.url && format.url.startsWith('http')) {
+        // 🚀 PRIORIDAD 1: Si tenemos la URL directa del stream en el cliente (que no esté atada a la IP del servidor)
+        const isIpBound = format.url && format.url.includes('googlevideo.com')
+        if (format.url && format.url.startsWith('http') && !isIpBound) {
           if (isNative) {
             try {
               console.log('📱 [Android] Descargando flujo directo nativamente...')
@@ -1040,8 +1044,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('🎵 Descargando audio:', audioFormat.itag)
 
-        // 📱 PRIORIDAD 1 (MÓVIL): Descarga directa nativa a biblioteca de Música
-        if (isNative && audioFormat.url && audioFormat.url.startsWith('http')) {
+        // 📱 PRIORIDAD 1 (MÓVIL): Descarga directa nativa a biblioteca de Música (solo si no es googlevideo.com IP-bound)
+        const isIpBound = audioFormat.url && audioFormat.url.includes('googlevideo.com')
+        if (isNative && audioFormat.url && audioFormat.url.startsWith('http') && !isIpBound) {
           console.log('📱 [Android] Descargando audio directamente en el dispositivo...')
           setDownloadDetails('Descargando archivo de audio...')
           setDownloadProgress(35)
@@ -1411,18 +1416,35 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value)
-                setError(null)
-                setVideoInfo(null)
-              }}
-              placeholder="https://www.youtube.com/watch?v=abc123 o https://youtu.be/abc123"
-              className="flex-1 px-4 py-3.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
-              required
-            />
+            <div className="relative flex-1">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value)
+                  setError(null)
+                  setVideoInfo(null)
+                }}
+                onPaste={(e) => {
+                  const text = e.clipboardData?.getData('text')
+                  if (text) {
+                    const clean = extractUrlFromText(text) || text.trim()
+                    setUrl(clean)
+                    setTimeout(() => processUrl(clean), 50)
+                  }
+                }}
+                placeholder="https://www.youtube.com/watch?v=abc123 o https://youtu.be/abc123"
+                className="w-full px-4 py-3.5 pr-24 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
+                required
+              />
+              <button
+                type="button"
+                onClick={handlePaste}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/60 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors border border-red-200/50 dark:border-red-800/40 cursor-pointer"
+              >
+                {t.downloader.pasteBtn}
+              </button>
+            </div>
             <button
               type="submit"
               disabled={isLoading}

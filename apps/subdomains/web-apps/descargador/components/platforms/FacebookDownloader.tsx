@@ -5,7 +5,8 @@ import { useState, useEffect } from 'react'
 import { getFacebookInfo, FacebookVideoInfo } from '@/lib/platforms/facebook';
 import { formatBytes } from '@/lib/utils';
 import { usePlatform } from '@/hooks/usePlatform';
-import { saveNativeMediaFile } from '@/lib/nativeBridge';
+import { saveNativeMediaFile, readNativeClipboard } from '@/lib/nativeBridge';
+import { extractUrlFromText } from '@/lib/clipboardDetector';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -60,27 +61,40 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
   const [thumbError, setThumbError] = useState(false);
 
   const processUrl = async (urlToFetch: string) => {
-    if (!urlToFetch.includes('facebook.com') && !urlToFetch.includes('fb.watch') && !urlToFetch.includes('fb.me')) {
+    const cleanTargetUrl = extractUrlFromText(urlToFetch) || urlToFetch.trim()
+    if (!cleanTargetUrl || (!cleanTargetUrl.includes('facebook.com') && !cleanTargetUrl.includes('fb.watch') && !cleanTargetUrl.includes('fb.me'))) {
       setError('Por favor, ingresa un enlace válido de Facebook')
       return
     }
 
+    setUrl(cleanTargetUrl)
     setIsLoading(true)
     setError(null)
     setVideoInfo(null)
     setDownloadProgress(0)
 
     try {
-      const data = await getFacebookInfo(urlToFetch)
+      const data = await getFacebookInfo(cleanTargetUrl)
       setVideoInfo(data)
       setThumbSrc(data.thumbnail || '')
       setThumbError(false)
-      setOriginalUrl(urlToFetch);
+      setOriginalUrl(cleanTargetUrl);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Error al procesar el video')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handlePaste = async () => {
+    try {
+      const text = await readNativeClipboard()
+      if (text) {
+        const clean = extractUrlFromText(text) || text.trim()
+        setUrl(clean)
+        processUrl(clean)
+      }
+    } catch {}
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,9 +104,10 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
 
   useEffect(() => {
     if (initialUrl) {
-      setUrl(initialUrl)
+      const clean = extractUrlFromText(initialUrl) || initialUrl.trim()
+      setUrl(clean)
       if (autoSearch) {
-        processUrl(initialUrl)
+        processUrl(clean)
       }
     }
   }, [initialUrl, autoSearch])
@@ -543,18 +558,35 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value)
-                setError(null)
-                setVideoInfo(null)
-              }}
-              placeholder={t.downloader.placeholderFacebook}
-              className="flex-1 px-4 py-3.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
-              required
-            />
+            <div className="relative flex-1">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value)
+                  setError(null)
+                  setVideoInfo(null)
+                }}
+                onPaste={(e) => {
+                  const text = e.clipboardData?.getData('text')
+                  if (text) {
+                    const clean = extractUrlFromText(text) || text.trim()
+                    setUrl(clean)
+                    setTimeout(() => processUrl(clean), 50)
+                  }
+                }}
+                placeholder={t.downloader.placeholderFacebook}
+                className="w-full px-4 py-3.5 pr-24 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
+                required
+              />
+              <button
+                type="button"
+                onClick={handlePaste}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors border border-blue-200/50 dark:border-blue-800/40 cursor-pointer"
+              >
+                {t.downloader.pasteBtn}
+              </button>
+            </div>
             <button
               type="submit"
               disabled={isLoading}

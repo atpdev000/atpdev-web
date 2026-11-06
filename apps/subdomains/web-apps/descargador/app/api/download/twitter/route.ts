@@ -99,20 +99,19 @@ async function extractSaveTwitter(url: string): Promise<TwitterMediaResult | nul
   return null;
 }
 
-// 2. Extractor con FxTwitter API
+// 2. Extractor con FxTwitter / FixupX API
 async function extractFxTwitter(url: string): Promise<TwitterMediaResult | null> {
   try {
-    const idMatch = url.match(/\/status\/(\d+)/);
-    if (!idMatch) return null;
-    const id = idMatch[1];
+    const tweetMatch = url.match(/(?:twitter\.com|x\.com)\/([^\/]+)\/status\/(\d+)/i);
+    if (!tweetMatch) return null;
 
-    const usernameMatch = url.match(/(?:twitter|x)\.com\/([^\/]+)\/status/);
-    const username = usernameMatch ? usernameMatch[1] : 'i';
+    const username = tweetMatch[1];
+    const tweetId = tweetMatch[2];
+    const fxUrl = `https://api.fxtwitter.com/${username}/status/${tweetId}`;
 
-    const apiUrl = `https://api.fxtwitter.com/${username}/status/${id}`;
-    const res = await fetch(apiUrl, {
+    const res = await fetch(fxUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
       }
     });
 
@@ -121,22 +120,22 @@ async function extractFxTwitter(url: string): Promise<TwitterMediaResult | null>
 
     if (data.code === 200 && data.tweet) {
       const tweet = data.tweet;
-      const videos = tweet.media?.videos || [];
+      const media = tweet.media?.videos || (tweet.media?.all ? tweet.media.all.filter((m: any) => m.type === 'video' || m.type === 'gif') : []);
 
-      if (videos.length > 0) {
-        const primaryVideo = videos[0];
+      if (media && media.length > 0) {
+        const vid = media[0];
+        const videoUrl = vid.url;
+        const thumbnail = vid.thumbnail_url || tweet.media?.photos?.[0]?.url || 'https://picsum.photos/600/400';
         const formats: TwitterFormat[] = [];
 
-        if (primaryVideo.variants && primaryVideo.variants.length > 0) {
-          const mp4Variants = primaryVideo.variants
-            .filter((v: any) => v.content_type === 'video/mp4' && v.url)
-            .sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
+        if (vid.variants && Array.isArray(vid.variants)) {
+          const validVariants = vid.variants.filter((v: any) => v.content_type === 'video/mp4' && v.url);
+          validVariants.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
 
-          for (const v of mp4Variants) {
-            const resMatch = v.url.match(/\/(\d+x\d+)\//);
-            const qualityLabel = resMatch ? `${resMatch[1].split('x')[1]}p` : 'MP4';
+          for (const v of validVariants) {
+            const bitrateStr = v.bitrate ? `${Math.round(v.bitrate / 1000)}k` : 'HD';
             formats.push({
-              quality: qualityLabel,
+              quality: `MP4 (${bitrateStr})`,
               format: 'MP4',
               url: v.url,
               hasAudio: true,
@@ -145,20 +144,22 @@ async function extractFxTwitter(url: string): Promise<TwitterMediaResult | null>
           }
         }
 
-        if (formats.length === 0 && primaryVideo.url) {
+        if (formats.length === 0 && videoUrl) {
           formats.push({
             quality: 'HD Video',
             format: 'MP4',
-            url: primaryVideo.url
+            url: videoUrl,
+            hasAudio: true,
+            hasVideo: true
           });
         }
 
         if (formats.length > 0) {
           return {
             title: tweet.text || 'Video de Twitter / X',
-            thumbnail: primaryVideo.thumbnail_url || 'https://picsum.photos/600/400',
-            duration: Math.round(primaryVideo.duration || 30),
-            uploader: tweet.author?.name || 'Twitter User',
+            thumbnail,
+            duration: Math.round(vid.duration || 30),
+            uploader: tweet.author?.name || `@${username}`,
             formats
           };
         }
@@ -170,7 +171,7 @@ async function extractFxTwitter(url: string): Promise<TwitterMediaResult | null>
   return null;
 }
 
-// 3. Extractor con yt-dlp local
+// 3. Extractor de respaldo con yt-dlp local
 async function extractTwitterWithYtDlp(url: string, binPath: string): Promise<TwitterMediaResult | null> {
   const nodeBin = process.execPath || 'node';
   return new Promise((resolve) => {
@@ -221,28 +222,55 @@ export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
 
-    if (!url || (!url.includes('twitter.com') && !url.includes('x.com'))) {
+    if (!url || typeof url !== 'string') {
+      return NextResponse.json(
+        { error: 'URL de Twitter / X inválida' },
+        { status: 400 }
+      );
+    }
+
+    let cleanUrl = url.trim();
+
+    // Resolver enlaces cortos t.co automáticamente si fueron compartidos
+    if (cleanUrl.includes('t.co')) {
+      try {
+        const headRes = await fetch(cleanUrl, {
+          method: 'GET',
+          redirect: 'follow',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+          }
+        });
+        if (headRes.url && (headRes.url.includes('twitter.com') || headRes.url.includes('x.com'))) {
+          cleanUrl = headRes.url;
+        }
+      } catch (e) {
+        console.warn('⚠️ [Twitter Engine] Error resolviendo redirección t.co:', e);
+      }
+    }
+
+    if (!cleanUrl.includes('twitter.com') && !cleanUrl.includes('x.com')) {
       return NextResponse.json(
         { error: 'URL de Twitter / X inválida. Debe ser un enlace de twitter.com o x.com' },
         { status: 400 }
       );
     }
 
-    console.log('🐦 [Twitter / X Engine] Procesando URL:', url);
+    console.log('🐦 [Twitter / X Engine] Procesando URL:', cleanUrl);
 
     // Intentar 1: SaveTwitter API
-    let result = await extractSaveTwitter(url);
+    let result = await extractSaveTwitter(cleanUrl);
 
     // Intentar 2: FxTwitter API
     if (!result) {
-      result = await extractFxTwitter(url);
+      result = await extractFxTwitter(cleanUrl);
     }
 
     // Intentar 3: yt-dlp local
     if (!result) {
       const bin = findYtDlpBinary();
       if (bin) {
-        result = await extractTwitterWithYtDlp(url, bin);
+        result = await extractTwitterWithYtDlp(cleanUrl, bin);
       }
     }
 

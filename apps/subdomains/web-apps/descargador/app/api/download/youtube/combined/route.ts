@@ -94,7 +94,7 @@ async function downloadStreamToDisk(
   })
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'android,visionos,ios'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'tv_embedded,web_embedded,visionos'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
@@ -599,7 +599,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=android,visionos,ios',
+        '--extractor-args', 'youtube:player_client=tv_embedded,web_embedded,visionos',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,

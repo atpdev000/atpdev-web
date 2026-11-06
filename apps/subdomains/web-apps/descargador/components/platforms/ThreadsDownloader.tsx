@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
-import { saveNativeMediaFile } from '@/lib/nativeBridge'
+import { saveNativeMediaFile, readNativeClipboard } from '@/lib/nativeBridge'
+import { extractUrlFromText } from '@/lib/clipboardDetector'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -58,11 +59,13 @@ export default function ThreadsDownloader({ initialUrl, autoSearch }: Downloader
   }
 
   const processUrl = async (urlToFetch: string) => {
-    if (!isValidThreadsUrl(urlToFetch)) {
+    const cleanTargetUrl = extractUrlFromText(urlToFetch) || urlToFetch.trim()
+    if (!cleanTargetUrl || !isValidThreadsUrl(cleanTargetUrl)) {
       setError('Por favor, ingresa un enlace válido de Threads (ej. threads.com/@usuario/post/... o threads.net/...)')
       return
     }
 
+    setUrl(cleanTargetUrl)
     setIsLoading(true)
     setError(null)
     setVideoInfo(null)
@@ -73,7 +76,7 @@ export default function ThreadsDownloader({ initialUrl, autoSearch }: Downloader
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: urlToFetch })
+        body: JSON.stringify({ url: cleanTargetUrl })
       })
 
       const data = await response.json()
@@ -102,9 +105,10 @@ export default function ThreadsDownloader({ initialUrl, autoSearch }: Downloader
 
   useEffect(() => {
     if (initialUrl) {
-      setUrl(initialUrl)
+      const clean = extractUrlFromText(initialUrl) || initialUrl.trim()
+      setUrl(clean)
       if (autoSearch) {
-        processUrl(initialUrl)
+        processUrl(clean)
       }
     }
   }, [initialUrl, autoSearch])
@@ -287,8 +291,12 @@ export default function ThreadsDownloader({ initialUrl, autoSearch }: Downloader
 
   const handlePaste = async () => {
     try {
-      const text = await navigator.clipboard.readText();
-      if (text) setUrl(text);
+      const text = await readNativeClipboard();
+      if (text) {
+        const clean = extractUrlFromText(text) || text.trim();
+        setUrl(clean);
+        processUrl(clean);
+      }
     } catch {
       // Sin permisos
     }
@@ -303,6 +311,14 @@ export default function ThreadsDownloader({ initialUrl, autoSearch }: Downloader
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            onPaste={(e) => {
+              const text = e.clipboardData?.getData('text');
+              if (text) {
+                const clean = extractUrlFromText(text) || text.trim();
+                setUrl(clean);
+                setTimeout(() => processUrl(clean), 50);
+              }
+            }}
             placeholder={t.downloader.placeholderThreads}
             className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-zinc-800 dark:focus:ring-zinc-400 focus:border-transparent transition-all outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-sm font-medium"
             required

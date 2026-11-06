@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
 import { usePlatform } from '@/hooks/usePlatform'
-import { saveNativeMediaFile } from '@/lib/nativeBridge'
+import { saveNativeMediaFile, readNativeClipboard } from '@/lib/nativeBridge'
+import { extractUrlFromText } from '@/lib/clipboardDetector'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -71,10 +72,13 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
   }
 
   const processUrl = async (urlToFetch: string) => {
-    if (!isValidTiktokUrl(urlToFetch)) {
+    const cleanTargetUrl = extractUrlFromText(urlToFetch) || urlToFetch.trim()
+    if (!cleanTargetUrl || !isValidTiktokUrl(cleanTargetUrl)) {
       setError('Por favor, ingresa un enlace válido de TikTok')
       return
     }
+
+    setUrl(cleanTargetUrl)
 
     setIsLoading(true)
     setError(null)
@@ -86,7 +90,7 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: urlToFetch })
+        body: JSON.stringify({ url: cleanTargetUrl })
       })
 
       const data = await response.json()
@@ -107,6 +111,17 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
     }
   }
 
+  const handlePaste = async () => {
+    try {
+      const text = await readNativeClipboard()
+      if (text) {
+        const clean = extractUrlFromText(text) || text.trim()
+        setUrl(clean)
+        processUrl(clean)
+      }
+    } catch {}
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     processUrl(url)
@@ -114,9 +129,10 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
 
   useEffect(() => {
     if (initialUrl) {
-      setUrl(initialUrl)
+      const clean = extractUrlFromText(initialUrl) || initialUrl.trim()
+      setUrl(clean)
       if (autoSearch) {
-        processUrl(initialUrl)
+        processUrl(clean)
       }
     }
   }, [initialUrl, autoSearch])
@@ -464,18 +480,35 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value)
-                setError(null)
-                setVideoInfo(null)
-              }}
-              placeholder={t.downloader.placeholderTiktok}
-              className="flex-1 px-4 py-3.5 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
-              required
-            />
+            <div className="relative flex-1">
+              <input
+                type="url"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value)
+                  setError(null)
+                  setVideoInfo(null)
+                }}
+                onPaste={(e) => {
+                  const text = e.clipboardData?.getData('text')
+                  if (text) {
+                    const clean = extractUrlFromText(text) || text.trim()
+                    setUrl(clean)
+                    setTimeout(() => processUrl(clean), 50)
+                  }
+                }}
+                placeholder={t.downloader.placeholderTiktok}
+                className="w-full px-4 py-3.5 pr-24 border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-pink-500 dark:focus:ring-pink-400 focus:border-transparent outline-none transition-all shadow-sm font-medium"
+                required
+              />
+              <button
+                type="button"
+                onClick={handlePaste}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold text-pink-600 dark:text-pink-400 bg-pink-50 dark:bg-pink-950/60 hover:bg-pink-100 dark:hover:bg-pink-900/50 rounded-lg transition-colors border border-pink-200/50 dark:border-pink-800/40 cursor-pointer"
+              >
+                {t.downloader.pasteBtn}
+              </button>
+            </div>
             <button
               type="submit"
               disabled={isLoading}

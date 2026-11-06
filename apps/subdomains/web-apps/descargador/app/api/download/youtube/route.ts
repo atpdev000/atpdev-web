@@ -182,7 +182,7 @@ async function extractWithInvidious(url: string): Promise<any> {
   return null
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'android,visionos,ios'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'tv_embedded,web_embedded,visionos'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
@@ -274,15 +274,15 @@ export async function POST(request: NextRequest) {
 
     if (bin) {
       try {
-        // Intento 1 con clientes visionos,ios (bypasea el bloqueo bot de datacenters como Render)
-        rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos,ios')
+        // Intento 1 con clientes tv_embedded,web_embedded,visionos (bypasea el bloqueo bot de datacenters como Render)
+        rawInfo = await extractMetadata(cleanedUrl, bin, 'tv_embedded,web_embedded,visionos')
       } catch (err: any) {
         console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
         try {
-          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (ios,mweb)...')
-          rawInfo = await extractMetadata(cleanedUrl, bin, 'ios,mweb')
+          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (visionos,ios)...')
+          rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos,ios')
         } catch (retryErr: any) {
-          console.error('❌ [YouTube Serverless] Reintento ios,mweb falló:', retryErr.message)
+          console.error('❌ [YouTube Serverless] Reintento visionos,ios falló:', retryErr.message)
           extractionError = retryErr
         }
       }
