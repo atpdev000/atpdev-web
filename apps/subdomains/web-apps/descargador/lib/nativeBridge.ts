@@ -100,35 +100,48 @@ export async function saveNativeMediaFile(
 ): Promise<{ success: boolean; uri: string; path: string }> {
   const baseFolder = 'Download/FTYdownloaderPro/download';
   const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
-  
+
+  // Helper para crear directorios tolerando directorios preexistentes sin arrojar excepción
+  const safeMkdir = async (dirPath: string, directory: Directory): Promise<boolean> => {
+    try {
+      await Filesystem.mkdir({
+        path: dirPath,
+        directory,
+        recursive: true
+      });
+      return true;
+    } catch (err: any) {
+      const msg = (err?.message || err?.toString() || '').toLowerCase();
+      // Si el directorio ya existe, es completamente válido y seguro reutilizarlo
+      if (
+        msg.includes('already exists') ||
+        msg.includes('already exist') ||
+        msg.includes('exists') ||
+        msg.includes('os_status_code: 17') ||
+        msg.includes('eexist')
+      ) {
+        return true;
+      }
+      return false;
+    }
+  };
+
   let targetDirectory = Directory.ExternalStorage;
   let finalPath = `${baseFolder}/${typeFolder}/${filename}`;
 
-  try {
-    await Filesystem.mkdir({
-      path: `${baseFolder}/${typeFolder}`,
-      directory: targetDirectory,
-      recursive: true
-    });
-  } catch (e) {
-    console.warn('⚠️ No se pudo crear en ExternalStorage, probando Documents...', e);
-    try {
+  // Intentar ExternalStorage (Android < 11 o con permisos de almacenamiento)
+  const extOk = await safeMkdir(`${baseFolder}/${typeFolder}`, Directory.ExternalStorage);
+  if (!extOk) {
+    console.warn('⚠️ No se pudo crear en ExternalStorage, probando Documents...');
+    const docOk = await safeMkdir(`FTYdownloaderPro/${typeFolder}`, Directory.Documents);
+    if (docOk) {
       targetDirectory = Directory.Documents;
       finalPath = `FTYdownloaderPro/${typeFolder}/${filename}`;
-      await Filesystem.mkdir({
-        path: `FTYdownloaderPro/${typeFolder}`,
-        directory: targetDirectory,
-        recursive: true
-      });
-    } catch (docErr) {
-      console.warn('⚠️ No se pudo crear en Documents, usando almacenamiento interno seguro Data...', docErr);
+    } else {
+      console.warn('⚠️ No se pudo crear en Documents, usando almacenamiento interno seguro Data...');
       targetDirectory = Directory.Data;
       finalPath = `${typeFolder}/${filename}`;
-      await Filesystem.mkdir({
-        path: typeFolder,
-        directory: targetDirectory,
-        recursive: true
-      });
+      await safeMkdir(typeFolder, Directory.Data);
     }
   }
 
