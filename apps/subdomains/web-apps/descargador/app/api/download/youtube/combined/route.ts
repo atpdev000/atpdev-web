@@ -4,9 +4,14 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import dns from 'dns'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
+
+try {
+  dns.setDefaultResultOrder('ipv6first')
+} catch {}
 
 async function downloadStreamToDisk(
   sourceUrl: string,

@@ -3,8 +3,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import dns from 'dns'
 import { spawn } from 'child_process'
 import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
+
+try {
+  dns.setDefaultResultOrder('ipv6first')
+} catch {}
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
 const COMBINE_TIMEOUT = 300000 // 5 minutos para combinación

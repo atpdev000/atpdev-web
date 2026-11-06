@@ -4,7 +4,12 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import dns from 'dns'
 import { findYtDlpBinary } from '@/lib/server/binaries'
+
+try {
+  dns.setDefaultResultOrder('ipv6first')
+} catch {}
 
 export const maxDuration = 60
 

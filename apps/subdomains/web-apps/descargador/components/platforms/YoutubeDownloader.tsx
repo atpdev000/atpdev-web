@@ -461,9 +461,41 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       pollProgress()
 
       try {
-        console.log('📥 Iniciando descarga simple con motor del backend...', quality)
+        console.log('📥 Iniciando descarga simple...', quality)
 
-        // ✅ USAR EL MISMO ENDPOINT DE COMBINACIÓN PERO PARA UN SOLO ITAG
+        // 🚀 PRIORIDAD 1: Si tenemos la URL directa del stream en el cliente, intentar descarga directa nativa
+        if (format.url && format.url.startsWith('http')) {
+          if (isNative) {
+            try {
+              console.log('📱 [Android] Descargando flujo directo desde CDN de YouTube...')
+              setDownloadDetails('Descargando archivo directamente...')
+              const directRes = await fetch(format.url)
+              if (directRes.ok && directRes.body) {
+                pollActive = false
+                await downloadStream(directRes, defaultFilename, `simple-${quality}`)
+                return
+              }
+            } catch (nativeErr) {
+              console.warn('⚠️ Descarga directa nativa falló, intentando vía proxy/servidor...', nativeErr)
+            }
+          }
+
+          // Fallback vía proxy seguro
+          try {
+            console.log('🔄 Descargando mediante proxy...')
+            setDownloadDetails('Descargando archivo mediante proxy...')
+            const proxyRes = await fetch(`/api/download/proxy?url=${encodeURIComponent(format.url)}&filename=${encodeURIComponent(defaultFilename)}`)
+            if (proxyRes.ok && proxyRes.body) {
+              pollActive = false
+              await downloadStream(proxyRes, defaultFilename, `simple-${quality}`)
+              return
+            }
+          } catch (proxyErr) {
+            console.warn('⚠️ Descarga por proxy falló, intentando servidor...', proxyErr)
+          }
+        }
+
+        // ✅ USAR EL ENDPOINT DEL BACKEND COMO RESPALDO
         const response = await fetch('/api/download/youtube/combined', {
           method: 'POST',
           headers: {
@@ -953,6 +985,23 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           } catch {
             errorMsg = errorText.substring(0, 100) || errorMsg
           }
+
+          // 🔄 Fallback automático: Descargar audio directamente o mediante proxy
+          if (audioFormat.url && audioFormat.url.startsWith('http')) {
+            try {
+              console.log('🔄 Intentando descarga de audio mediante proxy fallback...')
+              setDownloadDetails('Descargando audio mediante enlace directo...')
+              const proxyRes = await fetch(`/api/download/proxy?url=${encodeURIComponent(audioFormat.url)}&filename=${encodeURIComponent(defaultFilename)}&isAudio=true`)
+              if (proxyRes.ok && proxyRes.body) {
+                pollActive = false
+                await downloadStream(proxyRes, defaultFilename, `audio-${audioFormat.itag}`)
+                return
+              }
+            } catch (fallbackErr) {
+              console.warn('Fallback de audio también falló:', fallbackErr)
+            }
+          }
+
           const cleanMsg = formatUserFriendlyError(errorMsg)
           if (isNative) {
             Dialog.alert({ title: 'Error en la descarga', message: cleanMsg }).catch(() => {})
