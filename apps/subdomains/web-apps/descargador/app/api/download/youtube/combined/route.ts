@@ -4,70 +4,103 @@ import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import dns from 'dns'
+import https from 'https'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
-
-try {
-  dns.setDefaultResultOrder('ipv6first')
-} catch {}
 
 async function downloadStreamToDisk(
   sourceUrl: string,
   destPath: string,
   onProgress?: (loaded: number, total: number) => void
 ): Promise<void> {
-  const headers: Record<string, string> = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': '*/*',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Accept-Encoding': 'identity',
-    'Range': 'bytes=0-',
-    'Referer': 'https://www.youtube.com/',
-    'Origin': 'https://www.youtube.com',
-    'Sec-Fetch-Dest': 'video',
-    'Sec-Fetch-Mode': 'cors'
-  }
+  return new Promise((resolve, reject) => {
+    let redirects = 0
 
-  const res = await fetch(sourceUrl, { headers, redirect: 'follow', signal: AbortSignal.timeout(120000) })
-  if (!res.ok) {
-    throw new Error(`Error ${res.status} al descargar stream (${sourceUrl.slice(0, 60)}...)`)
-  }
-  if (!res.body) {
-    throw new Error('No se recibió cuerpo de respuesta multimedia desde YouTube')
-  }
+    const execute = (currentUrl: string) => {
+      try {
+        const parsed = new URL(currentUrl)
+        const ipMatch = currentUrl.match(/[?&]ip=([^&]+)/)
+        const signedIp = ipMatch ? decodeURIComponent(ipMatch[1]) : ''
+        const family = signedIp.includes(':') ? 6 : (signedIp.includes('.') ? 4 : undefined)
 
-  const total = parseInt(res.headers.get('content-length') || '0', 10)
-  let loaded = 0
-  const fileStream = fs.createWriteStream(destPath)
-  const reader = res.body.getReader()
+        const options: https.RequestOptions = {
+          hostname: parsed.hostname,
+          port: parsed.port || 443,
+          path: parsed.pathname + parsed.search,
+          method: 'GET',
+          family,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept-Encoding': 'identity',
+            'Range': 'bytes=0-',
+            'Referer': 'https://www.youtube.com/',
+            'Origin': 'https://www.youtube.com'
+          }
+        }
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    fileStream.write(value)
-    loaded += value.length
-    if (onProgress) {
-      onProgress(loaded, total)
+        const req = https.request(options, (res) => {
+          if (res.statusCode && [301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+            redirects++
+            if (redirects > 6) {
+              reject(new Error('Demasiados redireccionamientos'))
+              return
+            }
+            let nextUrl = res.headers.location
+            if (nextUrl.startsWith('/')) {
+              nextUrl = `${parsed.protocol}//${parsed.host}${nextUrl}`
+            }
+            execute(nextUrl)
+            return
+          }
+
+          if (res.statusCode !== 200 && res.statusCode !== 206) {
+            reject(new Error(`Error ${res.statusCode} al descargar stream (${currentUrl.slice(0, 60)}...)`))
+            return
+          }
+
+          const total = parseInt(res.headers['content-length'] || '0', 10)
+          let loaded = 0
+          const fileStream = fs.createWriteStream(destPath)
+
+          res.on('data', (chunk) => {
+            fileStream.write(chunk)
+            loaded += chunk.length
+            if (onProgress) onProgress(loaded, total)
+          })
+
+          res.on('end', () => {
+            fileStream.end()
+          })
+
+          fileStream.on('finish', () => resolve())
+          fileStream.on('error', (err) => reject(err))
+          res.on('error', (err) => reject(err))
+        })
+
+        req.on('error', (err) => reject(err))
+        req.setTimeout(120000, () => {
+          req.destroy(new Error('Timeout de 120s descargando stream'))
+        })
+        req.end()
+      } catch (err) {
+        reject(err)
+      }
     }
-  }
 
-  fileStream.end()
-  await new Promise<void>((resolve, reject) => {
-    fileStream.on('finish', resolve)
-    fileStream.on('error', reject)
+    execute(sourceUrl)
   })
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,ios'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'android,visionos,ios'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
   return new Promise((resolve, reject) => {
     const args = [
-      '--force-ipv4',
-      '--socket-timeout', '10',
+      '--socket-timeout', '12',
       '--dump-json',
       '--js-runtimes', `node:${nodeBin}`,
       '--no-warnings',
@@ -558,7 +591,6 @@ export async function POST(request: NextRequest) {
       const cookieArgs = getCookiesArg()
       const ytArgs: string[] = [
         ...ffmpegArgs,
-        '--force-ipv4',
         '--socket-timeout', '15',
         '--js-runtimes', `node:${nodeBin}`,
         '--newline',
@@ -567,7 +599,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=visionos,ios',
+        '--extractor-args', 'youtube:player_client=android,visionos,ios',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,

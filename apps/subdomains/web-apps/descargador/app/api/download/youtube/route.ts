@@ -182,14 +182,13 @@ async function extractWithInvidious(url: string): Promise<any> {
   return null
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,ios'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'android,visionos,ios'): Promise<any> {
   const nodeBin = process.execPath || 'node'
   const cookieArgs = getCookiesArg()
 
   return new Promise((resolve, reject) => {
     const args = [
-      '--force-ipv4',
-      '--socket-timeout', '10',
+      '--socket-timeout', '12',
       '--dump-json',
       '--js-runtimes', `node:${nodeBin}`,
       '--no-warnings',

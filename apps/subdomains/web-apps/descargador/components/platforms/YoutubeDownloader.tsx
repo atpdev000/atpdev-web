@@ -16,7 +16,7 @@ import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useI18n } from '@/lib/i18n/context';
-import { NativeWhatsAppStatus, saveNativeMediaFile } from '@/lib/nativeBridge';
+import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative } from '@/lib/nativeBridge';
 
 interface VideoFormat {
   quality: string
@@ -274,6 +274,48 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
 
+        // 📱 PRIORIDAD 1 (MÓVIL): Combinador nativo por hardware con MediaMuxer en Android
+        if (isNative && format.url && format.url.startsWith('http')) {
+          console.log('📱 [Android] Descargando y combinando nativamente con MediaMuxer...')
+          setDownloadDetails('Descargando y combinando con aceleración nativa...')
+          setDownloadProgress(35)
+          try {
+            const nativeRes = await downloadAndCombineNative(
+              format.url,
+              audioCandidate?.url || undefined,
+              defaultFilename,
+              false
+            )
+            pollActive = false
+            setDownloadProgress(100)
+            setDownloadDetails('¡Guardado en la Galería!')
+            scheduleNotification('Descarga Completada', `Guardado en Galería (${defaultFilename})`)
+            await Toast.show({
+              text: `✅ ¡Descarga completada! Guardado en Galería (FTY Downloader Pro).`,
+              duration: 'long'
+            }).catch(() => {})
+            addToHistory({
+              title: videoInfo?.title || defaultFilename,
+              platform: 'youtube',
+              thumbnail: videoInfo?.thumbnail || '',
+              originalUrl: originalUrl || url,
+              status: 'completed',
+              format: quality.toUpperCase(),
+              filePath: nativeRes.uri,
+              mimeType: 'video/mp4'
+            })
+            setDownloadCompletedInfo({
+              title: videoInfo?.title || defaultFilename,
+              filename: defaultFilename,
+              filePath: nativeRes.uri
+            })
+            setTimeout(() => setDownloadCompletedInfo(null), 8000)
+            return
+          } catch (nativeErr: any) {
+            console.warn('⚠️ Combinador nativo no disponible o falló, recurriendo al servidor...', nativeErr)
+          }
+        }
+
       const response = await fetch('/api/download/youtube/combined', {
         method: 'POST',
         headers: {
@@ -467,16 +509,53 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         if (format.url && format.url.startsWith('http')) {
           if (isNative) {
             try {
-              console.log('📱 [Android] Descargando flujo directo desde CDN de YouTube...')
+              console.log('📱 [Android] Descargando flujo directo nativamente...')
               setDownloadDetails('Descargando archivo directamente...')
+              setDownloadProgress(35)
+              const nativeRes = await downloadAndCombineNative(
+                format.url,
+                undefined,
+                defaultFilename,
+                false
+              )
+              pollActive = false
+              setDownloadProgress(100)
+              setDownloadDetails('¡Guardado en la Galería!')
+              scheduleNotification('Descarga Completada', `Guardado en Galería (${defaultFilename})`)
+              await Toast.show({
+                text: `✅ ¡Descarga completada! Guardado en Galería.`,
+                duration: 'long'
+              }).catch(() => {})
+              addToHistory({
+                title: videoInfo?.title || defaultFilename,
+                platform: 'youtube',
+                thumbnail: videoInfo?.thumbnail || '',
+                originalUrl: originalUrl || url,
+                status: 'completed',
+                format: quality.toUpperCase(),
+                filePath: nativeRes.uri,
+                mimeType: 'video/mp4'
+              })
+              setDownloadCompletedInfo({
+                title: videoInfo?.title || defaultFilename,
+                filename: defaultFilename,
+                filePath: nativeRes.uri
+              })
+              setTimeout(() => setDownloadCompletedInfo(null), 8000)
+              return
+            } catch (nativeErr) {
+              console.warn('⚠️ Descarga directa nativa falló, intentando fetch stream...', nativeErr)
+            }
+
+            try {
               const directRes = await fetch(format.url)
               if (directRes.ok && directRes.body) {
                 pollActive = false
                 await downloadStream(directRes, defaultFilename, `simple-${quality}`)
                 return
               }
-            } catch (nativeErr) {
-              console.warn('⚠️ Descarga directa nativa falló, intentando vía proxy/servidor...', nativeErr)
+            } catch (fetchErr) {
+              console.warn('⚠️ Fetch stream falló...', fetchErr)
             }
           }
 
@@ -960,6 +1039,48 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
       try {
         console.log('🎵 Descargando audio:', audioFormat.itag)
+
+        // 📱 PRIORIDAD 1 (MÓVIL): Descarga directa nativa a biblioteca de Música
+        if (isNative && audioFormat.url && audioFormat.url.startsWith('http')) {
+          console.log('📱 [Android] Descargando audio directamente en el dispositivo...')
+          setDownloadDetails('Descargando archivo de audio...')
+          setDownloadProgress(35)
+          try {
+            const nativeRes = await downloadAndCombineNative(
+              undefined,
+              audioFormat.url,
+              defaultFilename,
+              true
+            )
+            pollActive = false
+            setDownloadProgress(100)
+            setDownloadDetails('¡Guardado en Música!')
+            scheduleNotification('Descarga Completada', `Guardado en Música (${defaultFilename})`)
+            await Toast.show({
+              text: `✅ ¡Audio guardado en tu biblioteca de Música!`,
+              duration: 'long'
+            }).catch(() => {})
+            addToHistory({
+              title: videoInfo?.title || defaultFilename,
+              platform: 'youtube',
+              thumbnail: videoInfo?.thumbnail || '',
+              originalUrl: originalUrl || url,
+              status: 'completed',
+              format: 'AUDIO',
+              filePath: nativeRes.uri,
+              mimeType: 'audio/mpeg'
+            })
+            setDownloadCompletedInfo({
+              title: videoInfo?.title || defaultFilename,
+              filename: defaultFilename,
+              filePath: nativeRes.uri
+            })
+            setTimeout(() => setDownloadCompletedInfo(null), 8000)
+            return
+          } catch (nativeErr) {
+            console.warn('⚠️ Descarga nativa de audio falló, intentando servidor...', nativeErr)
+          }
+        }
 
         const response = await fetch('/api/download/youtube/combined', {
           method: 'POST',

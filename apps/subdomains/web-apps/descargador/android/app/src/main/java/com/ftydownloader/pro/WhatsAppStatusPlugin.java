@@ -8,7 +8,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaCodec;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
+import android.media.MediaMuxer;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -29,8 +33,12 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -221,6 +229,75 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
     }
 
+    public Uri saveFileToMediaStore(File sourceFile, String displayName, boolean isAudio) {
+        if (sourceFile == null || !sourceFile.exists()) return null;
+
+        try {
+            String lower = displayName.toLowerCase();
+            boolean isVideo = !isAudio && (lower.endsWith(".mp4") || lower.endsWith(".3gp") || lower.endsWith(".mov") || lower.endsWith(".mkv"));
+
+            String mimeType = "video/mp4";
+            Uri collection;
+            String relativeSubDir;
+
+            if (isVideo) {
+                mimeType = "video/mp4";
+                collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                relativeSubDir = Environment.DIRECTORY_MOVIES + "/FTY Downloader Pro";
+            } else if (isAudio) {
+                mimeType = lower.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg";
+                collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                relativeSubDir = Environment.DIRECTORY_MUSIC + "/FTY Downloader Pro";
+            } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp")) {
+                mimeType = "image/jpeg";
+                collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                relativeSubDir = Environment.DIRECTORY_PICTURES + "/FTY Downloader Pro";
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+                } else {
+                    collection = MediaStore.Files.getContentUri("external");
+                }
+                relativeSubDir = Environment.DIRECTORY_DOWNLOADS + "/FTY Downloader Pro";
+            }
+
+            ContentValues values = new ContentValues();
+            String finalDisplayName = displayName.startsWith("FTY_") ? displayName : ("FTY_" + displayName);
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, finalDisplayName);
+            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeSubDir);
+                values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+            }
+
+            Uri itemUri = getContext().getContentResolver().insert(collection, values);
+            if (itemUri == null) return null;
+
+            try (InputStream in = new FileInputStream(sourceFile);
+                 OutputStream out = getContext().getContentResolver().openOutputStream(itemUri)) {
+                byte[] buffer = new byte[32768];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, bytesRead);
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear();
+                values.put(MediaStore.MediaColumns.IS_PENDING, 0);
+                getContext().getContentResolver().update(itemUri, values, null, null);
+            } else {
+                MediaScannerConnection.scanFile(getContext(), new String[]{sourceFile.getAbsolutePath()}, new String[]{mimeType}, null);
+            }
+
+            return itemUri;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     @PluginMethod
     public void saveToGallery(PluginCall call) {
         String filePath = call.getString("filePath");
@@ -236,77 +313,237 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
 
         try {
-            String name = sourceFile.getName();
-            String lower = name.toLowerCase();
-            boolean isVideo = lower.endsWith(".mp4") || lower.endsWith(".3gp") || lower.endsWith(".mov") || lower.endsWith(".mkv");
-            boolean isAudio = lower.endsWith(".mp3") || lower.endsWith(".m4a") || lower.endsWith(".wav") || lower.endsWith(".aac") || lower.endsWith(".ogg");
-            boolean isImage = lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp");
-
-            String mimeType = "application/octet-stream";
-            Uri collection;
-            String relativeSubDir;
-
-            if (isVideo) {
-                mimeType = "video/mp4";
-                collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                relativeSubDir = Environment.DIRECTORY_MOVIES + "/FTY Downloader Pro";
-            } else if (isAudio) {
-                mimeType = lower.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg";
-                collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                relativeSubDir = Environment.DIRECTORY_MUSIC + "/FTY Downloader Pro";
-            } else if (isImage) {
-                mimeType = "image/jpeg";
-                collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                relativeSubDir = Environment.DIRECTORY_PICTURES + "/FTY Downloader Pro";
-            } else {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI;
-                } else {
-                    collection = MediaStore.Files.getContentUri("external");
-                }
-                relativeSubDir = Environment.DIRECTORY_DOWNLOADS + "/FTY Downloader Pro";
-            }
-
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.MediaColumns.DISPLAY_NAME, "FTY_" + name);
-            values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, relativeSubDir);
-                values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-            }
-
-            Uri itemUri = getContext().getContentResolver().insert(collection, values);
-
+            boolean isAudio = sourceFile.getName().toLowerCase().endsWith(".mp3") || sourceFile.getName().toLowerCase().endsWith(".m4a");
+            Uri itemUri = saveFileToMediaStore(sourceFile, sourceFile.getName(), isAudio);
             if (itemUri == null) {
-                call.reject("No se pudo crear la entrada en el almacenamiento público");
+                call.reject("No se pudo guardar en almacenamiento público");
                 return;
-            }
-
-            try (InputStream in = new FileInputStream(sourceFile);
-                 OutputStream out = getContext().getContentResolver().openOutputStream(itemUri)) {
-                byte[] buffer = new byte[16384];
-                int bytesRead;
-                while ((bytesRead = in.read(buffer)) > 0) {
-                    out.write(buffer, 0, bytesRead);
-                }
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                values.clear();
-                values.put(MediaStore.MediaColumns.IS_PENDING, 0);
-                getContext().getContentResolver().update(itemUri, values, null, null);
-            } else {
-                MediaScannerConnection.scanFile(getContext(), new String[]{sourceFile.getAbsolutePath()}, new String[]{mimeType}, null);
             }
 
             JSObject ret = new JSObject();
             ret.put("success", true);
             ret.put("uri", itemUri.toString());
-            ret.put("fileName", "FTY_" + name);
+            ret.put("fileName", "FTY_" + sourceFile.getName());
             call.resolve(ret);
         } catch (Exception e) {
             call.reject("Error al guardar en galería/música: " + e.getMessage());
+        }
+    }
+
+    @PluginMethod
+    public void downloadAndCombineMedia(PluginCall call) {
+        String videoUrl = call.getString("videoUrl");
+        String audioUrl = call.getString("audioUrl");
+        String filename = call.getString("filename", "video_" + System.currentTimeMillis() + ".mp4");
+        boolean isAudio = Boolean.TRUE.equals(call.getBoolean("isAudio", false));
+
+        if ((videoUrl == null || videoUrl.isEmpty()) && (audioUrl == null || audioUrl.isEmpty())) {
+            call.reject("URL multimedia es requerida");
+            return;
+        }
+
+        new Thread(() -> {
+            File cacheDir = getContext().getCacheDir();
+            long now = System.currentTimeMillis();
+            File tempVideo = new File(cacheDir, "temp_v_" + now + ".mp4");
+            File tempAudio = new File(cacheDir, "temp_a_" + now + ".m4a");
+            File tempCombined = new File(cacheDir, "temp_c_" + now + ".mp4");
+
+            try {
+                File fileToSave = null;
+
+                if (isAudio && audioUrl != null && !audioUrl.isEmpty()) {
+                    downloadHttpStream(audioUrl, tempAudio);
+                    fileToSave = tempAudio;
+                } else if (videoUrl != null && !videoUrl.isEmpty()) {
+                    downloadHttpStream(videoUrl, tempVideo);
+                    fileToSave = tempVideo;
+
+                    if (audioUrl != null && !audioUrl.isEmpty()) {
+                        try {
+                            downloadHttpStream(audioUrl, tempAudio);
+                            boolean muxSuccess = muxMediaTracks(tempVideo, tempAudio, tempCombined);
+                            if (muxSuccess && tempCombined.exists() && tempCombined.length() > 0) {
+                                fileToSave = tempCombined;
+                            }
+                        } catch (Exception e) {
+                            android.util.Log.w("FTYCombiner", "Audio mux falló, guardando solo video: " + e.getMessage());
+                        }
+                    }
+                }
+
+                if (fileToSave != null && fileToSave.exists() && fileToSave.length() > 0) {
+                    Uri savedUri = saveFileToMediaStore(fileToSave, filename, isAudio);
+                    if (savedUri != null) {
+                        JSObject ret = new JSObject();
+                        ret.put("success", true);
+                        ret.put("uri", savedUri.toString());
+                        ret.put("fileName", filename);
+                        call.resolve(ret);
+                    } else {
+                        call.reject("No se pudo registrar el archivo en MediaStore");
+                    }
+                } else {
+                    call.reject("El archivo descargado está vacío o no se pudo generar");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                call.reject("Error en descarga nativa: " + e.getMessage());
+            } finally {
+                try { tempVideo.delete(); } catch (Exception ignored) {}
+                try { tempAudio.delete(); } catch (Exception ignored) {}
+                try { tempCombined.delete(); } catch (Exception ignored) {}
+            }
+        }).start();
+    }
+
+    private void downloadHttpStream(String fileUrl, File destFile) throws Exception {
+        String currentUrl = fileUrl;
+        int redirects = 0;
+        HttpURLConnection conn = null;
+
+        while (redirects < 6) {
+            URL url = new URL(currentUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+            conn.setRequestProperty("Accept", "*/*");
+            conn.setRequestProperty("Range", "bytes=0-");
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(120000);
+            conn.setInstanceFollowRedirects(true);
+            conn.connect();
+
+            int code = conn.getResponseCode();
+            if (code == HttpURLConnection.HTTP_MOVED_PERM || code == HttpURLConnection.HTTP_MOVED_TEMP || code == 307 || code == 308) {
+                String newUrl = conn.getHeaderField("Location");
+                conn.disconnect();
+                if (newUrl != null && !newUrl.isEmpty()) {
+                    currentUrl = newUrl;
+                    redirects++;
+                    continue;
+                }
+            }
+
+            if (code != 200 && code != 206) {
+                conn.disconnect();
+                throw new Exception("HTTP " + code + " descargando stream multimedia");
+            }
+
+            break;
+        }
+
+        if (conn == null) {
+            throw new Exception("No se pudo iniciar la conexión HTTP");
+        }
+
+        try (InputStream in = conn.getInputStream();
+             OutputStream out = new FileOutputStream(destFile)) {
+            byte[] buf = new byte[32768];
+            int read;
+            while ((read = in.read(buf)) != -1) {
+                out.write(buf, 0, read);
+            }
+        } finally {
+            conn.disconnect();
+        }
+    }
+
+    private boolean muxMediaTracks(File videoFile, File audioFile, File outputFile) {
+        MediaExtractor videoExtractor = null;
+        MediaExtractor audioExtractor = null;
+        MediaMuxer muxer = null;
+
+        try {
+            videoExtractor = new MediaExtractor();
+            videoExtractor.setDataSource(videoFile.getAbsolutePath());
+
+            audioExtractor = new MediaExtractor();
+            audioExtractor.setDataSource(audioFile.getAbsolutePath());
+
+            int videoTrack = -1;
+            int audioTrack = -1;
+
+            for (int i = 0; i < videoExtractor.getTrackCount(); i++) {
+                MediaFormat format = videoExtractor.getTrackFormat(i);
+                String mime = format.getString(MediaFormat.KEY_MIME);
+                if (mime != null && mime.startsWith("video/")) {
+                    videoTrack = i;
+                    break;
+                }
+            }
+
+            for (int i = 0; i < audioExtractor.getTrackCount(); i++) {
+                MediaFormat format = audioExtractor.getTrackFormat(i);
+                String mime = format.getString(MediaFormat.KEY_MIME);
+                if (mime != null && mime.startsWith("audio/")) {
+                    audioTrack = i;
+                    break;
+                }
+            }
+
+            if (videoTrack < 0) {
+                return false;
+            }
+
+            muxer = new MediaMuxer(outputFile.getAbsolutePath(), MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+
+            videoExtractor.selectTrack(videoTrack);
+            MediaFormat vFormat = videoExtractor.getTrackFormat(videoTrack);
+            int muxerVideoTrack = muxer.addTrack(vFormat);
+
+            int muxerAudioTrack = -1;
+            if (audioTrack >= 0) {
+                audioExtractor.selectTrack(audioTrack);
+                MediaFormat aFormat = audioExtractor.getTrackFormat(audioTrack);
+                muxerAudioTrack = muxer.addTrack(aFormat);
+            }
+
+            muxer.start();
+
+            ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024 * 2);
+            MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+
+            // Interleave Video Track
+            while (true) {
+                int sampleSize = videoExtractor.readSampleData(buffer, 0);
+                if (sampleSize < 0) break;
+                info.offset = 0;
+                info.size = sampleSize;
+                info.presentationTimeUs = videoExtractor.getSampleTime();
+                info.flags = videoExtractor.getSampleFlags();
+                muxer.writeSampleData(muxerVideoTrack, buffer, info);
+                videoExtractor.advance();
+            }
+
+            // Interleave Audio Track
+            if (muxerAudioTrack >= 0) {
+                while (true) {
+                    int sampleSize = audioExtractor.readSampleData(buffer, 0);
+                    if (sampleSize < 0) break;
+                    info.offset = 0;
+                    info.size = sampleSize;
+                    info.presentationTimeUs = audioExtractor.getSampleTime();
+                    info.flags = audioExtractor.getSampleFlags();
+                    muxer.writeSampleData(muxerAudioTrack, buffer, info);
+                    audioExtractor.advance();
+                }
+            }
+
+            muxer.stop();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (muxer != null) {
+                try { muxer.release(); } catch (Exception ignored) {}
+            }
+            if (videoExtractor != null) {
+                try { videoExtractor.release(); } catch (Exception ignored) {}
+            }
+            if (audioExtractor != null) {
+                try { audioExtractor.release(); } catch (Exception ignored) {}
+            }
         }
     }
 

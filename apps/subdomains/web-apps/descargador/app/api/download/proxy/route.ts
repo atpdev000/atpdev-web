@@ -3,13 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import dns from 'dns'
+import https from 'https'
 import { spawn } from 'child_process'
 import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
-
-try {
-  dns.setDefaultResultOrder('ipv6first')
-} catch {}
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
 const COMBINE_TIMEOUT = 300000 // 5 minutos para combinación
@@ -413,26 +409,68 @@ async function handleCombinedDownload(videoUrl: string, audioUrl: string, filena
     console.log('📹 Video URL:', videoUrl.substring(0, 100) + '...')
     console.log('🎶 Audio URL:', audioUrl.substring(0, 100) + '...')
 
-    const downloadStreamFile = async (url: string, destPath: string) => {
-      const headers = getPlatformHeaders(url, false, false)
-      const res = await fetch(url, { headers, redirect: 'follow', signal: AbortSignal.timeout(120000) })
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status} al descargar stream`)
-      }
-      if (!res.body) {
-        throw new Error('No se recibió cuerpo de respuesta multimedia')
-      }
-      const fileStream = fs.createWriteStream(destPath)
-      const reader = res.body.getReader()
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        fileStream.write(value)
-      }
-      fileStream.end()
-      await new Promise<void>((resolve, reject) => {
-        fileStream.on('finish', resolve)
-        fileStream.on('error', reject)
+    const downloadStreamFile = (url: string, destPath: string): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        let redirects = 0
+
+        const execute = (currentUrl: string) => {
+          try {
+            const parsed = new URL(currentUrl)
+            const ipMatch = currentUrl.match(/[?&]ip=([^&]+)/)
+            const signedIp = ipMatch ? decodeURIComponent(ipMatch[1]) : ''
+            const family = signedIp.includes(':') ? 6 : (signedIp.includes('.') ? 4 : undefined)
+            const headers = getPlatformHeaders(currentUrl, false, false)
+
+            const options: https.RequestOptions = {
+              hostname: parsed.hostname,
+              port: parsed.port || 443,
+              path: parsed.pathname + parsed.search,
+              method: 'GET',
+              family,
+              headers: {
+                ...headers,
+                'Range': 'bytes=0-'
+              }
+            }
+
+            const req = https.request(options, (res) => {
+              if (res.statusCode && [301, 302, 303, 307, 308].includes(res.statusCode) && res.headers.location) {
+                redirects++
+                if (redirects > 6) {
+                  reject(new Error('Demasiados redireccionamientos'))
+                  return
+                }
+                let nextUrl = res.headers.location
+                if (nextUrl.startsWith('/')) {
+                  nextUrl = `${parsed.protocol}//${parsed.host}${nextUrl}`
+                }
+                execute(nextUrl)
+                return
+              }
+
+              if (res.statusCode !== 200 && res.statusCode !== 206) {
+                reject(new Error(`HTTP ${res.statusCode} al descargar stream`))
+                return
+              }
+
+              const fileStream = fs.createWriteStream(destPath)
+              res.pipe(fileStream)
+              fileStream.on('finish', () => resolve())
+              fileStream.on('error', reject)
+              res.on('error', reject)
+            })
+
+            req.on('error', reject)
+            req.setTimeout(120000, () => {
+              req.destroy(new Error('Timeout descargando stream'))
+            })
+            req.end()
+          } catch (err) {
+            reject(err)
+          }
+        }
+
+        execute(url)
       })
     }
 

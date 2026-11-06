@@ -19,6 +19,12 @@ export interface WhatsAppStatusPluginInterface {
     count: number;
   }>;
   saveToGallery(options: { filePath: string }): Promise<{ success: boolean; uri: string; fileName: string }>;
+  downloadAndCombineMedia(options: {
+    videoUrl?: string;
+    audioUrl?: string;
+    filename: string;
+    isAudio?: boolean;
+  }): Promise<{ success: boolean; uri: string; fileName: string }>;
   openWhatsApp(options?: { target?: 'whatsapp' | 'business' }): Promise<{ success: boolean; package?: string }>;
   openMedia(options: { filePath: string }): Promise<{ success: boolean }>;
   shareFile(options: { filePath: string; title?: string }): Promise<{ success: boolean }>;
@@ -192,4 +198,22 @@ export async function saveNativeMediaFile(
     uri: savedUri,
     path: finalPath
   };
+}
+
+/**
+ * Descarga y combina flujos de video y audio directamente en el dispositivo Android
+ * mediante MediaMuxer nativo por hardware, eludiendo restricciones de red y proxy.
+ */
+export async function downloadAndCombineNative(
+  videoUrl?: string,
+  audioUrl?: string,
+  filename?: string,
+  isAudio: boolean = false
+): Promise<{ success: boolean; uri: string; fileName: string }> {
+  return await NativeWhatsAppStatus.downloadAndCombineMedia({
+    videoUrl: videoUrl || '',
+    audioUrl: audioUrl || '',
+    filename: filename || `media_${Date.now()}.${isAudio ? 'mp3' : 'mp4'}`,
+    isAudio
+  });
 }
