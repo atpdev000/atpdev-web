@@ -241,10 +241,12 @@ export default function InstagramDownloader({ initialUrl, autoSearch }: Download
 
         const blob = await readStreamWithProgress(response, format.isAudio ? 'audio/mp4' : 'video/mp4')
 
+        let savedFilePath = ''
         if (isNative) {
           try {
             const isAudio = Boolean(format.isAudio);
             const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (pct) => setDownloadProgress(pct));
+            savedFilePath = saveRes?.uri || '';
             const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
 
             await scheduleNotification(
@@ -281,7 +283,8 @@ export default function InstagramDownloader({ initialUrl, autoSearch }: Download
           status: 'completed',
           format: format.quality,
           fileSize: formatBytes(blob.size),
-          mimeType: 'video/mp4'
+          mimeType: format.isAudio ? 'audio/mp4' : 'video/mp4',
+          filePath: savedFilePath
         });
 
       } catch (err: any) {

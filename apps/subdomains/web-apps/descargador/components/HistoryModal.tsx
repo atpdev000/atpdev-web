@@ -46,39 +46,54 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
     };
 
     const handleItemClick = async (item: HistoryItem) => {
-        if (item.filePath && Capacitor.isNativePlatform()) {
-            try {
-                await FileOpener.open({
-                    filePath: item.filePath,
-                    contentType: item.mimeType || 'video/mp4'
-                });
-                return;
-            } catch (e) {
-                console.warn('Error abriendo archivo local con FileOpener, probando NativeWhatsAppStatus.openMedia:', e);
+        if (Capacitor.isNativePlatform()) {
+            if (item.filePath) {
+                // 1. Probar abrir primero con nuestro reproductor nativo (FileProvider + Intent.ACTION_VIEW con chooser)
                 try {
                     await NativeWhatsAppStatus.openMedia({ filePath: item.filePath });
                     return;
                 } catch (openErr) {
-                    console.warn('Error con NativeWhatsAppStatus.openMedia:', openErr);
+                    console.warn('NativeWhatsAppStatus.openMedia falló, probando FileOpener:', openErr);
+                }
+
+                // 2. Probar con FileOpener
+                try {
+                    await FileOpener.open({
+                        filePath: item.filePath,
+                        contentType: item.mimeType || 'video/mp4'
+                    });
+                    return;
+                } catch (e) {
+                    console.warn('FileOpener falló:', e);
                 }
             }
-        }
-        
-        if (item.originalUrl) {
-            window.open(item.originalUrl, '_blank');
-        } else {
+
+            // Si el archivo no tiene filePath guardado (ej. descargas previas antes de la actualización)
             try {
-                if (Capacitor.isNativePlatform()) {
-                    await Dialog.alert({
-                        title: 'No se puede abrir',
-                        message: 'El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.'
-                    });
-                } else {
-                    alert('El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.');
+                const res = await Dialog.confirm({
+                    title: 'Reproducir Video',
+                    message: `El archivo descargado se guardó en la memoria de tu teléfono (en tu Galería de videos o en la carpeta "FTYdownloaderPro Video").\n\nPuedes reproducirlo directamente desde tu Galería.\n\n¿Deseas visitar el enlace de origen en ${item.platform.toUpperCase()}?`,
+                    okButtonTitle: 'Ir al enlace',
+                    cancelButtonTitle: 'Entendido'
+                });
+                if (res.value && item.originalUrl) {
+                    window.open(item.originalUrl, '_blank');
                 }
             } catch {
-                alert('El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.');
+                await Dialog.alert({
+                    title: 'Guardado en tu Galería',
+                    message: 'El archivo descargado se guardó en tu Galería o Administrador de archivos (en la carpeta "FTYdownloaderPro Video").'
+                });
             }
+            return;
+        }
+        
+        if (item.filePath) {
+            window.open(item.filePath, '_blank');
+        } else if (item.originalUrl) {
+            window.open(item.originalUrl, '_blank');
+        } else {
+            alert('El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.');
         }
     };
 

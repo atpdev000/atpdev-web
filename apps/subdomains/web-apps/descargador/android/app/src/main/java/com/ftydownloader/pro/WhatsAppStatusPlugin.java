@@ -223,7 +223,22 @@ public class WhatsAppStatusPlugin extends Plugin {
                 filePath = Uri.parse(filePath).getPath();
             }
             filePath = java.net.URLDecoder.decode(filePath, "UTF-8");
-            return new File(filePath);
+            File file = new File(filePath);
+            if (file.exists()) return file;
+
+            // Revisar en el directorio interno de la aplicación
+            File inFiles = new File(getContext().getFilesDir(), filePath);
+            if (inFiles.exists()) return inFiles;
+
+            // Revisar en Download público
+            File inDownload = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filePath);
+            if (inDownload.exists()) return inDownload;
+
+            // Revisar en Movies público
+            File inMovies = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), filePath);
+            if (inMovies.exists()) return inMovies;
+
+            return file;
         } catch (Exception e) {
             return new File(filePath);
         }
@@ -589,6 +604,25 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
 
         try {
+            if (filePath.startsWith("content://")) {
+                Uri contentUri = Uri.parse(filePath);
+                String mimeType = getContext().getContentResolver().getType(contentUri);
+                if (mimeType == null) {
+                    mimeType = "video/*";
+                }
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(contentUri, mimeType);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                Intent chooser = Intent.createChooser(intent, "Reproducir con");
+                chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(chooser);
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                call.resolve(ret);
+                return;
+            }
+
             File file = resolveFile(filePath);
             if (file == null || !file.exists()) {
                 call.reject("El archivo no existe: " + filePath);
@@ -616,7 +650,9 @@ public class WhatsAppStatusPlugin extends Plugin {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(contentUri, mimeType);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(intent);
+            Intent chooser = Intent.createChooser(intent, "Reproducir con");
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(chooser);
 
             JSObject ret = new JSObject();
             ret.put("success", true);
@@ -637,6 +673,27 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
 
         try {
+            if (filePath.startsWith("content://")) {
+                Uri contentUri = Uri.parse(filePath);
+                String mimeType = getContext().getContentResolver().getType(contentUri);
+                if (mimeType == null) {
+                    mimeType = "video/*";
+                }
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType(mimeType);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                Intent chooser = Intent.createChooser(shareIntent, title);
+                chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(chooser);
+
+                JSObject ret = new JSObject();
+                ret.put("success", true);
+                call.resolve(ret);
+                return;
+            }
+
             File file = resolveFile(filePath);
             if (file == null || !file.exists()) {
                 call.reject("El archivo no existe en el almacenamiento: " + filePath);
