@@ -1,5 +1,7 @@
 // app/api/download/tiktok/route.ts
 import { NextRequest, NextResponse } from 'next/server'
+import { spawn } from 'child_process'
+import { findYtDlpBinary } from '@/lib/server/binaries'
 
 export const maxDuration = 80;
 
@@ -9,38 +11,151 @@ function isValidTiktokUrl(url: string): boolean {
   return (
     clean.includes('tiktok.com') ||
     clean.includes('vm.tiktok.com') ||
-    clean.includes('vt.tiktok.com')
+    clean.includes('vt.tiktok.com') ||
+    clean.includes('douyin.com')
   )
 }
 
 // Resuelve redirecciones cortas (ej: vm.tiktok.com, vt.tiktok.com, tiktok.com/t/)
 async function resolveTikTokRedirect(url: string): Promise<string> {
-  const cleanUrl = url.trim()
+  let cleanUrl = url.trim()
   if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-    return 'https://' + cleanUrl
+    cleanUrl = 'https://' + cleanUrl
   }
 
-  if (cleanUrl.includes('/video/')) {
-    return cleanUrl
+  // Si ya tiene el ID de video o foto canonical
+  const directMatch = cleanUrl.match(/\/(video|photo|v)\/(\d+)/i)
+  if (directMatch) {
+    return cleanUrl.split('?')[0]
   }
 
   try {
-    const res = await fetch(cleanUrl, {
-      method: 'GET',
-      redirect: 'follow',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+    let current = cleanUrl
+    for (let hop = 0; hop < 5; hop++) {
+      const res = await fetch(current, {
+        method: 'GET',
+        redirect: 'manual',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        }
+      })
+
+      const loc = res.headers.get('location')
+      if (loc) {
+        const nextUrl = loc.startsWith('http') ? loc : new URL(loc, current).toString()
+        console.log(`🔀 [TikTok Redirect Hop ${hop + 1}]: ${current} -> ${nextUrl}`)
+
+        const match = nextUrl.match(/\/(video|photo|v)\/(\d+)/i)
+        if (match) {
+          const canonical = nextUrl.split('?')[0]
+          console.log(`🎯 [TikTok] Canonical URL detectada: ${canonical}`)
+          return canonical
+        }
+
+        if (nextUrl.includes('tiktok.com/?') || nextUrl === 'https://www.tiktok.com/' || nextUrl === 'https://m.tiktok.com/') {
+          break
+        }
+        current = nextUrl
+      } else {
+        // Si no hay cabecera location, intentar leer si el HTML contiene og:url o canonical
+        try {
+          const html = await res.text()
+          const ogMatch = html.match(/<meta[^>]+property=["']og:url["'][^>]+content=["']([^"']+)["']/i) ||
+                          html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i) ||
+                          html.match(/https?:\/\/(?:www\.)?tiktok\.com\/@[^/]+\/video\/\d+/i)
+          if (ogMatch && (ogMatch[1] || ogMatch[0])) {
+            const extracted = (ogMatch[1] || ogMatch[0]).split('?')[0]
+            if (extracted.includes('/video/') || extracted.includes('/photo/')) {
+              console.log(`🎯 [TikTok] Canonical extraída de HTML: ${extracted}`)
+              return extracted
+            }
+          }
+        } catch {}
+        break
       }
-    })
-    if (res.url && res.url.includes('/video/')) {
-      return res.url
     }
-  } catch (err) {
-    console.warn('⚠️ [TikTok] No se pudo resolver redirección:', err)
+  } catch (err: any) {
+    console.warn('⚠️ [TikTok] Error resolviendo redirección manual:', err.message)
   }
 
   return cleanUrl
+}
+
+function extractWithYtDlp(targetUrl: string): Promise<any> {
+  return new Promise((resolve) => {
+    try {
+      const binPath = findYtDlpBinary()
+      if (!binPath) return resolve(null)
+
+      const args = [
+        '--socket-timeout', '14',
+        '--dump-json',
+        '--no-warnings',
+        '--no-check-certificates',
+        '--geo-bypass',
+        targetUrl
+      ]
+
+      console.log(`🚀 [TikTok yt-dlp] Ejecutando extractor para: ${targetUrl}`)
+      const proc = spawn(binPath, args)
+      let stdout = ''
+      let isDone = false
+
+      const timer = setTimeout(() => {
+        if (!isDone) {
+          isDone = true
+          try { proc.kill('SIGKILL') } catch {}
+          resolve(null)
+        }
+      }, 15000)
+
+      proc.stdout.on('data', (d) => { stdout += d.toString() })
+      proc.on('error', (err) => {
+        if (isDone) return
+        isDone = true
+        clearTimeout(timer)
+        console.warn('⚠️ [TikTok yt-dlp] Error de proceso:', err.message)
+        resolve(null)
+      })
+      proc.on('close', (code) => {
+        if (isDone) return
+        isDone = true
+        clearTimeout(timer)
+        if (code === 0 && stdout) {
+          try {
+            const data = JSON.parse(stdout)
+            const directUrl = data.url
+            const formats = Array.isArray(data.formats) ? data.formats : []
+            const bestVideo = formats.slice().reverse().find((f: any) => f.vcodec !== 'none' && f.url && f.url.startsWith('http'))
+            const bestAudio = formats.slice().reverse().find((f: any) => (f.vcodec === 'none' || f.acodec !== 'none') && f.url && f.url.startsWith('http'))
+
+            const videoUrl = directUrl || bestVideo?.url
+            if (videoUrl) {
+              resolve({
+                title: data.title || 'Video de TikTok',
+                thumbnail: data.thumbnail || '',
+                duration: formatDuration(data.duration),
+                author: data.uploader || '@tiktokuser',
+                author_avatar: data.thumbnail,
+                no_watermark_url: videoUrl,
+                watermark_url: undefined,
+                audio_url: bestAudio?.url || data.url,
+                size: formatFileSize(bestVideo?.filesize || 15000000),
+                watermark_size: formatFileSize(16000000),
+                audio_size: formatFileSize(bestAudio?.filesize || 2000000),
+                method: 'yt_dlp'
+              })
+              return
+            }
+          } catch {}
+        }
+        resolve(null)
+      })
+    } catch {
+      resolve(null)
+    }
+  })
 }
 
 export async function POST(request: NextRequest) {
@@ -49,7 +164,7 @@ export async function POST(request: NextRequest) {
 
     if (!url || !isValidTiktokUrl(url)) {
       return NextResponse.json(
-        { error: 'URL de TikTok inválida. Ejemplo: https://www.tiktok.com/@usuario/video/1234567890 o https://vm.tiktok.com/...' },
+        { error: 'URL de TikTok inválida. Ejemplo: https://www.tiktok.com/@usuario/video/1234567890 o https://vt.tiktok.com/...' },
         { status: 400 }
       )
     }
@@ -115,21 +230,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Función principal para obtener datos reales de TikTok
+// Función principal para obtener datos reales de TikTok con multi-tier extractors
 async function getTikTokVideoInfo(resolvedUrl: string, originalUrl: string): Promise<any> {
   const urlsToTry = Array.from(new Set([resolvedUrl, originalUrl].filter(Boolean)))
 
   for (const targetUrl of urlsToTry) {
-    // 🚀 TIER 1: TikWM API oficial (Soporta HD sin marca de agua y audio limpio)
+    // 🚀 TIER 1A: TikWM API oficial GET (Soporta HD sin marca de agua y audio limpio)
     try {
-      console.log(`🌐 [TikTok] Intentando extracción con TikWM para: ${targetUrl}`)
+      console.log(`🌐 [TikTok] Intentando extracción con TikWM GET para: ${targetUrl}`)
       const tikwmUrl = `https://www.tikwm.com/api/?url=${encodeURIComponent(targetUrl)}&hd=1`
       const tikwmRes = await fetch(tikwmUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
           'Accept': 'application/json',
         },
-        signal: AbortSignal.timeout(12000)
+        signal: AbortSignal.timeout(10000)
       })
 
       if (tikwmRes.ok) {
@@ -138,7 +253,7 @@ async function getTikTokVideoInfo(resolvedUrl: string, originalUrl: string): Pro
           const item = data.data
           const noWatermark = item.hdplay || item.play
           if (noWatermark) {
-            console.log(`✅ [TikTok TikWM] Video encontrado: "${item.title}" por ${item.author?.nickname}`)
+            console.log(`✅ [TikTok TikWM GET] Video encontrado: "${item.title}" por ${item.author?.nickname}`)
             return {
               title: item.title || 'Video de TikTok',
               thumbnail: item.cover,
@@ -151,16 +266,105 @@ async function getTikTokVideoInfo(resolvedUrl: string, originalUrl: string): Pro
               size: formatFileSize(item.hd_size || item.size || 15000000),
               watermark_size: formatFileSize(item.wm_size || item.size || 16000000),
               audio_size: formatFileSize(item.music_size || 2000000),
-              method: 'tikwm_api'
+              method: 'tikwm_get'
             }
           }
         }
       }
     } catch (e: any) {
-      console.warn('⚠️ [TikTok] TikWM falló:', e.message)
+      console.warn('⚠️ [TikTok] TikWM GET falló:', e.message)
     }
 
-    // 🚀 TIER 2: Tiklydown API
+    // 🚀 TIER 1B: TikWM API oficial POST
+    try {
+      console.log(`🌐 [TikTok] Intentando TikWM POST para: ${targetUrl}`)
+      const postParams = new URLSearchParams({ url: targetUrl, hd: '1' })
+      const tikwmPostRes = await fetch('https://www.tikwm.com/api/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+        },
+        body: postParams.toString(),
+        signal: AbortSignal.timeout(10000)
+      })
+
+      if (tikwmPostRes.ok) {
+        const data = await tikwmPostRes.json()
+        if (data && data.code === 0 && data.data) {
+          const item = data.data
+          const noWatermark = item.hdplay || item.play
+          if (noWatermark) {
+            console.log(`✅ [TikTok TikWM POST] Video encontrado: "${item.title}" por ${item.author?.nickname}`)
+            return {
+              title: item.title || 'Video de TikTok',
+              thumbnail: item.cover,
+              duration: formatDuration(item.duration),
+              author: item.author?.nickname || `@${item.author?.unique_id}` || '@tiktokuser',
+              author_avatar: item.author?.avatar,
+              no_watermark_url: noWatermark,
+              watermark_url: item.wmplay,
+              audio_url: item.music,
+              size: formatFileSize(item.hd_size || item.size || 15000000),
+              watermark_size: formatFileSize(item.wm_size || item.size || 16000000),
+              audio_size: formatFileSize(item.music_size || 2000000),
+              method: 'tikwm_post'
+            }
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn('⚠️ [TikTok] TikWM POST falló:', e.message)
+    }
+
+    // 🚀 TIER 2: Extractor nativo yt-dlp (Bypasea restricciones y soporta cualquier URL)
+    try {
+      const ytData = await extractWithYtDlp(targetUrl)
+      if (ytData) {
+        console.log(`✅ [TikTok yt-dlp] Video encontrado: "${ytData.title}"`)
+        return ytData
+      }
+    } catch (e: any) {
+      console.warn('⚠️ [TikTok] yt-dlp falló:', e.message)
+    }
+
+    // 🚀 TIER 3: Cloudflare Worker tdownv4
+    try {
+      console.log(`🌐 [TikTok] Intentando tdownv4 worker...`)
+      const tdownRes = await fetch(`https://tdownv4.sl-bjs.workers.dev/?down=${encodeURIComponent(targetUrl)}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json'
+        },
+        signal: AbortSignal.timeout(10000)
+      })
+
+      if (tdownRes.ok) {
+        const data = await tdownRes.json()
+        if (data && data.download_url) {
+          console.log(`✅ [TikTok tdownv4] Éxito con: "${data.title}"`)
+          return {
+            title: data.title || 'Video de TikTok',
+            thumbnail: data.author?.avatar || '',
+            duration: formatDuration(data.author?.duration || 0),
+            author: data.author?.nickname || data.author?.username || '@tiktokuser',
+            author_avatar: data.author?.avatar,
+            no_watermark_url: data.download_url,
+            watermark_url: undefined,
+            audio_url: data.author?.audio_url,
+            size: formatFileSize(15000000),
+            watermark_size: formatFileSize(16000000),
+            audio_size: formatFileSize(2000000),
+            method: 'tdownv4_worker'
+          }
+        }
+      }
+    } catch (e: any) {
+      console.warn('⚠️ [TikTok] tdownv4 falló:', e.message)
+    }
+
+    // 🚀 TIER 4: Tiklydown API
     try {
       console.log(`🌐 [TikTok] Intentando alternativa Tiklydown...`)
       const tiklyRes = await fetch(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(targetUrl)}`, {
@@ -199,7 +403,7 @@ async function getTikTokVideoInfo(resolvedUrl: string, originalUrl: string): Pro
     }
   }
 
-  // ⛔ NUNCA devolver datos mock/falsos (fotos de mar o barcos de picsum)
+  // ⛔ NUNCA devolver datos mock/falsos
   return null
 }
 
