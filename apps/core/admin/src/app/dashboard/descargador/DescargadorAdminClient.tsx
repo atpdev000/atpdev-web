@@ -38,7 +38,12 @@ import {
   Monitor,
   Wand2,
   Loader2,
-  X
+  X,
+  Mail,
+  Phone,
+  Search,
+  Bell,
+  Megaphone
 } from "lucide-react";
 import { SubdomainConfig, SubdomainTheme, ACCENT_COLOR_MAP } from "@atpdev/database";
 import { saveDescargadorConfigAction, checkRailwayBackendHealthAction } from "./actions";
@@ -87,7 +92,7 @@ const ACCENT_PRESETS = [
 
 export default function DescargadorAdminClient({ initialConfig }: Props) {
   const [config, setConfig] = useState<SubdomainConfig>(initialConfig);
-  const [activeTab, setActiveTab] = useState<'modules' | 'branding' | 'theme' | 'backend'>('modules');
+  const [activeTab, setActiveTab] = useState<'modules' | 'branding' | 'theme' | 'backend' | 'seo' | 'contact'>('modules');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -259,7 +264,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('modules')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
             activeTab === 'modules'
               ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
@@ -271,7 +276,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
 
         <button
           onClick={() => setActiveTab('backend')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
             activeTab === 'backend'
               ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
@@ -283,19 +288,43 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
 
         <button
           onClick={() => setActiveTab('branding')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
             activeTab === 'branding'
               ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
           }`}
         >
           <Settings className="w-4 h-4" />
-          Branding & SEO
+          Textos & Hero
+        </button>
+
+        <button
+          onClick={() => setActiveTab('seo')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
+            activeTab === 'seo'
+              ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          <Search className="w-4 h-4" />
+          SEO & Metadatos
+        </button>
+
+        <button
+          onClick={() => setActiveTab('contact')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
+            activeTab === 'contact'
+              ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          <Mail className="w-4 h-4" />
+          Contacto & Canales
         </button>
 
         <button
           onClick={() => setActiveTab('theme')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
             activeTab === 'theme'
               ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
@@ -651,20 +680,20 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
         </div>
       )}
 
-      {/* TAB 3: BRANDING & SEO */}
+      {/* TAB 3: BRANDING & HERO */}
       {activeTab === 'branding' && (
         <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <Settings className="w-5 h-5 text-blue-400" />
-            Textos, Títulos y Metadatos SEO
+            Identidad de Marca, Hero y Anuncios
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Nombre del Sitio</label>
+              <label className="text-xs font-medium text-slate-300">Nombre del Sitio (Branding)</label>
               <input
                 type="text"
-                value={config.branding.site_title}
+                value={config.branding.site_title || ''}
                 onChange={(e) => setConfig({
                   ...config,
                   branding: { ...config.branding, site_title: e.target.value }
@@ -677,7 +706,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               <label className="text-xs font-medium text-slate-300">Eslogan (Tagline)</label>
               <input
                 type="text"
-                value={config.branding.site_tagline}
+                value={config.branding.site_tagline || ''}
                 onChange={(e) => setConfig({
                   ...config,
                   branding: { ...config.branding, site_tagline: e.target.value }
@@ -687,10 +716,109 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
             </div>
 
             <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-medium text-slate-300">Hero Badge (Píldora Superior)</label>
+              <input
+                type="text"
+                value={config.branding.hero_badge || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  branding: { ...config.branding, hero_badge: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Hero Título (Prefijo)</label>
+              <input
+                type="text"
+                value={config.branding.hero_title_prefix || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  branding: { ...config.branding, hero_title_prefix: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Hero Título (Destacado Neón)</label>
+              <input
+                type="text"
+                value={config.branding.hero_title_highlight || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  branding: { ...config.branding, hero_title_highlight: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-medium text-slate-300">Descripción del Hero</label>
+              <textarea
+                rows={3}
+                value={config.branding.hero_description || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  branding: { ...config.branding, hero_description: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none resize-none"
+              />
+            </div>
+
+            {/* Barra de Anuncios */}
+            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 md:col-span-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Megaphone className="w-4 h-4 text-amber-400" />
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">Barra de Notificaciones Superior</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setConfig({
+                    ...config,
+                    branding: { ...config.branding, announcement_enabled: !config.branding.announcement_enabled }
+                  })}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                    config.branding.announcement_enabled ? 'bg-amber-500' : 'bg-slate-700'
+                  }`}
+                >
+                  <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition ${
+                    config.branding.announcement_enabled ? 'translate-x-4' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
+
+              <input
+                type="text"
+                placeholder="Ej: ⚡ Descargas ilimitadas en máxima calidad sin marcas de agua."
+                value={config.branding.announcement_text || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  branding: { ...config.branding, announcement_text: e.target.value }
+                })}
+                className="w-full px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-xs focus:border-amber-500 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: SEO & METADATOS */}
+      {activeTab === 'seo' && (
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Search className="w-5 h-5 text-blue-400" />
+            Optimización en Motores de Búsqueda (SEO)
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5 md:col-span-2">
               <label className="text-xs font-medium text-slate-300">Título SEO (Meta Title)</label>
               <input
                 type="text"
-                value={config.seo.meta_title}
+                value={config.seo.meta_title || ''}
                 onChange={(e) => setConfig({
                   ...config,
                   seo: { ...config.seo, meta_title: e.target.value }
@@ -703,7 +831,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               <label className="text-xs font-medium text-slate-300">Descripción SEO (Meta Description)</label>
               <textarea
                 rows={3}
-                value={config.seo.meta_description}
+                value={config.seo.meta_description || ''}
                 onChange={(e) => setConfig({
                   ...config,
                   seo: { ...config.seo, meta_description: e.target.value }
@@ -716,7 +844,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               <label className="text-xs font-medium text-slate-300">URL Canónica</label>
               <input
                 type="text"
-                value={config.seo.canonical_url}
+                value={config.seo.canonical_url || ''}
                 onChange={(e) => setConfig({
                   ...config,
                   seo: { ...config.seo, canonical_url: e.target.value }
@@ -726,13 +854,95 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-slate-300">Hero Badge</label>
+              <label className="text-xs font-medium text-slate-300">Palabras Clave (Separadas por comas)</label>
               <input
                 type="text"
-                value={config.branding.hero_badge}
+                value={Array.isArray(config.seo.keywords) ? config.seo.keywords.join(', ') : ''}
                 onChange={(e) => setConfig({
                   ...config,
-                  branding: { ...config.branding, hero_badge: e.target.value }
+                  seo: { 
+                    ...config.seo, 
+                    keywords: e.target.value.split(',').map(k => k.trim()).filter(Boolean) 
+                  }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: CONTACTO & CANALES */}
+      {activeTab === 'contact' && (
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Mail className="w-5 h-5 text-blue-400" />
+            Canales de Atención, Soporte y Contacto Oficial
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Email Oficial de Soporte</label>
+              <input
+                type="email"
+                value={config.contact?.email || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  contact: { ...config.contact, email: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">WhatsApp de Soporte</label>
+              <input
+                type="text"
+                value={config.contact?.whatsapp || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  contact: { ...config.contact, whatsapp: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-medium text-slate-300">URL del Centro de Ayuda / Soporte</label>
+              <input
+                type="text"
+                value={config.contact?.support_url || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  contact: { ...config.contact, support_url: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Canal de Telegram (Opcional)</label>
+              <input
+                type="text"
+                placeholder="https://t.me/atpdev"
+                value={config.contact?.telegram_channel_url || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  contact: { ...config.contact, telegram_channel_url: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Canal de WhatsApp (Opcional)</label>
+              <input
+                type="text"
+                placeholder="https://whatsapp.com/channel/..."
+                value={config.contact?.whatsapp_channel_url || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  contact: { ...config.contact, whatsapp_channel_url: e.target.value }
                 })}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
               />
