@@ -4,21 +4,27 @@ import { blogPosts } from '@/lib/content/blog-posts'
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
 
-    // Rutas estáticas
+    // Rutas estáticas canónicas
     const staticRoutes = [
         '',
         '/about',
         '/contact',
         '/faq',
         '/blog',
+        '/planes',
         '/tools',
-        '/privacy-policy',
-        '/terms-of-service',
+        '/tools/facebook',
+        '/tools/tiktok',
+        '/tools/youtube',
+        '/legal/privacidad',
+        '/legal/terminos',
+        '/legal/cookies',
+        '/legal/copyright',
     ].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
         changeFrequency: 'weekly' as const,
-        priority: route === '' ? 1 : 0.8,
+        priority: route === '' ? 1 : (route.startsWith('/legal') ? 0.5 : 0.8),
     }))
 
     // Rutas dinámicas del blog

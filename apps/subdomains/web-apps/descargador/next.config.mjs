@@ -57,6 +57,31 @@ const nextConfig = {
         destination: '/legal/privacidad',
         permanent: true,
       },
+      {
+        source: '/privacy',
+        destination: '/legal/privacidad',
+        permanent: true,
+      },
+      {
+        source: '/terms-of-service',
+        destination: '/legal/terminos',
+        permanent: true,
+      },
+      {
+        source: '/terms',
+        destination: '/legal/terminos',
+        permanent: true,
+      },
+      {
+        source: '/cookies',
+        destination: '/legal/cookies',
+        permanent: true,
+      },
+      {
+        source: '/dmca',
+        destination: '/legal/copyright',
+        permanent: true,
+      },
     ]
   },
 }

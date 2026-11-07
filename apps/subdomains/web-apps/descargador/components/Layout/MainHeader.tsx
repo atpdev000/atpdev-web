@@ -16,7 +16,7 @@ export default function MainHeader() {
                 FTYDownloader Pro
               </h1>
               <p className="text-sm text-gray-600">
-                Facebook & TikTok Downloader
+                Descargador Multimedia Pro
               </p>
             </div>
           </Link>
