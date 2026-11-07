@@ -4,6 +4,7 @@ export const translations = {
   es: {
     nav: {
       home: 'Inicio',
+      tools: 'Herramientas',
       blog: 'Blog',
       download: 'Descargar Videos',
       faq: 'FAQ',
@@ -108,11 +109,29 @@ export const translations = {
       terms: 'Términos de Servicio',
       privacy: 'Política de Privacidad',
       rights: 'Todos los derechos reservados. Desarrollado por ATP DEV.'
+    },
+    blog: {
+      heroBadge: 'Centro de Aprendizaje & Guías Pro',
+      heroTitlePrefix: 'Guías y Tutoriales para',
+      heroTitleHighlight: 'Creadores Digitales',
+      heroSubtitle: 'Aprende sobre calidad 1080p, extracción de audio MP3, derechos de autor y preservación de contenidos multimedia.',
+      backToDownloader: 'Volver al Descargador',
+      backToBlog: 'Volver al blog',
+      readTime: 'de lectura',
+      readFullGuide: 'Leer Guía Completa',
+      readMore: 'Leer más →',
+      aboutGuideTitle: 'Sobre esta guía',
+      aboutGuideDesc: 'Esta es una guía de referencia redactada por nuestro equipo para asegurar la mejor calidad de descarga e información técnica.',
+      tableOfContents: 'Contenido de esta guía',
+      relatedArticles: 'Artículos Relacionados',
+      previewTitle: 'Nuestras Guías y Tutoriales',
+      previewSubtitle: 'Contenido especializado para que aproveches al máximo tus redes sociales.'
     }
   },
   en: {
     nav: {
       home: 'Home',
+      tools: 'Tools',
       blog: 'Blog',
       download: 'Download Videos',
       faq: 'FAQ',
@@ -217,11 +236,29 @@ export const translations = {
       terms: 'Terms of Service',
       privacy: 'Privacy Policy',
       rights: 'All rights reserved. Powered by ATP DEV.'
+    },
+    blog: {
+      heroBadge: 'Learning Center & Pro Guides',
+      heroTitlePrefix: 'Guides and Tutorials for',
+      heroTitleHighlight: 'Digital Creators',
+      heroSubtitle: 'Learn about 1080p quality, MP3 audio extraction, copyright, and multimedia content preservation.',
+      backToDownloader: 'Back to Downloader',
+      backToBlog: 'Back to blog',
+      readTime: 'read',
+      readFullGuide: 'Read Full Guide',
+      readMore: 'Read more →',
+      aboutGuideTitle: 'About this guide',
+      aboutGuideDesc: 'This is a reference guide written by our team to ensure the best download quality and technical information.',
+      tableOfContents: 'Table of Contents',
+      relatedArticles: 'Related Articles',
+      previewTitle: 'Our Guides & Tutorials',
+      previewSubtitle: 'Specialized content to help you make the most of your social networks.'
     }
   },
   pt: {
     nav: {
       home: 'Início',
+      tools: 'Ferramentas',
       blog: 'Blog',
       download: 'Baixar Vídeos',
       faq: 'FAQ',
@@ -326,6 +363,23 @@ export const translations = {
       terms: 'Termos de Serviço',
       privacy: 'Política de Privacidade',
       rights: 'Todos os direitos reservados. Desenvolvido por ATP DEV.'
+    },
+    blog: {
+      heroBadge: 'Centro de Aprendizado e Guias Pro',
+      heroTitlePrefix: 'Guias e Tutoriais para',
+      heroTitleHighlight: 'Criadores Digitais',
+      heroSubtitle: 'Aprenda sobre qualidade 1080p, extração de áudio MP3, direitos autorais e preservação de conteúdo multimídia.',
+      backToDownloader: 'Voltar ao Baixador',
+      backToBlog: 'Voltar ao blog',
+      readTime: 'de leitura',
+      readFullGuide: 'Ler Guia Completo',
+      readMore: 'Ler mais →',
+      aboutGuideTitle: 'Sobre este guia',
+      aboutGuideDesc: 'Este é um guia de referência escrito pela nossa equipe para garantir a melhor qualidade de download e dados técnicos.',
+      tableOfContents: 'Conteúdo deste guia',
+      relatedArticles: 'Artigos Relacionados',
+      previewTitle: 'Nossos Guias e Tutoriais',
+      previewSubtitle: 'Conteúdo especializado para você aproveitar ao máximo suas redes sociais.'
     }
   }
 };

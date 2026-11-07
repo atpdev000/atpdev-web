@@ -58,7 +58,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200">
+      <header className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200" suppressHydrationWarning>
         <div className="container mx-auto px-4 py-3.5">
           <div className="flex items-center justify-between">
             {/* Logo y nombre con enlace a Home */}
@@ -79,7 +79,7 @@ export default function Header() {
             </Link>
 
             {/* Navegación Desktop */}
-            <nav className="hidden lg:flex items-center space-x-6 text-sm font-medium">
+            <nav className="hidden lg:flex items-center space-x-6 text-sm font-medium" suppressHydrationWarning>
               <Link href="/" className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 {t.nav.home}
               </Link>
