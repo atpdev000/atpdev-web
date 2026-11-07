@@ -145,18 +145,18 @@ export default function HomePage() {
 
         {/* Trust Pills */}
         <div className="pt-4 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-600 dark:text-zinc-300 font-medium">
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 shadow-xs">
+          <Link href="/apps/sorteo-instagram" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 shadow-xs hover:border-pink-300 hover:text-pink-600 transition-colors">
             <InstagramIcon className="w-4 h-4 text-pink-600" /> Instagram Posts & Reels
-          </span>
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 shadow-xs">
+          </Link>
+          <Link href="/sorteos/nuevo?platform=facebook" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 shadow-xs hover:border-blue-300 hover:text-blue-600 transition-colors">
             <FacebookIcon className="w-4 h-4 text-blue-600" /> {t('home_trust_fb')}
-          </span>
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 shadow-xs">
+          </Link>
+          <Link href="/sorteos/nuevo?platform=youtube" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 shadow-xs hover:border-red-300 hover:text-red-600 transition-colors">
             <YoutubeIcon className="w-4 h-4 text-red-600" /> {t('home_trust_yt')}
-          </span>
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 shadow-xs">
+          </Link>
+          <Link href="/verificar" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-800 dark:text-emerald-300 shadow-xs hover:bg-emerald-100 transition-colors">
             <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> {t('home_trust_sha')}
-          </span>
+          </Link>
         </div>
       </section>
 

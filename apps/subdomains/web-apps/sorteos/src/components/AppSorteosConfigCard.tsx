@@ -274,52 +274,39 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
         </p>
       </div>
 
-      {/* ─── 2. TARJETA PRINCIPAL DE CONFIGURACIÓN (AppSorteos Luxury Dark Card) ── */}
+      {/* ─── 2. TARJETA PRINCIPAL DE CONFIGURACIÓN (Estilo AppSorteos) ────────── */}
       <div 
-        className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl space-y-6 transition-all duration-300"
+        className="bg-white dark:bg-[#111827] rounded-3xl p-6 sm:p-10 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 transition-all duration-300"
       >
-        {/* Ambient Glowing Highlights */}
-        <div 
-          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
-          style={{ backgroundColor: selectedColor }}
-        />
-        <div 
-          className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
-          style={{ backgroundColor: selectedColor }}
-        />
-        <div 
-          className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
-          style={{ background: `linear-gradient(90deg, transparent, ${selectedColor}, transparent)` }}
-        />
         {/* Ganadores Stepper */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex items-center justify-between gap-4">
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
           <div>
-            <span className="text-base sm:text-lg font-black font-display tracking-wide block">
+            <span className="text-base sm:text-lg font-black font-display tracking-wide block text-slate-900 dark:text-white">
               Ganadores
             </span>
-            <span className="text-xs text-white/80 font-medium">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               Número de ganadores principales
             </span>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-full p-1.5 border border-white/30">
+          <div className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-full p-1.5 border border-slate-200 dark:border-slate-700 shadow-sm">
             <button
               type="button"
               onClick={() => handleUpdateWinners(-1)}
               disabled={rules.winnersCount <= 1}
-              className="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-black text-xl hover:bg-white/90 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
+              className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white flex items-center justify-center font-black text-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
               aria-label="Disminuir ganadores"
             >
               −
             </button>
-            <span className="w-8 text-center font-black font-display text-2xl select-none">
+            <span className="w-8 text-center font-black font-display text-2xl text-slate-900 dark:text-white select-none">
               {rules.winnersCount}
             </span>
             <button
               type="button"
               onClick={() => handleUpdateWinners(1)}
               disabled={rules.winnersCount >= 50}
-              className="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-black text-xl hover:bg-white/90 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
+              className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white flex items-center justify-center font-black text-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
               aria-label="Aumentar ganadores"
             >
               +
@@ -328,34 +315,34 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
         </div>
 
         {/* Suplentes Stepper */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex items-center justify-between gap-4">
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
           <div className="max-w-xs sm:max-w-md">
-            <span className="text-base sm:text-lg font-black font-display tracking-wide block">
+            <span className="text-base sm:text-lg font-black font-display tracking-wide block text-slate-900 dark:text-white">
               Suplentes
             </span>
-            <p className="text-xs text-white/80 font-medium leading-relaxed">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
               Evita repetir el sorteo si un ganador no cumple las reglas.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/20 backdrop-blur-sm rounded-full p-1.5 border border-white/30 shrink-0">
+          <div className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-full p-1.5 border border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
             <button
               type="button"
               onClick={() => handleUpdateSubstitutes(-1)}
               disabled={rules.substitutesCount <= 0}
-              className="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-black text-xl hover:bg-white/90 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
+              className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white flex items-center justify-center font-black text-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
               aria-label="Disminuir suplentes"
             >
               −
             </button>
-            <span className="w-8 text-center font-black font-display text-2xl select-none">
+            <span className="w-8 text-center font-black font-display text-2xl text-slate-900 dark:text-white select-none">
               {rules.substitutesCount}
             </span>
             <button
               type="button"
               onClick={() => handleUpdateSubstitutes(1)}
               disabled={rules.substitutesCount >= 20}
-              className="w-10 h-10 rounded-full bg-white text-slate-900 flex items-center justify-center font-black text-xl hover:bg-white/90 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
+              className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-white flex items-center justify-center font-black text-xl hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95 transition-all disabled:opacity-40 disabled:scale-100 cursor-pointer shadow-sm"
               aria-label="Aumentar suplentes"
             >
               +
@@ -364,15 +351,15 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
         </div>
 
         {/* Filtrar Duplicados ⭐ Toggle */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex items-center justify-between gap-4">
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-base sm:text-lg font-black font-display tracking-wide">
+              <span className="text-base sm:text-lg font-black font-display tracking-wide text-slate-900 dark:text-white">
                 Filtrar Duplicados
               </span>
-              <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+              <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
             </div>
-            <p className="text-xs text-white/80 font-medium">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               Permitir una sola participación por persona.
             </p>
           </div>
@@ -382,28 +369,26 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
             type="button"
             onClick={handleToggleDuplicates}
             className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-              rules.excludeDuplicates ? 'bg-white' : 'bg-white/30'
+              rules.excludeDuplicates ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
             }`}
             aria-label="Alternar filtrado de duplicados"
           >
             <div
-              className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                rules.excludeDuplicates
-                  ? 'translate-x-6 bg-pink-600'
-                  : 'translate-x-0 bg-white'
+              className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                rules.excludeDuplicates ? 'translate-x-6' : 'translate-x-0'
               }`}
             />
           </button>
         </div>
 
         {/* Premios Toggle */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-4">
+        <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <span className="text-base sm:text-lg font-black font-display tracking-wide block">
+              <span className="text-base sm:text-lg font-black font-display tracking-wide block text-slate-900 dark:text-white">
                 Premios
               </span>
-              <p className="text-xs text-white/80 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                 ¿Quieres definir premios para cada ganador?
               </p>
             </div>
@@ -412,15 +397,13 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
               type="button"
               onClick={handleTogglePrizes}
               className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-                hasPrizes ? 'bg-white' : 'bg-white/30'
+                hasPrizes ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
               }`}
               aria-label="Alternar definición de premios"
             >
               <div
-                className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                  hasPrizes
-                    ? 'translate-x-6 bg-pink-600'
-                    : 'translate-x-0 bg-white'
+                className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                  hasPrizes ? 'translate-x-6' : 'translate-x-0'
                 }`}
               />
             </button>
@@ -428,14 +411,14 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
 
           {/* Lista de premios expandible */}
           {hasPrizes && (
-            <div className="pt-2 border-t border-white/20 space-y-2 animate-in fade-in duration-200">
-              <span className="text-xs font-bold uppercase tracking-wider text-white/90 block">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2 animate-in fade-in duration-200">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
                 Premios asignados a los {rules.winnersCount} ganadores:
               </span>
               <div className="space-y-2">
                 {Array.from({ length: rules.winnersCount }).map((_, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold w-16 text-white/80">
+                    <span className="text-xs font-mono font-bold w-16 text-slate-500">
                       #{idx + 1}:
                     </span>
                     <input
@@ -443,7 +426,7 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                       value={prizesList[idx] || `Premio #${idx + 1}`}
                       onChange={(e) => handlePrizeNameChange(idx, e.target.value)}
                       placeholder={`Ej: Gift card $50, Producto, etc.`}
-                      className="w-full px-3 py-2 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 text-xs font-medium focus:outline-none focus:bg-white/30"
+                      className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs font-medium focus:outline-none focus:border-[#d91a7a]"
                     />
                   </div>
                 ))}
@@ -773,31 +756,18 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
         </div>
       </div>
 
-      {/* ─── 5. FILTROS AVANZADOS (AppSorteos Luxury Dark Card) ────────────────────── */}
+      {/* ─── 5. FILTROS AVANZADOS (Estilo AppSorteos) ────────────────────────── */}
       <div 
-        className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl space-y-6 transition-all duration-300"
+        className="bg-white dark:bg-[#111827] rounded-3xl p-6 sm:p-10 text-slate-900 dark:text-white shadow-xl border border-slate-200 dark:border-slate-800 space-y-6 transition-all duration-300"
       >
-        {/* Ambient Glowing Highlights */}
-        <div 
-          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
-          style={{ backgroundColor: selectedColor }}
-        />
-        <div 
-          className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
-          style={{ backgroundColor: selectedColor }}
-        />
-        <div 
-          className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
-          style={{ background: `linear-gradient(90deg, transparent, ${selectedColor}, transparent)` }}
-        />
         <div className="text-center space-y-1">
-          <h3 className="text-2xl sm:text-3xl font-black font-display tracking-tight">
+          <h3 className="text-2xl sm:text-3xl font-black font-display tracking-tight text-slate-900 dark:text-white">
             Filtros avanzados
           </h3>
           <button
             type="button"
             onClick={() => setShowFaqModal(true)}
-            className="text-xs text-white/80 underline hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1"
+            className="text-xs text-[#d91a7a] hover:underline transition-colors cursor-pointer inline-flex items-center gap-1 font-semibold"
           >
             <span>¿Alguna duda con los filtros? Haz click aquí</span>
             <HelpCircle className="w-3.5 h-3.5" />
@@ -806,13 +776,13 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
 
         <div className="space-y-4 max-w-2xl mx-auto">
           {/* Mínimo de Menciones Toggle */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <span className="text-base font-black font-display block">
+                <span className="text-base font-black font-display block text-slate-900 dark:text-white">
                   Mínimo de Menciones
                 </span>
-                <span className="text-xs text-white/80">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   Exige que cada comentario etiquete a 1 o más amigos
                 </span>
               </div>
@@ -825,24 +795,24 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                   onChangeRules({ ...rules, minMentions: next ? 1 : 0 });
                 }}
                 className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-                  hasMinMentions ? 'bg-white' : 'bg-white/30'
+                  hasMinMentions ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
                 aria-label="Alternar filtro de menciones mínimas"
               >
                 <div
-                  className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                    hasMinMentions ? 'translate-x-6 bg-pink-600' : 'translate-x-0 bg-white'
+                  className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                    hasMinMentions ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
             {hasMinMentions && (
-              <div className="pt-2 border-t border-white/20 flex items-center justify-between gap-3 animate-in fade-in duration-200">
-                <span className="text-xs font-bold text-white/90">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 animate-in fade-in duration-200">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   Cantidad de menciones requeridas:
                 </span>
-                <div className="flex items-center gap-2 bg-white/20 rounded-xl p-1">
+                <div className="flex items-center gap-2 bg-slate-200 dark:bg-slate-800 rounded-xl p-1">
                   {[1, 2, 3, 4, 5].map((cnt) => (
                     <button
                       key={cnt}
@@ -850,8 +820,8 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                       onClick={() => onChangeRules({ ...rules, minMentions: cnt })}
                       className={`w-8 h-8 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                         rules.minMentions === cnt
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-white hover:bg-white/20'
+                          ? 'bg-[#d91a7a] text-white shadow-sm'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
                       }`}
                     >
                       {cnt}
@@ -863,13 +833,13 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
           </div>
 
           {/* Filtrar por #Hashtag Toggle */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <span className="text-base font-black font-display block">
+                <span className="text-base font-black font-display block text-slate-900 dark:text-white">
                   Filtrar por #Hashtag
                 </span>
-                <span className="text-xs text-white/80">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   Válido solo para comentarios que incluyan un hashtag específico
                 </span>
               </div>
@@ -882,42 +852,42 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                   onChangeRules({ ...rules, requiredHashtag: next ? '#sorteopro' : '' });
                 }}
                 className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-                  hasHashtag ? 'bg-white' : 'bg-white/30'
+                  hasHashtag ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
                 aria-label="Alternar filtro por hashtag"
               >
                 <div
-                  className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                    hasHashtag ? 'translate-x-6 bg-pink-600' : 'translate-x-0 bg-white'
+                  className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                    hasHashtag ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
             {hasHashtag && (
-              <div className="pt-2 border-t border-white/20 animate-in fade-in duration-200">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-200">
                 <input
                   type="text"
                   value={rules.requiredHashtag || ''}
                   onChange={(e) => onChangeRules({ ...rules, requiredHashtag: e.target.value })}
                   placeholder="Ej: #sorteopro o #aniversario"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 text-xs font-mono focus:outline-none focus:bg-white/30"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs font-mono focus:outline-none focus:border-[#d91a7a]"
                 />
               </div>
             )}
           </div>
 
           {/* Filtrar por @Mención ⭐ Toggle */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base font-black font-display">
+                  <span className="text-base font-black font-display text-slate-900 dark:text-white">
                     Filtrar por @Mención
                   </span>
-                  <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 </div>
-                <span className="text-xs text-white/80">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   Exige mencionar a una cuenta obligatoria (ej: patrocinador o marca)
                 </span>
               </div>
@@ -930,41 +900,41 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                   onChangeRules({ ...rules, requiredMention: next ? '@atpdev' : '' });
                 }}
                 className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-                  hasRequiredMention ? 'bg-white' : 'bg-white/30'
+                  hasRequiredMention ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
                 aria-label="Alternar filtro por mención específica"
               >
                 <div
-                  className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                    hasRequiredMention ? 'translate-x-6 bg-pink-600' : 'translate-x-0 bg-white'
+                  className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                    hasRequiredMention ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
             {hasRequiredMention && (
-              <div className="pt-2 border-t border-white/20 animate-in fade-in duration-200">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 animate-in fade-in duration-200">
                 <input
                   type="text"
                   value={rules.requiredMention || ''}
                   onChange={(e) => onChangeRules({ ...rules, requiredMention: e.target.value })}
                   placeholder="Ej: @tu_marca o @patrocinador"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 text-xs font-mono focus:outline-none focus:bg-white/30"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs font-mono focus:outline-none focus:border-[#d91a7a]"
                 />
               </div>
             )}
           </div>
 
           {/* Bonus & Chances Extra ⭐ Toggle */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 flex items-center justify-between gap-4">
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-black font-display">
+                <span className="text-base font-black font-display text-slate-900 dark:text-white">
                   Bonus & Chances Extra
                 </span>
-                <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
               </div>
-              <span className="text-xs text-white/80">
+              <span className="text-xs text-slate-500 dark:text-slate-400">
                 Otorga más probabilidades de ganar a quienes comentaron varias veces
               </span>
             </div>
@@ -977,29 +947,29 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                 onChangeRules({ ...rules, bonusChances: next });
               }}
               className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-                hasBonusChances ? 'bg-white' : 'bg-white/30'
+                hasBonusChances ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
               }`}
               aria-label="Alternar bonus y chances extra"
             >
               <div
-                className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                  hasBonusChances ? 'translate-x-6 bg-pink-600' : 'translate-x-0 bg-white'
+                className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                  hasBonusChances ? 'translate-x-6' : 'translate-x-0'
                 }`}
               />
             </button>
           </div>
 
           {/* Excluir Participantes ⭐ Toggle */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 space-y-3">
+          <div className="bg-slate-50 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-base font-black font-display">
+                  <span className="text-base font-black font-display text-slate-900 dark:text-white">
                     Excluir Participantes
                   </span>
-                  <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                 </div>
-                <span className="text-xs text-white/80">
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   Bloquea cuentas bots, organizadores o ganadores anteriores
                 </span>
               </div>
@@ -1015,20 +985,20 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                   });
                 }}
                 className={`w-14 h-8 rounded-full p-1 transition-colors relative cursor-pointer shrink-0 ${
-                  hasExcludeBlocked ? 'bg-white' : 'bg-white/30'
+                  hasExcludeBlocked ? 'bg-[#d91a7a]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
                 aria-label="Alternar exclusión de participantes"
               >
                 <div
-                  className={`w-6 h-6 rounded-full shadow-md transition-transform duration-200 ${
-                    hasExcludeBlocked ? 'translate-x-6 bg-pink-600' : 'translate-x-0 bg-white'
+                  className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
+                    hasExcludeBlocked ? 'translate-x-6' : 'translate-x-0'
                   }`}
                 />
               </button>
             </div>
 
             {hasExcludeBlocked && (
-              <div className="pt-2 border-t border-white/20 space-y-2 animate-in fade-in duration-200">
+              <div className="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2 animate-in fade-in duration-200">
                 <input
                   type="text"
                   value={blockedInput}
@@ -1041,9 +1011,9 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
                     onChangeRules({ ...rules, blockedUsers: list });
                   }}
                   placeholder="Ej: cuenta_bot, usuario_anterior, organizador (separados por coma)"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/50 text-xs font-mono focus:outline-none focus:bg-white/30"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 text-xs font-mono focus:outline-none focus:border-[#d91a7a]"
                 />
-                <span className="text-[10px] text-white/70 block">
+                <span className="text-[10px] text-slate-400 block">
                   Escribe los usuarios que deseas vetar del sorteo separados por comas.
                 </span>
               </div>
@@ -1066,11 +1036,7 @@ export const AppSorteosConfigCard: React.FC<AppSorteosConfigCardProps> = ({
           type="button"
           disabled={isDrawing || eligibleCount === 0}
           onClick={onExecute}
-          className="w-full sm:w-auto px-10 py-5 rounded-2xl text-white font-black font-display text-lg tracking-wide transition-all shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 cursor-pointer flex items-center justify-center gap-3"
-          style={{
-            background: `linear-gradient(135deg, ${selectedColor} 0%, #4338ca 100%)`,
-            boxShadow: `0 10px 30px -5px ${selectedColor}60`
-          }}
+          className="w-full sm:w-auto px-10 py-5 rounded-2xl bg-[#d91a7a] hover:bg-[#c2146c] text-white font-black font-display text-lg tracking-wide transition-all shadow-xl shadow-pink-500/25 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 cursor-pointer flex items-center justify-center gap-3"
         >
           <Sparkles className="w-6 h-6 animate-pulse" />
           <span>{isDrawing ? 'Sorteando...' : '¡Comenzar Sorteo!'}</span>

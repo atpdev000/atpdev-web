@@ -140,7 +140,7 @@ export const Navbar: React.FC = () => {
 
   // ─── 4 COLUMNAS DEL MEGA-MENÚ ESTILO APPSORTEOS ─────────────────────────
   const megaColSorteos: NavAppItem[] = [
-    { name: 'Sorteo en Instagram', href: '/sorteos/nuevo?platform=instagram', icon: InstagramIcon, iconBg: 'bg-gradient-to-tr from-amber-500 via-pink-600 to-purple-600 text-white' },
+    { name: 'Sorteo en Instagram', href: '/apps/sorteo-instagram', icon: InstagramIcon, iconBg: 'bg-gradient-to-tr from-amber-500 via-pink-600 to-purple-600 text-white' },
     { name: 'Sorteo en Facebook', href: '/sorteos/nuevo?platform=facebook', icon: FacebookIcon, iconBg: 'bg-blue-600 text-white' },
     { name: 'Listado de Nombres', href: '/herramientas/lista', icon: ListOrdered, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' },
     { name: 'Sorteo en Twitter (X)', href: '/sorteos/nuevo?platform=x', icon: XIcon, iconBg: 'bg-slate-900 dark:bg-white text-white dark:text-black' },

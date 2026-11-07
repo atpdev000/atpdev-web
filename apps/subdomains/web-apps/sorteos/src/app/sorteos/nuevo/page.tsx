@@ -2256,148 +2256,59 @@ interface AdditionalSource {
         </div>
       </div>
 
-      {/* STEP 1: Select Network & Post URL */}
+      {/* STEP 1: Select Network & Post URL (1:1 AppSorteos Aesthetic) */}
       {step === 1 && (
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl transition-all duration-500 space-y-8">
-          {/* Ambient glowing radial lights based on brand accent color */}
-          <div 
-            className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
-            style={{ backgroundColor: currentThemeColor }}
-          />
-          <div 
-            className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-20 transition-all duration-700"
-            style={{ backgroundColor: currentThemeColor }}
-          />
-          {/* Top subtle laser highlight bar */}
-          <div 
-            className="absolute top-0 inset-x-0 h-[2px] transition-all duration-500"
-            style={{ background: `linear-gradient(90deg, transparent, ${currentThemeColor}, transparent)` }}
-          />
+        <div className="bg-white dark:bg-[#111827] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-800 space-y-8 transition-all duration-300">
 
-          {/* Selector de Color de Marca Principal (AppSorteos Signature Style) */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/60 backdrop-blur-md border border-slate-800/80 shadow-sm space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="text-base">🎨</span>
-                <span className="text-xs sm:text-sm font-bold font-sans tracking-wide uppercase text-slate-200">
-                  Color de Marca y Estilo del Sorteo
-                </span>
-                <span className="text-[10px] font-sans px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold border border-slate-700">
-                  Personalización en Vivo
-                </span>
-              </div>
-              <span className="text-xs font-sans text-slate-400">
-                Seleccionado: <strong className="text-white uppercase">{COLOR_PALETTES.find(p => p.hex.toLowerCase() === currentThemeColor.toLowerCase())?.label || currentThemeColor}</strong>
-              </span>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-1">
-              {COLOR_PALETTES.map((palette) => {
-                const isSelected = palette.hex.toLowerCase() === currentThemeColor.toLowerCase();
-                return (
-                  <button
-                    key={palette.id}
-                    type="button"
-                    onClick={() => setRules((prev) => ({ ...prev, themeColor: palette.hex }))}
-                    title={`${palette.label} (${palette.hex})`}
-                    className={`group relative w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all duration-200 cursor-pointer flex items-center justify-center ${
-                      isSelected
-                        ? 'ring-3 ring-white ring-offset-2 ring-offset-slate-900 scale-110 shadow-lg'
-                        : 'opacity-70 hover:opacity-100 hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: palette.hex }}
-                  >
-                    {isSelected && (
-                      <Check className="w-3.5 h-3.5 text-white drop-shadow stroke-[3]" />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <h2 className="text-lg sm:text-xl font-bold font-display text-white">
-                {t('wizard_step1_title')}
-              </h2>
-              {mounted && connectedAccounts.length > 0 && (
-                <span className="text-xs font-sans text-emerald-300 flex items-center gap-1.5 font-semibold bg-emerald-500/15 px-2.5 py-1 rounded-full border border-emerald-400/30">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  {connectedAccounts.length} cuenta{connectedAccounts.length > 1 ? 's' : ''} oficial{connectedAccounts.length > 1 ? 'es' : ''} vinculada{connectedAccounts.length > 1 ? 's' : ''}
-                </span>
-              )}
-            </div>
-
-            {/* Platform Selector Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
+          {/* Horizontal Platform Selector Tabs — Estilo Oficial AppSorteos */}
+          <div className="space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Selecciona la Red Social:
+            </span>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-slate-100 dark:border-slate-800/80">
               {NETWORK_CONFIGS.map((net) => {
                 const IconComponent = net.icon;
-                const isSelected = network === net.id;
+                const isSelected = network === net.id && !isMultiNetwork;
                 const acc = mounted ? connectedAccounts.find((a) => (a.platform === net.id || a.network === net.id)) : undefined;
 
                 return (
                   <button
                     key={net.id}
                     type="button"
-                    onClick={() => handleSelectNetwork(net.id)}
-                    className={`p-4 sm:p-5 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between space-y-3 cursor-pointer relative overflow-hidden group ${
+                    onClick={() => {
+                      setIsMultiNetwork(false);
+                      handleSelectNetwork(net.id);
+                    }}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-slate-800/90 border-2 shadow-xl scale-[1.02]'
-                        : 'bg-slate-950/40 hover:bg-slate-800/50 border-slate-800 hover:border-slate-700 text-slate-300'
+                        ? 'bg-[#d91a7a] text-white shadow-md shadow-pink-500/25 scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                     }`}
-                    style={
-                      isSelected
-                        ? {
-                            borderColor: net.id === 'youtube' ? '#ef4444' : net.id === 'instagram' ? '#ec4899' : net.id === 'tiktok' ? '#06b6d4' : net.id === 'facebook' ? '#3b82f6' : net.id === 'threads' ? '#a855f7' : '#e2e8f0',
-                            boxShadow: `0 10px 25px -5px ${net.id === 'youtube' ? 'rgba(239,68,68,0.25)' : net.id === 'instagram' ? 'rgba(236,72,153,0.25)' : net.id === 'tiktok' ? 'rgba(6,182,212,0.25)' : net.id === 'facebook' ? 'rgba(59,130,246,0.25)' : 'rgba(168,85,247,0.25)'}`
-                          }
-                        : undefined
-                    }
                   >
-                    <div className="flex items-center justify-between">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${net.iconBg}`}>
-                        <IconComponent className="w-5 h-5" />
-                      </div>
-                      {isSelected && (
-                        <span 
-                          className="w-2.5 h-2.5 rounded-full animate-pulse shadow-sm"
-                          style={{
-                            backgroundColor: net.id === 'youtube' ? '#ef4444' : net.id === 'instagram' ? '#ec4899' : net.id === 'tiktok' ? '#06b6d4' : net.id === 'facebook' ? '#3b82f6' : net.id === 'threads' ? '#a855f7' : '#e2e8f0'
-                          }}
-                        />
-                      )}
-                    </div>
-                    <div>
-                      <div className="font-bold text-sm text-white">{net.name}</div>
-                      
-                      {acc ? (
-                        <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-sans font-semibold max-w-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300">
-                          <Check className="w-3 h-3 shrink-0" />
-                          <span className="truncate">{acc.name || acc.handle}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between mt-1 text-xs">
-                          <span className="truncate text-slate-400">
-                            {t(net.subtitleKey)}
-                          </span>
-                          <span
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOAuthConnect(net.id);
-                            }}
-                            className="text-[10px] font-sans font-semibold text-slate-400 hover:text-white underline cursor-pointer ml-1.5 shrink-0"
-                            title={`Iniciar sesión y conectar ${net.name}`}
-                          >
-                            + Vincular
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                    <IconComponent className="w-4 h-4" />
+                    <span>{net.name}</span>
+                    {acc && (
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" title="Cuenta conectada" />
+                    )}
                   </button>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => setIsMultiNetwork(true)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  isMultiNetwork
+                    ? 'bg-[#d91a7a] text-white shadow-md shadow-pink-500/25 scale-[1.02]'
+                    : 'bg-pink-50 dark:bg-pink-950/40 text-[#d91a7a] dark:text-pink-300 border border-pink-200 dark:border-pink-800/50 hover:bg-pink-100'
+                }`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Multi-Red</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 font-mono">PRO</span>
+              </button>
             </div>
+          </div>
 
             {/* Account Status Banner */}
             {currentConnectedAccount ? (
@@ -2541,7 +2452,6 @@ interface AdditionalSource {
                 </button>
               </div>
             )}
-          </div>
 
           <div className="space-y-4">
             <div>
@@ -2556,7 +2466,7 @@ interface AdditionalSource {
                 onChange={(e) => setGiveawayTitle(e.target.value)}
                 placeholder="Ej: Sorteo Oficial de Aniversario"
                 aria-label="Título o Nombre de la Campaña"
-                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 font-sans text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner"
+                className="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 font-medium text-sm sm:text-base focus:outline-none focus:border-[#d91a7a] focus:ring-4 focus:ring-pink-500/10 transition-all shadow-xs"
               />
             </div>
 
@@ -2587,7 +2497,7 @@ interface AdditionalSource {
                 }}
                 placeholder={NETWORK_CONFIGS.find((c) => c.id === network)?.placeholder}
                 aria-label="URL de la Publicación, Video o @cuenta"
-                className="w-full px-4 py-3.5 rounded-xl bg-slate-950/70 border border-slate-700/80 text-white placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all shadow-inner"
+                className="w-full px-5 py-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder-slate-400 font-mono text-base focus:outline-none focus:border-[#d91a7a] focus:ring-4 focus:ring-pink-500/10 transition-all shadow-xs"
               />
 
               {/* Alerta de discrepancia de plataforma en la URL */}
@@ -2829,65 +2739,52 @@ interface AdditionalSource {
           </div>
 
           {/* Bottom Action Bar — 100% Uniforme para todas las redes (RF-011 / UX) */}
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800/80">
-            <div className="text-xs text-slate-400 font-sans">
-              {isMultiNetwork ? (
-                <span className="text-slate-200 font-bold flex items-center gap-1.5 flex-wrap">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>
-                    Sorteo Multi-Red ({[network, ...additionalSources.map((s) => s.network)].map((n) => NETWORK_CONFIGS.find((c) => c.id === n)?.name.split(' ')[0] || n).join(' + ')})
-                  </span>
+                    {/* Bottom Action Bar — 1:1 AppSorteos Signature Hot-Pink Button */}
+          <div className="pt-4 space-y-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-sans">
+              <span>Sorteo oficial verificado con algoritmo CSPRNG auditado</span>
+              {isMultiNetwork && (
+                <span className="font-bold text-[#d91a7a] flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Multi-Red ({1 + additionalSources.length} Fuentes)</span>
                 </span>
-              ) : (
-                <span>Sorteo oficial verificado con algoritmo CSPRNG auditado</span>
               )}
             </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-end ml-auto">
-              <button
-                type="button"
-                disabled={
-                  isLoadingComments ||
-                  !postUrl ||
-                  Boolean(detectUrlPlatform(postUrl) && detectUrlPlatform(postUrl) !== network) ||
-                  (isMultiNetwork && additionalSources.some((s) => !s.postUrl.trim()))
-                }
-                onClick={handleImportComments}
-                className={`font-bold font-sans text-sm sm:text-base py-3.5 px-8 rounded-2xl cursor-pointer flex items-center gap-2.5 shadow-xl transition-all text-white ${
-                  isLoadingComments ||
-                  !postUrl ||
-                  Boolean(detectUrlPlatform(postUrl) && detectUrlPlatform(postUrl) !== network) ||
-                  (isMultiNetwork && additionalSources.some((s) => !s.postUrl.trim()))
-                    ? 'opacity-50 cursor-not-allowed !transform-none bg-slate-800 text-slate-400 border border-slate-700'
-                    : 'hover:scale-[1.02] hover:shadow-2xl active:scale-[0.98]'
-                }`}
-                style={
-                  !isLoadingComments && postUrl
-                    ? {
-                        background: `linear-gradient(135deg, ${currentThemeColor} 0%, #4f46e5 100%)`,
-                        boxShadow: `0 10px 30px -5px ${currentThemeColor}50`
-                      }
-                    : undefined
-                }
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoadingComments ? 'animate-spin' : ''}`} />
-                <span>
-                  {isLoadingComments
-                    ? 'Extrayendo comentarios...'
-                    : isMultiNetwork
-                    ? `Cargar Comentarios Combinados (${1 + additionalSources.length} Fuentes)`
-                    : 'Cargar Comentarios'}
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={
+                isLoadingComments ||
+                !postUrl ||
+                Boolean(detectUrlPlatform(postUrl) && detectUrlPlatform(postUrl) !== network) ||
+                (isMultiNetwork && additionalSources.some((s) => !s.postUrl.trim()))
+              }
+              onClick={handleImportComments}
+              className={`w-full py-5 rounded-2xl font-black text-lg sm:text-xl uppercase tracking-wider flex items-center justify-center gap-3 shadow-xl transition-all cursor-pointer text-white ${
+                isLoadingComments ||
+                !postUrl ||
+                Boolean(detectUrlPlatform(postUrl) && detectUrlPlatform(postUrl) !== network) ||
+                (isMultiNetwork && additionalSources.some((s) => !s.postUrl.trim()))
+                  ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed shadow-none'
+                  : 'bg-[#d91a7a] hover:bg-[#c2146c] active:scale-[0.99] shadow-pink-500/25 hover:shadow-pink-500/40'
+              }`}
+            >
+              <RefreshCw className={`w-5 h-5 ${isLoadingComments ? 'animate-spin' : ''}`} />
+              <span>
+                {isLoadingComments
+                  ? 'Extrayendo comentarios...'
+                  : isMultiNetwork
+                  ? `CARGAR COMENTARIOS (${1 + additionalSources.length} FUENTES)`
+                  : 'CARGAR COMENTARIOS'}
+              </span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
           </div>
         </div>
       )}
 
-      {/* STEP 2: Preview Extracted Comments */}
+      {/* STEP 2: Preview Extracted Comments (1:1 AppSorteos Aesthetic) */}
       {step === 2 && (
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl transition-all duration-500 space-y-8">
+        <div className="bg-white dark:bg-[#111827] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-800 space-y-8 transition-all duration-300">
           {/* Ambient glowing radial lights based on brand accent color */}
           <div 
             className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
@@ -4596,7 +4493,7 @@ interface AdditionalSource {
               onClick={handleApplyRules}
               className="font-bold font-sans text-sm sm:text-base py-3.5 px-8 rounded-2xl flex items-center gap-2 cursor-pointer shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all text-white"
               style={{
-                background: `linear-gradient(135deg, ${currentThemeColor} 0%, #4f46e5 100%)`,
+                background: '#d91a7a',
                 boxShadow: `0 10px 30px -5px ${currentThemeColor}50`
               }}
             >
@@ -4639,9 +4536,9 @@ interface AdditionalSource {
         onComplete={handleFinishDrawExecution}
       />
 
-      {/* STEP 4: Draw Finished & Verifiable Certificate */}
+      {/* STEP 4: Draw Finished & Verifiable Certificate (1:1 AppSorteos Aesthetic) */}
       {step === 4 && finishedGiveaway && (
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 text-white shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-800/80 bg-slate-900/95 dark:bg-[#0c111e]/95 backdrop-blur-2xl transition-all duration-500 space-y-8 text-center">
+        <div className="bg-white dark:bg-[#111827] text-slate-900 dark:text-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-800 space-y-8 text-center transition-all duration-300">
           {/* Ambient glowing radial lights based on brand accent color */}
           <div 
             className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-[110px] pointer-events-none opacity-25 transition-all duration-700"
@@ -4766,7 +4663,158 @@ interface AdditionalSource {
       )}
 
       {/* Modal para Iniciar Sesión en la Red Social y Sincronizar Comentarios */}
-      {connectModalOpen && (
+      
+      {/* ─── APPSORTEOS SECTIONS: GUÍA, CARACTERÍSTICAS Y FAQ ─────────────── */}
+      {step === 1 && (
+        <div className="space-y-12 pt-6">
+          {/* 3 Simples Pasos */}
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
+                ¿Cómo hacer un sorteo en Instagram y Redes Sociales?
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Crea sorteos transparentes y rápidos para tus seguidores en 3 simples pasos.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950/40 text-[#d91a7a] flex items-center justify-center font-black text-xl">
+                  1
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Copia el enlace de tu post
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Entra a tu red social desde tu móvil o PC, pulsa en los 3 puntos de tu publicación, Reel o foto y selecciona &quot;Copiar enlace&quot;.
+                </p>
+              </div>
+              <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950/40 text-[#d91a7a] flex items-center justify-center font-black text-xl">
+                  2
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Pega el link y carga comentarios
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Pega la URL en nuestra caja superior y pulsa &quot;CARGAR COMENTARIOS&quot;. Nuestro motor recolecta las participaciones en segundos.
+                </p>
+              </div>
+              <div className="p-6 rounded-3xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-pink-50 dark:bg-pink-950/40 text-[#d91a7a] flex items-center justify-center font-black text-xl">
+                  3
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                  Filtra y obtén ganadores oficiales
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Elige ganadores, suplentes, filtra duplicados o menciones. Obtén tu certificado público SHA-256 e imagen para tus stories.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Características */}
+          <div className="space-y-6 pt-4">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
+                Ventajas y Garantías de AppSorteos
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Todas las herramientas que necesitas para un sorteo transparente, legal y profesional.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 flex items-center justify-center font-bold">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">100% Aleatorio y Auditado</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Algoritmo CSPRNG con certificado de validez SHA-256 inviolable y verificable.</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/30 text-blue-500 flex items-center justify-center font-bold">
+                  <Users className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Filtrar Usuarios Duplicados</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Permite una sola participación por persona o da chances por cada comentario emitido.</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-950/30 text-[#d91a7a] flex items-center justify-center font-bold">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Sorteos Multi-Red</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Combina publicaciones de Instagram, TikTok, YouTube, Facebook y X en una sola lista unificada.</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/30 text-amber-500 flex items-center justify-center font-bold">
+                  <Gift className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Ganadores y Suplentes</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Elige varios ganadores simultáneos y suplentes de reserva por si alguno no responde.</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/30 text-purple-500 flex items-center justify-center font-bold">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Video & Story para Redes</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Descarga la animación y tarjeta oficial lista para compartir en Instagram Stories y TikTok.</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 flex items-center justify-center font-bold">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Sin Contraseñas</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">No solicitamos tus contraseñas ni permisos peligrosos en tu dispositivo. 100% seguro.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* FAQ Accordion */}
+          <div className="space-y-4 pt-4 max-w-3xl mx-auto">
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
+                Preguntas Frecuentes
+              </h2>
+            </div>
+            <div className="space-y-3 pt-2">
+              {[
+                {
+                  q: "¿Cómo elegir al ganador de un sorteo en Instagram?",
+                  a: "Solo copia el enlace de tu publicación o Reel en Instagram, pégalo en la barra superior y pulsa 'CARGAR COMENTARIOS'. Selecciona cuántos ganadores deseas y haz clic en Iniciar Sorteo."
+                },
+                {
+                  q: "¿Es gratis hacer sorteos en esta plataforma?",
+                  a: "Sí, puedes realizar sorteos básicos y filtrar comentarios de forma gratuita. También dispones de planes PRO para sorteos masivos y opciones multi-red ilimitadas."
+                },
+                {
+                  q: "¿Necesito dar mis contraseñas de Instagram?",
+                  a: "No, nunca. No requerimos tu contraseña de Instagram ni acceso a tus mensajes privados. Solo necesitamos el enlace público del post."
+                },
+                {
+                  q: "¿Cómo demuestro que el sorteo fue transparente ante mis seguidores?",
+                  a: "Al finalizar el sorteo, la plataforma genera automáticamente un Certificado Oficial con código SHA-256 único e inviolable y un enlace público que puedes compartir en tu biografía o stories."
+                },
+                {
+                  q: "¿Puedo sortear entre comentarios de varias publicaciones a la vez?",
+                  a: "¡Sí! Con el modo Multi-Red puedes añadir 2, 3 o más publicaciones e incluso mezclar comentarios de Instagram, TikTok, YouTube y Facebook en una sola lista unificada."
+                }
+              ].map((item, i) => (
+                <details key={i} className="group p-5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 shadow-xs transition-all">
+                  <summary className="font-bold text-slate-900 dark:text-white text-sm sm:text-base cursor-pointer list-none flex items-center justify-between">
+                    <span>{item.q}</span>
+                    <span className="text-[#d91a7a] font-bold text-lg group-open:rotate-45 transition-transform">+</span>
+                  </summary>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-3 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
+                    {item.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+{connectModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#0f172a] rounded-3xl max-w-md w-full border border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Header del modal */}

@@ -55,8 +55,8 @@ export default function FAQPage() {
     <div className="container mx-auto px-4 max-w-4xl">
       {/* Encabezado */}
       <div className="mb-8 text-center max-w-2xl mx-auto">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -76,8 +76,8 @@ export default function FAQPage() {
       {/* Lista de FAQs */}
       <div className="space-y-4">
         {faqs.map((faq, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs hover:border-blue-500/40 transition-colors"
           >
             <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-2 flex items-start gap-2.5">

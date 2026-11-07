@@ -605,11 +605,7 @@ body[data-has-custom-bg="true"] > * {
 /* 1. SPOTLIGHT BORDER (Reflector Neón) */
 [data-interaction*="spotlight-border"] .interactive-card,
 [data-interaction*="spotlight-border"] .glass-card,
-[data-interaction*="spotlight-border"] [data-interactive="true"],
-[data-interaction*="spotlight-border"] .rounded-2xl.border,
-[data-interaction*="spotlight-border"] .rounded-3xl.border,
-[data-interaction*="spotlight-border"] [class*="rounded-2xl"][class*="border"],
-[data-interaction*="spotlight-border"] [class*="rounded-3xl"][class*="border"] {
+[data-interaction*="spotlight-border"] [data-interactive="true"] {
   --x: 50%;
   --y: 50%;
   position: relative;
@@ -618,11 +614,7 @@ body[data-has-custom-bg="true"] > * {
 }
 [data-interaction*="spotlight-border"] .interactive-card::before,
 [data-interaction*="spotlight-border"] .glass-card::before,
-[data-interaction*="spotlight-border"] [data-interactive="true"]::before,
-[data-interaction*="spotlight-border"] .rounded-2xl.border::before,
-[data-interaction*="spotlight-border"] .rounded-3xl.border::before,
-[data-interaction*="spotlight-border"] [class*="rounded-2xl"][class*="border"]::before,
-[data-interaction*="spotlight-border"] [class*="rounded-3xl"][class*="border"]::before {
+[data-interaction*="spotlight-border"] [data-interactive="true"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -640,11 +632,7 @@ body[data-has-custom-bg="true"] > * {
 }
 [data-interaction*="spotlight-border"] .interactive-card:hover::before,
 [data-interaction*="spotlight-border"] .glass-card:hover::before,
-[data-interaction*="spotlight-border"] [data-interactive="true"]:hover::before,
-[data-interaction*="spotlight-border"] .rounded-2xl.border:hover::before,
-[data-interaction*="spotlight-border"] .rounded-3xl.border:hover::before,
-[data-interaction*="spotlight-border"] [class*="rounded-2xl"][class*="border"]:hover::before,
-[data-interaction*="spotlight-border"] [class*="rounded-3xl"][class*="border"]:hover::before {
+[data-interaction*="spotlight-border"] [data-interactive="true"]:hover::before {
   opacity: 1;
   filter: drop-shadow(0 0 var(--neon-glow, 16px) var(--primary, #8b5cf6));
 }
@@ -652,22 +640,14 @@ body[data-has-custom-bg="true"] > * {
 /* 1.5. FULL NEON BORDER (Borde Neón Completo) */
 [data-interaction*="full-border"] .interactive-card,
 [data-interaction*="full-border"] .glass-card,
-[data-interaction*="full-border"] [data-interactive="true"],
-[data-interaction*="full-border"] .rounded-2xl.border,
-[data-interaction*="full-border"] .rounded-3xl.border,
-[data-interaction*="full-border"] [class*="rounded-2xl"][class*="border"],
-[data-interaction*="full-border"] [class*="rounded-3xl"][class*="border"] {
+[data-interaction*="full-border"] [data-interactive="true"] {
   position: relative;
   isolation: isolate;
   border-color: transparent !important;
 }
 [data-interaction*="full-border"] .interactive-card::before,
 [data-interaction*="full-border"] .glass-card::before,
-[data-interaction*="full-border"] [data-interactive="true"]::before,
-[data-interaction*="full-border"] .rounded-2xl.border::before,
-[data-interaction*="full-border"] .rounded-3xl.border::before,
-[data-interaction*="full-border"] [class*="rounded-2xl"][class*="border"]::before,
-[data-interaction*="full-border"] [class*="rounded-3xl"][class*="border"]::before {
+[data-interaction*="full-border"] [data-interactive="true"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -686,11 +666,7 @@ body[data-has-custom-bg="true"] > * {
 }
 [data-interaction*="full-border"] .interactive-card:hover::before,
 [data-interaction*="full-border"] .glass-card:hover::before,
-[data-interaction*="full-border"] [data-interactive="true"]:hover::before,
-[data-interaction*="full-border"] .rounded-2xl.border:hover::before,
-[data-interaction*="full-border"] .rounded-3xl.border:hover::before,
-[data-interaction*="full-border"] [class*="rounded-2xl"][class*="border"]:hover::before,
-[data-interaction*="full-border"] [class*="rounded-3xl"][class*="border"]:hover::before {
+[data-interaction*="full-border"] [data-interactive="true"]:hover::before {
   opacity: 1;
   filter: drop-shadow(0 0 var(--neon-glow, 18px) var(--primary, #8b5cf6));
 }
@@ -698,9 +674,7 @@ body[data-has-custom-bg="true"] > * {
 /* MULTICOLOR & ARMONICO (FULL BORDER) */
 [data-interaction*="full-border"][data-interaction*="neon-multi"] .interactive-card::before,
 [data-interaction*="full-border"][data-interaction*="neon-multi"] .glass-card::before,
-[data-interaction*="full-border"][data-interaction*="neon-multi"] [data-interactive="true"]::before,
-[data-interaction*="full-border"][data-interaction*="neon-multi"] [class*="rounded-2xl"][class*="border"]::before,
-[data-interaction*="full-border"][data-interaction*="neon-multi"] [class*="rounded-3xl"][class*="border"]::before {
+[data-interaction*="full-border"][data-interaction*="neon-multi"] [data-interactive="true"]::before {
   background: linear-gradient(
     90deg,
     hsl(var(--hue, 280) 95% 60%),
@@ -713,18 +687,14 @@ body[data-has-custom-bg="true"] > * {
 }
 [data-interaction*="full-border"][data-interaction*="neon-multi"] .interactive-card:hover::before,
 [data-interaction*="full-border"][data-interaction*="neon-multi"] .glass-card:hover::before,
-[data-interaction*="full-border"][data-interaction*="neon-multi"] [data-interactive="true"]:hover::before,
-[data-interaction*="full-border"][data-interaction*="neon-multi"] [class*="rounded-2xl"][class*="border"]:hover::before,
-[data-interaction*="full-border"][data-interaction*="neon-multi"] [class*="rounded-3xl"][class*="border"]:hover::before {
+[data-interaction*="full-border"][data-interaction*="neon-multi"] [data-interactive="true"]:hover::before {
   opacity: 1;
   filter: drop-shadow(0 0 var(--neon-glow, 22px) hsl(var(--hue, 280) 95% 60%));
 }
 
 [data-interaction*="full-border"][data-interaction*="neon-harmonic"] .interactive-card::before,
 [data-interaction*="full-border"][data-interaction*="neon-harmonic"] .glass-card::before,
-[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [data-interactive="true"]::before,
-[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [class*="rounded-2xl"][class*="border"]::before,
-[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [class*="rounded-3xl"][class*="border"]::before {
+[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [data-interactive="true"]::before {
   background: linear-gradient(
     90deg,
     hsl(var(--hue, 280) 85% 55%),
@@ -736,9 +706,7 @@ body[data-has-custom-bg="true"] > * {
 }
 [data-interaction*="full-border"][data-interaction*="neon-harmonic"] .interactive-card:hover::before,
 [data-interaction*="full-border"][data-interaction*="neon-harmonic"] .glass-card:hover::before,
-[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [data-interactive="true"]:hover::before,
-[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [class*="rounded-2xl"][class*="border"]:hover::before,
-[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [class*="rounded-3xl"][class*="border"]:hover::before {
+[data-interaction*="full-border"][data-interaction*="neon-harmonic"] [data-interactive="true"]:hover::before {
   opacity: 1;
   filter: drop-shadow(0 0 var(--neon-glow, 22px) hsl(var(--hue, 280) 85% 55%));
 }
@@ -892,9 +860,7 @@ body[data-has-custom-bg="true"] > * {
 
 /* 5. RIPPLE (Ondas Clic) */
 [data-interaction*="ripple"] .interactive-card,
-[data-interaction*="ripple"] .glass-card,
-[data-interaction*="ripple"] [class*="rounded-2xl"][class*="border"],
-[data-interaction*="ripple"] [class*="rounded-3xl"][class*="border"] {
+[data-interaction*="ripple"] .glass-card {
   position: relative;
   overflow: hidden;
 }
@@ -1001,13 +967,7 @@ body[data-has-custom-bg="true"] > * {
 [data-interaction*="glitch"] .glass-card:hover .font-display,
 [data-interaction*="glitch"] [data-interactive="true"]:hover h1,
 [data-interaction*="glitch"] [data-interactive="true"]:hover h2,
-[data-interaction*="glitch"] [data-interactive="true"]:hover .font-display,
-[data-interaction*="glitch"] [class*="rounded-2xl"][class*="border"]:hover h1,
-[data-interaction*="glitch"] [class*="rounded-2xl"][class*="border"]:hover h2,
-[data-interaction*="glitch"] [class*="rounded-2xl"][class*="border"]:hover .font-display,
-[data-interaction*="glitch"] [class*="rounded-3xl"][class*="border"]:hover h1,
-[data-interaction*="glitch"] [class*="rounded-3xl"][class*="border"]:hover h2,
-[data-interaction*="glitch"] [class*="rounded-3xl"][class*="border"]:hover .font-display {
+[data-interaction*="glitch"] [data-interactive="true"]:hover .font-display {
   animation: cyberpunkGlitch 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
   display: inline-block;
   position: relative;

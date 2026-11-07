@@ -123,7 +123,7 @@ export default function RootLayout({
 }>) {
   const config = getSubdomainConfig("sorteos");
   const theme = config.theme || ({} as any);
-  const accentHex = theme.accent_color || theme.primary_color || "#8b5cf6";
+  const accentHex = theme.accent_color || theme.primary_color || "#d91a7a";
   const neonThickness = theme.neon_thickness || "4px";
   const neonGlow = neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px";
   const radiusScale = theme.radius_scale === 'none' ? '0px' : theme.radius_scale === 'small' ? '0.75rem' : theme.radius_scale === 'medium' ? '1rem' : '1.5rem';
