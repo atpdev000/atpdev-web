@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Trash2, Clock, Share2, Play } from 'lucide-react';
+import { X, Trash2, Clock, Share2, Play, Music, ExternalLink, Download } from 'lucide-react';
 import { HistoryItem } from '@/hooks/useDownloadHistory';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -21,19 +21,31 @@ interface HistoryModalProps {
 
 export default function HistoryModal({ isOpen, onClose, history = [], onClear, onDelete }: HistoryModalProps) {
     const [mounted, setMounted] = useState(false);
+    const [selectedPreview, setSelectedPreview] = useState<HistoryItem | null>(null);
+    const [videoError, setVideoError] = useState(false);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
     useEffect(() => {
+        setVideoError(false);
+    }, [selectedPreview]);
+
+    useEffect(() => {
         if (!isOpen) return;
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape') {
+                if (selectedPreview) {
+                    setSelectedPreview(null);
+                } else {
+                    onClose();
+                }
+            }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
+    }, [isOpen, onClose, selectedPreview]);
 
     if (!mounted || !isOpen || typeof document === 'undefined') return null;
 
@@ -42,58 +54,27 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
             e.stopPropagation();
             e.preventDefault();
         }
+        setSelectedPreview(null);
         onClose();
     };
 
-    const handleItemClick = async (item: HistoryItem) => {
-        if (Capacitor.isNativePlatform()) {
-            if (item.filePath) {
-                // 1. Probar abrir primero con nuestro reproductor nativo (FileProvider + Intent.ACTION_VIEW con chooser)
-                try {
-                    await NativeWhatsAppStatus.openMedia({ filePath: item.filePath });
-                    return;
-                } catch (openErr) {
-                    console.warn('NativeWhatsAppStatus.openMedia falló, probando FileOpener:', openErr);
-                }
+    const handleItemClick = (item: HistoryItem) => {
+        setSelectedPreview(item);
+    };
 
-                // 2. Probar con FileOpener
-                try {
-                    await FileOpener.open({
-                        filePath: item.filePath,
-                        contentType: item.mimeType || 'video/mp4'
-                    });
-                    return;
-                } catch (e) {
-                    console.warn('FileOpener falló:', e);
-                }
-            }
-
-            // Si el archivo no tiene filePath guardado (ej. descargas previas antes de la actualización)
+    const handleOpenExternal = async (filePath: string, mimeType?: string) => {
+        if (!Capacitor.isNativePlatform()) return;
+        try {
+            await NativeWhatsAppStatus.openMedia({ filePath });
+        } catch (e) {
             try {
-                const res = await Dialog.confirm({
-                    title: 'Reproducir Video',
-                    message: `El archivo descargado se guardó en la memoria de tu teléfono (en tu Galería de videos o en la carpeta "FTYdownloaderPro Video").\n\nPuedes reproducirlo directamente desde tu Galería.\n\n¿Deseas visitar el enlace de origen en ${item.platform.toUpperCase()}?`,
-                    okButtonTitle: 'Ir al enlace',
-                    cancelButtonTitle: 'Entendido'
+                await FileOpener.open({
+                    filePath,
+                    contentType: mimeType || 'video/mp4'
                 });
-                if (res.value && item.originalUrl) {
-                    window.open(item.originalUrl, '_blank');
-                }
-            } catch {
-                await Dialog.alert({
-                    title: 'Guardado en tu Galería',
-                    message: 'El archivo descargado se guardó en tu Galería o Administrador de archivos (en la carpeta "FTYdownloaderPro Video").'
-                });
+            } catch (err) {
+                console.warn('Error abriendo con reproductor externo:', err);
             }
-            return;
-        }
-        
-        if (item.filePath) {
-            window.open(item.filePath, '_blank');
-        } else if (item.originalUrl) {
-            window.open(item.originalUrl, '_blank');
-        } else {
-            alert('El archivo ya no se encuentra en el dispositivo o fue movido de ubicación.');
         }
     };
 
@@ -448,5 +429,202 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
         </div>
     );
 
-    return createPortal(modalContent, document.body);
+    const isAudio = Boolean(
+        selectedPreview?.mimeType?.includes('audio') ||
+        selectedPreview?.format?.toLowerCase().includes('audio') ||
+        selectedPreview?.format?.toLowerCase().includes('mp3') ||
+        selectedPreview?.title?.toLowerCase().endsWith('.mp3') ||
+        selectedPreview?.title?.toLowerCase().endsWith('.m4a')
+    );
+    const isImage = Boolean(
+        selectedPreview?.mimeType?.includes('image') ||
+        selectedPreview?.format?.toLowerCase().includes('foto') ||
+        selectedPreview?.title?.toLowerCase().endsWith('.jpg') ||
+        selectedPreview?.title?.toLowerCase().endsWith('.png') ||
+        selectedPreview?.title?.toLowerCase().endsWith('.jpeg') ||
+        selectedPreview?.title?.toLowerCase().endsWith('.webp')
+    );
+
+    let mediaSrc = '';
+    if (selectedPreview) {
+        const path = selectedPreview.filePath || selectedPreview.originalUrl || '';
+        if (path) {
+            if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) {
+                mediaSrc = path;
+            } else if (Capacitor.isNativePlatform()) {
+                mediaSrc = Capacitor.convertFileSrc(path);
+            } else {
+                mediaSrc = path;
+            }
+        }
+        if (!mediaSrc && selectedPreview.thumbnail) {
+            mediaSrc = selectedPreview.thumbnail;
+        }
+    }
+
+    const previewModalContent = selectedPreview ? (
+        <div 
+            className="fixed inset-0 z-[100000] bg-black/95 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
+            style={{
+                paddingTop: 'max(1rem, env(safe-area-inset-top, 1rem))',
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 1rem))'
+            }}
+            onClick={(e) => {
+                if (e.target === e.currentTarget) setSelectedPreview(null);
+            }}
+        >
+            <div 
+                className="relative max-w-lg w-full max-h-[92vh] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-800"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Header del Reproductor */}
+                <div className="p-3.5 sm:p-4 flex items-center justify-between text-white border-b border-slate-800/80 bg-slate-900/80 backdrop-blur-sm shrink-0">
+                    <div className="flex items-center gap-2 min-w-0 mr-2">
+                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase text-white shrink-0 ${
+                            selectedPreview.platform === 'youtube' ? 'bg-red-600' :
+                            selectedPreview.platform === 'facebook' ? 'bg-blue-600' :
+                            selectedPreview.platform === 'instagram' ? 'bg-gradient-to-tr from-amber-500 via-pink-600 to-purple-600' :
+                            selectedPreview.platform === 'tiktok' ? 'bg-zinc-800' :
+                            selectedPreview.platform === 'threads' ? 'bg-zinc-800' :
+                            selectedPreview.platform === 'whatsapp' ? 'bg-emerald-600' :
+                            'bg-blue-600'
+                        }`}>
+                            {selectedPreview.platform}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase bg-slate-800 text-slate-300 shrink-0">
+                            {isImage ? 'FOTO' : (isAudio ? 'AUDIO' : (selectedPreview.format || 'HD'))}
+                        </span>
+                        <span className="font-bold text-xs sm:text-sm truncate text-slate-100">{selectedPreview.title}</span>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setSelectedPreview(null)}
+                        className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded-full bg-slate-800/80 hover:bg-slate-700 text-sm font-bold cursor-pointer shrink-0 transition-colors active:scale-95"
+                        aria-label="Cerrar visor"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+
+                {/* Reproductor / Visor Multimedia */}
+                <div className="flex-1 overflow-hidden flex items-center justify-center bg-black p-2 min-h-[300px] max-h-[70vh] relative">
+                    {isImage ? (
+                        <img
+                            src={mediaSrc}
+                            alt={selectedPreview.title}
+                            className="max-h-[68vh] w-auto max-w-full object-contain rounded-xl shadow-lg"
+                        />
+                    ) : isAudio ? (
+                        <div className="w-full flex flex-col items-center justify-center p-6 space-y-4">
+                            <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                                <Music className="w-12 h-12 text-white animate-pulse" />
+                            </div>
+                            <div className="text-center">
+                                <p className="text-white font-bold text-sm truncate max-w-xs">{selectedPreview.title}</p>
+                                <p className="text-slate-400 text-xs mt-1">{selectedPreview.fileSize || 'Pista de Audio'}</p>
+                            </div>
+                            {mediaSrc ? (
+                                <audio
+                                    key={selectedPreview.id}
+                                    src={mediaSrc}
+                                    controls
+                                    autoPlay
+                                    className="w-full max-w-md"
+                                />
+                            ) : (
+                                <p className="text-xs text-slate-400">Audio guardado en la carpeta FTYdownloaderPro Audio</p>
+                            )}
+                        </div>
+                    ) : (selectedPreview.filePath && !videoError) ? (
+                        <video
+                            key={selectedPreview.id}
+                            src={mediaSrc}
+                            controls
+                            autoPlay
+                            playsInline
+                            onError={(e) => {
+                                console.warn('Error en reproductor HTML5 interno:', e);
+                                setVideoError(true);
+                            }}
+                            className="max-h-[68vh] w-full rounded-xl object-contain bg-black shadow-lg"
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center p-6 text-center text-white space-y-3">
+                            <div className="w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                                <Play className="w-8 h-8 ml-1" />
+                            </div>
+                            <p className="font-bold text-base">Video guardado en el dispositivo</p>
+                            <p className="text-xs text-slate-300 max-w-xs">
+                                Este archivo fue descargado en tu Galería de videos o en la carpeta <span className="text-blue-400 font-mono">FTYdownloaderPro Video</span> de tu teléfono.
+                            </p>
+                            {selectedPreview.filePath && Capacitor.isNativePlatform() && (
+                                <button
+                                    type="button"
+                                    onClick={() => handleOpenExternal(selectedPreview.filePath!, selectedPreview.mimeType)}
+                                    className="mt-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-2 shadow-lg"
+                                >
+                                    <Play className="w-4 h-4 fill-current" />
+                                    <span>Abrir con Reproductor Externo</span>
+                                </button>
+                            )}
+                            {selectedPreview.originalUrl && (
+                                <button
+                                    type="button"
+                                    onClick={() => window.open(selectedPreview.originalUrl, '_blank')}
+                                    className="mt-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition-all active:scale-95"
+                                >
+                                    Visitar enlace original
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Barra de Acciones del Modal */}
+                <div className="p-3 border-t border-slate-800/80 bg-slate-900/90 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                    {selectedPreview.filePath && Capacitor.isNativePlatform() && (
+                        <button
+                            type="button"
+                            onClick={() => handleOpenExternal(selectedPreview.filePath!, selectedPreview.mimeType)}
+                            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                            title="Abrir en reproductor nativo del teléfono"
+                        >
+                            <Play className="w-3.5 h-3.5 text-blue-400" />
+                            <span>Reproductor Externo</span>
+                        </button>
+                    )}
+
+                    <div className="flex items-center gap-2 ml-auto">
+                        {selectedPreview.originalUrl && (
+                            <button
+                                type="button"
+                                onClick={() => window.open(selectedPreview.originalUrl, '_blank')}
+                                className="px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-medium text-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                                title="Ver enlace original"
+                            >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                <span>Enlace</span>
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={(e) => handleShare(e, selectedPreview)}
+                            className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-lg shadow-blue-500/20"
+                        >
+                            <Share2 className="w-3.5 h-3.5" />
+                            <span>Compartir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    ) : null;
+
+    return createPortal(
+        <>
+            {modalContent}
+            {previewModalContent}
+        </>,
+        document.body
+    );
 }
