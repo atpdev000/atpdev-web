@@ -1,100 +1,91 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { HelpCircle, ArrowLeft, MessageSquare, ExternalLink } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Preguntas Frecuentes (FAQ) - FTY Downloader Pro',
-  description: 'Resuelve tus dudas sobre cómo descargar videos de redes sociales, seguridad del sitio, formatos compatibles y soporte técnico de FTY Downloader Pro.',
+  description: 'Resuelve tus dudas sobre cómo descargar videos de redes sociales, formatos compatibles, calidad 1080p, audio MP3 y seguridad.',
 }
 
 export default function FAQPage() {
   const faqs = [
     {
       question: "¿Es realmente gratuito FTY Downloader Pro?",
-      answer: "Sí, el servicio de FTY Downloader Pro es 100% gratuito para todos los usuarios. No existen cuotas de suscripción, funciones premium bloqueadas tras muros de pago, ni límites en el número de descargas que puedes realizar. Nuestra plataforma se financia exclusivamente a través de publicidad discreta en el sitio web, lo que nos permite mantener nuestros servidores activos y seguir mejorando la herramienta sin costo para los creadores de contenido."
+      answer: "Sí, el servicio de FTY Downloader Pro es 100% gratuito. No existen cuotas de suscripción obligatorias ni límites en el número de descargas que puedes realizar. Nuestra plataforma se financia a través de publicidad responsable en el sitio web y en la app, lo que nos permite mantener servidores de alta velocidad sin costo para los creadores de contenido."
     },
     {
       question: "¿Qué plataformas y redes sociales son compatibles?",
-      answer: "Actualmente, nuestra herramienta es totalmente compatible con Facebook (incluyendo Reels y videos normales), TikTok (con la opción de descarga sin marca de agua) e Instagram. Estamos constantemente monitoreando los cambios en las redes sociales para asegurar que nuestro servicio nunca se interrumpa."
+      answer: "Nuestra suite es totalmente compatible con Facebook (incluyendo Reels y videos 1080p), TikTok (sin marca de agua y audio MP3), YouTube (video HD y extracción de música), Instagram (Reels y videos), Threads, Twitter / 𝕏 y estados de WhatsApp. Monitoreamos continuamente las plataformas para que las descargas nunca se interrumpan."
     },
     {
       question: "¿Cómo garantizan la calidad de los videos descargados?",
-      answer: "FTY Downloader utiliza tecnología de extracción directa. Esto significa que nuestro sistema analiza los metadatos del video original y descarga directamente el archivo fuente que la plataforma utiliza para el streaming. No comprimimos ni recodificamos el video durante el proceso, por lo que recibirás exactamente la misma calidad que el video original tiene disponible, desde resoluciones estándar (480p) hasta Alta Definición (1080p Full HD)."
+      answer: "FTY Downloader Pro utiliza tecnología de extracción directa de flujo. Analizamos los metadatos de la publicación y conectamos directamente con el flujo fuente original que la red social utiliza para el streaming, entregando la máxima resolución disponible (720p, 1080p Full HD y calidades superiores sin compresión destructiva)."
     },
     {
-      question: "¿Puedo extraer música o audio MP3 de mis videos?",
-      answer: "Absolutamente. Contamos con un motor de conversión de audio integrado. Al pegar un enlace, tienes la opción de elegir 'Sólo Audio'. Nuestro sistema extraerá la pista de audio original y la convertirá a formato MP3 de alta compatibilidad. Dependiendo de la fuente original, ofrecemos bitrates de hasta 320kbps, lo cual es ideal para podcasts, conferencias o música que desees escuchar sin conexión en cualquier reproductor multimedia."
+      question: "¿Puedo extraer audio MP3 de cualquier video?",
+      answer: "Sí. Contamos con un motor nativo de extracción de audio. Al procesar un enlace en YouTube, TikTok o Facebook, puedes seleccionar 'Sólo Audio' para obtener el archivo MP3 o M4A directamente en tu biblioteca de música."
     },
     {
-      question: "¿Es seguro para mi dispositivo usar este sitio?",
-      answer: "La seguridad es nuestro pilar fundamental. A diferencia de otros descargadores que te obligan a instalar extensiones de navegador sospechosas o software ejecutable que puede contener malware, FTY Downloader Pro funciona íntegramente de forma web. Todo el procesamiento se realiza en nuestros servidores seguros. Además, utilizamos certificados SSL para cifrar tu conexión y no requerimos registro, lo que significa que no recolectamos datos personales ni correos electrónicos que puedan ser vulnerados."
+      question: "¿Es seguro para mi dispositivo usar este sitio o la app?",
+      answer: "Totalmente seguro. No requerimos que instales extensiones sospechosas ni software con publicidad invasiva. Toda la transmisión está cifrada bajo HTTPS con certificados SSL y seguimos las directrices de privacidad más estrictas: no recopilamos datos personales ni vendemos tu información a terceros."
     },
     {
-      question: "¿Cómo descargo videos en dispositivos iPhone o Android?",
-      answer: "Nuestra web es completamente 'Mobile-First'. En Android, simplemente usa el navegador Chrome; la descarga irá directamente a tu carpeta de 'Downloads'. En dispositivos Apple con iOS (iPhone/iPad), recomendamos usar el navegador Safari. Debido a las políticas de iOS, al presionar el botón de descarga, Safari te preguntará si quieres descargar el archivo. Una vez completado, podrás encontrarlo en la aplicación predeterminada 'Archivos' (Files) de Apple, desde donde podrás guardarlo en tu carrete o compartirlo."
+      question: "¿Cómo descargo en teléfonos Android o iPhone?",
+      answer: "En Android (web o app), la descarga se guarda automáticamente en tu Galería de videos o en la carpeta Downloads/FTYdownloaderPro. En dispositivos Apple con iOS (iPhone/iPad), Safari te preguntará si deseas descargar el archivo, guardándose de inmediato en la aplicación predeterminada 'Archivos' (Files), desde donde podrás compartirlo a WhatsApp o guardarlo en tu Carrete."
     },
     {
       question: "¿Necesito registrarme o crear una cuenta?",
-      answer: "No. Creemos que la libertad es esencial para la creatividad. Puedes usar todas las funciones de FTY Downloader Pro de forma anónima. No te pediremos tu nombre, correo electrónico, ni vinculación con cuentas de redes sociales. Esto no solo hace el proceso más rápido (pegar y descargar), sino que protege tu privacidad digital al evitar que tus hábitos de consumo de contenido sean rastreados o vendidos a terceros."
+      answer: "No. Puedes usar todas las funciones de FTY Downloader Pro de forma completamente anónima. No solicitamos correos electrónicos, contraseñas ni vinculación con tus cuentas de redes sociales."
     },
     {
-      question: "¿Por qué a veces recibo un mensaje de error al intentar descargar?",
-      answer: "Existen tres razones principales para esto: 1) El video es Privado o Privado para amigos, por lo que nuestros servidores no pueden 'verlo'. 2) El video tiene restricciones geográficas (solo visible en ciertos países). 3) El video ha sido eliminado o la URL está mal escrita. Si estás seguro de que el video es público y accesible, intenta actualizar la página y pegar el enlace nuevamente. Si el problema persiste, puedes reportarlo a través de nuestra página de contacto."
+      question: "¿Por qué a veces recibo un error al intentar procesar un enlace?",
+      answer: "Las causas más frecuentes son: 1) El video es Privado o solo para amigos. 2) El video tiene restricciones de edad o geográficas. 3) El enlace fue borrado o copiado de forma incompleta. Asegúrate de que el video sea público y que el enlace esté completo."
     },
     {
-      question: "¿Existe algún límite en la duración de los videos?",
-      answer: "No imponemos límites técnicos estrictos en la duración del video. Sin embargo, videos extremadamente largos (por ejemplo, transmisiones en vivo de 10 horas) pueden tardar significativamente más en procesarse y descargarse debido al tamaño masivo del archivo. Para videos estándar, tutoriales y música, el procesamiento es casi instantáneo."
-    },
-    {
-      question: "¿Puedo descargar transmisiones en vivo?",
-      answer: "Puedes descargar cualquier transmisión en vivo (Live Stream) una vez que esta haya finalizado y haya sido publicada como un video permanente por el creador. No es posible realizar descargas de transmisiones que se están emitiendo en tiempo real por razones técnicas y de latencia del servidor."
-    },
-    {
-      question: "¿Cuál es el formato de archivo final?",
-      answer: "El formato estándar de salida para video es MP4, el cual es el más compatible del mercado actual (funciona en Smart TVs, móviles y todos los sistemas operativos). Para audio, el formato estándar es MP3. En algunos casos avanzados, el sistema podría ofrecer otros formatos de alta fidelidad compatibles con dispositivos modernos."
-    },
-    {
-      question: "¿Qué debo hacer si la descarga no comienza automáticamente?",
-      answer: "En el 99% de los casos, la descarga comienza tras presionar el botón de confirmación. Si por alguna razón tu navegador lo abre como una visualización en lugar de descargar (sucede a veces en navegadores móviles antiguos), simplemente mantén presionado el video y selecciona 'Guardar Video Como...' o 'Descargar Vínculo'. Así forzarás el guardado en tu almacenamiento local."
-    },
-    {
-      question: "¿Cómo funciona la descarga de Reels de Instagram en alta calidad?",
-      answer: "Nuestro sistema para Instagram Reels utiliza una API de extracción de metadatos optimizada para 2026. Al pegar la URL del Reel, FTY Downloader Pro identifica el servidor CDN de Meta que contiene el archivo original sin compresión adicional. Esto nos permite ofrecerte la descarga en la resolución nativa en la que fue subido por el creador, usualmente 1080p con un bitrate optimizado. Es el método más fiable para creadores que necesitan republicar su propio contenido en otras plataformas manteniendo la fidelidad visual que Instagram exige."
-    },
-    {
-      question: "¿Puedo descargar videos de cuentas privadas?",
-      answer: "Por razones de seguridad técnica y respeto a la privacidad de los usuarios, FTY Downloader Pro solo puede procesar contenido que esté configurado como 'Público'. Si un video está restringido a 'Amigos' o es de una cuenta privada, nuestras herramientas no pueden acceder a los servidores de la plataforma para extraer el archivo. Esto garantiza que nuestro servicio no sea utilizado de forma malintencionada para vulnerar la privacidad de las personas en las redes sociales."
-    },
-    {
-      question: "¿Qué es FTY Downloader Pro y en qué se diferencia de otros?",
-      answer: "FTY Downloader Pro es una suite de herramientas de nueva generación diseñada específicamente para la economía de los creadores en 2026. A diferencia de los descargadores genéricos que están plagados de anuncios invasivos y malware, nosotros priorizamos una experiencia de usuario 'limpia' y ultrarrápida. Utilizamos balanceadores de carga globales que aseguran que tus descargas siempre se realicen desde el servidor más cercano a tu ubicación, reduciendo la latencia y maximizando tu ancho de banda disponible."
-    },
-    {
-      question: "¿Cómo reportar errores o sugerir nuevas plataformas?",
-      answer: "Valoramos enormemente el feedback de nuestra comunidad. Si encuentras un enlace que no funciona o tienes una sugerencia para incluir plataformas como YouTube, LinkedIn o Pinterest, puedes usar nuestro formulario de contacto oficial. Nuestro equipo de ingenieros revisa los reportes diariamente y suele implementar correcciones para errores de red sociales en menos de 24 horas, asegurando que FTY Downloader Pro sea siempre la herramienta más actualizada del mercado."
+      question: "¿Puedo reproducir mis videos descargados dentro de la app?",
+      answer: "¡Sí! En el botón del reloj (Historial) encontrarás un reproductor integrado a pantalla completa similar al visor de WhatsApp, con opciones para ver el video, escuchar el audio, compartirlo directamente o abrirlo en reproductores externos (VLC, Google Fotos, etc.)."
     },
     {
       question: "¿Cumplen con las normativas de derechos de autor?",
-      answer: "FTY Downloader Pro es una herramienta neutral diseñada para el uso personal y profesional legítimo. Alentamos a todos nuestros usuarios a respetar los derechos de propiedad intelectual de los autores originales. La descarga de contenido debe realizarse bajo el principio de 'fair use' (uso justo) o con el permiso explícito del creador de contenido. Nuestra plataforma no promueve la piratería ni la distribución ilegal de material protegido por copyright, siendo responsabilidad del usuario el uso final que se le dé a los archivos descargados."
+      answer: "FTY Downloader Pro es una herramienta neutral diseñada para la gestión y copia de seguridad de contenido propio o bajo excepciones de Uso Justo (Fair Use) para fines educativos, de crítica o comentario. Respetamos rigurosamente los derechos de propiedad intelectual y contamos con un procedimiento ágil de notificación DMCA."
     }
   ]
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-16">
-        <h1 className="text-5xl font-extrabold text-gray-900 mb-6">Preguntas Frecuentes</h1>
-        <p className="text-xl text-gray-600">
-          Todo lo que necesitas saber sobre FTY Downloader Pro, seguridad y privacidad.
+    <div className="container mx-auto px-4 max-w-4xl">
+      {/* Encabezado */}
+      <div className="mb-8 text-center max-w-2xl mx-auto">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Volver al Descargador</span>
+        </Link>
+        <div className="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
+          <HelpCircle className="w-6 h-6" />
+        </div>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+          Preguntas Frecuentes
+        </h1>
+        <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+          Todo lo que necesitas saber sobre descargas, formatos compatibles, calidad y seguridad en FTY Downloader Pro.
         </p>
       </div>
 
-      <div className="space-y-8">
+      {/* Lista de FAQs */}
+      <div className="space-y-4">
         {faqs.map((faq, index) => (
-          <div key={index} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md transition-shadow">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-start">
-              <span className="text-blue-500 mr-4 font-serif">Q.</span>
-              {faq.question}
+          <div 
+            key={index} 
+            className="bg-white dark:bg-slate-900/90 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-xs hover:border-blue-500/40 transition-colors"
+          >
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mb-2 flex items-start gap-2.5">
+              <span className="text-blue-600 dark:text-blue-400 font-extrabold">Q.</span>
+              <span>{faq.question}</span>
             </h3>
-            <div className="pl-9 border-l-2 border-blue-50 ml-2">
-              <p className="text-gray-700 leading-relaxed text-lg">
+            <div className="pl-6 border-l-2 border-blue-500/20 dark:border-blue-500/30 ml-1">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 {faq.answer}
               </p>
             </div>
@@ -102,25 +93,25 @@ export default function FAQPage() {
         ))}
       </div>
 
-      {/* Sección de contacto adicional */}
-      <div className="mt-20 text-center bg-blue-600 text-white p-12 rounded-3xl shadow-xl">
-        <h2 className="text-3xl font-bold mb-6">¿Aún tienes dudas técnicas?</h2>
-        <p className="text-blue-100 mb-10 text-lg max-w-2xl mx-auto">
-          Nuestro equipo de soporte técnico está disponible para ayudarte a resolver cualquier inconveniente con tus descargas.
+      {/* Tarjeta de soporte final */}
+      <div className="mt-12 text-center p-8 sm:p-10 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/10 space-y-4">
+        <h2 className="text-2xl sm:text-3xl font-extrabold">¿Tienes alguna duda técnica puntual?</h2>
+        <p className="text-xs sm:text-sm text-blue-100 max-w-xl mx-auto opacity-90 leading-relaxed">
+          Nuestro equipo de soporte técnico responde a tus consultas sobre enlaces o compatibilidad en menos de 24 horas hábiles.
         </p>
-        <div className="flex justify-center gap-6">
-          <a
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <Link
             href="/contact"
-            className="bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-blue-50 font-bold transition-colors shadow-lg"
+            className="px-5 py-2.5 rounded-xl bg-white text-blue-600 font-bold text-xs sm:text-sm shadow-md hover:bg-blue-50 transition-colors"
           >
-            Contactar Soporte
-          </a>
-          <a
+            Contactar a Soporte
+          </Link>
+          <Link
             href="/"
-            className="bg-blue-500 text-white border border-blue-400 px-8 py-4 rounded-xl hover:bg-blue-400 font-bold transition-colors"
+            className="px-5 py-2.5 rounded-xl bg-blue-500/40 border border-white/20 text-white font-bold text-xs sm:text-sm hover:bg-blue-500/60 transition-colors"
           >
-            Volver al Inicio
-          </a>
+            Ir al Descargador
+          </Link>
         </div>
       </div>
     </div>

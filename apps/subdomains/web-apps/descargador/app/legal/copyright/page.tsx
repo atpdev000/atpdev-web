@@ -1,69 +1,93 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { Copyright, ArrowLeft, Shield, AlertTriangle, Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
-    title: 'Política de Copyright y Propiedad Intelectual | FTY Downloader Pro',
-    description: 'Información sobre derechos de autor, uso justo (fair use) y cómo reportar contenido protegido en FTY Downloader Pro.',
+  title: 'Política de Copyright y DMCA | FTY Downloader Pro',
+  description: 'Información sobre derechos de autor, procedimiento de notificación DMCA y uso legítimo en FTY Downloader Pro.',
 }
 
 export default function CopyrightPage() {
-    return (
-        <div className="container mx-auto px-4 py-12 max-w-4xl">
-            <h1 className="text-4xl font-bold mb-8">Política de Copyright</h1>
-
-            <div className="prose prose-lg max-w-none text-gray-700">
-                <section className="mb-10">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Respeto por los Derechos de Autor</h2>
-                    <p>
-                        En <strong>FTY Downloader Pro</strong>, respetamos los derechos de propiedad intelectual de los demás y esperamos que nuestros usuarios hagan lo mismo.
-                        Nuestra plataforma es una herramienta técnica que permite el intercambio de formato (format-shifting) para uso personal y privado, de acuerdo con las leyes internacionales de propiedad intelectual.
-                    </p>
-                </section>
-
-                <section className="mb-10">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">2. Uso Justo (Fair Use)</h2>
-                    <p>
-                        Recordamos a los usuarios que la descarga de material protegido por derechos de autor sin el permiso explícito del titular del derecho
-                        puede ser legalmente permisible bajo la doctrina de <strong>Uso Justo (Fair Use)</strong> o excepciones similares en su jurisdicción, siempre que se utilice para fines de:
-                    </p>
-                    <ul className="list-disc pl-6 space-y-2">
-                        <li>Crítica y comentario.</li>
-                        <li>Información de noticias.</li>
-                        <li>Enseñanza y educación académica.</li>
-                        <li>Investigación académica.</li>
-                        <li>Uso personal no comercial.</li>
-                    </ul>
-                </section>
-
-                <section className="mb-10">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">3. Responsabilidad del Usuario</h2>
-                    <p>
-                        El usuario es el único responsable de los datos que procesa a través de nuestra herramienta. FTY Downloader Pro no aloja contenido en sus servidores;
-                        actuamos como un puente técnico entre el servidor de origen y el dispositivo del usuario final.
-                    </p>
-                    <p className="mt-4">
-                        Al utilizar este sitio, usted acepta no utilizar nuestra plataforma para infringir leyes de derechos de autor ni para realizar redistribución comercial de contenido protegido sin autorización.
-                    </p>
-                </section>
-
-                <section className="mb-10 bg-gray-50 p-8 rounded-2xl border">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4 font-bold italic">4. Procedimiento de Notificación (DMCA)</h2>
-                    <p>
-                        Si usted es el titular de los derechos de autor de un contenido y cree que nuestra herramienta está facilitando un acceso no autorizado a su obra de una manera que perjudica sus derechos,
-                        puede contactarnos para solicitar el bloqueo de URLs específicas en nuestro sistema.
-                    </p>
-                    <p className="mt-4">
-                        Para procesar su solicitud, incluya:
-                    </p>
-                    <ul className="list-disc pl-6 space-y-2 mt-2">
-                        <li>Identificación de la obra protegida.</li>
-                        <li>La URL específica que desea bloquear en nuestro convertidor.</li>
-                        <li>Su información de contacto (email y firma digital).</li>
-                    </ul>
-                    <p className="mt-4 font-semibold text-blue-600">
-                        Envíe su solicitud a: atp.dev000@gmail.com
-                    </p>
-                </section>
-            </div>
+  return (
+    <div className="container mx-auto px-4 max-w-4xl">
+      {/* Navegación y Encabezado */}
+      <div className="mb-8">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Volver al Descargador</span>
+        </Link>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-2xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+            <Copyright className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Política de Copyright y DMCA
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Protección de Propiedad Intelectual y Procedimiento de Notificación
+            </p>
+          </div>
         </div>
-    )
+      </div>
+
+      <div className="space-y-8">
+        {/* Resumen */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            1. Respeto por los Derechos de Autor
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            En <strong>FTY Downloader Pro</strong>, respetamos escrupulosamente los derechos de propiedad intelectual de creadores, productoras y artistas. Nuestra plataforma funciona como una herramienta neutral de procesamiento y conversión de medios (format-shifting) para uso personal privado y legítimo, sin almacenar ni hospedar archivos audiovisuales de terceros en servidores propios.
+          </p>
+        </div>
+
+        {/* Uso Justo / Fair Use */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            2. Doctrina de Uso Justo (Fair Use)
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Recordamos a los usuarios que la descarga de material protegido sin autorización previa puede estar amparada exclusivamente bajo las excepciones de <strong>Uso Justo (Fair Use)</strong> aplicables en su país, limitadas estrictamente a:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            <li>Crítica, reseñas y comentarios académicos o culturales.</li>
+            <li>Reportajes periodísticos e investigación de noticias.</li>
+            <li>Enseñanza y actividades educativas sin fines de lucro.</li>
+            <li>Copias de respaldo de archivos propios para visualización privada offline.</li>
+          </ul>
+        </div>
+
+        {/* Procedimiento DMCA */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-purple-50/80 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-purple-950 dark:text-purple-200 flex items-center gap-2">
+            <Shield className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <span>3. Procedimiento de Notificación de Infracción (DMCA)</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-purple-900/90 dark:text-purple-300/90 leading-relaxed">
+            Si eres titular legítimo de derechos de autor (o representante acreditado) y consideras que algún contenido procesado a través de nuestra herramienta infringe tus derechos, puedes remitir una notificación con los siguientes datos:
+          </p>
+          <ul className="list-disc pl-5 space-y-1.5 text-xs text-purple-900/80 dark:text-purple-300/80">
+            <li>Identificación precisa de la obra protegida por derechos de autor supuestamente infringida.</li>
+            <li>La URL exacta del contenido en la red social de origen.</li>
+            <li>Información de contacto (nombre, dirección, teléfono y correo electrónico corporativo).</li>
+            <li>Declaración de buena fe donde conste que el uso reclamado no está autorizado por el titular ni por la ley.</li>
+            <li>Firma física o electrónica del titular o representante acreditado.</li>
+          </ul>
+          <div className="pt-2">
+            <a 
+              href="mailto:contacto@atpdev.dev?subject=Notificacion%20DMCA%20FTYDownloader" 
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-sm transition-all"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Enviar Notificación DMCA (contacto@atpdev.dev)</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }

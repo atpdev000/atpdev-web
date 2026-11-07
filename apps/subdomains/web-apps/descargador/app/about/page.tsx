@@ -1,137 +1,119 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { ArrowLeft, Target, Rocket, Shield, Sparkles, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Sobre Nosotros | FTY Downloader Pro - Nuestra Misión y Equipo',
-  description: 'Conoce la visión de FTY Downloader Pro. Somos un equipo de especialistas en procesamiento multimedia dedicados a democratizar el acceso al contenido digital.',
+  title: 'Sobre Nosotros | FTY Downloader Pro - Misión y Ecosistema',
+  description: 'Conoce la visión de FTY Downloader Pro. Especialistas en procesamiento multimedia dedicados a garantizar la accesibilidad y respaldo legítimo de contenidos digitales.',
 }
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto px-4 py-12 max-w-5xl">
+    <div className="container mx-auto px-4 py-8 max-w-5xl">
+      {/* Botón Volver */}
+      <div className="mb-6">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Volver al Descargador</span>
+        </Link>
+      </div>
+
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white py-20 px-8 rounded-[2.5rem] mb-20 shadow-xl">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block bg-blue-400/30 text-blue-100 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-blue-300/20">
-            Nuestra Identidad
+      <section className="bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-700 text-white py-12 sm:py-16 px-6 sm:px-10 rounded-3xl mb-12 shadow-xl shadow-blue-500/10 text-center">
+        <div className="max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-1.5 bg-white/20 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-xs">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Identidad & Propósito</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-8 tracking-tight leading-tight">
-            Liderando la Preservación de <br />
-            <span className="text-blue-200">Activos Digitales</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 tracking-tight leading-tight">
+            Preservación y Respaldo de Contenidos Digitales
           </h1>
-          <p className="text-xl text-blue-50 leading-relaxed max-w-3xl mx-auto opacity-90">
-            Desde 2022, FTYDownloader Pro se ha consolidado como la plataforma técnica de referencia para creadores que buscan proteger su propiedad intelectual y su historial multimedia con calidad 4K.
+          <p className="text-sm sm:text-base text-blue-100 leading-relaxed max-w-2xl mx-auto opacity-95">
+            FTY Downloader Pro es una plataforma técnica creada para creadores, educadores y usuarios que buscan respaldar su contenido multimedia con la máxima fidelidad y velocidad.
           </p>
         </div>
       </section>
 
-      {/* Main Content Grid */}
-      <div className="space-y-24">
-        {/* Misión y Visión Section */}
-        <section className="grid md:grid-cols-2 gap-10">
-          <div className="group bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-              🎯
+      {/* Grid de Misión y Visión */}
+      <div className="space-y-12">
+        <section className="grid sm:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-slate-900/90 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+            <div className="w-12 h-12 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <Target className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Nuestra Misión</h2>
-            <p className="text-gray-600 leading-relaxed">
-              Empoderar a los usuarios dotándolos de las herramientas de extracción más potentes del mercado para recuperar el control sobre su contenido multimedia, garantizando integridad y accesibilidad offline permanente.
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Nuestra Misión</h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Empoderar a los usuarios dotándolos de herramientas directas de extracción para recuperar el control de su contenido multimedia, garantizando integridad de formatos y acceso offline permanente.
             </p>
           </div>
-          <div className="group bg-white p-10 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-14 h-14 bg-indigo-100 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
-              🚀
+
+          <div className="bg-white dark:bg-slate-900/90 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+            <div className="w-12 h-12 rounded-xl bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <Rocket className="w-6 h-6" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Nuestra Visión</h2>
-            <p className="text-gray-600 leading-relaxed">
-              Convertirnos en el centro de recursos multimedia más confiable del mundo de habla hispana, liderando en ciberseguridad, soberanía digital y gestión de datos de alto rendimiento.
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Nuestra Visión</h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Consolidarnos como el centro de herramientas multimedia más confiable y rápido, liderando en privacidad del usuario, diseño accesible y compatibilidad universal entre dispositivos.
             </p>
           </div>
         </section>
 
-        {/* Historia y Propósito */}
-        <section className="bg-gray-50 rounded-[3rem] p-12 md:p-20">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-8 border-l-4 border-blue-600 pl-6">Nuestra Historia</h2>
-            <div className="prose prose-lg text-gray-600 space-y-6">
-              <p>
-                FTY Downloader Pro nació de una observación simple pero alarmante: internet es la biblioteca más grande de la historia, pero su arquitectura es volátil. El contenido que hoy es vital para tu educación o negocio puede desaparecer mañana por cambios en algoritmos o cierres de plataformas.
-              </p>
-              <p>
-                Lo que comenzó como un script de ingeniería para procesar flujos de datos HD, evolucionó rápidamente en un ecosistema profesional. Hoy, servimos a una comunidad global de creadores que exigen una alternativa segura, sin malware y orientada a la máxima fidelidad técnica.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* El Equipo */}
-        <section>
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Mentes Detrás del Código</h2>
-            <p className="text-gray-600 text-lg">Especialistas dedicados a la excelencia técnica y la seguridad digital.</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { name: 'Alex T.P.', role: 'Arquitecto Principal', icon: '💻' },
-              { name: 'M. García', role: 'Seguridad FIDO2', icon: '🛡️' },
-              { name: 'L. Mendez', role: 'Editora de Blog', icon: '✍️' },
-              { name: 'P. Rojas', role: 'Infraestructura Dev', icon: '⚡' },
-            ].map((member) => (
-              <div key={member.name} className="bg-white p-8 rounded-3xl text-center border border-gray-100 shadow-sm hover:border-blue-200 transition-colors">
-                <div className="text-4xl mb-4">{member.icon}</div>
-                <h3 className="font-bold text-gray-900 text-lg">{member.name}</h3>
-                <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mt-1">{member.role}</p>
+        {/* Pilares */}
+        <section className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+            Nuestros Pilares Técnicos
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-4 pt-2">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Soberanía de Datos</h3>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Valores */}
-        <section className="space-y-12">
-          <h2 className="text-3xl font-extrabold text-gray-900 text-center">Nuestras Columnas Vertebrales</h2>
-          <div className="grid gap-6">
-            {[
-              { title: 'Soberanía Digital', desc: 'Tu contenido es tuyo. Te damos la llave para sacarlo de la nube y guardarlo en tu propia infraestructura.' },
-              { title: 'Calidad 1:1', desc: 'No escalamos video; extraemos el stream original sin pérdida de frames ni bitrates, tal como fue subido.' },
-              { title: 'Higiene de Datos', desc: 'Privacidad absoluta. No rastreamos tus descargas ni almacenamos historiales de tus sesiones.' },
-            ].map((value, index) => (
-              <div key={value.title} className="flex flex-col md:flex-row gap-6 p-8 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                <div className="text-blue-600 text-3xl font-black">0{index + 1}</div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{value.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{value.desc}</p>
-                </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Tu contenido es tuyo: facilidades para respaldar tus publicaciones de redes en tu propio disco o teléfono.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Calidad Original 1080p</h3>
               </div>
-            ))}
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="bg-gray-900 text-white p-12 md:p-20 rounded-[3rem] text-center overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl -ml-32 -mb-32"></div>
-
-          <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 tracking-tight">¿Tienes un Proyecto o Duda Técnica?</h2>
-            <p className="text-gray-400 mb-10 max-w-2xl mx-auto text-lg">
-              Nuestro equipo de soporte humano está listo para asistirte en colaboraciones, reportes de errores o consultas legales sobre copyright.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link
-                href="/contact"
-                className="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/40 text-lg"
-              >
-                Inicia una Conversación
-              </Link>
-              <Link
-                href="/blog"
-                className="bg-white/10 backdrop-blur-md text-white px-10 py-4 rounded-2xl font-bold hover:bg-white/20 transition-all text-lg"
-              >
-                Explora nuestras Guías
-              </Link>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Extracción limpia sin recodificación destructiva ni pérdida de bitrate o fotogramas.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">Privacidad Rigurosa</h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                Sin registros obligatorios, sin rastreo de actividad y con historial guardado exclusivamente en tu equipo.
+              </p>
             </div>
           </div>
         </section>
+
+        {/* CTA Contacto */}
+        <div className="text-center p-8 rounded-2xl bg-slate-100/80 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            ¿Tienes sugerencias o deseas colaborar?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+            Estamos abiertos a retroalimentación continua para añadir nuevas plataformas y optimizar las herramientas existentes.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-sm transition-all"
+            >
+              <span>Ir a la Página de Contacto</span>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )

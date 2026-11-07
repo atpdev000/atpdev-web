@@ -1,10 +1,14 @@
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Contacto - Soporte FTY Downloader Pro',
-  description: '¿Necesitas ayuda con tus descargas? Ponte en contacto con el equipo de soporte técnico de FTY Downloader Pro. Estamos para ayudarte.',
-}
+import Header from '@/components/Layout/MainHeader'
+import Footer from '@/components/Layout/Footer'
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return (
+    <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
+      <Header />
+      <main className="flex-1 py-8 sm:py-12">{children}</main>
+      <Footer />
+    </div>
+  )
 }

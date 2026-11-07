@@ -1,68 +1,123 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { Cookie, ArrowLeft, Settings, Check, Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Política de Cookies | FTY Downloader Pro',
-  description: 'Conoce cómo FTY Downloader Pro utiliza cookies técnicas y de preferencias para garantizar la mejor experiencia de usuario.',
+  description: 'Conoce en detalle cómo FTY Downloader Pro utiliza cookies técnicas y almacenamiento local para brindarte la mejor experiencia.',
 }
 
 export default function CookiesPage() {
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8">Política de Cookies</h1>
+    <div className="container mx-auto px-4 max-w-4xl">
+      {/* Navegación y Encabezado */}
+      <div className="mb-8">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Volver al Descargador</span>
+        </Link>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+            <Cookie className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Política de Cookies
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Última actualización: 1 de Enero de 2026 • Información de Almacenamiento Local
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <div className="prose prose-lg max-w-none text-gray-700">
-        <p className="text-sm text-gray-500 mb-8 italic">Última actualización: 1 de Enero de 2026</p>
+      <div className="space-y-8">
+        {/* Introducción */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            En <strong>FTY Downloader Pro</strong>, utilizamos cookies y tecnologías de almacenamiento local en el navegador (como LocalStorage) para que disfrutes de una navegación rápida, segura y adaptada a tus preferencias. Esta política explica qué tecnologías usamos, para qué sirven y cómo puedes configurarlas o desactivarlas.
+          </p>
+        </div>
 
-        <p>
-          En <strong>FTY Downloader Pro</strong>, utilizamos cookies y tecnologías de almacenamiento local para garantizar el funcionamiento fluido de la herramienta, recordar tus elecciones de configuración y optimizar la experiencia de navegación. Esta política explica qué son las cookies, con qué finalidad se emplean y cómo puedes gestionarlas.
-        </p>
+        {/* Tipos de cookies */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            1. ¿Qué tipos de cookies y almacenamiento utilizamos?
+          </h2>
 
-        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. ¿Qué son las cookies y el almacenamiento local?</h2>
-        <p>
-          Las cookies son pequeños ficheros de datos que los sitios web depositan en tu navegador al visitarlos. El almacenamiento local (LocalStorage / IndexedDB) es una tecnología moderna similar que permite que tu navegador retenga información útil en tu propio equipo (como tu lista de historial o el tema visual) sin transmitirla a servidores remotos.
-        </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Cookies Técnicas Esenciales</h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Requeridas para la navegación, seguridad de peticiones API y entrega del reproductor de video.
+              </p>
+            </div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. ¿Qué tipos de cookies y datos almacenamos?</h2>
-        <ul className="list-disc pl-6 space-y-3">
-          <li>
-            <strong>Cookies Técnicas y Esenciales:</strong> Son indispensables para la operativa básica de la aplicación, como la gestión de sesiones, la seguridad de las peticiones API y la navegación entre pantallas.
-          </li>
-          <li>
-            <strong>Cookies de Preferencias:</strong> Nos permiten memorizar parámetros elegidos por el usuario, como el idioma de la interfaz (español, inglés o portugués) y la paleta visual (modo oscuro o modo claro).
-          </li>
-          <li>
-            <strong>Historial de Descargas Local:</strong> Tu historial de descargas se guarda estrictamente en el almacenamiento local de tu dispositivo para que puedas reproducir tus videos sin conexión. Esta información no se sube a bases de datos en la nube.
-          </li>
-          <li>
-            <strong>Publicidad y Medición (Terceros):</strong> Servicios asociados como Google AdSense, AdMob o Ezoic pueden emplear cookies para mostrar anuncios contextuales y medir la efectividad de campañas publicitarias.
-          </li>
-        </ul>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Preferencias de Idioma y Tema</h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Permiten que la web recuerde si prefieres Modo Oscuro o Claro y tu idioma (ES, EN, PT) en cada visita.
+              </p>
+            </div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. Servicios de Terceros</h2>
-        <p>
-          En nuestra plataforma colaboramos con proveedores técnicos de confianza que pueden gestionar cookies propias:
-        </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Google AdSense / Google AdMob:</strong> Muestran anuncios relevantes y evitan la repetición excesiva de la misma publicidad.</li>
-          <li><strong>Google Analytics:</strong> Recopila datos métricos consolidados y totalmente anonimizados sobre visitas y tiempos de carga.</li>
-        </ul>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Historial Local Privado</h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Almacena el registro de tus descargas únicamente en la memoria local de tu dispositivo, sin enviarlo a la nube.
+              </p>
+            </div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. ¿Cómo puedes controlar o desactivar las cookies?</h2>
-        <p>
-          Tienes el derecho y la libertad de aceptar, rechazar o eliminar las cookies en cualquier momento desde los ajustes de privacidad de tu navegador (Chrome, Firefox, Safari, Edge, etc.).
-        </p>
-        <p className="mt-4">
-          Ten presente que deshabilitar cookies esenciales puede ocasionar que ciertas funciones (como recordar tu idioma o el tema oscuro) deban seleccionarse nuevamente en cada visita.
-        </p>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 space-y-2">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm">Publicidad (Google AdSense)</h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Google utiliza cookies para medir impresiones y presentar anuncios contextuales de forma segura.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Actualizaciones de esta Política</h2>
-        <p>
-          Podemos modificar esta Política de Cookies en función de nuevas exigencias legales o mejoras en nuestra arquitectura tecnológica. Te recomendamos revisarla periódicamente para mantenerte informado.
-        </p>
+        {/* Cómo gestionar cookies */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Settings className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <span>2. ¿Cómo controlar o desactivar las cookies?</span>
+          </h2>
+          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-3">
+            <p>
+              Puedes permitir, bloquear o eliminar las cookies instaladas en tu equipo mediante la configuración de las opciones de tu navegador web:
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><strong>Google Chrome:</strong> Configuración &gt; Privacidad y seguridad &gt; Cookies de terceros.</li>
+              <li><strong>Mozilla Firefox:</strong> Opciones &gt; Privacidad y seguridad &gt; Cookies y datos del sitio.</li>
+              <li><strong>Apple Safari:</strong> Preferencias &gt; Privacidad.</li>
+              <li><strong>Microsoft Edge:</strong> Configuración &gt; Cookies y permisos del sitio.</li>
+            </ul>
+          </div>
+        </div>
 
-        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mt-12">
-          <h3 className="text-xl font-bold mb-3 text-gray-900">Canal de Contacto</h3>
-          <p className="text-sm">Si tienes inquietudes respecto al tratamiento de cookies en nuestra web, puedes escribirnos a: <strong>contacto@atpdev.dev</strong></p>
+        {/* Contacto */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-slate-100/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+            ¿Preguntas sobre nuestra política de cookies?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Puedes escribirnos directamente a: <a href="mailto:contacto@atpdev.dev" className="text-blue-600 dark:text-blue-400 font-bold underline">contacto@atpdev.dev</a>
+          </p>
         </div>
       </div>
     </div>

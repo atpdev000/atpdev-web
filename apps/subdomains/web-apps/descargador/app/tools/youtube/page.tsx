@@ -1,106 +1,89 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Sparkles } from 'lucide-react'
 import { FEATURES } from '@/lib/featureFlags'
+import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
 
 export const metadata: Metadata = {
-    title: 'Respaldo de Video Digital | Herramienta de Gestión Multimedia ✅',
-    description: 'Gestiona y respalda tus videos personales en la mejor calidad disponible. Rápido, seguro y profesional.',
+    title: 'Descargar Videos de YouTube en HD y MP3 | FTY Downloader Pro',
+    description: 'Gestiona y respalda videos de YouTube en la mejor calidad disponible (1080p, 4K y MP3). Rápido, seguro y profesional.',
 }
-
-import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
 
 export default function YoutubeToolPage() {
     if (!FEATURES.YOUTUBE_ENABLED) {
         redirect('/')
     }
     return (
-        <div className="container mx-auto px-4 py-8 max-w-5xl">
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    Gestor de Respaldo Multimedia
+        <div className="container mx-auto px-4 max-w-5xl">
+            {/* Botón Volver */}
+            <div className="mb-6">
+                <Link 
+                    href="/" 
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:underline"
+                >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Volver al Descargador</span>
+                </Link>
+            </div>
+
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider mb-3">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>YouTube HD & MP3</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+                    Descargador de Videos de YouTube
                 </h1>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                    La forma más potente de guardar y organizar tu contenido digital en alta definición.
+                <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Guarda videos de YouTube en MP4 de alta resolución (1080p y 4K) o extrae el audio en formato MP3 de alta fidelidad.
                 </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
+            <div className="bg-white dark:bg-slate-900/90 rounded-3xl shadow-xl p-5 sm:p-8 mb-12 border border-slate-200 dark:border-slate-800">
                 <YoutubeDownloader />
             </div>
 
-            <div className="prose prose-lg max-w-none text-gray-700">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 font-bold">Cómo guardar videos de Redes Sociales en HD y 4K</h2>
-                <p>
-                    Las plataformas digitales son la biblioteca de video más grande del planeta. Ya sea que necesites un tutorial para estudiar,
-                    música para un evento o documentales para un viaje, <strong>FTY Downloader Pro</strong> te permite gestionar
-                    tu contenido de forma eficiente y gratuita.
-                </p>
-
-                <h3 className="text-2xl font-semibold mt-8 mb-4">Tutorial Paso a Paso</h3>
-                <ul className="space-y-4">
-                    <li><strong>Copia la URL:</strong> En tu aplicación social, presiona "Compartir" y copia el enlace del video o usa la URL de la barra del navegador.</li>
-                    <li><strong>Pega y Analiza:</strong> Coloca el enlace arriba. Nuestro motor especializado analizará todas las resoluciones disponibles del video (desde 144p hasta 4K).</li>
-                    <li><strong>Elige el Formato:</strong> Puedes guardar el video completo en MP4 o solo el audio en MP3 de alta calidad.</li>
-                </ul>
-
-                <div className="bg-red-50 p-6 rounded-xl my-8 border-l-4 border-red-500">
-                    <h4 className="font-bold text-red-800 mb-2">🚀 Soporte para Videos 4K</h4>
-                    <p className="text-red-700 text-sm">
-                        Nuestra herramienta soporta la tecnología DASH, permitiéndote gestionar videos en 1080p, 1440p y 4K.
-                        Muchos otros gestores solo llegan a 720p; nosotros te damos la resolución máxima real del video original.
+            <div className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xs space-y-8">
+                <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-4">
+                        ¿Cómo descargar videos de YouTube en HD?
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Con <strong>FTY Downloader Pro</strong>, puedes procesar enlaces de videos largos, Shorts y transmisiones finalizadas para verlos sin conexión en cualquier dispositivo.
                     </p>
                 </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 font-bold">Por qué somos la mejor opción para Multimedia HD</h2>
-                <div className="grid md:grid-cols-2 gap-8 not-prose">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🔊 Audio 320kbps</h4>
-                        <p className="text-gray-600">Si buscas fidelidad de sonido, nuestro extractor de MP3 mantiene la mayor calidad de audio disponible en el origen.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🎞️ Múltiples Formatos</h4>
-                        <p className="text-gray-600">Compatible con MP4, WEBM y MP3. Elige el que mejor se adapte a tu reproductor o dispositivo.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🚫 Sin Software Adicional</h4>
-                        <p className="text-gray-600">No necesitas instalar plugins pesados ni software sospechoso. Todo ocurre en la nube de forma segura.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🌍 Soporte Global</h4>
-                        <p className="text-gray-600">Nuestros servidores distribuidos garantizan una conexión rápida desde cualquier parte del mundo.</p>
-                    </div>
+                <div className="space-y-3">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                        Pasos para descargar:
+                    </h3>
+                    <ul className="grid sm:grid-cols-3 gap-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        <li className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                            <strong>1. Copia el enlace:</strong> Presiona Compartir en YouTube y copia el link del video.
+                        </li>
+                        <li className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                            <strong>2. Pega y procesa:</strong> Pega la URL en el buscador y pulsa Buscar Video.
+                        </li>
+                        <li className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                            <strong>3. Elige formato:</strong> Selecciona 1080p, 720p o Audio MP3 para descargar.
+                        </li>
+                    </ul>
                 </div>
 
-                <h2 className="text-2xl font-bold mt-12 mb-6 font-bold">FAQ sobre gestión multimedia</h2>
-                <div className="space-y-6">
-                    <details className="group border-b pb-4">
-                        <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-lg">
-                            ¿Puedo gestionar listas de reproducción (Playlists)?
-                            <span className="group-open:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <p className="mt-4 text-gray-600">
-                            Actualmente procesamos archivos de forma individual para garantizar la máxima velocidad. Estamos trabajando para implementar la gestión de listas completas próximamente.
-                        </p>
-                    </details>
-                    <details className="group border-b pb-4">
-                        <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-lg">
-                            ¿Es necesario registrarse?
-                            <span className="group-open:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <p className="mt-4 text-gray-600">
-                            Absolutamente no. Queremos que la experiencia sea libre y abierta. No recopilamos correos electrónicos ni información privada.
-                        </p>
-                    </details>
-                    <details className="group border-b pb-4">
-                        <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-lg">
-                            ¿Por qué algunos archivos no cargan?
-                            <span className="group-open:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <p className="mt-4 text-gray-600">
-                            Algunos contenidos pueden tener restricciones de derechos de autor muy estrictas o estar bloqueados regionalmente.
-                            Si un archivo no procesa, intenta con otro enlace o verifica que sea público.
-                        </p>
-                    </details>
+                <div className="grid md:grid-cols-3 gap-4 pt-2">
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">🔊 Audio MP3 320kbps</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Excelente fidelidad para música, podcasts y audiolibros.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">📺 1080p y 4K</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Soporte con combinador nativo MediaMuxer en móvil.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">📱 Visualizador Integrado</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Reproduce tus descargas directamente desde el historial.</p>
+                    </div>
                 </div>
             </div>
         </div>

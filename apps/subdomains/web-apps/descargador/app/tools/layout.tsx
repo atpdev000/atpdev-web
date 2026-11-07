@@ -1,10 +1,14 @@
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Herramientas de Descarga - FTY Downloader Pro',
-  description: 'Utiliza nuestras herramientas profesionales para descargar videos de Facebook en HD y TikTok sin marca de agua. Rápido, seguro y 100% gratuito.',
-}
+import Header from '@/components/Layout/MainHeader'
+import Footer from '@/components/Layout/Footer'
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return (
+    <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
+      <Header />
+      <main className="flex-1 py-8 sm:py-12">{children}</main>
+      <Footer />
+    </div>
+  )
 }

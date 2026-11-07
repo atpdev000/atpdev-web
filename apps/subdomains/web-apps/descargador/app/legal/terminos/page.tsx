@@ -1,104 +1,153 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { FileText, ArrowLeft, AlertCircle, Scale, ShieldAlert, CheckCircle, Mail } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Términos de Servicio | FTY Downloader Pro',
-  description: 'Términos y condiciones de uso de FTY Downloader Pro. Lee nuestras políticas de uso aceptable y limitaciones del servicio.',
+  description: 'Términos y condiciones de uso de FTY Downloader Pro. Normas de uso aceptable, limitaciones de responsabilidad y doctrina de uso justo.',
 }
 
 export default function TermsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-4">Términos de Servicio</h1>
-      <p className="text-gray-600 mb-8">Última actualización: 1 de Enero de 2026</p>
+    <div className="container mx-auto px-4 max-w-4xl">
+      {/* Navegación y Encabezado */}
+      <div className="mb-8">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Volver al Descargador</span>
+        </Link>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+            <Scale className="w-5 h-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Términos de Servicio
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Última actualización: 1 de Enero de 2026 • Condiciones Generales de Uso
+            </p>
+          </div>
+        </div>
+      </div>
 
-      <div className="prose prose-lg max-w-none">
-        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8">
-          <p className="text-amber-800">
-            <strong>Importante:</strong> Al utilizar FTY Downloader Pro (en web o app móvil), aceptas cumplir estos Términos de Servicio.
-            Por favor, léelos cuidadosamente antes de hacer uso de nuestra plataforma.
+      <div className="space-y-8">
+        {/* Aviso Importante */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 shadow-xs">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-relaxed space-y-1">
+              <p className="font-bold text-sm sm:text-base">Aviso Legal Importante:</p>
+              <p>
+                Al acceder y utilizar <strong>FTY Downloader Pro</strong> (en su versión web o aplicación móvil Android), confirmas que has leído, entendido y aceptado cumplir estos Términos de Servicio y todas las normativas legales aplicables.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sección 1: Naturaleza del servicio */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            1. Naturaleza y Propósito del Servicio
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            FTY Downloader Pro es una herramienta tecnológica independiente diseñada para facilitar la descarga, conversión técnica (format-shifting) y respaldo de contenidos multimedia de plataformas públicas (Facebook, TikTok, Instagram, Threads, Twitter/𝕏, YouTube y WhatsApp). Nuestro software actúa exclusivamente como intermediario técnico de transmisión y no almacena copias de videos ajenos en sus servidores.
           </p>
         </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Aceptación de los Términos</h2>
-        <p>
-          Al acceder y utilizar FTY Downloader Pro (en adelante "el Servicio"), ubicado en descargador.atpdev.dev y a través de su aplicación móvil oficial,
-          aceptas cumplir con estos Términos de Servicio y con todas las leyes y regulaciones aplicables en tu jurisdicción.
-          Si no estás de acuerdo con alguno de estos términos, debes abstenerte de utilizar el Servicio.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">2. Descripción y Naturaleza del Servicio</h2>
-        <p>
-          FTY Downloader Pro es una herramienta tecnológica multipropósito para la preservación, extracción y respaldo de contenidos multimedia de plataformas públicas (incluyendo Facebook, TikTok, Instagram, Threads, Twitter/𝕏, YouTube y estados de WhatsApp).
-          El Servicio actúa exclusivamente como una herramienta técnica de transformación de formatos (format-shifting) para uso personal, privado y educativo legítimo.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">3. Uso Aceptable y Responsabilidad del Usuario</h2>
-        <p>Nuestras herramientas están diseñadas y habilitadas exclusivamente para:</p>
-        <ul className="list-disc pl-6 space-y-2 my-4">
-          <li><strong>Respaldo de contenido propio:</strong> Descargar copias de seguridad de videos y fotos creados por ti o subidos desde tus perfiles.</li>
-          <li><strong>Uso personal y visualización sin conexión:</strong> Disfrutar de contenidos para reproducción personal sin conexión a internet.</li>
-          <li><strong>Fines educativos y de investigación:</strong> Uso académico, citas, análisis y crítica bajo los preceptos legales del uso legítimo.</li>
-          <li><strong>Contenido de dominio público o bajo licencias libres:</strong> Material con licencias Creative Commons o autorizaciones expresas del titular.</li>
-        </ul>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">4. Usos Expresamente Prohibidos</h2>
-        <p>Queda terminantemente prohibido utilizar el Servicio para:</p>
-        <ul className="list-disc pl-6 space-y-2 my-4">
-          <li>Descargar, duplicar o distribuir material protegido por derechos de autor con fines de lucro o redistribución pública sin consentimiento del titular.</li>
-          <li>Modificar creaciones intelectuales ajenas y reivindicar su autoría como propia.</li>
-          <li>Descargar contenidos para actividades ilícitas, fraudulentas, difamatorias, de hostigamiento o lesivas contra terceros.</li>
-          <li>Llevar a cabo ataques de denegación de servicio (DDoS), inyecciones o intentos deliberados de desestabilizar la infraestructura del servidor.</li>
-          <li>Emplear bots, scrapers o sistemas automatizados de extracción masiva que sobrecarguen los recursos de red.</li>
-        </ul>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">5. Derechos de Autor y Doctrina del Uso Justo (Fair Use)</h2>
-
-        <h3 className="text-xl font-medium mt-6 mb-3">5.1 Respeto a los Derechos de Propiedad Intelectual</h3>
-        <p>
-          FTY Downloader Pro respeta los derechos de propiedad intelectual y no alberga ningún contenido en sus servidores. El usuario asume plena y exclusiva responsabilidad legal respecto al derecho de descarga y uso final que otorgue a los archivos generados.
-        </p>
-
-        <h3 className="text-xl font-medium mt-6 mb-3">5.2 Doctrina del Fair Use</h3>
-        <p>
-          En diversas legislaciones internacionales (como el Título 17 del Código de EE. UU. y directivas equivalentes de la UE), la utilización de fragmentos con fines de crítica, comentarios, parodia, docencia o investigación periodística se considera legalmente amparada. Corresponde exclusivamente al usuario verificar que su actividad califique en estos supuestos.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">6. Limitación de Responsabilidad</h2>
-        <div className="bg-gray-50 p-6 rounded-xl my-4 border border-gray-200">
-          <p className="font-bold text-gray-900">
-            EL SERVICIO SE SUMINISTRA "TAL CUAL" (AS IS) Y "SEGÚN DISPONIBILIDAD":
+        {/* Sección 2: Uso Aceptable */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            2. Uso Aceptable y Legítimo
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Nuestras herramientas deben ser utilizadas únicamente para fines éticos y legales, incluyendo:
           </p>
-          <ul className="list-disc pl-6 space-y-2 mt-4 text-sm text-gray-700">
-            <li>FTY Downloader Pro no garantiza la disponibilidad ininterrumpida ante eventuales modificaciones en las APIs o políticas de redes sociales terceras.</li>
-            <li>No nos responsabilizamos de las decisiones, redistribuciones o usos indebidos que los usuarios realicen con los archivos descargados.</li>
-            <li>No almacenamos ni somos custodios de contenidos ajenos generados por las plataformas de origen.</li>
-            <li>Bajo ninguna circunstancia FTY Downloader Pro será responsable por daños incidentales, consecuentes o pérdida de datos derivados del uso del servicio.</li>
+          <ul className="grid sm:grid-cols-2 gap-3 pt-2 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Contenido Propio:</strong> Copias de seguridad de videos creados o publicados por ti.</span>
+            </li>
+            <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Uso Personal Privado:</strong> Visualización sin conexión en dispositivos personales.</span>
+            </li>
+            <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Docencia e Investigación:</strong> Citas y análisis con la debida atribución al autor original.</span>
+            </li>
+            <li className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+              <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              <span><strong>Dominio Público:</strong> Obras bajo licencias libres o Creative Commons.</span>
+            </li>
           </ul>
         </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">7. Marcas Registradas y Enlaces a Terceros</h2>
-        <p>
-          Facebook, TikTok, Instagram, Threads, YouTube, Twitter/𝕏 y WhatsApp son marcas registradas de sus respectivos propietarios. FTY Downloader Pro es una plataforma independiente y no mantiene relación comercial, patrocinio ni afiliación oficial con Meta Platforms, ByteDance, Google LLC, X Corp o WhatsApp LLC.
-        </p>
+        {/* Sección 3: Usos Prohibidos */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-red-500" />
+            <span>3. Usos Prohibidos</span>
+          </h2>
+          <div className="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            <p>Queda terminantemente prohibido hacer uso de esta plataforma para:</p>
+            <ul className="list-disc pl-5 space-y-2 text-red-600 dark:text-red-400">
+              <li>Descargar, duplicar o comercializar contenido protegido por derechos de autor con fines lucrativos sin autorización.</li>
+              <li>Apropiarse de la autoría de creaciones intelectuales ajenas.</li>
+              <li>Difundir contenidos con fines de acoso, difamación, vulneración de intimidad o actividades ilícitas.</li>
+              <li>Ejecutar ataques de denegación de servicio (DDoS) o sobrecargar deliberadamente la infraestructura del servidor.</li>
+            </ul>
+          </div>
+        </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">8. Propiedad Intelectual del Software</h2>
-        <p>
-          El software, algoritmos, interfaz gráfica, diseño visual, logotipos y marca distintiva de FTY Downloader Pro son propiedad intelectual protegida. Queda prohibida la reproducción no autorizada del código o ingeniería inversa del aplicativo.
-        </p>
+        {/* Sección 4: Exención de Responsabilidad */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            4. Limitación de Responsabilidad ("Tal cual")
+          </h2>
+          <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed space-y-2">
+            <p>
+              El servicio se provee "tal cual" y según disponibilidad. FTY Downloader Pro no ofrece garantías explícitas de disponibilidad ininterrumpida ante cambios imprevistos en las plataformas de origen y no se hace responsable del uso final ni la redistribución que los usuarios realicen con los archivos obtenidos.
+            </p>
+          </div>
+        </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">9. Modificaciones de los Términos</h2>
-        <p>
-          Nos reservamos el derecho de modificar estos Términos de Servicio en cualquier momento. Los cambios se harán efectivos a partir de su publicación en esta sección. El uso continuado del Servicio tras la publicación implicará la conformidad y aceptación total de los términos revisados.
-        </p>
+        {/* Sección 5: Marcas Registradas */}
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+            5. Marcas Registradas de Terceros
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            Facebook, TikTok, Instagram, Threads, YouTube, Twitter/𝕏 y WhatsApp son marcas registradas propiedad de sus correspondientes titulares (Meta Platforms, Inc., ByteDance Ltd., Google LLC, X Corp. y WhatsApp LLC). FTY Downloader Pro es una aplicación técnica independiente sin relación corporativa, patrocinio ni afiliación oficial con ninguna de dichas empresas.
+          </p>
+        </div>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">10. Contacto y Consultas Legales</h2>
-        <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
-          <p className="font-semibold text-blue-900">¿Tienes dudas o necesitas atención sobre estos términos?</p>
-          <ul className="mt-3 space-y-1 text-sm text-blue-800">
-            <li>✉️ <strong>Correo Oficial:</strong> contacto@atpdev.dev</li>
-            <li>📝 <strong>Mesa de Ayuda:</strong> <a href="/contact" className="text-blue-700 underline font-semibold">Página de Contacto</a></li>
-            <li>🌐 <strong>Sitio Oficial:</strong> descargador.atpdev.dev</li>
-          </ul>
+        {/* Sección 6: Contacto */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-slate-100/90 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+            6. Consultas sobre los Términos
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Para inquietudes respecto a estos términos o peticiones legales:
+          </p>
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <a 
+              href="mailto:contacto@atpdev.dev" 
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>contacto@atpdev.dev</span>
+            </a>
+            <Link 
+              href="/contact" 
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs"
+            >
+              <span>Mesa de Ayuda</span>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

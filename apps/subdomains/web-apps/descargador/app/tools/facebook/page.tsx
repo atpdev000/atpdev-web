@@ -1,100 +1,84 @@
 import FacebookDownloader from '@/components/platforms/FacebookDownloader'
 import { Metadata } from 'next'
+import Link from 'next/link'
+import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
     title: 'Descargar Videos de Facebook HD Online | Gratis y Rápido',
-    description: 'La mejor herramienta para descargar videos de Facebook, Reels y videos privados en alta definición (HD). Rápido, gratuito y sin registro.',
+    description: 'La mejor herramienta para descargar videos de Facebook, Reels y videos públicos en alta definición (1080p HD). Rápido, gratuito y sin registro.',
 }
 
 export default function FacebookToolPage() {
     return (
-        <div className="container mx-auto px-4 py-8 max-w-5xl">
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="container mx-auto px-4 max-w-5xl">
+            {/* Botón Volver */}
+            <div className="mb-6">
+                <Link 
+                    href="/" 
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Volver al Descargador</span>
+                </Link>
+            </div>
+
+            <div className="text-center mb-10 max-w-2xl mx-auto">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider mb-3">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Facebook HD & Reels</span>
+                </div>
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
                     Descargador de Videos de Facebook
                 </h1>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                    Obtén tus videos favoritos de Facebook en MP4 y alta resolución al instante.
+                <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Obtén tus videos y Reels de Facebook en MP4 y alta resolución (1080p Full HD) al instante.
                 </p>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
+            <div className="bg-white dark:bg-slate-900/90 rounded-3xl shadow-xl p-5 sm:p-8 mb-12 border border-slate-200 dark:border-slate-800">
                 <FacebookDownloader />
             </div>
 
-            <div className="prose prose-lg max-w-none text-gray-700">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">¿Cómo descargar videos de Facebook gratis?</h2>
-                <p>
-                    Facebook se ha convertido en una de las mayores plataformas de video del mundo, con contenidos que van desde
-                    tutoriales educativos hasta entretenimiento viral. Sin embargo, guardarlos para verlos sin conexión no siempre es intuitivo.
-                    En <strong>FTY Downloader Pro</strong>, hemos simplificado este proceso para que puedas tener tus videos en segundos.
-                </p>
-
-                <h3 className="text-2xl font-semibold mt-8 mb-4">Pasos para descargar videos de Facebook en 2026</h3>
-                <ul className="space-y-4">
-                    <li><strong>Copia la URL:</strong> Ve al video de Facebook que deseas bajar. Haz clic en el botón "Compartir" y luego en "Copiar enlace".</li>
-                    <li><strong>Pega en FTY:</strong> Regresa a esta página y pega la dirección en el cuadro de arriba.</li>
-                    <li><strong>Analiza y Descarga:</strong> Haz clic en el botón de descarga. Nuestro sistema detectará automáticamente si hay versiones en Standard Quality (SD) o High Definition (HD).</li>
-                </ul>
-
-                <div className="bg-blue-50 p-6 rounded-xl my-8 border-l-4 border-blue-500">
-                    <h4 className="font-bold text-blue-800 mb-2">💡 Nota sobre la Calidad HD</h4>
-                    <p className="text-blue-700 text-sm">
-                        No todos los videos de Facebook están disponibles en HD. Si el creador original no subió el video en alta resolución,
-                        nuestra herramienta solo podrá ofrecerte la calidad estándar disponible en los servidores de Meta.
+            <div className="bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-10 border border-slate-200 dark:border-slate-800 shadow-xs space-y-8">
+                <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-4">
+                        ¿Cómo descargar videos de Facebook gratis?
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Facebook es una de las mayores plataformas de video del mundo. Con <strong>FTY Downloader Pro</strong>, puedes guardar videos y Reels para verlos sin conexión o respaldar tus publicaciones sin perder calidad.
                     </p>
                 </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-6 font-bold">Características de nuestro descargador de Facebook</h2>
-                <div className="grid md:grid-cols-2 gap-8 not-prose">
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🚀 Velocidad Ultrarrápida</h4>
-                        <p className="text-gray-600">Nuestros servidores están optimizados para procesar los enlaces de Facebook en milisegundos, garantizando que no pierdas tiempo esperando.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🎬 Soporte para Reels</h4>
-                        <p className="text-gray-600">No solo videos largos; también puedes descargar los Reels de Facebook con la misma facilidad y calidad.</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">📱 Compatible con móviles</h4>
-                        <p className="text-gray-600">Funciona perfectamente en Android y iOS usando tu navegador favorito (Chrome, Safari, Firefox).</p>
-                    </div>
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                        <h4 className="font-bold text-lg mb-2">🔒 Privacidad Total</h4>
-                        <p className="text-gray-600">No guardamos registro de lo que descargas ni solicitamos datos personales. Tu navegación es 100% anónima.</p>
-                    </div>
+                <div className="space-y-3">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                        Pasos sencillos para descargar:
+                    </h3>
+                    <ul className="grid sm:grid-cols-3 gap-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        <li className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                            <strong>1. Copia la URL:</strong> Haz clic en Compartir y selecciona "Copiar enlace".
+                        </li>
+                        <li className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                            <strong>2. Pega en el buscador:</strong> Pega el enlace en la barra de arriba y pulsa Buscar.
+                        </li>
+                        <li className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                            <strong>3. Elige tu calidad:</strong> Selecciona HD (1080p), SD o Audio MP3 y guarda el archivo.
+                        </li>
+                    </ul>
                 </div>
 
-                <h2 className="text-2xl font-bold mt-12 mb-6">Preguntas frecuentes sobre descargas de Facebook</h2>
-                <div className="space-y-6">
-                    <details className="group border-b pb-4">
-                        <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-lg">
-                            ¿Puedo descargar videos privados de Facebook?
-                            <span className="group-open:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <p className="mt-4 text-gray-600">
-                            Nuestra herramienta estándar funciona con videos públicos. Para videos privados, el sistema requiere acceso a los datos de la sesión,
-                            lo cual no proporcionamos actualmente para priorizar la seguridad de tu cuenta.
-                        </p>
-                    </details>
-                    <details className="group border-b pb-4">
-                        <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-lg">
-                            ¿En qué formato se guardan los videos?
-                            <span className="group-open:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <p className="mt-4 text-gray-600">
-                            Todos los videos se descargan en formato .MP4, que es el estándar de la industria y compatible con prácticamente cualquier dispositivo moderno.
-                        </p>
-                    </details>
-                    <details className="group border-b pb-4">
-                        <summary className="font-bold cursor-pointer list-none flex justify-between items-center text-lg">
-                            ¿Hay algún límite diario?
-                            <span className="group-open:rotate-180 transition-transform">▼</span>
-                        </summary>
-                        <p className="mt-4 text-gray-600">
-                            No, puedes descargar tantos videos como desees. Nuestro servicio es ilimitado y gratuito para todos los usuarios.
-                        </p>
-                    </details>
+                <div className="grid md:grid-cols-3 gap-4 pt-2">
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">🚀 Alta Velocidad</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Extracción directa sin intermediarios lentos.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">🎬 Soporte para Reels</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Descarga videos verticales con audio sincronizado.</p>
+                    </div>
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1">
+                        <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">📱 Móvil y PC</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-400">Compatible con Android, iPhone, Windows y Mac.</p>
+                    </div>
                 </div>
             </div>
         </div>

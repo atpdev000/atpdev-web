@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Metadata } from 'next'
+import Link from 'next/link'
+import { Mail, MessageSquare, Send, CheckCircle2, Clock, HelpCircle, ArrowLeft } from 'lucide-react'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ export default function ContactPage() {
     setIsSubmitting(true)
 
     // Simular envío
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise(resolve => setTimeout(resolve, 800))
 
     console.log('Formulario enviado:', formData)
     setSubmitted(true)
@@ -34,118 +35,127 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <h1 className="text-4xl font-bold mb-4 text-center">Contacto</h1>
-      <p className="text-gray-600 text-center mb-8 max-w-2xl mx-auto">
-        ¿Tienes preguntas, sugerencias o necesitas ayuda? Estamos aquí para asistirte.
-        Completa el formulario o usa nuestros canales directos de contacto.
-      </p>
+    <div className="container mx-auto px-4 max-w-5xl">
+      {/* Encabezado */}
+      <div className="mb-8 text-center max-w-2xl mx-auto">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Volver al Descargador</span>
+        </Link>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+          Contacto y Mesa de Ayuda
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          ¿Tienes preguntas sobre descargas, sugerencias o requieres asistencia técnica? Nuestro equipo está listo para ayudarte.
+        </p>
+      </div>
 
-      <div className="grid md:grid-cols-2 gap-12">
-        {/* Información de Contacto */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6">Información de Contacto</h2>
+      <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+        {/* Información de Canales Directos */}
+        <div className="space-y-4">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-2">
+            Canales de Atención Oficial
+          </h2>
 
-          <div className="space-y-6">
-            {/* Email Principal */}
-            <div className="bg-blue-50 p-5 rounded-xl">
-              <div className="flex items-start">
-                <span className="text-2xl mr-4">📧</span>
-                <div>
-                  <h3 className="font-semibold text-lg text-blue-800">Email General</h3>
-                  <a href="mailto:atp.dev000@gmail.com" className="text-blue-600 hover:underline">
-                    atp.dev000@gmail.com
-                  </a>
-                  <p className="text-sm text-gray-600 mt-1">Respuesta en 24-48 horas</p>
-                </div>
+          {/* Email General */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 shadow-xs">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm sm:text-base text-blue-950 dark:text-blue-200">
+                  Correo Electrónico
+                </h3>
+                <a 
+                  href="mailto:contacto@atpdev.dev" 
+                  className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline block truncate"
+                >
+                  contacto@atpdev.dev
+                </a>
+                <p className="text-xs text-blue-800/70 dark:text-blue-300/70 mt-1">
+                  Respuesta estimada: 24 a 48 horas hábiles.
+                </p>
               </div>
             </div>
+          </div>
 
-            {/* Soporte Técnico */}
-            <div className="bg-green-50 p-5 rounded-xl">
-              <div className="flex items-start">
-                <span className="text-2xl mr-4">🛠️</span>
-                <div>
-                  <h3 className="font-semibold text-lg text-green-800">Soporte Técnico</h3>
-                  <a href="mailto:s.atpdev000@gmail.com" className="text-green-600 hover:underline">
-                    s.atpdev000@gmail.com
-                  </a>
-                  <p className="text-sm text-gray-600 mt-1">Ayuda con problemas técnicos</p>
-                </div>
+          {/* Soporte Técnico */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <MessageSquare className="w-5 h-5" />
               </div>
-            </div>
-
-            {/* Colaboraciones */}
-            <div className="bg-purple-50 p-5 rounded-xl">
-              <div className="flex items-start">
-                <span className="text-2xl mr-4">🤝</span>
-                <div>
-                  <h3 className="font-semibold text-lg text-purple-800">Colaboraciones y Negocios</h3>
-                  <a href="mailto:atp.dev000@gmail.com" className="text-purple-600 hover:underline">
-                    atp.dev000@gmail.com
-                  </a>
-                  <p className="text-sm text-gray-600 mt-1">Propuestas comerciales o de partnership</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Reportar Problemas */}
-            <div className="bg-red-50 p-5 rounded-xl">
-              <div className="flex items-start">
-                <span className="text-2xl mr-4">🐛</span>
-                <div>
-                  <h3 className="font-semibold text-lg text-red-800">Reportar Errores</h3>
-                  <a href="mailto:s.atpdev000@gmail.com" className="text-red-600 hover:underline">
-                    s.atpdev000@gmail.com
-                  </a>
-                  <p className="text-sm text-gray-600 mt-1">Informa sobre bugs o mejoras</p>
-                </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm sm:text-base text-emerald-950 dark:text-emerald-200">
+                  Soporte de Descargas
+                </h3>
+                <a 
+                  href="mailto:soporte@atpdev.dev" 
+                  className="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline block truncate"
+                >
+                  soporte@atpdev.dev
+                </a>
+                <p className="text-xs text-emerald-800/70 dark:text-emerald-300/70 mt-1">
+                  Reportes sobre URLs de TikTok, Facebook, YouTube o Instagram.
+                </p>
               </div>
             </div>
           </div>
 
           {/* Horario de Atención */}
-          <div className="mt-8 p-5 bg-gray-50 rounded-xl">
-            <h3 className="font-semibold text-lg mb-3">⏰ Horario de Atención</h3>
-            <ul className="space-y-2 text-gray-700">
+          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <h3 className="font-bold text-sm text-slate-900 dark:text-white">Horario de Soporte</h3>
+            </div>
+            <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li className="flex justify-between">
-                <span>Lunes - Viernes:</span>
-                <span className="font-medium">9:00 AM - 6:00 PM (GMT-5)</span>
+                <span>Lunes a Viernes:</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">9:00 AM - 6:00 PM (GMT-5)</span>
               </li>
               <li className="flex justify-between">
                 <span>Sábados:</span>
-                <span className="font-medium">10:00 AM - 2:00 PM (GMT-5)</span>
+                <span className="font-semibold text-slate-900 dark:text-slate-100">10:00 AM - 2:00 PM (GMT-5)</span>
               </li>
               <li className="flex justify-between">
-                <span>Domingos:</span>
-                <span className="text-gray-500">Cerrado</span>
+                <span>Domingos y Feriados:</span>
+                <span className="text-slate-400">Guardia técnica automatizada</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Formulario de Contacto */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6">Envíanos un Mensaje</h2>
+        <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs">
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-4">
+            Envíanos un Mensaje
+          </h2>
 
           {submitted ? (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
-              <span className="text-5xl mb-4 block">✅</span>
-              <h3 className="text-xl font-bold text-green-800 mb-2">¡Mensaje Enviado!</h3>
-              <p className="text-green-700 mb-4">
-                Hemos recibido tu mensaje. Te responderemos en un plazo de 24-48 horas hábiles.
+            <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-center space-y-3">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-emerald-950 dark:text-emerald-200">¡Mensaje Enviado con Éxito!</h3>
+              <p className="text-xs text-emerald-800 dark:text-emerald-300">
+                Hemos recibido tu solicitud. Nuestro equipo te responderá a la brevedad.
               </p>
               <button
+                type="button"
                 onClick={() => setSubmitted(false)}
-                className="text-green-600 hover:underline"
+                className="mt-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all"
               >
                 Enviar otro mensaje
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="name" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Nombre Completo *
                 </label>
                 <input
@@ -156,12 +166,12 @@ export default function ContactPage() {
                   onChange={handleChange}
                   required
                   placeholder="Tu nombre"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="email" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Correo Electrónico *
                 </label>
                 <input
@@ -172,12 +182,12 @@ export default function ContactPage() {
                   onChange={handleChange}
                   required
                   placeholder="tu@email.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400"
                 />
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="subject" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Asunto *
                 </label>
                 <select
@@ -186,19 +196,19 @@ export default function ContactPage() {
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 >
-                  <option value="soporte">Soporte Técnico</option>
-                  <option value="sugerencia">Sugerencia</option>
-                  <option value="error">Reportar un Error</option>
+                  <option value="soporte">Soporte Técnico de Descargas</option>
+                  <option value="error">Reportar un Enlace o Error</option>
+                  <option value="sugerencia">Sugerencia o Mejora</option>
                   <option value="colaboracion">Colaboración / Negocios</option>
-                  <option value="legal">Consulta Legal</option>
+                  <option value="legal">Consulta Legal o DMCA</option>
                   <option value="otro">Otro</option>
                 </select>
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="message" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Mensaje *
                 </label>
                 <textarea
@@ -207,53 +217,55 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   required
-                  rows={6}
-                  placeholder="Describe tu consulta con el mayor detalle posible..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  rows={4}
+                  placeholder="Describe tu consulta con detalle (incluye la red social o enlace si aplica)..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400 resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-blue-600 text-white px-6 py-4 rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center"
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
               >
                 {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Enviando...
-                  </>
+                  <span>Enviando mensaje...</span>
                 ) : (
-                  '📤 Enviar Mensaje'
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>Enviar Mensaje</span>
+                  </>
                 )}
               </button>
 
-              <p className="text-sm text-gray-500 text-center">
-                Al enviar este formulario, aceptas nuestra{' '}
-                <a href="/legal/privacidad" className="text-blue-600 hover:underline">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center pt-1">
+                Al enviar el formulario, confirmas que has leído nuestra{' '}
+                <Link href="/legal/privacidad" className="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                   Política de Privacidad
-                </a>
+                </Link>.
               </p>
             </form>
           )}
         </div>
       </div>
 
-      {/* FAQ Link */}
-      <div className="mt-12 text-center bg-gray-50 p-8 rounded-2xl">
-        <h3 className="text-xl font-bold mb-3">¿Tienes una pregunta frecuente?</h3>
-        <p className="text-gray-600 mb-4">
-          Antes de contactarnos, revisa nuestras Preguntas Frecuentes. Quizás ya tenemos la respuesta.
+      {/* Enlace de FAQ */}
+      <div className="mt-12 text-center p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
+          <HelpCircle className="w-5 h-5" />
+        </div>
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">
+          ¿Tienes dudas rápidas sobre el uso del descargador?
+        </h3>
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-4 max-w-md mx-auto">
+          Revisa nuestras Preguntas Frecuentes para conocer resoluciones inmediatas sobre formatos compatibles, calidad y descargas en móvil.
         </p>
-        <a
+        <Link
           href="/faq"
-          className="inline-block bg-white border border-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors"
         >
-          📋 Ver Preguntas Frecuentes
-        </a>
+          <span>Consultar Preguntas Frecuentes (FAQ)</span>
+        </Link>
       </div>
     </div>
   )
