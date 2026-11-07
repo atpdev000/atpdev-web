@@ -97,3 +97,4 @@ export default function BlogListingClient({ initialPosts }: { initialPosts: Blog
     </div>
   )
 }
+

@@ -490,3 +490,4 @@ export function getLocalizedPost(post: BlogPost, locale: Locale): BlogPost {
     content: post.content
   };
 }
+
