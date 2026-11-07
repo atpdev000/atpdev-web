@@ -62,6 +62,7 @@ export default function Home() {
     blog_enabled: true
   })
   const [branding, setBranding] = useState<{
+    site_title?: string
     hero_badge?: string
     hero_title_prefix?: string
     hero_title_highlight?: string
@@ -69,6 +70,21 @@ export default function Home() {
     announcement_text?: string
     announcement_enabled?: boolean
   }>({})
+  const [apkConfig, setApkConfig] = useState<{
+    enabled?: boolean
+    version?: string
+    file_url?: string
+    file_size?: string
+    release_notes?: string
+    playstore_url?: string
+    direct_download_enabled?: boolean
+  }>({
+    enabled: true,
+    version: 'v1.2.0',
+    file_url: '/downloads/FTYdownloaderPro.apk',
+    file_size: '10.8 MB',
+    release_notes: 'Descargas HD/4K sin marcas de agua, reproductor integrado en app tipo WhatsApp y solución de guardado.'
+  })
 
   // Cargar configuración inicial y escuchar cambios en vivo
   useEffect(() => {
@@ -80,6 +96,9 @@ export default function Home() {
         }
         if (data?.branding) {
           setBranding(data.branding)
+        }
+        if (data?.apk) {
+          setApkConfig(data.apk)
         }
       })
       .catch(() => {})
@@ -93,6 +112,7 @@ export default function Home() {
         if (event.data?.type === 'UPDATE_DESCARGADOR_CONFIG' && event.data.payload) {
           if (event.data.payload.modules) setModules(event.data.payload.modules)
           if (event.data.payload.branding) setBranding(event.data.payload.branding)
+          if (event.data.payload.apk) setApkConfig(event.data.payload.apk)
         }
       }
       return () => channel.close()
@@ -224,6 +244,60 @@ export default function Home() {
         <main className="flex-1 container mx-auto px-4 py-8 main-with-sidebars">
           {/* 1. Hero Section */}
           <HeroSection onSelectPlatform={setActivePlatform} modules={modules} branding={branding} />
+
+          {/* 📱 Promoción Oficial App Android APK */}
+          {apkConfig?.enabled && (
+            <div className="max-w-4xl mx-auto mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-blue-950/40 border border-emerald-500/30 shadow-xl shadow-emerald-950/20 backdrop-blur-md relative overflow-hidden">
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
+                <div className="flex items-center gap-4 text-center sm:text-left">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30 shrink-0">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1084-.188.0438-.429-.1442-.5374-.188-.1085-.429-.0439-.5374.1442l-2.0227 3.5033c-1.4827-.6786-3.1384-1.0583-4.9232-1.0583-1.7848 0-3.4405.3797-4.9232 1.0583L5.3032 5.4713c-.1084-.188-.3494-.2527-.5374-.1442-.188.1084-.2526.3494-.1442.5374l1.996 3.4572C3.0645 11.2384 1 14.8329 1 19h22c0-4.1671-2.0645-7.7616-5.1185-9.6786"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                        App Oficial Android
+                      </span>
+                      <span className="text-xs font-semibold text-slate-400">
+                        {apkConfig.version || 'v1.2.0'} • {apkConfig.file_size || '10.8 MB'}
+                      </span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-white">
+                      Descarga {branding.site_title || 'FTYDownloader Pro'} para Android
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                      {apkConfig.release_notes || 'Descargas ultra rápidas en segundo plano, soporte para estados de WhatsApp y reproductor nativo integrado.'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+                  <a
+                    href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                    download
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95"
+                  >
+                    <svg className="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    <span>Descargar APK</span>
+                  </a>
+                  {apkConfig.playstore_url && (
+                    <a
+                      href={apkConfig.playstore_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-white font-semibold text-xs border border-slate-700 transition-all"
+                    >
+                      Google Play
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Banner Top (Top of Page) */}
           {modules.adsense_enabled !== false && (

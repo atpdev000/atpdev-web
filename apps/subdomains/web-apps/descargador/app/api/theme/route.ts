@@ -14,6 +14,8 @@ export async function GET() {
       seo: config.seo,
       modules: config.modules,
       contact: config.contact,
+      apk: config.apk,
+      monetization: config.monetization,
       updated_at: config.updated_at,
     });
   } catch (error) {

@@ -64,3 +64,4 @@ export default function AnnouncementBar({ initialText, initialEnabled }: Announc
     </div>
   )
 }
+

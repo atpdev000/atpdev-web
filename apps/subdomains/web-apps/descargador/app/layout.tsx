@@ -39,8 +39,8 @@ export function generateMetadata(): Metadata {
       canonical: siteUrl
     },
     other: {
-      'ezoic-site-verification': 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
-      'google-adsense-account': 'ca-pub-5414009811868137'
+      'ezoic-site-verification': config?.monetization?.ezoic_verification_code || 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
+      'google-adsense-account': config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137'
     },
     openGraph: {
       title,
@@ -143,6 +143,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"}>
         <DescargadorThemeListener />
         <I18nProvider>
+          {/* Google AdSense Oficial cargado dinámicamente desde el CMS Admin */}
+          {config?.monetization?.adsense_enabled !== false && config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_client_id && (
+            <Script
+              id="google-adsense-sdk"
+              strategy="afterInteractive"
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.monetization.adsense_client_id}`}
+              crossOrigin="anonymous"
+            />
+          )}
+
           {/* Scripts de Ezoic y consentimiento cargados solo en producción para evitar error 403 en localhost */}
           {process.env.NODE_ENV === 'production' && (
             <>

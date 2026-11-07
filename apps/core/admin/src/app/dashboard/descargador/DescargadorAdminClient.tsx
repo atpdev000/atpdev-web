@@ -43,10 +43,19 @@ import {
   Phone,
   Search,
   Bell,
-  Megaphone
+  Megaphone,
+  Upload,
+  FileUp,
+  DollarSign,
+  DownloadCloud
 } from "lucide-react";
 import { SubdomainConfig, SubdomainTheme, ACCENT_COLOR_MAP } from "@atpdev/database";
-import { saveDescargadorConfigAction, checkRailwayBackendHealthAction } from "./actions";
+import { 
+  saveDescargadorConfigAction, 
+  checkRailwayBackendHealthAction,
+  syncBuiltApkAction,
+  uploadApkFileAction
+} from "./actions";
 import UnifiedThemeStudio from "@/components/theme/UnifiedThemeStudio";
 
 interface Props {
@@ -92,9 +101,68 @@ const ACCENT_PRESETS = [
 
 export default function DescargadorAdminClient({ initialConfig }: Props) {
   const [config, setConfig] = useState<SubdomainConfig>(initialConfig);
-  const [activeTab, setActiveTab] = useState<'modules' | 'branding' | 'theme' | 'backend' | 'seo' | 'contact'>('modules');
+  const [activeTab, setActiveTab] = useState<'modules' | 'monetization' | 'apk' | 'branding' | 'seo' | 'contact' | 'backend' | 'theme'>('modules');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // APK Management State
+  const [syncingApk, setSyncingApk] = useState(false);
+  const [uploadingApk, setUploadingApk] = useState(false);
+  const [apkNotice, setApkNotice] = useState<{ text: string; ok: boolean } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleSyncBuiltApk = async () => {
+    setSyncingApk(true);
+    setApkNotice(null);
+    try {
+      const res = await syncBuiltApkAction();
+      setApkNotice({ text: res.message, ok: res.success });
+      if (res.success && res.fileSize) {
+        setConfig(prev => ({
+          ...prev,
+          apk: {
+            ...(prev.apk || {}),
+            enabled: true,
+            file_url: '/downloads/FTYdownloaderPro.apk',
+            file_size: res.fileSize
+          }
+        }));
+      }
+    } catch (err: any) {
+      setApkNotice({ text: err.message || 'Error al sincronizar APK', ok: false });
+    } finally {
+      setSyncingApk(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingApk(true);
+    setApkNotice(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await uploadApkFileAction(fd);
+      setApkNotice({ text: res.message, ok: res.success });
+      if (res.success && res.fileSize) {
+        setConfig(prev => ({
+          ...prev,
+          apk: {
+            ...(prev.apk || {}),
+            enabled: true,
+            file_url: '/downloads/FTYdownloaderPro.apk',
+            file_size: res.fileSize
+          }
+        }));
+      }
+    } catch (err: any) {
+      setApkNotice({ text: err.message || 'Error al subir archivo APK', ok: false });
+    } finally {
+      setUploadingApk(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   // Broadcast theme change to live tabs
   const broadcastThemeChange = (newTheme: any) => {
@@ -278,31 +346,31 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
           }`}
         >
           <Layers className="w-4 h-4" />
-          Módulos & Plataformas
+          Módulos
         </button>
 
         <button
-          onClick={() => setActiveTab('backend')}
+          onClick={() => setActiveTab('monetization')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
-            activeTab === 'backend'
-              ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+            activeTab === 'monetization'
+              ? 'bg-emerald-600/10 text-emerald-400 border border-emerald-500/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
           }`}
         >
-          <Server className="w-4 h-4" />
-          Backend Railway (yt-dlp)
+          <DollarSign className="w-4 h-4" />
+          Publicidad & AdSense
         </button>
 
         <button
-          onClick={() => setActiveTab('branding')}
+          onClick={() => setActiveTab('apk')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
-            activeTab === 'branding'
-              ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+            activeTab === 'apk'
+              ? 'bg-indigo-600/10 text-indigo-400 border border-indigo-500/30'
               : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
           }`}
         >
-          <Settings className="w-4 h-4" />
-          Textos & Hero
+          <Smartphone className="w-4 h-4" />
+          App Android (APK)
         </button>
 
         <button
@@ -318,6 +386,18 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
         </button>
 
         <button
+          onClick={() => setActiveTab('branding')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
+            activeTab === 'branding'
+              ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          <Settings className="w-4 h-4" />
+          Textos & Hero
+        </button>
+
+        <button
           onClick={() => setActiveTab('contact')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
             activeTab === 'contact'
@@ -327,6 +407,18 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
         >
           <Mail className="w-4 h-4" />
           Contacto & Canales
+        </button>
+
+        <button
+          onClick={() => setActiveTab('backend')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
+            activeTab === 'backend'
+              ? 'bg-blue-600/10 text-blue-400 border border-blue-500/30'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          <Server className="w-4 h-4" />
+          Backend Railway (yt-dlp)
         </button>
 
         <button
@@ -554,17 +646,52 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               Fusión WebAssembly de audio y video en el cliente para ahorrar ancho de banda del servidor.
             </p>
           </div>
+        </div>
+      )}
 
-          {/* AdSense */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
-            <div className="flex items-start justify-between">
-              <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                <Flame className="w-6 h-6" />
+      {/* TAB: PUBLICIDAD & ADSENSE */}
+      {activeTab === 'monetization' && (
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-emerald-400" />
+                Configuración de Monetización, Google AdSense & AdMob
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Controla los IDs de anunciantes, bloques de anuncios y códigos de verificación sin tocar el código fuente.
+              </p>
+            </div>
+
+            <a
+              href="https://adsense.google.com"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+              Consola AdSense
+            </a>
+          </div>
+
+          {/* Tarjeta Google AdSense Web */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Flame className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Google AdSense (Web)</h3>
+                  <p className="text-xs text-slate-400">Anuncios automáticos y unidades de display en la versión web</p>
+                </div>
               </div>
+
               <button
+                type="button"
                 onClick={() => toggleModule('adsense_enabled')}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  config.modules.adsense_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                  config.modules.adsense_enabled ? 'bg-emerald-600' : 'bg-slate-700'
                 }`}
               >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
@@ -572,22 +699,56 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 }`} />
               </button>
             </div>
-            <h3 className="mt-4 text-base font-bold text-white">Monetización Google AdSense & Ezoic</h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Banners automáticos y unidades de anuncios responsivas estratégicamente ubicadas.
-            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">ID de Editor AdSense (Client ID)</label>
+                <input
+                  type="text"
+                  placeholder="ca-pub-5414009811868137"
+                  value={config.monetization?.adsense_client_id || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    monetization: { ...config.monetization, adsense_client_id: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-emerald-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Código de Verificación Ezoic</label>
+                <input
+                  type="text"
+                  placeholder="wStjwIfmHCWL7mcvHPkYWJi6FeTviZ"
+                  value={config.monetization?.ezoic_verification_code || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    monetization: { ...config.monetization, ezoic_verification_code: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-emerald-500 outline-none"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* AdMob (Mobile) */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
-            <div className="flex items-start justify-between">
-              <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                <Smartphone className="w-6 h-6" />
+          {/* Tarjeta Google AdMob (App Android) */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Google AdMob (App Android / APK)</h3>
+                  <p className="text-xs text-slate-400">Publicidad nativa para la aplicación móvil instalada en teléfonos</p>
+                </div>
               </div>
+
               <button
+                type="button"
                 onClick={() => toggleModule('admob_enabled')}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  config.modules.admob_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                  config.modules.admob_enabled ? 'bg-indigo-600' : 'bg-slate-700'
                 }`}
               >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
@@ -595,33 +756,248 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 }`} />
               </button>
             </div>
-            <h3 className="mt-4 text-base font-bold text-white">Google AdMob (App Android)</h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Banners nativos en pie de pantalla e Interstitials entre descargas en APK/Play Store.
-            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">ID de Aplicación AdMob (App ID)</label>
+                <input
+                  type="text"
+                  placeholder="ca-app-pub-5414009811868137~8923412091"
+                  value={config.monetization?.admob_app_id || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    monetization: { ...config.monetization, admob_app_id: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-indigo-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">ID de Banner Inferior</label>
+                <input
+                  type="text"
+                  placeholder="ca-app-pub-5414009811868137/1029384756"
+                  value={config.monetization?.admob_banner_id || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    monetization: { ...config.monetization, admob_banner_id: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-indigo-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">ID de Interstitial (Descargas)</label>
+                <input
+                  type="text"
+                  placeholder="ca-app-pub-5414009811868137/5647382910"
+                  value={config.monetization?.admob_interstitial_id || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    monetization: { ...config.monetization, admob_interstitial_id: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-indigo-500 outline-none"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Blog & SEO Guides */}
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition">
-            <div className="flex items-start justify-between">
-              <div className="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                <FileText className="w-6 h-6" />
-              </div>
+          {/* Archivo app-ads.txt Info */}
+          <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Archivo <strong>app-ads.txt</strong> activo y verificado en <code className="text-slate-300">/app-ads.txt</code></span>
+            </div>
+            <a
+              href="https://descargador.atpdev.dev/app-ads.txt"
+              target="_blank"
+              rel="noreferrer"
+              className="text-blue-400 hover:underline flex items-center gap-1"
+            >
+              Ver Archivo
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: APP ANDROID & GESTIÓN APK */}
+      {activeTab === 'apk' && (
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Smartphone className="w-5 h-5 text-indigo-400" />
+                Gestión y Distribución del APK Android
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Controla la versión pública, el archivo instalable y la subida directa de nuevos builds para tus usuarios.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 font-medium">Botón de descarga en la web:</span>
               <button
-                onClick={() => toggleModule('blog_enabled')}
+                type="button"
+                onClick={() => setConfig({
+                  ...config,
+                  apk: { ...(config.apk || {}), enabled: !config.apk?.enabled }
+                })}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  config.modules.blog_enabled ? 'bg-blue-600' : 'bg-slate-700'
+                  config.apk?.enabled !== false ? 'bg-indigo-600' : 'bg-slate-700'
                 }`}
               >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                  config.modules.blog_enabled ? 'translate-x-6' : 'translate-x-1'
+                  config.apk?.enabled !== false ? 'translate-x-6' : 'translate-x-1'
                 }`} />
               </button>
             </div>
-            <h3 className="mt-4 text-base font-bold text-white">Blog & Guías Técnicas SEO</h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Sección con 9 tutoriales especializados para posicionamiento orgánico en Google.
-            </p>
+          </div>
+
+          {/* Notificación de resultado APK */}
+          {apkNotice && (
+            <div className={`p-4 rounded-xl border text-xs flex items-center gap-2 ${
+              apkNotice.ok
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+            }`}>
+              {apkNotice.ok ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <XCircle className="w-4 h-4 shrink-0" />}
+              <span>{apkNotice.text}</span>
+            </div>
+          )}
+
+          {/* Tarjeta de Estado del APK Actual */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                  <DownloadCloud className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    FTYdownloaderPro.apk
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">
+                      {config.apk?.version || 'v1.2.0'}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Tamaño actual: <strong className="text-white">{config.apk?.file_size || '10.8 MB'}</strong> • Ruta pública: <code className="text-indigo-400">/downloads/FTYdownloaderPro.apk</code>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={config.apk?.file_url || '/downloads/FTYdownloaderPro.apk'}
+                  download
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs shadow-md shadow-indigo-600/30 transition"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Descargar APK
+                </a>
+              </div>
+            </div>
+
+            {/* Acciones de actualización del archivo APK */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-800">
+              {/* Acción 1: Sincronizar build local */}
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
+                    Sincronizar Build de Android
+                  </span>
+                  <span className="text-[10px] text-slate-400">Automático</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Copia el archivo compilado más reciente (<code className="text-slate-300">app-debug.apk</code>) a la carpeta pública de descargas.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSyncBuiltApk}
+                  disabled={syncingApk}
+                  className="w-full mt-2 inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs border border-slate-700 transition disabled:opacity-50"
+                >
+                  {syncingApk ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  {syncingApk ? 'Sincronizando...' : 'Sincronizar Último Build'}
+                </button>
+              </div>
+
+              {/* Acción 2: Subir archivo manual */}
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Upload className="w-3.5 h-3.5 text-emerald-400" />
+                    Subir APK Manualmente
+                  </span>
+                  <span className="text-[10px] text-slate-400">.apk</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Sube directamente un archivo APK firmado o compilado desde tu computadora al servidor.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".apk"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingApk}
+                  className="w-full mt-2 inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/30 transition disabled:opacity-50"
+                >
+                  {uploadingApk ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileUp className="w-3.5 h-3.5" />}
+                  {uploadingApk ? 'Subiendo APK...' : 'Seleccionar y Subir APK'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Metadatos y Versión del APK */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">Versión Pública</label>
+              <input
+                type="text"
+                placeholder="v1.2.0"
+                value={config.apk?.version || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  apk: { ...(config.apk || {}), version: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-indigo-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-300">URL del Enlace a Google Play Store (Opcional)</label>
+              <input
+                type="text"
+                placeholder="https://play.google.com/store/apps/details?id=com.ftydownloader.pro"
+                value={config.apk?.playstore_url || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  apk: { ...(config.apk || {}), playstore_url: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-indigo-500 outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-medium text-slate-300">Notas de la Versión / Novedades</label>
+              <textarea
+                rows={3}
+                placeholder="Ej: Nueva versión con reproductor integrado estilo WhatsApp, descargas en 4K y solución de guardado."
+                value={config.apk?.release_notes || ''}
+                onChange={(e) => setConfig({
+                  ...config,
+                  apk: { ...(config.apk || {}), release_notes: e.target.value }
+                })}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-indigo-500 outline-none resize-none"
+              />
+            </div>
           </div>
         </div>
       )}

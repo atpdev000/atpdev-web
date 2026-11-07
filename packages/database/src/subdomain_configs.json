@@ -181,7 +181,7 @@
       "logo_url": "/icon.png",
       "favicon_url": "/favicon.ico",
       "announcement_text": "⚡ Descargas ilimitadas en máxima calidad sin marcas de agua.",
-      "announcement_enabled": true
+      "announcement_enabled": false
     },
     "seo": {
       "meta_title": "Descargador Pro — Descargar Videos de YouTube, TikTok y Facebook Gratis",
@@ -214,7 +214,23 @@
       "whatsapp": "+51987654321",
       "support_url": "https://descargador.atpdev.dev/contact"
     },
-    "updated_at": "2026-10-28T16:45:00.000Z"
+    "apk": {
+      "enabled": true,
+      "version": "v1.2.0",
+      "file_url": "/downloads/FTYdownloaderPro.apk",
+      "file_size": "10.8 MB",
+      "release_notes": "Descargas HD/4K sin marcas de agua, reproductor integrado en app tipo WhatsApp y solución de guardado.",
+      "playstore_url": "",
+      "direct_download_enabled": true
+    },
+    "monetization": {
+      "adsense_client_id": "ca-pub-5414009811868137",
+      "ezoic_verification_code": "wStjwIfmHCWL7mcvHPkYWJi6FeTviZ",
+      "admob_app_id": "ca-app-pub-5414009811868137~8923412091",
+      "admob_banner_id": "ca-app-pub-5414009811868137/1029384756",
+      "admob_interstitial_id": "ca-app-pub-5414009811868137/5647382910"
+    },
+    "updated_at": "2026-11-07T15:55:00.000Z"
   },
   "magic": {
     "id": "magic",

@@ -62,6 +62,30 @@ export interface SubdomainContact {
   support_url?: string;
 }
 
+export interface SubdomainAPK {
+  enabled?: boolean;
+  version?: string;
+  file_url?: string;
+  file_size?: string;
+  release_notes?: string;
+  playstore_url?: string;
+  direct_download_enabled?: boolean;
+}
+
+export interface SubdomainMonetization {
+  adsense_enabled?: boolean;
+  adsense_client_id?: string;
+  adsense_slot_header?: string;
+  adsense_slot_incontent?: string;
+  adsense_slot_footer?: string;
+  ezoic_enabled?: boolean;
+  ezoic_verification_code?: string;
+  admob_app_id?: string;
+  admob_banner_id?: string;
+  admob_interstitial_id?: string;
+  admob_rewarded_id?: string;
+}
+
 export interface SubdomainConfig {
   id: string; // e.g. 'chamba'
   name: string; // e.g. 'Chamba Pro'
@@ -76,6 +100,8 @@ export interface SubdomainConfig {
   seo: SubdomainSEO;
   modules: SubdomainModules;
   contact: SubdomainContact;
+  apk?: SubdomainAPK;
+  monetization?: SubdomainMonetization;
   updated_at?: string;
 }
 
@@ -346,6 +372,22 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     email: 'contacto@atpdev.dev',
     whatsapp: '+51987654321',
     support_url: 'https://descargador.atpdev.dev/contact'
+  },
+  apk: {
+    enabled: true,
+    version: 'v1.2.0',
+    file_url: '/downloads/FTYdownloaderPro.apk',
+    file_size: '10.8 MB',
+    release_notes: 'Descargas HD/4K sin marcas de agua, reproductor integrado en app tipo WhatsApp y solución de guardado.',
+    playstore_url: '',
+    direct_download_enabled: true
+  },
+  monetization: {
+    adsense_client_id: 'ca-pub-5414009811868137',
+    ezoic_verification_code: 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
+    admob_app_id: 'ca-app-pub-5414009811868137~8923412091',
+    admob_banner_id: 'ca-app-pub-5414009811868137/1029384756',
+    admob_interstitial_id: 'ca-app-pub-5414009811868137/5647382910'
   },
   updated_at: new Date().toISOString()
 };

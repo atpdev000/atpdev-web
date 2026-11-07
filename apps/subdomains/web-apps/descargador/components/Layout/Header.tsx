@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageSelector } from './LanguageSelector'
@@ -7,6 +8,47 @@ import { useI18n } from '@/lib/i18n/context'
 
 export default function Header() {
   const { t } = useI18n()
+  const [siteTitle, setSiteTitle] = useState('FTYDownloader Pro')
+  const [apkConfig, setApkConfig] = useState<{
+    enabled?: boolean
+    version?: string
+    file_url?: string
+    file_size?: string
+  }>({
+    enabled: true,
+    version: 'v1.2.0',
+    file_url: '/downloads/FTYdownloaderPro.apk',
+    file_size: '10.8 MB'
+  })
+
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.branding?.site_title) {
+          setSiteTitle(data.branding.site_title)
+        }
+        if (data?.apk) {
+          setApkConfig(data.apk)
+        }
+      })
+      .catch(() => {})
+
+    try {
+      const channel = new BroadcastChannel('descargador_theme_channel')
+      channel.onmessage = (event) => {
+        if (event.data?.type === 'UPDATE_DESCARGADOR_CONFIG' && event.data.payload) {
+          if (event.data.payload.branding?.site_title) {
+            setSiteTitle(event.data.payload.branding.site_title)
+          }
+          if (event.data.payload.apk) {
+            setApkConfig(event.data.payload.apk)
+          }
+        }
+      }
+      return () => channel.close()
+    } catch (e) {}
+  }, [])
 
   const scrollToTools = () => {
     document.getElementById('herramientas')?.scrollIntoView({
@@ -59,6 +101,19 @@ export default function Header() {
               >
                 {t.nav.plans}
               </Link>
+              {apkConfig?.enabled && (
+                <a
+                  href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                  download
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-all hover:scale-105"
+                  title="Descargar App Android APK"
+                >
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1084-.188.0438-.429-.1442-.5374-.188-.1085-.429-.0439-.5374.1442l-2.0227 3.5033c-1.4827-.6786-3.1384-1.0583-4.9232-1.0583-1.7848 0-3.4405.3797-4.9232 1.0583L5.3032 5.4713c-.1084-.188-.3494-.2527-.5374-.1442-.188.1084-.2526.3494-.1442.5374l1.996 3.4572C3.0645 11.2384 1 14.8329 1 19h22c0-4.1671-2.0645-7.7616-5.1185-9.6786"/>
+                  </svg>
+                  <span>APK {apkConfig.version || 'v1.2.0'}</span>
+                </a>
+              )}
             </nav>
 
             {/* Controles de Idioma, Tema, Historial y Contacto */}
@@ -89,6 +144,18 @@ export default function Header() {
               >
                 👑 PRO
               </Link>
+
+              {/* APK en móvil */}
+              {apkConfig?.enabled && (
+                <a
+                  href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                  download
+                  className="lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs"
+                  title="Descargar APK"
+                >
+                  📲 APK
+                </a>
+              )}
 
               {/* Botón Contacto */}
               <Link
