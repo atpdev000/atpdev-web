@@ -1,13 +1,20 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Cookie, ArrowLeft, Settings, Check, Mail } from 'lucide-react'
+import { getSubdomainConfig } from '@atpdev/database'
 
-export const metadata: Metadata = {
-  title: 'Política de Cookies | FTY Downloader Pro',
-  description: 'Conoce en detalle cómo FTY Downloader Pro utiliza cookies técnicas y almacenamiento local para brindarte la mejor experiencia.',
+export function generateMetadata(): Metadata {
+  const config = getSubdomainConfig('descargador')
+  const siteTitle = config?.branding?.site_title || 'FTY Downloader Pro'
+  return {
+    title: `Política de Cookies | ${siteTitle}`,
+    description: `Conoce en detalle cómo ${siteTitle} utiliza cookies técnicas y almacenamiento local para brindarte la mejor experiencia.`,
+  }
 }
 
 export default function CookiesPage() {
+  const config = getSubdomainConfig('descargador')
+  const contactEmail = config?.contact?.email || 'contacto@atpdev.dev'
   return (
     <div className="container mx-auto px-4 max-w-4xl">
       {/* Navegación y Encabezado */}
@@ -116,7 +123,7 @@ export default function CookiesPage() {
             ¿Preguntas sobre nuestra política de cookies?
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-            Puedes escribirnos directamente a: <a href="mailto:contacto@atpdev.dev" className="text-blue-600 dark:text-blue-400 font-bold underline">contacto@atpdev.dev</a>
+            Puedes escribirnos directamente a: <a href={`mailto:${contactEmail}`} className="text-blue-600 dark:text-blue-400 font-bold underline">{contactEmail}</a>
           </p>
         </div>
       </div>

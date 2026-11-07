@@ -174,6 +174,13 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
       if (res.success) {
         setConfig(res.config);
         broadcastThemeChange(res.config.theme);
+        if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+          try {
+            const bc = new BroadcastChannel("descargador_theme_channel");
+            bc.postMessage({ type: "UPDATE_DESCARGADOR_CONFIG", payload: res.config });
+            bc.close();
+          } catch {}
+        }
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       }

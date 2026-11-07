@@ -1,13 +1,21 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { FileText, ArrowLeft, AlertCircle, Scale, ShieldAlert, CheckCircle, Mail } from 'lucide-react'
+import { getSubdomainConfig } from '@atpdev/database'
 
-export const metadata: Metadata = {
-  title: 'Términos de Servicio | FTY Downloader Pro',
-  description: 'Términos y condiciones de uso de FTY Downloader Pro. Normas de uso aceptable, limitaciones de responsabilidad y doctrina de uso justo.',
+export function generateMetadata(): Metadata {
+  const config = getSubdomainConfig('descargador')
+  const siteTitle = config?.branding?.site_title || 'FTY Downloader Pro'
+  return {
+    title: `Términos de Servicio | ${siteTitle}`,
+    description: `Términos y condiciones de uso de ${siteTitle}. Normas de uso aceptable, limitaciones de responsabilidad y doctrina de uso justo.`,
+  }
 }
 
 export default function TermsPage() {
+  const config = getSubdomainConfig('descargador')
+  const siteTitle = config?.branding?.site_title || 'FTY Downloader Pro'
+  const contactEmail = config?.contact?.email || 'contacto@atpdev.dev'
   return (
     <div className="container mx-auto px-4 max-w-4xl">
       {/* Navegación y Encabezado */}
@@ -42,7 +50,7 @@ export default function TermsPage() {
             <div className="text-xs sm:text-sm text-amber-900 dark:text-amber-200 leading-relaxed space-y-1">
               <p className="font-bold text-sm sm:text-base">Aviso Legal Importante:</p>
               <p>
-                Al acceder y utilizar <strong>FTY Downloader Pro</strong> (en su versión web o aplicación móvil Android), confirmas que has leído, entendido y aceptado cumplir estos Términos de Servicio y todas las normativas legales aplicables.
+                Al acceder y utilizar <strong>{siteTitle}</strong> (en su versión web o aplicación móvil Android), confirmas que has leído, entendido y aceptado cumplir estos Términos de Servicio y todas las normativas legales aplicables.
               </p>
             </div>
           </div>
@@ -54,7 +62,7 @@ export default function TermsPage() {
             1. Naturaleza y Propósito del Servicio
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            FTY Downloader Pro es una herramienta tecnológica independiente diseñada para facilitar la descarga, conversión técnica (format-shifting) y respaldo de contenidos multimedia de plataformas públicas (Facebook, TikTok, Instagram, Threads, Twitter/𝕏, YouTube y WhatsApp). Nuestro software actúa exclusivamente como intermediario técnico de transmisión y no almacena copias de videos ajenos en sus servidores.
+            {siteTitle} es una herramienta tecnológica independiente diseñada para facilitar la descarga, conversión técnica (format-shifting) y respaldo de contenidos multimedia de plataformas públicas (Facebook, TikTok, Instagram, Threads, Twitter/𝕏, YouTube y WhatsApp). Nuestro software actúa exclusivamente como intermediario técnico de transmisión y no almacena copias de videos ajenos en sus servidores.
           </p>
         </div>
 
@@ -121,7 +129,7 @@ export default function TermsPage() {
             5. Marcas Registradas de Terceros
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            Facebook, TikTok, Instagram, Threads, YouTube, Twitter/𝕏 y WhatsApp son marcas registradas propiedad de sus correspondientes titulares (Meta Platforms, Inc., ByteDance Ltd., Google LLC, X Corp. y WhatsApp LLC). FTY Downloader Pro es una aplicación técnica independiente sin relación corporativa, patrocinio ni afiliación oficial con ninguna de dichas empresas.
+            Facebook, TikTok, Instagram, Threads, YouTube, Twitter/𝕏 y WhatsApp son marcas registradas propiedad de sus correspondientes titulares (Meta Platforms, Inc., ByteDance Ltd., Google LLC, X Corp. y WhatsApp LLC). {siteTitle} es una aplicación técnica independiente sin relación corporativa, patrocinio ni afiliación oficial con ninguna de dichas empresas.
           </p>
         </div>
 
@@ -135,11 +143,11 @@ export default function TermsPage() {
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <a 
-              href="mailto:contacto@atpdev.dev" 
+              href={`mailto:${contactEmail}`} 
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs"
             >
               <Mail className="w-3.5 h-3.5" />
-              <span>contacto@atpdev.dev</span>
+              <span>{contactEmail}</span>
             </a>
             <Link 
               href="/contact" 

@@ -17,67 +17,72 @@ export const viewport: Viewport = {
   themeColor: '#3b82f6'
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
+export function generateMetadata(): Metadata {
+  const config = getSubdomainConfig('descargador')
+  const siteUrl = config?.seo?.canonical_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
+  const title = config?.seo?.meta_title || 'Descargador Pro - Descargar Videos de Facebook HD, TikTok Sin Marca de Agua y YouTube ✅ Gratis'
+  const description = config?.seo?.meta_description || '🚀 La herramienta más rápida para descargar videos de Facebook en HD y TikTok sin marca de agua. Descargador Pro: 100% gratis, seguro y en alta calidad. MP4 y MP3.'
+  const keywords = Array.isArray(config?.seo?.keywords) && config.seo.keywords.length > 0
+    ? config.seo.keywords.join(', ')
+    : 'descargar videos tiktok sin marca de agua, facebook downloader hd, descargar videos facebook, tiktok downloader no watermark, descargar videos de tiktok gratis, bajar videos de facebook, convertir video a mp3, descargar mp4 gratis, bajar videos online, downloader online'
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: 'Descargador Pro - Descargar Videos de Facebook HD, TikTok Sin Marca de Agua y YouTube ✅ Gratis',
-  description:
-    '🚀 La herramienta más rápida para descargar videos de Facebook en HD y TikTok sin marca de agua. Descargador Pro: 100% gratis, seguro y en alta calidad. MP4 y MP3.',
-  keywords: `descargar videos tiktok sin marca de agua, facebook downloader hd, descargar videos facebook, tiktok downloader no watermark, descargar videos de tiktok gratis, bajar videos de facebook, convertir video a mp3, descargar mp4 gratis, bajar videos online, downloader online`,
-  authors: [{ name: 'ATP DEV', url: siteUrl }],
-  creator: 'ATP DEV',
-  publisher: 'Descargador Pro',
-  manifest: '/manifest.json',
-  alternates: {
-    canonical: siteUrl
-  },
-  other: {
-    'ezoic-site-verification': 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
-    'google-adsense-account': 'ca-pub-5414009811868137'
-  },
-  openGraph: {
-    title: 'Descargador Pro - Descargar Videos de Facebook HD, TikTok y YouTube ✅ Gratis',
-    description:
-      'La herramienta más rápida para descargar videos de Facebook en HD y TikTok sin marca de agua. 100% gratis, seguro y en alta calidad.',
-    url: siteUrl,
-    siteName: 'Descargador Pro',
-    images: [
-      {
-        url: '/images/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Descargador Pro - Descargar Videos de Redes Sociales'
-      }
-    ],
-    locale: 'es_PE',
-    type: 'website'
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Descargador Pro - Descargar Videos de Facebook HD, TikTok y YouTube ✅ Gratis',
-    description:
-      'La herramienta más rápida para descargar videos de Facebook en HD y TikTok sin marca de agua. 100% gratis, seguro y en alta calidad.',
-    images: ['/images/og-image.png']
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+  return {
+    metadataBase: new URL(siteUrl),
+    title,
+    description,
+    keywords,
+    authors: [{ name: 'ATP DEV', url: siteUrl }],
+    creator: 'ATP DEV',
+    publisher: config?.branding?.site_title || 'Descargador Pro',
+    manifest: '/manifest.json',
+    alternates: {
+      canonical: siteUrl
+    },
+    other: {
+      'ezoic-site-verification': 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
+      'google-adsense-account': 'ca-pub-5414009811868137'
+    },
+    openGraph: {
+      title,
+      description,
+      url: siteUrl,
+      siteName: config?.branding?.site_title || 'Descargador Pro',
+      images: [
+        {
+          url: '/images/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: 'Descargador Pro - Descargar Videos de Redes Sociales'
+        }
+      ],
+      locale: 'es_PE',
+      type: 'website'
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/images/og-image.png']
+    },
+    robots: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1
+      }
+    },
+    icons: {
+      icon: [
+        { url: '/icon.png', type: 'image/png', sizes: '192x192' },
+        { url: '/icons/icon-512.png', type: 'image/png', sizes: '512x512' }
+      ],
+      shortcut: '/favicon.ico',
+      apple: [{ url: '/icons/icon-192.png', sizes: '180x180', type: 'image/png' }]
     }
-  },
-  icons: {
-    icon: [
-      { url: '/icon.png', type: 'image/png', sizes: '192x192' },
-      { url: '/icons/icon-512.png', type: 'image/png', sizes: '512x512' }
-    ],
-    shortcut: '/favicon.ico',
-    apple: [{ url: '/icons/icon-192.png', sizes: '180x180', type: 'image/png' }]
   }
 }
 

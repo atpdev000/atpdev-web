@@ -1,13 +1,20 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Copyright, ArrowLeft, Shield, AlertTriangle, Mail } from 'lucide-react'
+import { getSubdomainConfig } from '@atpdev/database'
 
-export const metadata: Metadata = {
-  title: 'Política de Copyright y DMCA | FTY Downloader Pro',
-  description: 'Información sobre derechos de autor, procedimiento de notificación DMCA y uso legítimo en FTY Downloader Pro.',
+export function generateMetadata(): Metadata {
+  const config = getSubdomainConfig('descargador')
+  const siteTitle = config?.branding?.site_title || 'FTY Downloader Pro'
+  return {
+    title: `Política de Copyright y DMCA | ${siteTitle}`,
+    description: `Información sobre derechos de autor, procedimiento de notificación DMCA y uso legítimo en ${siteTitle}.`,
+  }
 }
 
 export default function CopyrightPage() {
+  const config = getSubdomainConfig('descargador')
+  const contactEmail = config?.contact?.email || 'contacto@atpdev.dev'
   return (
     <div className="container mx-auto px-4 max-w-4xl">
       {/* Navegación y Encabezado */}
@@ -79,11 +86,11 @@ export default function CopyrightPage() {
           </ul>
           <div className="pt-2">
             <a 
-              href="mailto:contacto@atpdev.dev?subject=Notificacion%20DMCA%20FTYDownloader" 
+              href={`mailto:${contactEmail}?subject=Notificacion%20DMCA`} 
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-sm transition-all"
             >
               <Mail className="w-4 h-4" />
-              <span>Enviar Notificación DMCA (contacto@atpdev.dev)</span>
+              <span>Enviar Notificación DMCA ({contactEmail})</span>
             </a>
           </div>
         </div>

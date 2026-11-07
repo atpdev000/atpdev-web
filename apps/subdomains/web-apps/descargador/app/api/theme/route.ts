@@ -13,6 +13,7 @@ export async function GET() {
       branding: config.branding,
       seo: config.seo,
       modules: config.modules,
+      contact: config.contact,
       updated_at: config.updated_at,
     });
   } catch (error) {

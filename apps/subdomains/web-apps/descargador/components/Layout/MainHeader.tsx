@@ -1,11 +1,24 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, ShieldCheck } from 'lucide-react'
 import { ThemeToggle } from '@/components/Layout/ThemeToggle'
 import { LanguageSelector } from '@/components/Layout/LanguageSelector'
 
 export default function MainHeader() {
+  const [siteTitle, setSiteTitle] = useState('Descargador Pro')
+
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.branding?.site_title) {
+          setSiteTitle(data.branding.site_title)
+        }
+      })
+      .catch(() => {})
+  }, [])
   return (
     <header className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-50 transition-colors duration-200">
       <div className="container mx-auto px-4 py-3 sm:py-4">
@@ -21,7 +34,7 @@ export default function MainHeader() {
             </div>
             <div className="min-w-0">
               <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight truncate">
-                FTYDownloader <span className="text-blue-600 dark:text-blue-400 font-extrabold">Pro</span>
+                {siteTitle}
               </h1>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate hidden sm:block">
                 Descargador Multimedia Universal HD & MP3

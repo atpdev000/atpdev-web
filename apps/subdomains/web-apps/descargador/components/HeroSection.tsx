@@ -7,10 +7,21 @@ import { Platform } from './PlatformTabs'
 interface HeroSectionProps {
   onSelectPlatform?: (platform: Platform) => void
   modules?: Record<string, boolean>
+  branding?: {
+    hero_badge?: string
+    hero_title_prefix?: string
+    hero_title_highlight?: string
+    hero_description?: string
+  }
 }
 
-export default function HeroSection({ onSelectPlatform, modules }: HeroSectionProps) {
+export default function HeroSection({ onSelectPlatform, modules, branding }: HeroSectionProps) {
   const { t } = useI18n()
+
+  const heroBadge = branding?.hero_badge || t.hero.verifiedBadge
+  const heroPrefix = branding?.hero_title_prefix || t.hero.titlePrefix
+  const heroHighlight = branding?.hero_title_highlight || t.hero.titleHighlight
+  const heroDescription = branding?.hero_description || t.hero.subtitle
 
   const scrollToTools = () => {
     document.getElementById('herramientas')?.scrollIntoView({
@@ -32,17 +43,17 @@ export default function HeroSection({ onSelectPlatform, modules }: HeroSectionPr
         <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.64.304 1.24.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
         </svg>
-        {t.hero.verifiedBadge}
+        {heroBadge}
       </div>
 
       {/* Título Principal */}
       <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight">
-        {t.hero.titlePrefix} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{t.hero.titleHighlight}</span>
+        {heroPrefix} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{heroHighlight}</span>
       </h1>
 
       {/* Subtítulo */}
       <p className="text-base sm:text-xl text-gray-600 dark:text-slate-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-        {t.hero.subtitle}
+        {heroDescription}
       </p>
 
       {/* Iconos de plataformas */}

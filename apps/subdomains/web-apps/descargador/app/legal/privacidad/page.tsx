@@ -1,13 +1,21 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { Shield, Lock, Eye, FileText, CheckCircle2, ArrowLeft, Mail } from 'lucide-react'
+import { getSubdomainConfig } from '@atpdev/database'
 
-export const metadata: Metadata = {
-  title: 'Política de Privacidad | FTY Downloader Pro',
-  description: 'Conoce cómo protegemos tu privacidad, nuestra política de cookies y el tratamiento seguro de datos en FTY Downloader Pro conforme a RGPD y Google AdSense.',
+export function generateMetadata(): Metadata {
+  const config = getSubdomainConfig('descargador')
+  const siteTitle = config?.branding?.site_title || 'FTY Downloader Pro'
+  return {
+    title: `Política de Privacidad | ${siteTitle}`,
+    description: `Conoce cómo protegemos tu privacidad, nuestra política de cookies y el tratamiento seguro de datos en ${siteTitle} conforme a RGPD y Google AdSense.`,
+  }
 }
 
 export default function PrivacyPage() {
+  const config = getSubdomainConfig('descargador')
+  const siteTitle = config?.branding?.site_title || 'FTY Downloader Pro'
+  const contactEmail = config?.contact?.email || 'contacto@atpdev.dev'
   return (
     <div className="container mx-auto px-4 max-w-4xl">
       {/* Navegación y Encabezado */}
@@ -42,7 +50,7 @@ export default function PrivacyPage() {
             <div className="text-xs sm:text-sm text-blue-900 dark:text-blue-200 leading-relaxed space-y-2">
               <p className="font-bold text-sm sm:text-base">Tu privacidad está garantizada al 100%:</p>
               <p>
-                En <strong>FTY Downloader Pro</strong>, la privacidad es un pilar fundamental. Nuestra herramienta funciona de forma totalmente libre, sin requerir registro de cuenta, sin almacenar videos ajenos en nuestros servidores y sin recopilar datos personales identificables.
+                En <strong>{siteTitle}</strong>, la privacidad es un pilar fundamental. Nuestra herramienta funciona de forma totalmente libre, sin requerir registro de cuenta, sin almacenar videos ajenos en nuestros servidores y sin recopilar datos personales identificables.
               </p>
             </div>
           </div>
@@ -212,11 +220,11 @@ export default function PrivacyPage() {
           </p>
           <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm">
             <a 
-              href="mailto:contacto@atpdev.dev" 
+              href={`mailto:${contactEmail}`}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition-all shadow-sm"
             >
               <Mail className="w-4 h-4" />
-              <span>contacto@atpdev.dev</span>
+              <span>{contactEmail}</span>
             </a>
             <Link 
               href="/contact" 

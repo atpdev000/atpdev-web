@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Mail, MessageSquare, Send, CheckCircle2, Clock, HelpCircle, ArrowLeft } from 'lucide-react'
+import { Mail, MessageSquare, Send, CheckCircle2, Clock, HelpCircle, ArrowLeft, Phone } from 'lucide-react'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -13,6 +13,25 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [contactInfo, setContactInfo] = useState({
+    email: 'contacto@atpdev.dev',
+    whatsapp: '+51 987 654 321',
+    support_url: 'https://descargador.atpdev.dev/contact'
+  })
+
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.contact) {
+          setContactInfo(prev => ({
+            ...prev,
+            ...data.contact
+          }))
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,10 +90,10 @@ export default function ContactPage() {
                   Correo Electrónico
                 </h3>
                 <a 
-                  href="mailto:contacto@atpdev.dev" 
+                  href={`mailto:${contactInfo.email}`}
                   className="text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline block truncate"
                 >
-                  contacto@atpdev.dev
+                  {contactInfo.email}
                 </a>
                 <p className="text-xs text-blue-800/70 dark:text-blue-300/70 mt-1">
                   Respuesta estimada: 24 a 48 horas hábiles.
@@ -83,28 +102,32 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Soporte Técnico */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <MessageSquare className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="font-bold text-sm sm:text-base text-emerald-950 dark:text-emerald-200">
-                  Soporte de Descargas
-                </h3>
-                <a 
-                  href="mailto:soporte@atpdev.dev" 
-                  className="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline block truncate"
-                >
-                  soporte@atpdev.dev
-                </a>
-                <p className="text-xs text-emerald-800/70 dark:text-emerald-300/70 mt-1">
-                  Reportes sobre URLs de TikTok, Facebook, YouTube o Instagram.
-                </p>
+          {/* WhatsApp Directo */}
+          {contactInfo.whatsapp && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-bold text-sm sm:text-base text-emerald-950 dark:text-emerald-200">
+                    WhatsApp Oficial
+                  </h3>
+                  <a 
+                    href={`https://wa.me/${contactInfo.whatsapp.replace(/[^0-9]/g, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:underline block truncate"
+                  >
+                    {contactInfo.whatsapp}
+                  </a>
+                  <p className="text-xs text-emerald-800/70 dark:text-emerald-300/70 mt-1">
+                    Atención rápida para consultas y soporte técnico.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Horario de Atención */}
           <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">

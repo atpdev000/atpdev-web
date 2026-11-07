@@ -31,6 +31,7 @@ import { useI18n } from '@/lib/i18n/context'
 
 import SmartClipboardDetector from '@/components/SmartClipboardDetector'
 import { DetectedUrlInfo } from '@/lib/clipboardDetector'
+import AnnouncementBar from '@/components/Layout/AnnouncementBar'
 
 export default function Home() {
   const { isNative } = usePlatform()
@@ -45,7 +46,7 @@ export default function Home() {
   const { showInterstitial } = useAdMobInterstitial()
   const hasShownInitialAd = useRef(false)
 
-  // 🧩 Módulos controlados desde CMS Admin
+  // 🧩 Módulos y Branding controlados desde CMS Admin
   const [modules, setModules] = useState<Record<string, boolean>>({
     youtube_enabled: true,
     tiktok_enabled: true,
@@ -60,8 +61,16 @@ export default function Home() {
     admob_enabled: true,
     blog_enabled: true
   })
+  const [branding, setBranding] = useState<{
+    hero_badge?: string
+    hero_title_prefix?: string
+    hero_title_highlight?: string
+    hero_description?: string
+    announcement_text?: string
+    announcement_enabled?: boolean
+  }>({})
 
-  // Cargar módulos iniciales y escuchar cambios en vivo
+  // Cargar configuración inicial y escuchar cambios en vivo
   useEffect(() => {
     fetch('/api/theme')
       .then(res => res.json())
@@ -69,14 +78,21 @@ export default function Home() {
         if (data?.modules) {
           setModules(data.modules)
         }
+        if (data?.branding) {
+          setBranding(data.branding)
+        }
       })
       .catch(() => {})
 
     try {
-      const channel = new BroadcastChannel('atp_descargador_theme_channel')
+      const channel = new BroadcastChannel('descargador_theme_channel')
       channel.onmessage = (event) => {
         if (event.data?.modules) {
           setModules(event.data.modules)
+        }
+        if (event.data?.type === 'UPDATE_DESCARGADOR_CONFIG' && event.data.payload) {
+          if (event.data.payload.modules) setModules(event.data.payload.modules)
+          if (event.data.payload.branding) setBranding(event.data.payload.branding)
         }
       }
       return () => channel.close()
@@ -193,6 +209,7 @@ export default function Home() {
   // 🌐 MODO WEB
   return (
     <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <AnnouncementBar initialText={branding.announcement_text} initialEnabled={branding.announcement_enabled} />
       <SmartClipboardDetector onDetected={handleClipboardDetected} />
       <Header />
 
@@ -206,7 +223,7 @@ export default function Home() {
         {/* CONTENIDO PRINCIPAL */}
         <main className="flex-1 container mx-auto px-4 py-8 main-with-sidebars">
           {/* 1. Hero Section */}
-          <HeroSection onSelectPlatform={setActivePlatform} modules={modules} />
+          <HeroSection onSelectPlatform={setActivePlatform} modules={modules} branding={branding} />
 
           {/* Banner Top (Top of Page) */}
           {modules.adsense_enabled !== false && (
