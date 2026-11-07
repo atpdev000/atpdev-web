@@ -6,6 +6,7 @@ import fs from 'fs'
 import os from 'os'
 import dns from 'dns'
 import { findYtDlpBinary } from '@/lib/server/binaries'
+import { getBackendEndpoint } from '@/lib/server/backend-config'
 
 try {
   dns.setDefaultResultOrder('ipv6first')
@@ -301,22 +302,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback 2 a API externa Python si está configurada
-    const PYTHON_API_URL = process.env.PYTHON_API_URL?.replace(/\/$/, '')
+    // Fallback 2 a API externa Python (Render / Railway dinámico desde el CMS)
+    const backendInfo = getBackendEndpoint()
+    const PYTHON_API_URL = backendInfo.url || process.env.PYTHON_API_URL?.replace(/\/$/, '')
     if (!rawInfo && PYTHON_API_URL) {
       try {
-        console.log('🔄 [YouTube] Intentando fallback con API externa:', PYTHON_API_URL)
+        console.log(`🔄 [YouTube] Intentando fallback con API externa (${backendInfo.provider}):`, PYTHON_API_URL)
         const extRes = await fetch(`${PYTHON_API_URL}/api/v1/youtube/download`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: cleanedUrl, quality, format_type })
+          body: JSON.stringify({ url: cleanedUrl, quality, format_type }),
+          signal: AbortSignal.timeout(backendInfo.timeoutSeconds * 1000)
         })
         if (extRes.ok) {
           const extData = await extRes.json()
           return NextResponse.json(extData)
         }
       } catch (extErr: any) {
-        console.error('❌ [YouTube] Fallback externo también falló:', extErr.message)
+        console.error('❌ [YouTube] Fallback externo primario falló:', extErr.message)
+        if (backendInfo.fallbackUrl) {
+          try {
+            console.log('🔄 [YouTube] Intentando con servidor de respaldo:', backendInfo.fallbackUrl)
+            const fbRes = await fetch(`${backendInfo.fallbackUrl}/api/v1/youtube/download`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url: cleanedUrl, quality, format_type }),
+              signal: AbortSignal.timeout(backendInfo.timeoutSeconds * 1000)
+            })
+            if (fbRes.ok) {
+              const fbData = await fbRes.json()
+              return NextResponse.json(fbData)
+            }
+          } catch (fbErr: any) {
+            console.error('❌ [YouTube] Fallback secundario también falló:', fbErr.message)
+          }
+        }
       }
     }
 

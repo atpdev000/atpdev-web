@@ -150,3 +150,4 @@ export default function TermsClient({ siteTitle, contactEmail }: { siteTitle: st
     </div>
   )
 }
+

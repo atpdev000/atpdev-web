@@ -9,6 +9,7 @@ import { useI18n } from '@/lib/i18n/context'
 
 export default function MainHeader() {
   const { t } = useI18n()
+  const [mounted, setMounted] = useState(false)
   const [siteTitle, setSiteTitle] = useState('Descargador Pro')
   const [apkConfig, setApkConfig] = useState<{
     enabled?: boolean
@@ -21,6 +22,7 @@ export default function MainHeader() {
   })
 
   useEffect(() => {
+    setMounted(true)
     fetch('/api/theme')
       .then(res => res.json())
       .then(data => {
@@ -94,10 +96,11 @@ export default function MainHeader() {
               <span>{t.nav.plans}</span>
             </Link>
 
-            {apkConfig?.enabled && (
+            {mounted && apkConfig?.enabled && (
               <a
                 href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
                 download
+                suppressHydrationWarning
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all hover:scale-105"
                 title="Descargar APK"
               >

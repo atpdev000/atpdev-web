@@ -16,6 +16,7 @@ export async function GET() {
       contact: config.contact,
       apk: config.apk,
       monetization: config.monetization,
+      backend: config.backend,
       updated_at: config.updated_at,
     });
   } catch (error) {

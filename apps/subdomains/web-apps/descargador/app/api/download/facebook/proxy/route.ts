@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries';
+import { getBackendEndpoint } from '@/lib/server/backend-config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
     if (isAudio && thumbnailUrl) {
       console.log('🎵 [Facebook Proxy] Procesando audio con miniatura...');
 
-      const backendUrl = process.env.BACKEND_URL;
+      const backendUrl = getBackendEndpoint().url || process.env.BACKEND_URL;
 
       if (backendUrl) {
         console.log(`🚀 [Facebook Proxy] Delegando a Backend Python: ${backendUrl}`);

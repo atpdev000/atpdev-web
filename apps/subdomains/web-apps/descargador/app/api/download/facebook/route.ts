@@ -1,5 +1,6 @@
 // app/api/download/facebook/route.ts - 100% SERVERLESS CON EXTRACCIÓN ROBUSTA DE MINIATURA Y MEDIOS
 import { NextRequest, NextResponse } from 'next/server'
+import { getBackendEndpoint } from '@/lib/server/backend-config'
 
 export const maxDuration = 45; // Vercel timeout
 
@@ -211,15 +212,17 @@ export async function POST(request: NextRequest) {
       extracted = await extractFallbackFacebook(url);
     }
 
-    // Si ambos fallaron y hay backend configurado, probarlo como último recurso
-    const pythonUrl = process.env.PYTHON_API_URL || process.env.PYTHON_BACKEND_URL;
+    // Si ambos fallaron y hay backend configurado (Render / Railway), probarlo como último recurso
+    const backendInfo = getBackendEndpoint();
+    const pythonUrl = backendInfo.url || process.env.PYTHON_API_URL || process.env.PYTHON_BACKEND_URL;
     if (!extracted && pythonUrl) {
       try {
-        console.log('🔄 [Facebook] Intentando backend externo como último recurso...');
+        console.log(`🔄 [Facebook] Intentando backend externo (${backendInfo.provider}):`, pythonUrl);
         const pyRes = await fetch(`${pythonUrl.replace(/\/$/, '')}/api/v1/facebook/info`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url })
+          body: JSON.stringify({ url }),
+          signal: AbortSignal.timeout(backendInfo.timeoutSeconds * 1000)
         });
         if (pyRes.ok) {
           const pyData = await pyRes.json();
@@ -228,8 +231,28 @@ export async function POST(request: NextRequest) {
           }
           return NextResponse.json(pyData);
         }
-      } catch (e) {
-        // Ignorar
+      } catch (e: any) {
+        console.warn('❌ [Facebook] Fallback primario falló:', e?.message);
+        if (backendInfo.fallbackUrl) {
+          try {
+            console.log('🔄 [Facebook] Intentando fallback secundario:', backendInfo.fallbackUrl);
+            const fbRes = await fetch(`${backendInfo.fallbackUrl.replace(/\/$/, '')}/api/v1/facebook/info`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ url }),
+              signal: AbortSignal.timeout(backendInfo.timeoutSeconds * 1000)
+            });
+            if (fbRes.ok) {
+              const fbData = await fbRes.json();
+              if (fbData && fbData.title) {
+                fbData.title = decodeHtmlEntities(fbData.title);
+              }
+              return NextResponse.json(fbData);
+            }
+          } catch (fbErr) {
+            // Ignorar
+          }
+        }
       }
     }
 

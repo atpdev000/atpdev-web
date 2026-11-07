@@ -86,6 +86,16 @@ export interface SubdomainMonetization {
   admob_rewarded_id?: string;
 }
 
+export interface SubdomainBackend {
+  provider?: 'render' | 'railway' | 'custom';
+  render_url?: string;
+  railway_url?: string;
+  custom_url?: string;
+  active_url?: string;
+  auto_fallback_enabled?: boolean;
+  timeout_seconds?: number;
+}
+
 export interface SubdomainConfig {
   id: string; // e.g. 'chamba'
   name: string; // e.g. 'Chamba Pro'
@@ -102,6 +112,7 @@ export interface SubdomainConfig {
   contact: SubdomainContact;
   apk?: SubdomainAPK;
   monetization?: SubdomainMonetization;
+  backend?: SubdomainBackend;
   updated_at?: string;
 }
 
@@ -388,6 +399,15 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     admob_app_id: 'ca-app-pub-5414009811868137~8923412091',
     admob_banner_id: 'ca-app-pub-5414009811868137/1029384756',
     admob_interstitial_id: 'ca-app-pub-5414009811868137/5647382910'
+  },
+  backend: {
+    provider: 'render',
+    render_url: 'https://snapnosh-backend.onrender.com',
+    railway_url: 'https://backend-freedownloaderpro.up.railway.app',
+    custom_url: '',
+    active_url: 'https://snapnosh-backend.onrender.com',
+    auto_fallback_enabled: true,
+    timeout_seconds: 30
   },
   updated_at: new Date().toISOString()
 };

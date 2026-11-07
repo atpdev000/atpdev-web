@@ -227,3 +227,4 @@ export default function PrivacyClient({ siteTitle, contactEmail }: { siteTitle: 
     </div>
   )
 }
+

@@ -579,3 +579,4 @@ export const copyrightTranslations: Record<Locale, CopyrightTranslations> = {
     dmcaButtonText: 'Enviar Notificação DMCA'
   }
 };
+

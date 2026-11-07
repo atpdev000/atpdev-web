@@ -53,6 +53,7 @@ import { SubdomainConfig, SubdomainTheme, ACCENT_COLOR_MAP } from "@atpdev/datab
 import { 
   saveDescargadorConfigAction, 
   checkRailwayBackendHealthAction,
+  checkBackendHealthAction,
   syncBuiltApkAction,
   uploadApkFileAction
 } from "./actions";
@@ -226,6 +227,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
     online: boolean;
     statusText: string;
     latencyMs: number;
+    targetUrl?: string;
     details?: any;
   }>({
     tested: false,
@@ -259,15 +261,18 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
     }
   };
 
-  const handleCheckHealth = async () => {
+  const handleCheckHealth = async (targetUrl?: string) => {
     setCheckingHealth(true);
+    const backendConfig = config.backend || {};
+    const urlToTest = targetUrl || backendConfig.active_url || backendConfig.render_url || 'https://snapnosh-backend.onrender.com';
     try {
-      const res = await checkRailwayBackendHealthAction();
+      const res = await checkBackendHealthAction(urlToTest, 10000);
       setHealthResult({
         tested: true,
         online: res.online,
         statusText: res.statusText,
         latencyMs: res.latencyMs,
+        targetUrl: res.targetUrl || urlToTest,
         details: res.details
       });
     } finally {
@@ -418,7 +423,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
           }`}
         >
           <Server className="w-4 h-4" />
-          Backend Railway (yt-dlp)
+          Motor Backend (Render / Railway)
         </button>
 
         <button
@@ -1002,63 +1007,541 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
         </div>
       )}
 
-      {/* TAB 2: BACKEND RAILWAY */}
+      {/* TAB 2: BACKEND RENDER & RAILWAY */}
       {activeTab === 'backend' && (
         <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          {/* Encabezado del Tab */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Server className="w-5 h-5 text-blue-400" />
-                Motor Backend Python (FastAPI + yt-dlp)
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Servicio desplegado en Railway que resuelve enlaces complejos, bypass de cookies y streams protegidos.
-              </p>
-            </div>
-
-            <button
-              onClick={handleCheckHealth}
-              disabled={checkingHealth}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs border border-slate-700 transition disabled:opacity-50"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${checkingHealth ? 'animate-spin' : ''}`} />
-              Probar Conexión (Ping)
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-              <label className="text-xs font-mono text-slate-400 uppercase tracking-wider">URL de Producción Railway</label>
-              <p className="text-sm font-mono text-blue-400 break-all select-all">
-                https://backend-freedownloaderpro.up.railway.app
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2">
-              <label className="text-xs font-mono text-slate-400 uppercase tracking-wider">Estado de Salud</label>
-              {healthResult.tested ? (
-                <div className="flex items-center gap-2">
-                  {healthResult.online ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Online • {healthResult.latencyMs}ms
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-medium">
-                      <XCircle className="w-3.5 h-3.5" />
-                      Offline ({healthResult.statusText})
-                    </span>
-                  )}
-                  <span className="text-xs text-slate-500">{healthResult.statusText}</span>
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <Server className="w-5 h-5" />
                 </div>
-              ) : (
-                <p className="text-xs text-slate-500">Haz clic en &quot;Probar Conexión&quot; para verificar el estado en vivo.</p>
-              )}
+                <div>
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    Motor Backend Python (Render & Railway)
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                      (config.backend?.provider || 'render') === 'render'
+                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                        : (config.backend?.provider === 'railway')
+                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                        : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    }`}>
+                      {(config.backend?.provider || 'render') === 'render' ? '🟣 Render Activo' : (config.backend?.provider === 'railway' ? '🚂 Railway Activo' : '🖥️ VPS Custom')}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Configuración centralizada del motor FastAPI + yt-dlp. Alterna dinámicamente entre Render y Railway sin tocar código.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                <span>Guardar Cambios</span>
+              </button>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/20 text-xs text-slate-300 leading-relaxed">
-            💡 <strong>Arquitectura Híbrida:</strong> El frontend en Next.js procesa solicitudes directas ligeras (TikTok, Facebook y YouTube Web), mientras que las peticiones complejas (como combinación de pistas de audio y video 1080p sin pérdida) se canalizan hacia el backend Python con cookies de sesión rotativas.
+          {/* 1. Selector de Proveedor Activo */}
+          <div className="space-y-3">
+            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <span>Selecciona el Proveedor Backend Activo</span>
+              <span className="text-[10px] text-slate-500 font-normal lowercase">(las descargas del sitio usarán este motor)</span>
+            </label>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Opción 1: Render */}
+              <div
+                onClick={() => {
+                  const renderUrl = config.backend?.render_url || 'https://snapnosh-backend.onrender.com';
+                  setConfig({
+                    ...config,
+                    backend: {
+                      ...(config.backend || {}),
+                      provider: 'render',
+                      active_url: renderUrl
+                    }
+                  });
+                }}
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                  (config.backend?.provider || 'render') === 'render'
+                    ? 'bg-purple-950/30 border-purple-500 shadow-md shadow-purple-500/10'
+                    : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm">
+                      🟣
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">Render Cloud</h3>
+                      <span className="text-[10px] text-emerald-400 font-semibold">Motor en Producción</span>
+                    </div>
+                  </div>
+                  <input
+                    type="radio"
+                    name="backend_provider"
+                    checked={(config.backend?.provider || 'render') === 'render'}
+                    onChange={() => {}}
+                    className="accent-purple-500 mt-1 cursor-pointer"
+                  />
+                </div>
+                <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                  Servicio Docker desplegado en Render (FastAPI + yt-dlp + Deno). Procesa streams y descargas de alta resolución.
+                </p>
+                <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span className="font-mono text-purple-300 truncate max-w-[200px]">
+                    {config.backend?.render_url || 'https://snapnosh-backend.onrender.com'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCheckHealth(config.backend?.render_url || 'https://snapnosh-backend.onrender.com');
+                    }}
+                    className="text-purple-400 hover:underline font-semibold"
+                  >
+                    Ping
+                  </button>
+                </div>
+              </div>
+
+              {/* Opción 2: Railway */}
+              <div
+                onClick={() => {
+                  const railwayUrl = config.backend?.railway_url || 'https://backend-freedownloaderpro.up.railway.app';
+                  setConfig({
+                    ...config,
+                    backend: {
+                      ...(config.backend || {}),
+                      provider: 'railway',
+                      active_url: railwayUrl
+                    }
+                  });
+                }}
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                  config.backend?.provider === 'railway'
+                    ? 'bg-blue-950/30 border-blue-500 shadow-md shadow-blue-500/10'
+                    : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
+                      🚂
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">Railway App</h3>
+                      <span className="text-[10px] text-blue-400 font-semibold">Servidor Secundario</span>
+                    </div>
+                  </div>
+                  <input
+                    type="radio"
+                    name="backend_provider"
+                    checked={config.backend?.provider === 'railway'}
+                    onChange={() => {}}
+                    className="accent-blue-500 mt-1 cursor-pointer"
+                  />
+                </div>
+                <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                  Servicio en Railway. Se puede usar como motor principal o como réplica de respaldo automático si Render duerme.
+                </p>
+                <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span className="font-mono text-blue-300 truncate max-w-[200px]">
+                    {config.backend?.railway_url || 'https://backend-freedownloaderpro.up.railway.app'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCheckHealth(config.backend?.railway_url || 'https://backend-freedownloaderpro.up.railway.app');
+                    }}
+                    className="text-blue-400 hover:underline font-semibold"
+                  >
+                    Ping
+                  </button>
+                </div>
+              </div>
+
+              {/* Opción 3: Servidor VPS Propio */}
+              <div
+                onClick={() => {
+                  const customUrl = config.backend?.custom_url || '';
+                  setConfig({
+                    ...config,
+                    backend: {
+                      ...(config.backend || {}),
+                      provider: 'custom',
+                      active_url: customUrl
+                    }
+                  });
+                }}
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                  config.backend?.provider === 'custom'
+                    ? 'bg-amber-950/30 border-amber-500 shadow-md shadow-amber-500/10'
+                    : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm">
+                      🖥️
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">VPS / Custom</h3>
+                      <span className="text-[10px] text-amber-400 font-semibold">Servidor Propio</span>
+                    </div>
+                  </div>
+                  <input
+                    type="radio"
+                    name="backend_provider"
+                    checked={config.backend?.provider === 'custom'}
+                    onChange={() => {}}
+                    className="accent-amber-500 mt-1 cursor-pointer"
+                  />
+                </div>
+                <p className="text-xs text-slate-400 mt-3 leading-relaxed">
+                  Conexión a un VPS propio (DigitalOcean, Hetzner, AWS o servidor local) ejecutando la imagen Docker de FastAPI.
+                </p>
+                <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span className="font-mono text-amber-300 truncate max-w-[200px]">
+                    {config.backend?.custom_url || 'Sin URL asignada'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (config.backend?.custom_url) handleCheckHealth(config.backend.custom_url);
+                      else alert('Por favor ingresa primero la URL del servidor VPS.');
+                    }}
+                    className="text-amber-400 hover:underline font-semibold"
+                  >
+                    Ping
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Edición de URLs y Parámetros de Red */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <SlidersHorizontal className="w-4 h-4 text-blue-400" />
+              Parámetros de Conexión & URLs de los Servicios
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* URL Render */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-300">URL del Backend Render</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const defUrl = 'https://snapnosh-backend.onrender.com';
+                      setConfig(prev => ({
+                        ...prev,
+                        backend: {
+                          ...(prev.backend || {}),
+                          render_url: defUrl,
+                          active_url: (prev.backend?.provider || 'render') === 'render' ? defUrl : prev.backend?.active_url
+                        }
+                      }));
+                    }}
+                    className="text-[11px] text-purple-400 hover:underline"
+                  >
+                    Restablecer por defecto
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={config.backend?.render_url || 'https://snapnosh-backend.onrender.com'}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setConfig(prev => ({
+                        ...prev,
+                        backend: {
+                          ...(prev.backend || {}),
+                          render_url: val,
+                          active_url: (prev.backend?.provider || 'render') === 'render' ? val : prev.backend?.active_url
+                        }
+                      }));
+                    }}
+                    placeholder="https://snapnosh-backend.onrender.com"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-purple-500 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleCheckHealth(config.backend?.render_url || 'https://snapnosh-backend.onrender.com')}
+                    disabled={checkingHealth}
+                    className="px-3 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 text-xs font-medium transition"
+                  >
+                    Test
+                  </button>
+                </div>
+              </div>
+
+              {/* URL Railway */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-300">URL del Backend Railway</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const defUrl = 'https://backend-freedownloaderpro.up.railway.app';
+                      setConfig(prev => ({
+                        ...prev,
+                        backend: {
+                          ...(prev.backend || {}),
+                          railway_url: defUrl,
+                          active_url: prev.backend?.provider === 'railway' ? defUrl : prev.backend?.active_url
+                        }
+                      }));
+                    }}
+                    className="text-[11px] text-blue-400 hover:underline"
+                  >
+                    Restablecer por defecto
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={config.backend?.railway_url || 'https://backend-freedownloaderpro.up.railway.app'}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setConfig(prev => ({
+                        ...prev,
+                        backend: {
+                          ...(prev.backend || {}),
+                          railway_url: val,
+                          active_url: prev.backend?.provider === 'railway' ? val : prev.backend?.active_url
+                        }
+                      }));
+                    }}
+                    placeholder="https://backend-freedownloaderpro.up.railway.app"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-blue-500 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleCheckHealth(config.backend?.railway_url || 'https://backend-freedownloaderpro.up.railway.app')}
+                    disabled={checkingHealth}
+                    className="px-3 py-2.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-medium transition"
+                  >
+                    Test
+                  </button>
+                </div>
+              </div>
+
+              {/* URL VPS Custom */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">URL de Servidor VPS Propio / Custom</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={config.backend?.custom_url || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setConfig(prev => ({
+                        ...prev,
+                        backend: {
+                          ...(prev.backend || {}),
+                          custom_url: val,
+                          active_url: prev.backend?.provider === 'custom' ? val : prev.backend?.active_url
+                        }
+                      }));
+                    }}
+                    placeholder="http://123.45.67.89:8000 o https://api.midominio.com"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-amber-500 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (config.backend?.custom_url) handleCheckHealth(config.backend.custom_url);
+                      else alert('Por favor escribe la URL de tu VPS antes de probar.');
+                    }}
+                    disabled={checkingHealth}
+                    className="px-3 py-2.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition"
+                  >
+                    Test
+                  </button>
+                </div>
+              </div>
+
+              {/* Timeout en segundos */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300">Tiempo de Espera Máximo (Timeout)</label>
+                <select
+                  value={config.backend?.timeout_seconds || 30}
+                  onChange={(e) => {
+                    const secs = parseInt(e.target.value, 10);
+                    setConfig(prev => ({
+                      ...prev,
+                      backend: {
+                        ...(prev.backend || {}),
+                        timeout_seconds: secs
+                      }
+                    }));
+                  }}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-blue-500 outline-none cursor-pointer"
+                >
+                  <option value={15}>15 segundos (Red ultra rápida)</option>
+                  <option value={30}>30 segundos (Recomendado para Render)</option>
+                  <option value={60}>60 segundos (Videos 4K pesados o cold-start)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Fallback Automático Toggle */}
+            <div className="pt-3 border-t border-slate-800 flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  Fallback Automático de Alta Disponibilidad
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Si Render está en modo suspensión o Railway experimenta fallas, conmuta automáticamente entre proveedores para que el usuario nunca vea error.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setConfig(prev => ({
+                    ...prev,
+                    backend: {
+                      ...(prev.backend || {}),
+                      auto_fallback_enabled: prev.backend?.auto_fallback_enabled === false ? true : false
+                    }
+                  }));
+                }}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  config.backend?.auto_fallback_enabled !== false ? 'bg-emerald-600' : 'bg-slate-700'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                  config.backend?.auto_fallback_enabled !== false ? 'translate-x-6' : 'translate-x-1'
+                }`} />
+              </button>
+            </div>
+          </div>
+
+          {/* 3. Tarjeta de Diagnóstico y Monitoreo en Vivo */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-400" />
+                  Diagnóstico de Salud en Tiempo Real
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Realiza un ping HTTP real al servicio FastAPI y verifica el estado de yt-dlp y los endpoints disponibles.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleCheckHealth(config.backend?.render_url || 'https://snapnosh-backend.onrender.com')}
+                  disabled={checkingHealth}
+                  className="px-3 py-1.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold transition disabled:opacity-50"
+                >
+                  Probar Render
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCheckHealth(config.backend?.railway_url || 'https://backend-freedownloaderpro.up.railway.app')}
+                  disabled={checkingHealth}
+                  className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-semibold transition disabled:opacity-50"
+                >
+                  Probar Railway
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCheckHealth()}
+                  disabled={checkingHealth}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs border border-slate-700 transition disabled:opacity-50 shadow-sm"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${checkingHealth ? 'animate-spin text-blue-400' : ''}`} />
+                  Probar Activo
+                </button>
+              </div>
+            </div>
+
+            {healthResult.tested ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+                  <div className="flex items-center gap-3">
+                    {healthResult.online ? (
+                      <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shadow-md shadow-emerald-400/50" />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full bg-rose-500" />
+                    )}
+                    <div>
+                      <span className="text-xs font-mono text-slate-300 font-bold block">
+                        {healthResult.targetUrl || config.backend?.active_url || 'https://snapnosh-backend.onrender.com'}
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        {healthResult.statusText}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                      healthResult.online
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                        : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                    }`}>
+                      {healthResult.online ? `OPERACIONAL • ${healthResult.latencyMs}ms` : 'SIN RESPUESTA'}
+                    </span>
+                  </div>
+                </div>
+
+                {healthResult.details && typeof healthResult.details === 'object' && (
+                  <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs space-y-2">
+                    <div className="flex items-center justify-between text-slate-300 font-semibold">
+                      <span>API: <strong className="text-white">{healthResult.details.name || 'FastAPI Backend'}</strong></span>
+                      <span>Versión: <code className="text-blue-400">{healthResult.details.version || 'v2.0'}</code></span>
+                      <span>Estado: <span className="text-emerald-400 uppercase font-bold">{healthResult.details.status || 'OK'}</span></span>
+                    </div>
+                    {healthResult.details.endpoints && (
+                      <div className="pt-2 border-t border-slate-800/80">
+                        <span className="text-[11px] text-slate-400 block mb-1">Rutas y Extractor yt-dlp Detectados:</span>
+                        <div className="flex flex-wrap gap-1.5 font-mono text-[10px]">
+                          {Object.entries(healthResult.details.endpoints).map(([key, val]: any) => (
+                            <span key={key} className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                              {key}: {typeof val === 'string' ? val : JSON.stringify(val)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-center text-xs text-slate-400">
+                Haz clic en <strong>Probar Render</strong>, <strong>Probar Railway</strong> o <strong>Probar Activo</strong> para verificar la conectividad y latencia en vivo.
+              </div>
+            )}
+          </div>
+
+          {/* Nota de Arquitectura Híbrida */}
+          <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-500/20 text-xs text-slate-300 leading-relaxed flex items-start gap-3">
+            <Sparkles className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+            <div>
+              <strong>Arquitectura Híbrida Inteligente:</strong> El frontend en Next.js resuelve de forma nativa enlaces públicos ligeros (TikTok, Facebook y YouTube básico), mientras que las peticiones complejas (como combinación de pistas de audio y video 1080p sin pérdida o streams protegidos) se delegan al motor FastAPI en Render o Railway con cookies de sesión activas.
+            </div>
           </div>
         </div>
       )}

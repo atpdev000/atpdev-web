@@ -119,17 +119,40 @@ export async function uploadApkFileAction(formData: FormData): Promise<{ success
   }
 }
 
-export async function checkRailwayBackendHealthAction(url: string = 'https://backend-freedownloaderpro.up.railway.app'): Promise<{ online: boolean; statusText: string; latencyMs: number; details?: any }> {
+export async function checkBackendHealthAction(url: string, timeoutMs: number = 8000): Promise<{
+  online: boolean;
+  statusText: string;
+  latencyMs: number;
+  details?: any;
+  targetUrl: string;
+}> {
   const start = Date.now();
+  const cleanUrl = (url || '').trim().replace(/\/$/, '');
+  if (!cleanUrl) {
+    return { online: false, statusText: 'URL vacía o no configurada', latencyMs: 0, targetUrl: '' };
+  }
+
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
-    
-    // Check root or docs or health
-    const res = await fetch(`${url.replace(/\/$/, '')}/`, { 
-      signal: controller.signal,
-      headers: { 'User-Agent': 'ATPDev-Admin-HealthCheck/1.0' }
-    });
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    let res: Response;
+    let endpointTried = '/';
+    try {
+      res = await fetch(`${cleanUrl}/`, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'ATPDev-Admin-HealthCheck/2.0' }
+      });
+      endpointTried = '/';
+    } catch (e: any) {
+      if (e?.name === 'AbortError') throw e;
+      res = await fetch(`${cleanUrl}/api/v1/health`, {
+        signal: controller.signal,
+        headers: { 'User-Agent': 'ATPDev-Admin-HealthCheck/2.0' }
+      });
+      endpointTried = '/api/v1/health';
+    }
+
     clearTimeout(timeout);
     const latencyMs = Date.now() - start;
 
@@ -140,14 +163,30 @@ export async function checkRailwayBackendHealthAction(url: string = 'https://bac
       } catch {
         data = await res.text();
       }
-      return { online: true, statusText: `HTTP ${res.status} OK`, latencyMs, details: data };
+      return {
+        online: true,
+        statusText: `HTTP ${res.status} OK (${endpointTried})`,
+        latencyMs,
+        details: data,
+        targetUrl: cleanUrl
+      };
     }
-    return { online: false, statusText: `HTTP ${res.status}`, latencyMs };
+    return {
+      online: false,
+      statusText: `HTTP ${res.status} ${res.statusText || ''}`.trim(),
+      latencyMs,
+      targetUrl: cleanUrl
+    };
   } catch (err: any) {
-    return { 
-      online: false, 
-      statusText: err?.name === 'AbortError' ? 'Tiempo de espera agotado (Timeout 6s)' : (err?.message || 'Error de conexión'),
-      latencyMs: Date.now() - start 
+    return {
+      online: false,
+      statusText: err?.name === 'AbortError' ? `Timeout (${timeoutMs / 1000}s)` : (err?.message || 'Error de conexión'),
+      latencyMs: Date.now() - start,
+      targetUrl: cleanUrl
     };
   }
+}
+
+export async function checkRailwayBackendHealthAction(url: string = 'https://backend-freedownloaderpro.up.railway.app') {
+  return checkBackendHealthAction(url);
 }
