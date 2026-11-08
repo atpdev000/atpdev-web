@@ -109,6 +109,8 @@ export default function CheckoutModal({
   const defaultMsg = `Hola ATP Dev 👋, quiero mejorar a Premium en Descargador Pro ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
   const customMsg = paymentConfig?.whatsapp_message_pro || defaultMsg
   const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(customMsg)}`
+  const whatsappCardMsg = `Hola ATP Dev 👋, deseo pagar mi suscripción Premium en Descargador Pro (${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`}) con Tarjeta de Crédito/Débito. Orden: #${orderRef}. ¿Me compartes el link de pago seguro por favor?`
+  const whatsappCardHref = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappCardMsg)}`
 
   // Validación de Licencia
   const handleVerifyCode = async (e: React.FormEvent) => {
@@ -150,27 +152,7 @@ export default function CheckoutModal({
         return
       }
 
-      const cleanCard = cardNumber.replace(/\s/g, '')
-      if (!cleanCard || cleanCard.length < 15) {
-        setCardError('Por favor ingresa un número de tarjeta válido (16 dígitos).')
-        return
-      }
-
-      if (!cardExpiry || cardExpiry.length < 5) {
-        setCardError('Por favor ingresa la fecha de expiración (MM/AA).')
-        return
-      }
-
-      if (!cardCvc || cardCvc.length < 3) {
-        setCardError('Por favor ingresa el código CVC (3 dígitos).')
-        return
-      }
-
-      setIsProcessing(true)
-      setTimeout(() => {
-        setIsProcessing(false)
-        setCardError('La pasarela de tarjeta directa está en sincronización bancaria. Por favor completa tu pago seguro por Yape / WhatsApp o canjea tu código de licencia.')
-      }, 1000)
+      window.open(whatsappCardHref, '_blank')
     } else if (selectedMethod === 'paypal') {
       window.open(paypalUrl || whatsappHref, '_blank')
     } else if (selectedMethod === 'yape') {

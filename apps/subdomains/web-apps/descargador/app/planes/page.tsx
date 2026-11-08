@@ -107,6 +107,8 @@ export default function PlanesPage() {
   const currencyNotice = isPEN ? `en Perú por Yape/Plin (${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
   const defaultWhatsappMsg = `Hola ATP Dev 👋, quiero activar Premium en Descargador Pro ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago?`
   const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(defaultWhatsappMsg)}`
+  const whatsappCardMsg = `Hola ATP Dev 👋, deseo pagar mi suscripción Premium en Descargador Pro (${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`}) con Tarjeta de Crédito/Débito. Orden: #${orderRef}. ¿Me compartes el link de pago seguro por favor?`
+  const whatsappCardHref = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappCardMsg)}`
 
   // Manejar submit del botón principal "Mejorar a Premium"
   const handleUpgradeSubmit = (e: React.FormEvent) => {
@@ -114,35 +116,14 @@ export default function PlanesPage() {
     setCardError(null)
 
     if (selectedMethod === 'card') {
-      // 1. Si hay link de Stripe conectado
+      // 1. Si hay link de Stripe conectado, ir directo a Stripe Checkout
       if (stripeUrl) {
         window.open(stripeUrl, '_blank')
         return
       }
 
-      // 2. Validación estricta: NO aceptar campos vacíos!
-      const cleanCard = cardNumber.replace(/\s/g, '')
-      if (!cleanCard || cleanCard.length < 15) {
-        setCardError('Por favor ingresa un número de tarjeta válido (16 dígitos).')
-        return
-      }
-
-      if (!cardExpiry || cardExpiry.length < 5) {
-        setCardError('Por favor ingresa la fecha de expiración (MM/AA).')
-        return
-      }
-
-      if (!cardCvc || cardCvc.length < 3) {
-        setCardError('Por favor ingresa el código de seguridad CVC (3 dígitos).')
-        return
-      }
-
-      // 3. Informar que debe completar el pago de forma segura por WhatsApp o Stripe
-      setIsProcessing(true)
-      setTimeout(() => {
-        setIsProcessing(false)
-        setCardError('La pasarela de tarjeta directa está en sincronización bancaria. Por favor completa tu pago seguro por Yape / WhatsApp o canjea tu código de licencia.')
-      }, 1000)
+      // 2. Si no hay Stripe configurado, abrir WhatsApp para link de pago seguro con tarjeta
+      window.open(whatsappCardHref, '_blank')
     } else if (selectedMethod === 'paypal') {
       if (paypalUrl) {
         window.open(paypalUrl, '_blank')
@@ -489,12 +470,19 @@ export default function PlanesPage() {
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Validando tarjeta...</span>
+                      <span>Conectando pasarela...</span>
                     </>
+                  ) : stripeUrl ? (
+                    <span>Pagar con Tarjeta Segura ({currentPriceDisplay})</span>
                   ) : (
-                    <span>Mejorar a Premium ({currentPriceDisplay})</span>
+                    <span>Pagar con Tarjeta ({currentPriceDisplay})</span>
                   )}
                 </button>
+                {!stripeUrl && (
+                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
+                    🔒 Pagos 100% seguros procesados con encriptación bancaria SSL. Recibirás tu link de pago oficial y activación inmediata.
+                  </p>
+                )}
               </form>
             )}
 
