@@ -38,7 +38,7 @@
       "logo_url": "/icon.svg",
       "favicon_url": "/icon.svg",
       "announcement_text": "🚀 Actualizado en tiempo real con convocatorias vigentes de SERVIR y entidades públicas.",
-      "announcement_enabled": true
+      "announcement_enabled": false
     },
     "seo": {
       "meta_title": "chamba pro — Buscador de Empleos y Convocatorias de Trabajo Perú",
@@ -72,7 +72,11 @@
       "telegram_channel_url": "https://t.me/chambapro_peru",
       "support_url": "https://atpdev.dev/contacto"
     },
-    "updated_at": "2026-09-14T20:39:52.157Z"
+    "updated_at": "2026-11-08T21:46:49.744Z",
+    "apk": {},
+    "monetization": {},
+    "backend": {},
+    "payments": {}
   },
   "sorteos": {
     "id": "sorteos",

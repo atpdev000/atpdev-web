@@ -2352,7 +2352,12 @@ export function oauthConnectUrl(platform: string, returnTo?: string): string {
     if (!isConfigured) {
       return `${appUrl}/api/v1/auth/oauth/callback/google?code=dev_google_${Date.now()}${stateQuery}`;
     }
-    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${cid}&redirect_uri=${encodeURIComponent(appUrl + '/api/v1/auth/oauth/callback/google')}&response_type=code&scope=${encodeURIComponent('https://www.googleapis.com/auth/youtube.readonly openid email profile')}&access_type=offline&prompt=consent${stateQuery}`;
+    // Para login general solo requerimos perfil básico (evita error de verificación de Google).
+    // Para YouTube de sorteos se solicita youtube.readonly.
+    const scopes = platform === 'youtube'
+      ? 'https://www.googleapis.com/auth/youtube.readonly openid email profile'
+      : 'openid email profile';
+    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${cid}&redirect_uri=${encodeURIComponent(appUrl + '/api/v1/auth/oauth/callback/google')}&response_type=code&scope=${encodeURIComponent(scopes)}&access_type=offline&prompt=consent${stateQuery}`;
   }
   if (platform === 'tiktok') {
     const appKey = process.env.TIKTOK_CLIENT_KEY;
