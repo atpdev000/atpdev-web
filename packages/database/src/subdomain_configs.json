@@ -50,7 +50,9 @@
         "convocatorias cas 2026",
         "servir convocatorias"
       ],
-      "canonical_url": "https://atpdev.dev"
+      "canonical_url": "https://atpdev.dev",
+      "google_analytics_id": "GTM-KGJN7SDL",
+      "microsoft_clarity_id": "zak4lzyye9"
     },
     "modules": {
       "scraper_enabled": true,

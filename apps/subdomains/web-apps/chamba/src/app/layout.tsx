@@ -17,6 +17,7 @@ import {
 import { HeaderNav } from "@/components/HeaderNav";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { ChambaThemeListener } from "@/components/ChambaThemeListener";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { getSubdomainConfig } from "@atpdev/database";
 import { SITE_URL } from "@/lib/siteConfig";
 import "./globals.css";
@@ -136,7 +137,8 @@ export default function RootLayout({
   const config = getSubdomainConfig("chamba");
   const theme = config.theme || ({} as any);
   const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-5414009811868137";
-  const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const gaId = config.seo?.google_analytics_id || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "GTM-KGJN7SDL";
+  const clarityId = config.seo?.microsoft_clarity_id || "zak4lzyye9";
   const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
   const accentHex = theme.accent_color || theme.primary_color || "#10b981";
   const glowStyle = theme.glow_style || "spotlight-border";
@@ -198,12 +200,16 @@ export default function RootLayout({
           }}
         />
 
-        {/* Google Analytics 4 (GA4) & Google Ads Tag */}
-        {(gaId || googleAdsId) && (
+        {/* Google Analytics 4 (GA4) & Google Tag (GTM) */}
+        {gaId && (
           <>
             <Script
               async
-              src={`https://www.googletagmanager.com/gtag/js?id=${gaId || googleAdsId}`}
+              src={
+                gaId.startsWith('GTM-')
+                  ? `https://www.googletagmanager.com/gtm.js?id=${gaId}`
+                  : `https://www.googletagmanager.com/gtag/js?id=${gaId}`
+              }
               strategy="afterInteractive"
             />
             <Script id="google-tags-init" strategy="afterInteractive">
@@ -211,11 +217,27 @@ export default function RootLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                ${gaId ? `gtag('config', '${gaId}', { page_path: window.location.pathname });` : ''}
+                ${gaId.startsWith('G-') ? `gtag('config', '${gaId}', { page_path: window.location.pathname });` : ''}
                 ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ''}
               `}
             </Script>
           </>
+        )}
+        {/* Microsoft Clarity Behavioral Analytics */}
+        {clarityId && (
+          <Script
+            id="microsoft-clarity-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${clarityId}");
+              `
+            }}
+          />
         )}
         {/* Google AdSense Script Inyección Oficial */}
         {adsenseId && (
@@ -272,6 +294,7 @@ export default function RootLayout({
       </head>
       <body className="bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-600 selection:text-white transition-colors">
         <ChambaThemeListener />
+        <AnalyticsTracker />
         <div className="min-h-screen flex flex-col">
         {/* Top Announcement Bar */}
         {config.branding?.announcement_enabled && (
