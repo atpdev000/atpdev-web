@@ -96,10 +96,62 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const serverTheme = theme.theme_mode === 'light' ? 'light' : 'dark'
   const customBg = theme.global_background_image
   const accentHex = theme.accent_color || theme.primary_color || '#3b82f6'
+  const siteUrl = config?.seo?.canonical_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
 
   return (
     <html lang="es" className={serverTheme} data-server-theme={serverTheme} suppressHydrationWarning>
       <head>
+        {/* Resource Hints */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+        {/* Google Consent Mode v2 Default Signals */}
+        <script
+          id="google-consent-mode-default"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'granted',
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+
+        {/* Schema.org WebApplication & Organization JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: config?.branding?.site_title || "Descargador Pro",
+              alternateName: "Descargador de Videos HD y Música MP3 Gratis",
+              applicationCategory: "MultimediaApplication",
+              operatingSystem: "All (Web, Android, iOS, Windows, macOS)",
+              url: siteUrl,
+              description: config?.seo?.meta_description || "Descarga videos y audios gratis de YouTube, TikTok sin marca de agua y Facebook en máxima calidad.",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD"
+              },
+              creator: {
+                "@type": "Organization",
+                name: "ATP DEV",
+                url: "https://atpdev.dev"
+              }
+            })
+          }}
+        />
         {customBg && (
           <style dangerouslySetInnerHTML={{
             __html: `
