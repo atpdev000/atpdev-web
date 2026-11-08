@@ -255,7 +255,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
   });
 
   const handlePingMercadoPago = async (customUrl?: string) => {
-    const targetUrl = customUrl || config.payments?.mercadopago_pro_monthly_url || config.payments?.mercadopago_pro_annual_url || 'https://mpago.la/1qwLLFy';
+    const targetUrl = customUrl || config.payments?.mercadopago_pro_monthly_url || config.payments?.mercadopago_pro_annual_url || 'https://mpago.la/1HfK5w8';
     setMpPingResult({ testing: true, tested: false });
     try {
       const res = await checkGatewayPingAction(targetUrl);
@@ -1181,7 +1181,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                   Consola Mercado Pago
                 </a>
                 <a
-                  href={config.payments?.mercadopago_pro_monthly_url || 'https://mpago.la/1qwLLFy'}
+                  href={config.payments?.mercadopago_pro_monthly_url || 'https://mpago.la/1HfK5w8'}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-sm"
@@ -1223,7 +1223,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                     ...config,
                     payments: { ...(config.payments || {}), mercadopago_pro_monthly_url: e.target.value }
                   })}
-                  placeholder="https://mpago.la/1qwLLFy"
+                  placeholder="https://mpago.la/1HfK5w8"
                   className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
                 />
                 <span className="text-[10px] text-slate-500 block">Enlace de cobro para suscripción mensual en Soles</span>
@@ -1241,7 +1241,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                     ...config,
                     payments: { ...(config.payments || {}), mercadopago_pro_annual_url: e.target.value }
                   })}
-                  placeholder="https://mpago.la/1tGtPwz"
+                  placeholder="https://mpago.la/2EJNTrd"
                   className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
                 />
                 <span className="text-[10px] text-slate-500 block">Enlace de cobro con descuento anual en Soles</span>
@@ -1280,7 +1280,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
 
               <div className="flex items-center gap-2 shrink-0">
                 <a
-                  href={config.payments?.mercadopago_pro_annual_url || 'https://mpago.la/1tGtPwz'}
+                  href={config.payments?.mercadopago_pro_annual_url || 'https://mpago.la/2EJNTrd'}
                   target="_blank"
                   rel="noreferrer"
                   className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition"

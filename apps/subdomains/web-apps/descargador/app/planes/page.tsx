@@ -107,8 +107,8 @@ export default function PlanesPage() {
     : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
 
   const mercadopagoUrl = billingCycle === 'annual'
-    ? (paymentConfig?.mercadopago_pro_annual_url || 'https://mpago.la/1tGtPwz')
-    : (paymentConfig?.mercadopago_pro_monthly_url || 'https://mpago.la/1qwLLFy')
+    ? (paymentConfig?.mercadopago_pro_annual_url || 'https://mpago.la/2EJNTrd')
+    : (paymentConfig?.mercadopago_pro_monthly_url || 'https://mpago.la/1HfK5w8')
 
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
