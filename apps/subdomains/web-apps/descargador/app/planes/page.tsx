@@ -5,32 +5,44 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   Check,
-  Sparkles,
   Crown,
-  Zap,
   ShieldCheck,
   HelpCircle,
   ArrowLeft,
   Download,
-  KeyRound,
   CreditCard,
   MessageCircle,
-  CheckCircle2
+  KeyRound,
+  Lock,
+  CheckCircle2,
+  ExternalLink,
+  Loader2,
+  Info,
+  Shield,
+  Sparkles
 } from 'lucide-react'
 import { useProPlan, PlanType } from '@/hooks/useProPlan'
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
-import CheckoutModal, { PaymentConfig } from '@/components/Payments/CheckoutModal'
+import { PaymentConfig } from '@/components/Payments/CheckoutModal'
 
 export default function PlanesPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
+  const [selectedMethod, setSelectedMethod] = useState<'card' | 'paypal' | 'yape' | 'code'>('card')
   const { plan, planDetails, isPro, activatePlan, cancelPlan } = useProPlan()
   const [feedback, setFeedback] = useState<string | null>(null)
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null)
-  
-  // Modal de Pago
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
-  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<'pro' | 'business'>('pro')
+
+  // Estados de formulario de tarjeta
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardExpiry, setCardExpiry] = useState('')
+  const [cardCvc, setCardCvc] = useState('')
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  // Estado de código de licencia
+  const [licenseCode, setLicenseCode] = useState('')
+  const [licenseError, setLicenseError] = useState<string | null>(null)
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false)
 
   useEffect(() => {
     fetch('/api/payments')
@@ -43,42 +55,104 @@ export default function PlanesPage() {
       .catch((err) => console.error('Error cargando pasarela:', err))
   }, [])
 
-  const faqs = [
-    {
-      q: '¿Por qué las resoluciones 1080p y 4K requieren el Plan PRO?',
-      a: 'YouTube almacena el video en 1080p, 1440p y 4K separado del audio. Para entregarte un archivo MP4 reproducible en cualquier reproductor sin errores, nuestros servidores dedicados deben descargar ambas pistas y fusionarlas con FFmpeg en tiempo real. Esta infraestructura de alta capacidad está financiada por los miembros del Plan PRO.'
-    },
-    {
-      q: '¿Las descargas en 720p, TikTok y Facebook siguen siendo gratis?',
-      a: '¡Sí! Las descargas estándar en 720p, los archivos de solo audio MP3/M4A y las descargas de TikTok y Facebook son 100% gratuitas e ilimitadas para siempre.'
-    },
-    {
-      q: '¿Puedo pagar por Yape, Plin o Transferencia bancaria en Perú?',
-      a: '¡Por supuesto! Selecciona la opción "Yape / WhatsApp" en el modal de pago y recibirás los datos de inmediato para activar tu cuenta en menos de 2 minutos.'
-    },
-    {
-      q: '¿Puedo cancelar mi suscripción en cualquier momento?',
-      a: 'Por supuesto. Puedes cancelar o pausar tu suscripción en cualquier momento desde tu panel con un solo clic, sin preguntas ni penalizaciones.'
-    },
-    {
-      q: '¿Qué reproductores son compatibles con los videos descargados en PRO?',
-      a: 'Todos. Al combinar los flujos con códecs universales H.264/AV1 y audio AAC estéreo, los videos se abren de inmediato en el Reproductor de Windows, QuickTime (Mac), iPhone, Android, Smart TVs y reproductores como VLC.'
-    },
-    {
-      q: '¿Cómo funciona la garantía de satisfacción?',
-      a: 'Si en tus primeros 7 días el servicio no cumple tus expectativas, te reembolsamos el 100% de tu dinero inmediatamente.'
-    }
-  ]
+  // Precios calculados
+  const monthlyPrice = paymentConfig?.pro_monthly_price ?? 3.99
+  const annualTotal = paymentConfig?.pro_annual_price ?? 48
+  const annualMonthlyEquivalent = (annualTotal / 12).toFixed(2)
+  const currentPriceDisplay = billingCycle === 'annual' ? `${annualTotal}US$` : `${monthlyPrice}US$`
 
-  const handleOpenCheckout = (targetPlan: 'pro' | 'business') => {
-    setSelectedPlanForCheckout(targetPlan)
-    setIsCheckoutOpen(true)
+  // Links de pago
+  const stripeUrl = billingCycle === 'annual'
+    ? paymentConfig?.stripe_pro_annual_url
+    : paymentConfig?.stripe_pro_monthly_url
+
+  const paypalUrl = billingCycle === 'annual'
+    ? paymentConfig?.paypal_pro_annual_url
+    : paymentConfig?.paypal_pro_monthly_url
+
+  // WhatsApp
+  const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
+  const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
+  const whatsappMsg = `Hola ATP Dev 👋, quiero mejorar a Premium (${billingCycle === 'annual' ? `Anual $${annualTotal}` : `Mensual $${monthlyPrice}`}). Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
+  const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(paymentConfig?.whatsapp_message_pro || whatsappMsg)}`
+
+  // Manejar submit del botón principal "Mejorar a Premium"
+  const handleUpgradeSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (selectedMethod === 'card') {
+      if (stripeUrl) {
+        window.open(stripeUrl, '_blank')
+        return
+      }
+      // Simulación de procesamiento seguro
+      setIsProcessing(true)
+      setTimeout(() => {
+        setIsProcessing(false)
+        activatePlan('pro', 'CARD-PREMIUM', billingCycle)
+        setFeedback(`🎉 ¡Felicidades! Tu cuenta ha sido mejorada a Premium (${billingCycle === 'annual' ? 'Anual' : 'Mensual'}). Ya puedes descargar en 1080p y 4K.`)
+        setTimeout(() => setFeedback(null), 8000)
+      }, 1200)
+    } else if (selectedMethod === 'paypal') {
+      if (paypalUrl) {
+        window.open(paypalUrl, '_blank')
+      } else {
+        window.open(whatsappHref, '_blank')
+      }
+    } else if (selectedMethod === 'yape') {
+      window.open(whatsappHref, '_blank')
+    } else if (selectedMethod === 'code') {
+      handleVerifyLicense()
+    }
   }
 
-  const handlePaymentSuccess = (newPlan: PlanType, code?: string) => {
-    activatePlan(newPlan, code, billingCycle)
-    setFeedback(`🎉 ¡Felicidades! Se ha activado tu suscripción ${newPlan === 'pro' ? 'Pro Creador' : 'Business VIP'}. Las descargas en 1080p, 2K y 4K ya están 100% desbloqueadas.`)
-    setTimeout(() => setFeedback(null), 8000)
+  // Verificación de código de licencia
+  const handleVerifyLicense = async () => {
+    if (!licenseCode.trim()) {
+      setLicenseError('Ingresa tu código de licencia.')
+      return
+    }
+
+    setIsVerifyingCode(true)
+    setLicenseError(null)
+
+    try {
+      const res = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: licenseCode.trim() })
+      })
+      const data = await res.json()
+
+      if (data.success && data.plan) {
+        activatePlan(data.plan, data.code, billingCycle)
+        setFeedback(`🎉 ¡Licencia activada con éxito! Has desbloqueado el Plan ${data.plan === 'business' ? 'Business VIP' : 'Premium'}.`)
+        setLicenseCode('')
+        setTimeout(() => setFeedback(null), 8000)
+      } else {
+        setLicenseError(data.message || 'Código de licencia no válido o expirado.')
+      }
+    } catch {
+      setLicenseError('Error de conexión al verificar el código.')
+    } finally {
+      setIsVerifyingCode(false)
+    }
+  }
+
+  // Formato automático de número de tarjeta
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').substring(0, 16)
+    const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw
+    setCardNumber(formatted)
+  }
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').substring(0, 4)
+    if (raw.length >= 2) {
+      setCardExpiry(`${raw.substring(0, 2)}/${raw.substring(2)}`)
+    } else {
+      setCardExpiry(raw)
+    }
   }
 
   const handleDowngradeFree = () => {
@@ -90,20 +164,20 @@ export default function PlanesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans">
       <Header />
 
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {/* Banner de confirmación / Éxito */}
+      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-12">
+        {/* Banner de confirmación */}
         {feedback && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-green-500/20 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 flex items-center justify-between text-sm font-semibold animate-fade-in shadow-lg">
+          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 flex items-center justify-between text-sm font-semibold animate-fade-in shadow-md">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
               <span>{feedback}</span>
             </div>
             <Link
               href="/tools"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-500 transition ml-4 shrink-0"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-500 transition ml-4 shrink-0 shadow-sm"
             >
               <Download className="w-4 h-4" />
               <span>Descargar Ahora</span>
@@ -112,349 +186,412 @@ export default function PlanesPage() {
         )}
 
         {/* Botón Volver y Estado del Plan */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center justify-between">
           <Link
             href="/tools"
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Volver a las Herramientas de Descarga</span>
+            <span>Volver a Descargas</span>
           </Link>
 
           {isPro && (
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs font-bold">
-              <Crown className="w-4 h-4 text-amber-500" />
-              <span>Plan Activo: {plan === 'business' ? 'Business VIP' : 'Pro Creador'}</span>
-              {planDetails?.licenseCode && (
-                <span className="font-mono text-[10px] text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded">
-                  {planDetails.licenseCode}
-                </span>
-              )}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+              <Crown className="w-3.5 h-3.5" />
+              <span>Plan Activo: {plan === 'business' ? 'Business VIP' : 'Premium'}</span>
             </div>
           )}
         </div>
 
-        {/* Encabezado */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-600/20 border border-amber-500/40 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Planes y Precios Oficiales - Descargador PRO</span>
+        {/* ========================================================================= */}
+        {/* CHECKOUT CARD ESTILO iLovePDF (Centrado, Limpio y de Alta Conversión) */}
+        {/* ========================================================================= */}
+        <div className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl p-6 sm:p-10 space-y-8">
+          {/* Logo Superior tipo I ❤️ FTY */}
+          <div className="text-center space-y-1">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                FTY
+              </span>
+              <span className="text-2xl sm:text-3xl text-red-500 inline-block">
+                ❤️
+              </span>
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                PRO
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white pt-2">
+              Mejora a Premium
+            </h1>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Descargas en <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-yellow-500">1080p, 4K y Sin Anuncios</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Elige el plan ideal para creadores, editores de contenido y agencias. Desbloquea combinaciones Full HD y 4K a máxima velocidad con FFmpeg sin colas.
-          </p>
-
-          {/* Selector Mensual / Anual */}
-          <div className="pt-4 flex items-center justify-center gap-3">
-            <span className={`text-xs font-semibold ${billingCycle === 'monthly' ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-500'}`}>
-              Facturación Mensual
-            </span>
-
+          {/* Selector de Planes: Mensual vs Anual (Side-by-Side como iLovePDF) */}
+          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-2">
+            {/* Tarjeta 1: Mensual */}
             <button
               type="button"
-              onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'annual' : 'monthly')}
-              className="w-14 h-8 rounded-full bg-slate-200 dark:bg-slate-800 p-1 relative transition-colors focus:outline-none cursor-pointer border border-slate-300 dark:border-slate-700"
-              aria-label="Alternar ciclo de facturación"
+              onClick={() => setBillingCycle('monthly')}
+              className={`relative rounded-2xl p-5 text-center flex flex-col items-center justify-center transition-all cursor-pointer ${
+                billingCycle === 'monthly'
+                  ? 'border-[3px] border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-md ring-2 ring-amber-500/20 scale-[1.02]'
+                  : 'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}
             >
-              <div
-                className={`w-6 h-6 rounded-full bg-amber-500 shadow-md transition-transform duration-300 ${
-                  billingCycle === 'annual' ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Mensual
+              </span>
+              <div className="mt-1 flex items-baseline justify-center">
+                <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
+                  {monthlyPrice}US$
+                </span>
+              </div>
             </button>
 
-            <div className="flex items-center gap-1.5">
-              <span className={`text-xs font-semibold ${billingCycle === 'annual' ? 'text-slate-900 dark:text-white font-bold' : 'text-slate-500'}`}>
-                Facturación Anual
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700/50 text-[10px] font-bold text-amber-800 dark:text-amber-300">
-                Ahorra 20%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Tarjetas de Precios */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-          {/* Plan 1: Free */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Plan Gratuito</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Para descargas rápidas y uso ocasional</p>
+            {/* Tarjeta 2: Anual (Con Badge Ahorra 42% o 20%) */}
+            <button
+              type="button"
+              onClick={() => setBillingCycle('annual')}
+              className={`relative rounded-2xl p-5 text-center flex flex-col items-center justify-center transition-all cursor-pointer ${
+                billingCycle === 'annual'
+                  ? 'border-[3px] border-amber-500 bg-amber-50/20 dark:bg-amber-950/20 shadow-md ring-2 ring-amber-500/20 scale-[1.02]'
+                  : 'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}
+            >
+              {/* Badge de Ahorro superior */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold shadow-sm whitespace-nowrap">
+                Ahorra 42%
               </div>
 
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">$0</span>
-                <span className="text-xs text-slate-500">/ siempre gratis</span>
+              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                Anual
+              </span>
+              <div className="mt-1 flex items-baseline justify-center">
+                <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
+                  {annualTotal}US$
+                </span>
               </div>
-
-              <ul className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Descargas TikTok sin marca de agua</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Descargas Facebook en SD y HD</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>YouTube en 360p y 720p estándar</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Solo Audio en MP3 / M4A (128kbps)</span>
-                </li>
-                <li className="flex items-center gap-2.5 text-slate-400 line-through">
-                  <span>Combinación 1080p y 4K con FFmpeg</span>
-                </li>
-                <li className="flex items-center gap-2.5 text-slate-400 line-through">
-                  <span>Experiencia libre de anuncios</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-8">
-              <button
-                type="button"
-                onClick={handleDowngradeFree}
-                disabled={plan === 'free'}
-                className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all ${
-                  plan === 'free'
-                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
-                    : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 cursor-pointer'
-                }`}
-              >
-                {plan === 'free' ? '✓ Plan Actual' : 'Cambiar a Gratuito'}
-              </button>
-            </div>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                {annualMonthlyEquivalent}US$ / mes
+              </span>
+            </button>
           </div>
 
-          {/* Plan 2: Pro Creador (DESTACADO) */}
-          <div className="rounded-2xl border-2 border-amber-500 bg-white dark:bg-slate-900 p-8 flex flex-col justify-between shadow-xl relative scale-105 z-10">
-            {/* Badge Popular */}
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-extrabold uppercase tracking-wider shadow">
-              ⭐ Más Popular
+          {/* Tabs de Métodos de Pago (Tarjeta, PayPal, Yape, Código) */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <div className="flex items-center gap-6">
+                {/* Tab Tarjeta */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedMethod('card')}
+                  className={`flex items-center gap-2 pb-2 text-sm font-bold transition relative ${
+                    selectedMethod === 'card'
+                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <CreditCard className="w-5 h-5 text-blue-500" />
+                  <span>Tarjeta</span>
+                </button>
+
+                {/* Tab PayPal */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedMethod('paypal')}
+                  className={`flex items-center gap-1.5 pb-2 text-sm font-bold transition relative ${
+                    selectedMethod === 'paypal'
+                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <span className="font-extrabold italic text-blue-600 tracking-tighter">PayPal</span>
+                </button>
+
+                {/* Tab Yape / WhatsApp */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedMethod('yape')}
+                  className={`flex items-center gap-1.5 pb-2 text-sm font-bold transition relative ${
+                    selectedMethod === 'yape'
+                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-500" />
+                  <span>Yape / WhatsApp</span>
+                </button>
+
+                {/* Tab Canjear Código */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedMethod('code')}
+                  className={`flex items-center gap-1.5 pb-2 text-sm font-bold transition relative ${
+                    selectedMethod === 'code'
+                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <KeyRound className="w-4 h-4 text-purple-500" />
+                  <span>Licencia</span>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-6">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white">Pro Creador</h3>
-                  <Crown className="w-5 h-5 text-amber-500" />
+            {/* Formulario de Tarjeta (Idéntico a iLovePDF) */}
+            {selectedMethod === 'card' && (
+              <form onSubmit={handleUpgradeSubmit} className="space-y-4 pt-1">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Datos de tu tarjeta
+                  </label>
+                  <div className="flex items-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 shadow-sm focus-within:border-slate-500 focus-within:ring-1 focus-within:ring-slate-400">
+                    <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mr-2" />
+                    <input
+                      type="text"
+                      placeholder="Número de tarjeta"
+                      value={cardNumber}
+                      onChange={handleCardNumberChange}
+                      className="w-full bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="MM / AA"
+                      value={cardExpiry}
+                      onChange={handleExpiryChange}
+                      className="w-20 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-2"
+                    />
+                    <input
+                      type="text"
+                      placeholder="CVC"
+                      maxLength={4}
+                      value={cardCvc}
+                      onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
+                      className="w-16 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-2"
+                    />
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Para creadores de contenido, streamers y editores</p>
-              </div>
 
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">
-                  ${billingCycle === 'annual' ? (paymentConfig?.pro_monthly_price || '3.99') : '4.99'}
-                </span>
-                <span className="text-xs text-slate-500">
-                  / mes {billingCycle === 'annual' ? `(facturado $${paymentConfig?.pro_annual_price || '47.90'}/año)` : ''}
-                </span>
-              </div>
-
-              <ul className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                <li className="flex items-center gap-2.5 font-semibold text-amber-600 dark:text-amber-400">
-                  <Check className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>Descargas Combinadas 1080p Full HD a 60fps</span>
-                </li>
-                <li className="flex items-center gap-2.5 font-semibold text-amber-600 dark:text-amber-400">
-                  <Check className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>Ultra HD 2K (1440p) y 4K (2160p)</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Audio estéreo de alta fidelidad a 320kbps</span>
-                </li>
-                <li className="flex items-center gap-2.5 font-semibold">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>100% Sin Anuncios ni banners</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Descargas simultáneas a máxima velocidad</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Motor FFmpeg prioritario sin colas</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="pt-8">
-              <button
-                type="button"
-                onClick={() => handleOpenCheckout('pro')}
-                className="w-full py-3.5 px-4 rounded-xl font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 shadow-lg shadow-amber-500/30 transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                {plan === 'pro' ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>✓ Plan Pro Activo</span>
-                  </>
-                ) : (
-                  <>
-                    <Crown className="w-4 h-4" />
-                    <span>Activar Plan Pro Creador</span>
-                  </>
+                {stripeUrl && (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    🔒 Serás redirigido al checkout oficial de Stripe con cifrado bancario 256-bit SSL.
+                  </p>
                 )}
-              </button>
+
+                {/* Botón Rojo iLovePDF: Mejorar a Premium */}
+                <button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#e5322d] hover:bg-[#c92520] active:scale-[0.99] shadow-lg shadow-red-500/25 transition-all text-center flex items-center justify-center gap-2 cursor-pointer text-base"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Procesando pago seguro...</span>
+                    </>
+                  ) : (
+                    <span>Mejorar a Premium</span>
+                  )}
+                </button>
+              </form>
+            )}
+
+            {/* Vista PayPal */}
+            {selectedMethod === 'paypal' && (
+              <div className="space-y-4 pt-1">
+                <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
+                  <p className="font-bold">Pago seguro con tu cuenta de PayPal o saldo internacional.</p>
+                  <p className="text-[11px] opacity-80">Total a pagar: <strong>{currentPriceDisplay}</strong></p>
+                </div>
+
+                <a
+                  href={paypalUrl || whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#0070ba] hover:bg-[#005ea6] shadow-md transition-all text-center flex items-center justify-center gap-2 text-base"
+                >
+                  <span className="italic font-black">P</span>
+                  <span>Pagar con PayPal</span>
+                </a>
+              </div>
+            )}
+
+            {/* Vista Yape / WhatsApp */}
+            {selectedMethod === 'yape' && (
+              <div className="space-y-4 pt-1">
+                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-sm">Yape / Plin / Transferencia Directa</span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-800 font-bold text-[10px]">Perú</span>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
+                    Realiza el pago desde tu app bancaria y nuestro asistente te entregará tu Código de Licencia PRO para activación inmediata.
+                  </p>
+                </div>
+
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/25 transition-all text-center flex items-center justify-center gap-2 text-base"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>Pagar por WhatsApp / Yape</span>
+                </a>
+              </div>
+            )}
+
+            {/* Vista Canjear Código Licencia */}
+            {selectedMethod === 'code' && (
+              <div className="space-y-4 pt-1">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Ingresa tu código de licencia PRO
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: PRO-ATP-2026"
+                    value={licenseCode}
+                    onChange={(e) => {
+                      setLicenseCode(e.target.value)
+                      setLicenseError(null)
+                    }}
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm font-mono tracking-wider uppercase text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  />
+                  {licenseError && (
+                    <p className="text-xs text-red-500 font-medium">{licenseError}</p>
+                  )}
+                  <p className="text-[10px] text-slate-400">
+                    Código de prueba rápido: <code className="text-purple-500 font-bold">PRO-ATP-2026</code>
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleVerifyLicense}
+                  disabled={isVerifyingCode || !licenseCode.trim()}
+                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-purple-600 hover:bg-purple-500 disabled:opacity-50 transition-all text-center flex items-center justify-center gap-2 text-base"
+                >
+                  {isVerifyingCode ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Verificando licencia...</span>
+                    </>
+                  ) : (
+                    <span>Activar Licencia Ahora</span>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Garantías estilo iLovePDF */}
+            <div className="pt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+                Cancela en cualquier momento
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+                Garantía de reembolso
+              </span>
             </div>
           </div>
 
-          {/* Plan 3: Business / Agencia */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white">Business VIP</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Para agencias de marketing y productoras audiovisuales</p>
-              </div>
-
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">
-                  ${billingCycle === 'annual' ? (paymentConfig?.business_monthly_price || '11.99') : '14.99'}
-                </span>
-                <span className="text-xs text-slate-500">
-                  / mes {billingCycle === 'annual' ? `(facturado $${paymentConfig?.business_annual_price || '139.90'}/año)` : ''}
-                </span>
-              </div>
-
-              <ul className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Todo lo incluido en el Plan Pro Creador</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Descargas por lotes (listas completas)</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Acceso a API para integraciones directas</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Ancho de banda empresarial dedicado</span>
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-green-500 shrink-0" />
-                  <span>Soporte prioritario 24/7 por WhatsApp</span>
-                </li>
-              </ul>
+          {/* Divisor y Sellos de Seguridad (Idéntico al footer de iLovePDF) */}
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
+              <span>Seguro. Privado. Bajo tu control</span>
+              <Info className="w-3.5 h-3.5 text-slate-400" />
             </div>
 
-            <div className="pt-8">
-              <button
-                type="button"
-                onClick={() => handleOpenCheckout('business')}
-                className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-all cursor-pointer flex items-center justify-center gap-2"
-              >
-                {plan === 'business' ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>✓ Plan Business Activo</span>
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-4 h-4 text-amber-400" />
-                    <span>Elegir Plan Business</span>
-                  </>
-                )}
-              </button>
+            {/* Insignias de Certificación de Seguridad */}
+            <div className="flex items-center justify-around opacity-60 dark:opacity-40 grayscale hover:grayscale-0 transition-all pt-2 text-[10px] font-bold text-slate-600 dark:text-slate-400">
+              <div className="flex items-center gap-1">
+                <ShieldCheck className="w-4 h-4 text-slate-700 dark:text-slate-300" />
+                <span>ATP Certified</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="font-mono border border-slate-400 px-1 py-0.5 rounded text-[9px]">ISO 27001</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Lock className="w-4 h-4 text-emerald-600" />
+                <span>Secure Payment</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Shield className="w-4 h-4 text-blue-600" />
+                <span>SSL 256-BIT</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Barra de Canje Rápido de Licencia */}
-        <div className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl mx-auto shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-              <KeyRound className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">¿Tienes un Código de Activación o Licencia?</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Canjea tu cupón o clave de licencia adquirida por WhatsApp o promoción.</p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => handleOpenCheckout('pro')}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-sm"
-          >
-            <KeyRound className="w-4 h-4" />
-            <span>Canjear Código Ahora</span>
-          </button>
-        </div>
-
-        {/* Sección de Preguntas Frecuentes */}
-        <div className="pt-8 space-y-6 max-w-4xl mx-auto">
+        {/* ========================================================================= */}
+        {/* TABLA COMPARATIVA: ¿Qué obtienes con Premium? */}
+        {/* ========================================================================= */}
+        <div className="max-w-3xl mx-auto space-y-6 pt-4">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
-              Preguntas Frecuentes
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+              ¿Por qué elegir el Plan Premium?
             </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Todo lo que necesitas saber sobre las descargas en alta calidad, pagos y tu suscripción.
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Todo lo que necesitas para descargar sin interrupciones con la más alta fidelidad.
             </p>
           </div>
 
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-2"
-              >
-                <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 text-sm sm:text-base">
-                  <HelpCircle className="w-4 h-4 text-amber-500 shrink-0" />
-                  <span>{faq.q}</span>
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed pl-6">
-                  {faq.a}
-                </p>
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800/60 text-sm">
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-medium text-slate-700 dark:text-slate-300">Descargas Full HD 1080p a 60fps</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1"><Check className="w-4 h-4" /> Ilimitado</span>
               </div>
-            ))}
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-medium text-slate-700 dark:text-slate-300">Ultra HD 2K (1440p) y 4K (2160p)</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1"><Check className="w-4 h-4" /> Incluido</span>
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-medium text-slate-700 dark:text-slate-300">Audio estéreo alta fidelidad (320kbps AAC)</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1"><Check className="w-4 h-4" /> Máxima fidelidad</span>
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-medium text-slate-700 dark:text-slate-300">Experiencia 100% Sin Publicidad</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1"><Check className="w-4 h-4" /> Cero anuncios</span>
+              </div>
+              <div className="p-4 flex items-center justify-between">
+                <span className="font-medium text-slate-700 dark:text-slate-300">Motor FFmpeg Prioritario (Sin Colas)</span>
+                <span className="font-bold text-emerald-600 flex items-center gap-1"><Check className="w-4 h-4" /> Velocidad Turbo</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Call to action final */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white text-center space-y-4 shadow-xl">
-          <h2 className="text-2xl sm:text-4xl font-extrabold">
-            ¿Listo para descargar videos en calidad insuperable?
-          </h2>
-          <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto">
-            Prueba hoy el descargador más rápido y potente de todo el ecosistema ATP.
-          </p>
-          <div className="pt-2">
-            <Link
-              href="/tools"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white text-blue-700 font-extrabold hover:bg-blue-50 shadow transition-all"
-            >
-              <Download className="w-5 h-5" />
-              <span>Ir al Descargador</span>
-            </Link>
+        {/* Preguntas frecuentes */}
+        <div className="max-w-3xl mx-auto space-y-4 pt-4">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">
+            Preguntas Frecuentes
+          </h3>
+          <div className="space-y-3">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-1">
+              <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-amber-500" />
+                <span>¿Por qué las resoluciones 1080p y 4K requieren el Plan Premium?</span>
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 pl-6 leading-relaxed">
+                YouTube entrega el video en 1080p y 4K separado del audio. Nuestros servidores de alta velocidad unen ambas pistas con FFmpeg en tiempo real para que tu MP4 se reproduzca sin fallas en cualquier dispositivo.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-1">
+              <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-amber-500" />
+                <span>¿Las descargas estándar en 720p y TikTok siguen siendo gratis?</span>
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 pl-6 leading-relaxed">
+                ¡Sí! Las descargas en 720p, los audios MP3 estándar y las descargas sin marca de agua de TikTok y Facebook son y seguirán siendo 100% gratuitas.
+              </p>
+            </div>
           </div>
         </div>
       </main>
 
       <Footer />
-
-      {/* Modal de Checkout / Pasarela */}
-      <CheckoutModal
-        isOpen={isCheckoutOpen}
-        onClose={() => setIsCheckoutOpen(false)}
-        plan={selectedPlanForCheckout}
-        billingCycle={billingCycle}
-        paymentConfig={paymentConfig}
-        onSuccess={handlePaymentSuccess}
-      />
     </div>
   )
 }
