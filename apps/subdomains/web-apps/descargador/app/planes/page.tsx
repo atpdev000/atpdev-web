@@ -106,6 +106,10 @@ export default function PlanesPage() {
     ? (paymentConfig?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00')
     : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
 
+  const mercadopagoUrl = billingCycle === 'annual'
+    ? paymentConfig?.mercadopago_pro_annual_url
+    : paymentConfig?.mercadopago_pro_monthly_url
+
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
@@ -130,6 +134,10 @@ export default function PlanesPage() {
       // 2. Si no hay Stripe configurado, abrir WhatsApp para link de pago seguro con tarjeta
       window.open(whatsappCardHref, '_blank')
     } else if (selectedMethod === 'yape') {
+      if (mercadopagoUrl) {
+        window.open(mercadopagoUrl, '_blank')
+        return
+      }
       window.open(whatsappHref, '_blank')
     } else if (selectedMethod === 'code') {
       handleVerifyLicense()
@@ -490,32 +498,64 @@ export default function PlanesPage() {
               </div>
             )}
 
-            {/* Vista Yape / WhatsApp */}
+            {/* Vista Yape / Mercado Pago */}
             {selectedMethod === 'yape' && (
               <div className="space-y-4 pt-1">
-                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 space-y-2">
+                <div className="p-4 rounded-xl bg-purple-50/80 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800/60 text-xs text-purple-900 dark:text-purple-200 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-sm">
-                      {isPEN ? 'Pago con Yape, Plin o Transferencia (Perú)' : 'Asistente VIP por WhatsApp'}
+                    <span className="font-bold text-sm flex items-center gap-1.5">
+                      <span>🟣</span>
+                      <span>{isPEN ? 'Yape, Plin o PagoEfectivo (Perú)' : 'Asistente VIP por WhatsApp'}</span>
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-800 font-bold text-[10px]">
+                    <span className="px-2 py-0.5 rounded bg-purple-200 dark:bg-purple-800 font-bold text-[10px]">
                       {currentCurrency.flag} {currentCurrency.code}
                     </span>
                   </div>
-                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
-                    Total a pagar: <strong className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{currentPriceDisplay}</strong>. Te enviaremos tu Clave de Licencia PRO al confirmar tu pago en 1 minuto.
+                  <p className="text-[11px] text-purple-800 dark:text-purple-300 leading-relaxed">
+                    {isPEN
+                      ? 'Paga con QR dinámico oficial de Yape, Plin o PagoEfectivo CIP sin compartir números de celular. Activación automática en tiempo real.'
+                      : `Total a pagar: ${currentPriceDisplay}. Te enviaremos tu Clave de Licencia PRO al confirmar tu pago.`}
                   </p>
                 </div>
 
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/25 transition-all text-center flex items-center justify-center gap-2 text-base"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span>{isPEN ? `Pagar ${currentPriceDisplay} por Yape / WhatsApp` : `Coordinar Pago ${currentPriceDisplay}`}</span>
-                </a>
+                {mercadopagoUrl ? (
+                  <div className="space-y-3">
+                    <a
+                      href={mercadopagoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#009ee3] hover:bg-[#0089c7] shadow-lg shadow-blue-500/25 transition-all text-center flex items-center justify-center gap-2 text-base cursor-pointer"
+                    >
+                      <span>Pagar con Yape / Plin QR ({currentPriceDisplay})</span>
+                    </a>
+                    <div className="text-center">
+                      <a
+                        href={whatsappHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-slate-500 hover:text-emerald-500 underline inline-flex items-center gap-1"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" />
+                        <span>¿Prefieres coordinar directo por WhatsApp? Clic aquí</span>
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/25 transition-all text-center flex items-center justify-center gap-2 text-base"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      <span>{isPEN ? `Pagar ${currentPriceDisplay} por Yape / WhatsApp` : `Coordinar Pago ${currentPriceDisplay}`}</span>
+                    </a>
+                    <p className="text-[11px] text-center text-slate-400">
+                      🔒 Pago 100% privado y seguro verificado por ATP DEV.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

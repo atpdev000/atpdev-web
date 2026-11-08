@@ -1082,6 +1082,34 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-amber-500"
                 />
               </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Mercado Pago Link (Yape / Plin Mensual S/.)</label>
+                <input
+                  type="text"
+                  placeholder="https://mpago.la/..."
+                  value={config.payments?.mercadopago_pro_monthly_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), mercadopago_pro_monthly_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Mercado Pago Link (Yape / Plin Anual S/.)</label>
+                <input
+                  type="text"
+                  placeholder="https://mpago.la/..."
+                  value={config.payments?.mercadopago_pro_annual_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), mercadopago_pro_annual_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-cyan-500"
+                />
+              </div>
             </div>
           </div>
 

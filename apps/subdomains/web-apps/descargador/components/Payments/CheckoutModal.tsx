@@ -31,6 +31,8 @@ export interface PaymentConfig {
   pro_annual_price?: number
   stripe_pro_monthly_url?: string
   stripe_pro_annual_url?: string
+  mercadopago_pro_monthly_url?: string
+  mercadopago_pro_annual_url?: string
   paypal_pro_monthly_url?: string
   paypal_pro_annual_url?: string
   business_monthly_price?: number
