@@ -1,21 +1,26 @@
 // components/Payments/CheckoutModal.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   X,
   CreditCard,
   ShieldCheck,
-  Crown,
   Check,
   MessageCircle,
   KeyRound,
   Loader2,
   Lock,
-  Info,
-  Shield
+  Shield,
+  Globe
 } from 'lucide-react'
 import { PlanType } from '@/hooks/useProPlan'
+import {
+  CurrencyConfig,
+  SUPPORTED_CURRENCIES,
+  detectDefaultCurrency,
+  formatPrice
+} from '@/lib/currency'
 
 export interface PaymentConfig {
   enabled?: boolean
@@ -57,6 +62,7 @@ export default function CheckoutModal({
 }: CheckoutModalProps) {
   const [cycle, setCycle] = useState<'monthly' | 'annual'>(initialCycle)
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'paypal' | 'yape' | 'code'>('card')
+  const [currentCurrency, setCurrentCurrency] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES.PEN)
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
   const [cardCvc, setCardCvc] = useState('')
@@ -65,13 +71,25 @@ export default function CheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false)
   const [errorCode, setErrorCode] = useState<string | null>(null)
 
+  useEffect(() => {
+    const detected = detectDefaultCurrency()
+    setCurrentCurrency(detected)
+    if (detected.code === 'PEN') {
+      setSelectedMethod('yape')
+    }
+  }, [])
+
   if (!isOpen) return null
 
-  // Precios
-  const monthlyPrice = paymentConfig?.pro_monthly_price ?? 3.99
-  const annualTotal = paymentConfig?.pro_annual_price ?? 48
-  const annualMonthlyEquivalent = (annualTotal / 12).toFixed(2)
-  const currentPriceDisplay = cycle === 'annual' ? `${annualTotal}US$` : `${monthlyPrice}US$`
+  // Precios dinámicos según país
+  const isPEN = currentCurrency.code === 'PEN'
+  const monthlyPriceNumber = isPEN ? 14.90 : (paymentConfig?.pro_monthly_price || currentCurrency.monthlyPrice)
+  const annualTotalNumber = isPEN ? 149.00 : (paymentConfig?.pro_annual_price || currentCurrency.annualTotal)
+
+  const monthlyPriceDisplay = formatPrice(monthlyPriceNumber, currentCurrency)
+  const annualTotalDisplay = formatPrice(annualTotalNumber, currentCurrency)
+  const annualMonthlyEquivalent = formatPrice(annualTotalNumber / 12, currentCurrency)
+  const currentPriceDisplay = cycle === 'annual' ? annualTotalDisplay : monthlyPriceDisplay
 
   // URLs de pasarela
   const stripeUrl = cycle === 'annual'
@@ -85,7 +103,8 @@ export default function CheckoutModal({
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
-  const defaultMsg = `Hola ATP Dev 👋, quiero mejorar a Premium (${cycle === 'annual' ? `Anual $${annualTotal}` : `Mensual $${monthlyPrice}`}). Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
+  const currencyNotice = isPEN ? `en Perú (${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
+  const defaultMsg = `Hola ATP Dev 👋, quiero mejorar a Premium ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
   const customMsg = paymentConfig?.whatsapp_message_pro || defaultMsg
   const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(customMsg)}`
 
@@ -171,6 +190,30 @@ export default function CheckoutModal({
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
             Mejora a Premium
           </h2>
+
+          {/* Selector de Moneda en el Modal */}
+          <div className="pt-1 flex items-center justify-center">
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-300">
+              <Globe className="w-3 h-3 text-slate-400" />
+              <select
+                value={currentCurrency.code}
+                onChange={(e) => {
+                  const sel = SUPPORTED_CURRENCIES[e.target.value]
+                  if (sel) {
+                    setCurrentCurrency(sel)
+                    if (sel.code === 'PEN') setSelectedMethod('yape')
+                  }
+                }}
+                className="bg-transparent text-[11px] font-semibold outline-none cursor-pointer"
+              >
+                {Object.values(SUPPORTED_CURRENCIES).map((c) => (
+                  <option key={c.code} value={c.code} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                    {c.flag} {c.code} ({c.symbol})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Selector de Planes: Mensual vs Anual */}
@@ -189,8 +232,8 @@ export default function CheckoutModal({
               Mensual
             </span>
             <div className="mt-0.5">
-              <span className="text-2xl font-black text-slate-900 dark:text-white">
-                {monthlyPrice}US$
+              <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                {monthlyPriceDisplay}
               </span>
             </div>
           </button>
@@ -213,23 +256,23 @@ export default function CheckoutModal({
               Anual
             </span>
             <div className="mt-0.5">
-              <span className="text-2xl font-black text-slate-900 dark:text-white">
-                {annualTotal}US$
+              <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                {annualTotalDisplay}
               </span>
             </div>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-              {annualMonthlyEquivalent}US$ / mes
+              {annualMonthlyEquivalent} / mes
             </span>
           </button>
         </div>
 
         {/* Tabs de Métodos de Pago */}
         <div className="space-y-4">
-          <div className="flex items-center gap-5 border-b border-slate-200 dark:border-slate-800 pb-2">
+          <div className="flex items-center gap-4 sm:gap-5 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
             <button
               type="button"
               onClick={() => setSelectedMethod('card')}
-              className={`flex items-center gap-1.5 pb-2 text-xs font-bold transition ${
+              className={`flex items-center gap-1.5 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'card'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
                   : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
@@ -241,8 +284,21 @@ export default function CheckoutModal({
 
             <button
               type="button"
+              onClick={() => setSelectedMethod('yape')}
+              className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
+                selectedMethod === 'yape'
+                  ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+              }`}
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-500" />
+              <span>{isPEN ? 'Yape / Plin' : 'WhatsApp'}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setSelectedMethod('paypal')}
-              className={`flex items-center gap-1 pb-2 text-xs font-bold transition ${
+              className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'paypal'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
                   : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
@@ -253,21 +309,8 @@ export default function CheckoutModal({
 
             <button
               type="button"
-              onClick={() => setSelectedMethod('yape')}
-              className={`flex items-center gap-1 pb-2 text-xs font-bold transition ${
-                selectedMethod === 'yape'
-                  ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              <MessageCircle className="w-4 h-4 text-emerald-500" />
-              <span>Yape / WhatsApp</span>
-            </button>
-
-            <button
-              type="button"
               onClick={() => setSelectedMethod('code')}
-              className={`flex items-center gap-1 pb-2 text-xs font-bold transition ${
+              className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'code'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
                   : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
@@ -283,7 +326,7 @@ export default function CheckoutModal({
             <form onSubmit={handleCardSubmit} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Datos de tu tarjeta
+                  Datos de tu tarjeta ({currentCurrency.code})
                 </label>
                 <div className="flex items-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm shadow-sm focus-within:border-slate-500">
                   <CreditCard className="w-4 h-4 text-slate-400 shrink-0 mr-2" />
@@ -330,10 +373,28 @@ export default function CheckoutModal({
                     <span>Procesando...</span>
                   </>
                 ) : (
-                  <span>Mejorar a Premium</span>
+                  <span>Mejorar a Premium ({currentPriceDisplay})</span>
                 )}
               </button>
             </form>
+          )}
+
+          {/* Formulario Yape */}
+          {selectedMethod === 'yape' && (
+            <div className="space-y-3 pt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Paga de inmediato por {isPEN ? 'Yape, Plin o Transferencia bancaria' : 'WhatsApp VIP'}: <strong>{currentPriceDisplay}</strong>
+              </p>
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Pagar por WhatsApp ({currentPriceDisplay})</span>
+              </a>
+            </div>
           )}
 
           {/* Formulario PayPal */}
@@ -349,25 +410,7 @@ export default function CheckoutModal({
                 className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-[#0070ba] hover:bg-[#005ea6] shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
               >
                 <span className="italic font-black">P</span>
-                <span>Pagar con PayPal</span>
-              </a>
-            </div>
-          )}
-
-          {/* Formulario Yape */}
-          {selectedMethod === 'yape' && (
-            <div className="space-y-3 pt-1">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Paga de inmediato por Yape, Plin o Transferencia bancaria:
-              </p>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Pagar por WhatsApp / Yape</span>
+                <span>Pagar con PayPal ({currentPriceDisplay})</span>
               </a>
             </div>
           )}

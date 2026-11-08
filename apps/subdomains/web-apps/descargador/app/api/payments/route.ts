@@ -4,19 +4,38 @@ import { getSubdomainConfig } from '@atpdev/database';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     const config = getSubdomainConfig('descargador');
+    
+    // Detección de país por cabecera de CDN (Cloudflare / proxies)
+    const rawCountry = (
+      req.headers.get('cf-ipcountry') ||
+      req.headers.get('x-vercel-ip-country') ||
+      req.headers.get('x-country-code') ||
+      ''
+    ).toUpperCase();
+
+    let detectedCurrency = 'USD';
+    if (rawCountry === 'PE') detectedCurrency = 'PEN';
+    else if (rawCountry === 'MX') detectedCurrency = 'MXN';
+    else if (rawCountry === 'CO') detectedCurrency = 'COP';
+    else if (rawCountry === 'CL') detectedCurrency = 'CLP';
+    else if (rawCountry === 'AR') detectedCurrency = 'ARS';
+    else if (['ES', 'FR', 'DE', 'IT', 'PT'].includes(rawCountry)) detectedCurrency = 'EUR';
+
     return NextResponse.json({
       success: true,
+      detectedCountry: rawCountry || null,
+      detectedCurrency,
       payments: config.payments || {
         enabled: true,
         provider: 'multi',
-        currency: 'USD',
-        pro_monthly_price: 3.99,
-        pro_annual_price: 47.90,
-        business_monthly_price: 11.99,
-        business_annual_price: 139.90,
+        currency: detectedCurrency,
+        pro_monthly_price: detectedCurrency === 'PEN' ? 14.90 : 3.99,
+        pro_annual_price: detectedCurrency === 'PEN' ? 149.00 : 47.90,
+        business_monthly_price: detectedCurrency === 'PEN' ? 45.00 : 11.99,
+        business_annual_price: detectedCurrency === 'PEN' ? 450.00 : 139.90,
         whatsapp_number: config.contact?.whatsapp || '+51987654321',
       },
       contact: config.contact,
@@ -79,3 +98,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

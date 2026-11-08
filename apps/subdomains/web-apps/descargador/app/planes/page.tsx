@@ -15,21 +15,27 @@ import {
   KeyRound,
   Lock,
   CheckCircle2,
-  ExternalLink,
   Loader2,
   Info,
   Shield,
-  Sparkles
+  Globe
 } from 'lucide-react'
-import { useProPlan, PlanType } from '@/hooks/useProPlan'
+import { useProPlan } from '@/hooks/useProPlan'
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
 import { PaymentConfig } from '@/components/Payments/CheckoutModal'
+import {
+  CurrencyConfig,
+  SUPPORTED_CURRENCIES,
+  detectDefaultCurrency,
+  formatPrice
+} from '@/lib/currency'
 
 export default function PlanesPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'paypal' | 'yape' | 'code'>('card')
-  const { plan, planDetails, isPro, activatePlan, cancelPlan } = useProPlan()
+  const [currentCurrency, setCurrentCurrency] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES.PEN)
+  const { plan, isPro, activatePlan, cancelPlan } = useProPlan()
   const [feedback, setFeedback] = useState<string | null>(null)
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null)
 
@@ -45,21 +51,44 @@ export default function PlanesPage() {
   const [isVerifyingCode, setIsVerifyingCode] = useState(false)
 
   useEffect(() => {
+    // 1. Detectar moneda local automáticamente
+    const detected = detectDefaultCurrency()
+    setCurrentCurrency(detected)
+    if (detected.code === 'PEN') {
+      setSelectedMethod('yape')
+    }
+
+    // 2. Cargar configuración del servidor
     fetch('/api/payments')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success && data.payments) {
-          setPaymentConfig(data.payments)
+        if (data.success) {
+          if (data.payments) setPaymentConfig(data.payments)
+          if (data.detectedCurrency && SUPPORTED_CURRENCIES[data.detectedCurrency]) {
+            setCurrentCurrency(SUPPORTED_CURRENCIES[data.detectedCurrency])
+            if (data.detectedCurrency === 'PEN') {
+              setSelectedMethod('yape')
+            }
+          }
         }
       })
       .catch((err) => console.error('Error cargando pasarela:', err))
   }, [])
 
-  // Precios calculados
-  const monthlyPrice = paymentConfig?.pro_monthly_price ?? 3.99
-  const annualTotal = paymentConfig?.pro_annual_price ?? 48
-  const annualMonthlyEquivalent = (annualTotal / 12).toFixed(2)
-  const currentPriceDisplay = billingCycle === 'annual' ? `${annualTotal}US$` : `${monthlyPrice}US$`
+  // Precios dinámicos según moneda seleccionada
+  const isPEN = currentCurrency.code === 'PEN'
+  const monthlyPriceNumber = isPEN
+    ? (paymentConfig?.pro_monthly_price && paymentConfig.currency === 'PEN' ? paymentConfig.pro_monthly_price : 14.90)
+    : (paymentConfig?.pro_monthly_price || currentCurrency.monthlyPrice)
+
+  const annualTotalNumber = isPEN
+    ? (paymentConfig?.pro_annual_price && paymentConfig.currency === 'PEN' ? paymentConfig.pro_annual_price : 149.00)
+    : (paymentConfig?.pro_annual_price || currentCurrency.annualTotal)
+
+  const monthlyPriceDisplay = formatPrice(monthlyPriceNumber, currentCurrency)
+  const annualTotalDisplay = formatPrice(annualTotalNumber, currentCurrency)
+  const annualMonthlyEquivalent = formatPrice(annualTotalNumber / 12, currentCurrency)
+  const currentPriceDisplay = billingCycle === 'annual' ? annualTotalDisplay : monthlyPriceDisplay
 
   // Links de pago
   const stripeUrl = billingCycle === 'annual'
@@ -73,8 +102,9 @@ export default function PlanesPage() {
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
-  const whatsappMsg = `Hola ATP Dev 👋, quiero mejorar a Premium (${billingCycle === 'annual' ? `Anual $${annualTotal}` : `Mensual $${monthlyPrice}`}). Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
-  const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(paymentConfig?.whatsapp_message_pro || whatsappMsg)}`
+  const currencyNotice = isPEN ? `en Perú por Yape/Plin (${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
+  const defaultWhatsappMsg = `Hola ATP Dev 👋, quiero mejorar a Premium ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago?`
+  const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(defaultWhatsappMsg)}`
 
   // Manejar submit del botón principal "Mejorar a Premium"
   const handleUpgradeSubmit = (e: React.FormEvent) => {
@@ -85,7 +115,6 @@ export default function PlanesPage() {
         window.open(stripeUrl, '_blank')
         return
       }
-      // Simulación de procesamiento seguro
       setIsProcessing(true)
       setTimeout(() => {
         setIsProcessing(false)
@@ -139,7 +168,6 @@ export default function PlanesPage() {
     }
   }
 
-  // Formato automático de número de tarjeta
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, '').substring(0, 16)
     const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw
@@ -152,14 +180,6 @@ export default function PlanesPage() {
       setCardExpiry(`${raw.substring(0, 2)}/${raw.substring(2)}`)
     } else {
       setCardExpiry(raw)
-    }
-  }
-
-  const handleDowngradeFree = () => {
-    if (confirm('¿Estás seguro de que deseas volver al Plan Gratuito? Perderás las descargas en 1080p/4K.')) {
-      cancelPlan()
-      setFeedback('Has cambiado al Plan Gratuito.')
-      setTimeout(() => setFeedback(null), 5000)
     }
   }
 
@@ -185,8 +205,8 @@ export default function PlanesPage() {
           </div>
         )}
 
-        {/* Botón Volver y Estado del Plan */}
-        <div className="flex items-center justify-between">
+        {/* Barra Superior: Volver, Moneda y Estado */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/tools"
             className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition"
@@ -195,16 +215,41 @@ export default function PlanesPage() {
             <span>Volver a Descargas</span>
           </Link>
 
-          {isPro && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
-              <Crown className="w-3.5 h-3.5" />
-              <span>Plan Activo: {plan === 'business' ? 'Business VIP' : 'Premium'}</span>
+          <div className="flex items-center gap-3">
+            {/* Selector de Moneda y País Automático */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs shadow-sm">
+              <Globe className="w-3.5 h-3.5 text-slate-400" />
+              <select
+                value={currentCurrency.code}
+                onChange={(e) => {
+                  const selected = SUPPORTED_CURRENCIES[e.target.value]
+                  if (selected) {
+                    setCurrentCurrency(selected)
+                    if (selected.code === 'PEN') setSelectedMethod('yape')
+                  }
+                }}
+                className="bg-transparent text-slate-700 dark:text-slate-200 text-xs font-semibold outline-none cursor-pointer"
+                aria-label="Seleccionar moneda"
+              >
+                {Object.values(SUPPORTED_CURRENCIES).map((curr) => (
+                  <option key={curr.code} value={curr.code} className="bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200">
+                    {curr.flag} {curr.code} ({curr.symbol})
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
+
+            {isPro && (
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                <Crown className="w-3.5 h-3.5" />
+                <span>Plan Premium Activo</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* CHECKOUT CARD ESTILO iLovePDF (Centrado, Limpio y de Alta Conversión) */}
+        {/* CHECKOUT CARD ESTILO iLovePDF (Con cambio automático de moneda por país) */}
         {/* ========================================================================= */}
         <div className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl p-6 sm:p-10 space-y-8">
           {/* Logo Superior tipo I ❤️ FTY */}
@@ -223,9 +268,12 @@ export default function PlanesPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white pt-2">
               Mejora a Premium
             </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Precios en tu moneda local: <strong className="text-slate-700 dark:text-slate-200">{currentCurrency.name}</strong>
+            </p>
           </div>
 
-          {/* Selector de Planes: Mensual vs Anual (Side-by-Side como iLovePDF) */}
+          {/* Selector de Planes: Mensual vs Anual */}
           <div className="grid grid-cols-2 gap-4 max-w-md mx-auto pt-2">
             {/* Tarjeta 1: Mensual */}
             <button
@@ -241,13 +289,13 @@ export default function PlanesPage() {
                 Mensual
               </span>
               <div className="mt-1 flex items-baseline justify-center">
-                <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
-                  {monthlyPrice}US$
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                  {monthlyPriceDisplay}
                 </span>
               </div>
             </button>
 
-            {/* Tarjeta 2: Anual (Con Badge Ahorra 42% o 20%) */}
+            {/* Tarjeta 2: Anual */}
             <button
               type="button"
               onClick={() => setBillingCycle('annual')}
@@ -257,7 +305,6 @@ export default function PlanesPage() {
                   : 'border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700'
               }`}
             >
-              {/* Badge de Ahorro superior */}
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold shadow-sm whitespace-nowrap">
                 Ahorra 42%
               </div>
@@ -266,39 +313,53 @@ export default function PlanesPage() {
                 Anual
               </span>
               <div className="mt-1 flex items-baseline justify-center">
-                <span className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">
-                  {annualTotal}US$
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                  {annualTotalDisplay}
                 </span>
               </div>
               <span className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                {annualMonthlyEquivalent}US$ / mes
+                {annualMonthlyEquivalent} / mes
               </span>
             </button>
           </div>
 
-          {/* Tabs de Métodos de Pago (Tarjeta, PayPal, Yape, Código) */}
+          {/* Tabs de Métodos de Pago */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto">
                 {/* Tab Tarjeta */}
                 <button
                   type="button"
                   onClick={() => setSelectedMethod('card')}
-                  className={`flex items-center gap-2 pb-2 text-sm font-bold transition relative ${
+                  className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'card'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                   }`}
                 >
-                  <CreditCard className="w-5 h-5 text-blue-500" />
+                  <CreditCard className="w-4 h-4 text-blue-500" />
                   <span>Tarjeta</span>
+                </button>
+
+                {/* Tab Yape / WhatsApp (Prioritario en Perú) */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedMethod('yape')}
+                  className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
+                    selectedMethod === 'yape'
+                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
+                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-500" />
+                  <span>{isPEN ? 'Yape / Plin' : 'WhatsApp VIP'}</span>
                 </button>
 
                 {/* Tab PayPal */}
                 <button
                   type="button"
                   onClick={() => setSelectedMethod('paypal')}
-                  className={`flex items-center gap-1.5 pb-2 text-sm font-bold transition relative ${
+                  className={`flex items-center gap-1 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'paypal'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
@@ -307,25 +368,11 @@ export default function PlanesPage() {
                   <span className="font-extrabold italic text-blue-600 tracking-tighter">PayPal</span>
                 </button>
 
-                {/* Tab Yape / WhatsApp */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedMethod('yape')}
-                  className={`flex items-center gap-1.5 pb-2 text-sm font-bold transition relative ${
-                    selectedMethod === 'yape'
-                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
-                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                  }`}
-                >
-                  <MessageCircle className="w-4 h-4 text-emerald-500" />
-                  <span>Yape / WhatsApp</span>
-                </button>
-
-                {/* Tab Canjear Código */}
+                {/* Tab Licencia */}
                 <button
                   type="button"
                   onClick={() => setSelectedMethod('code')}
-                  className={`flex items-center gap-1.5 pb-2 text-sm font-bold transition relative ${
+                  className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'code'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
                       : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
@@ -337,12 +384,12 @@ export default function PlanesPage() {
               </div>
             </div>
 
-            {/* Formulario de Tarjeta (Idéntico a iLovePDF) */}
+            {/* Vista Tarjeta */}
             {selectedMethod === 'card' && (
               <form onSubmit={handleUpgradeSubmit} className="space-y-4 pt-1">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Datos de tu tarjeta
+                    Datos de tu tarjeta ({currentCurrency.code})
                   </label>
                   <div className="flex items-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 shadow-sm focus-within:border-slate-500 focus-within:ring-1 focus-within:ring-slate-400">
                     <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mr-2" />
@@ -371,13 +418,6 @@ export default function PlanesPage() {
                   </div>
                 </div>
 
-                {stripeUrl && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    🔒 Serás redirigido al checkout oficial de Stripe con cifrado bancario 256-bit SSL.
-                  </p>
-                )}
-
-                {/* Botón Rojo iLovePDF: Mejorar a Premium */}
                 <button
                   type="submit"
                   disabled={isProcessing}
@@ -389,10 +429,39 @@ export default function PlanesPage() {
                       <span>Procesando pago seguro...</span>
                     </>
                   ) : (
-                    <span>Mejorar a Premium</span>
+                    <span>Mejorar a Premium ({currentPriceDisplay})</span>
                   )}
                 </button>
               </form>
+            )}
+
+            {/* Vista Yape / WhatsApp */}
+            {selectedMethod === 'yape' && (
+              <div className="space-y-4 pt-1">
+                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-sm">
+                      {isPEN ? 'Pago con Yape, Plin o Transferencia (Perú)' : 'Asistente VIP por WhatsApp'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-800 font-bold text-[10px]">
+                      {currentCurrency.flag} {currentCurrency.code}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
+                    Total a pagar: <strong className="text-sm font-bold text-emerald-600 dark:text-emerald-400">{currentPriceDisplay}</strong>. Te enviaremos tu Clave de Licencia PRO al confirmar tu pago en 1 minuto.
+                  </p>
+                </div>
+
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/25 transition-all text-center flex items-center justify-center gap-2 text-base"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>{isPEN ? `Pagar ${currentPriceDisplay} por Yape / WhatsApp` : `Coordinar Pago ${currentPriceDisplay}`}</span>
+                </a>
+              </div>
             )}
 
             {/* Vista PayPal */}
@@ -410,32 +479,7 @@ export default function PlanesPage() {
                   className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#0070ba] hover:bg-[#005ea6] shadow-md transition-all text-center flex items-center justify-center gap-2 text-base"
                 >
                   <span className="italic font-black">P</span>
-                  <span>Pagar con PayPal</span>
-                </a>
-              </div>
-            )}
-
-            {/* Vista Yape / WhatsApp */}
-            {selectedMethod === 'yape' && (
-              <div className="space-y-4 pt-1">
-                <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-sm">Yape / Plin / Transferencia Directa</span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-200 dark:bg-emerald-800 font-bold text-[10px]">Perú</span>
-                  </div>
-                  <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
-                    Realiza el pago desde tu app bancaria y nuestro asistente te entregará tu Código de Licencia PRO para activación inmediata.
-                  </p>
-                </div>
-
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/25 transition-all text-center flex items-center justify-center gap-2 text-base"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  <span>Pagar por WhatsApp / Yape</span>
+                  <span>Pagar con PayPal ({currentPriceDisplay})</span>
                 </a>
               </div>
             )}
@@ -483,7 +527,7 @@ export default function PlanesPage() {
               </div>
             )}
 
-            {/* Garantías estilo iLovePDF */}
+            {/* Reaseguros estilo iLovePDF */}
             <div className="pt-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
               <span className="flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
@@ -496,14 +540,13 @@ export default function PlanesPage() {
             </div>
           </div>
 
-          {/* Divisor y Sellos de Seguridad (Idéntico al footer de iLovePDF) */}
+          {/* Divisor y Sellos de Seguridad */}
           <div className="pt-6 border-t border-slate-200 dark:border-slate-800 space-y-4">
             <div className="text-center text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1">
               <span>Seguro. Privado. Bajo tu control</span>
               <Info className="w-3.5 h-3.5 text-slate-400" />
             </div>
 
-            {/* Insignias de Certificación de Seguridad */}
             <div className="flex items-center justify-around opacity-60 dark:opacity-40 grayscale hover:grayscale-0 transition-all pt-2 text-[10px] font-bold text-slate-600 dark:text-slate-400">
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-4 h-4 text-slate-700 dark:text-slate-300" />
@@ -524,9 +567,7 @@ export default function PlanesPage() {
           </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* TABLA COMPARATIVA: ¿Qué obtienes con Premium? */}
-        {/* ========================================================================= */}
+        {/* Tabla Comparativa */}
         <div className="max-w-3xl mx-auto space-y-6 pt-4">
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
@@ -563,7 +604,7 @@ export default function PlanesPage() {
           </div>
         </div>
 
-        {/* Preguntas frecuentes */}
+        {/* FAQ */}
         <div className="max-w-3xl mx-auto space-y-4 pt-4">
           <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">
             Preguntas Frecuentes
