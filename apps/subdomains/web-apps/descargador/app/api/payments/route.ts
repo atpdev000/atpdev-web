@@ -24,19 +24,25 @@ export async function GET(req: Request) {
     else if (rawCountry === 'AR') detectedCurrency = 'ARS';
     else if (['ES', 'FR', 'DE', 'IT', 'PT'].includes(rawCountry)) detectedCurrency = 'EUR';
 
+    const defaultWhatsapp = config.contact?.whatsapp || '+51987006572';
+    const paymentsConfig = config.payments || {
+      enabled: true,
+      provider: 'multi',
+      currency: detectedCurrency,
+      pro_monthly_price: detectedCurrency === 'PEN' ? 14.90 : 3.99,
+      pro_annual_price: detectedCurrency === 'PEN' ? 149.00 : 47.90,
+      business_monthly_price: detectedCurrency === 'PEN' ? 45.00 : 11.99,
+      business_annual_price: detectedCurrency === 'PEN' ? 450.00 : 139.90,
+      whatsapp_number: defaultWhatsapp,
+    };
+
     return NextResponse.json({
       success: true,
       detectedCountry: rawCountry || null,
       detectedCurrency,
-      payments: config.payments || {
-        enabled: true,
-        provider: 'multi',
-        currency: detectedCurrency,
-        pro_monthly_price: detectedCurrency === 'PEN' ? 14.90 : 3.99,
-        pro_annual_price: detectedCurrency === 'PEN' ? 149.00 : 47.90,
-        business_monthly_price: detectedCurrency === 'PEN' ? 45.00 : 11.99,
-        business_annual_price: detectedCurrency === 'PEN' ? 450.00 : 139.90,
-        whatsapp_number: config.payments?.whatsapp_number || config.contact?.whatsapp || '+51987006572',
+      payments: {
+        ...paymentsConfig,
+        whatsapp_number: paymentsConfig.whatsapp_number || defaultWhatsapp,
       },
       contact: config.contact,
     });
