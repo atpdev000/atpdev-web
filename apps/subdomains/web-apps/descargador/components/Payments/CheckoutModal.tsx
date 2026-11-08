@@ -62,7 +62,7 @@ export default function CheckoutModal({
   onSuccess
 }: CheckoutModalProps) {
   const [cycle, setCycle] = useState<'monthly' | 'annual'>(initialCycle)
-  const [selectedMethod, setSelectedMethod] = useState<'card' | 'paypal' | 'yape' | 'code'>('card')
+  const [selectedMethod, setSelectedMethod] = useState<'card' | 'yape' | 'code'>('card')
   const [currentCurrency, setCurrentCurrency] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES.PEN)
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
@@ -97,10 +97,6 @@ export default function CheckoutModal({
   const stripeUrl = cycle === 'annual'
     ? (paymentConfig?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00')
     : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
-
-  const paypalUrl = cycle === 'annual'
-    ? paymentConfig?.paypal_pro_annual_url
-    : paymentConfig?.paypal_pro_monthly_url
 
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
@@ -153,8 +149,6 @@ export default function CheckoutModal({
       }
 
       window.open(whatsappCardHref, '_blank')
-    } else if (selectedMethod === 'paypal') {
-      window.open(paypalUrl || whatsappHref, '_blank')
     } else if (selectedMethod === 'yape') {
       window.open(whatsappHref, '_blank')
     }
@@ -306,21 +300,6 @@ export default function CheckoutModal({
             <button
               type="button"
               onClick={() => {
-                setSelectedMethod('paypal')
-                setCardError(null)
-              }}
-              className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
-                selectedMethod === 'paypal'
-                  ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              <span className="font-black italic text-blue-600">PayPal</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
                 setSelectedMethod('code')
                 setCardError(null)
               }}
@@ -406,24 +385,6 @@ export default function CheckoutModal({
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Pagar por WhatsApp ({currentPriceDisplay})</span>
-              </a>
-            </div>
-          )}
-
-          {/* Formulario PayPal */}
-          {selectedMethod === 'paypal' && (
-            <div className="space-y-3 pt-1">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Total a pagar: <strong>{currentPriceDisplay}</strong>
-              </p>
-              <a
-                href={paypalUrl || whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-[#0070ba] hover:bg-[#005ea6] shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
-              >
-                <span className="italic font-black">P</span>
-                <span>Pagar con PayPal ({currentPriceDisplay})</span>
               </a>
             </div>
           )}

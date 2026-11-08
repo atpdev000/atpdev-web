@@ -877,6 +877,68 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
             </div>
           </div>
 
+          {/* Card de Información del Aplicativo de Pagos Activo */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-950 to-indigo-950/40 border border-blue-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#635bff]/20 border border-[#635bff]/30 text-[#635bff] flex items-center justify-center font-black text-xl shrink-0 shadow-lg shadow-[#635bff]/10">
+                  S
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white">Stripe Payment Gateway</h3>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                      (config.payments?.stripe_pro_annual_url || '').includes('test_')
+                        ? 'bg-amber-500/15 border-amber-500/30 text-amber-400'
+                        : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                    }`}>
+                      {(config.payments?.stripe_pro_annual_url || '').includes('test_') ? '🟡 Modo de Prueba (Test)' : '🟢 Modo Real (Producción)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Aplicativo oficial para procesamiento bancario de tarjetas y membresías PRO en <strong>Descargador Pro</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <a
+                  href="https://dashboard.stripe.com/payment-links"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#635bff] hover:bg-[#534acb] text-white text-xs font-bold transition shadow-sm"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Abrir Stripe Dashboard
+                </a>
+                <a
+                  href={config.payments?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition"
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-blue-400" />
+                  Probar Checkout (Ping)
+                </a>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
+                <span className="text-slate-500 block text-[11px]">Aplicación Vinculada:</span>
+                <span className="font-bold text-white">Descargador Pro (Web + App Android)</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
+                <span className="text-slate-500 block text-[11px]">Correo de Notificaciones / Cobros:</span>
+                <span className="font-bold text-purple-300">{config.contact?.email || 'contacto@atpdev.dev'}</span>
+              </div>
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
+                <span className="text-slate-500 block text-[11px]">WhatsApp Cobros (Yape / Plin):</span>
+                <span className="font-bold text-emerald-400">{config.payments?.whatsapp_number || config.contact?.whatsapp || '+51 987006572'}</span>
+              </div>
+            </div>
+          </div>
+
           {/* Toggle Activar Pasarela */}
           <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -917,9 +979,8 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 })}
                 className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-amber-500"
               >
-                <option value="multi">Multicanal (Recomendado: Stripe + PayPal + WhatsApp/Yape)</option>
+                <option value="multi">Multicanal (Recomendado: Stripe + WhatsApp/Yape)</option>
                 <option value="stripe">Solo Tarjeta Online (Stripe)</option>
-                <option value="paypal">Solo PayPal</option>
                 <option value="whatsapp">Solo WhatsApp / Yape Directo</option>
               </select>
               <p className="text-[11px] text-slate-400">
@@ -1019,20 +1080,6 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                     payments: { ...(config.payments || {}), stripe_pro_annual_url: e.target.value }
                   })}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="text-xs font-medium text-slate-300">PayPal Checkout Link (Pro Opcional)</label>
-                <input
-                  type="text"
-                  placeholder="https://paypal.me/..."
-                  value={config.payments?.paypal_pro_monthly_url || ''}
-                  onChange={(e) => setConfig({
-                    ...config,
-                    payments: { ...(config.payments || {}), paypal_pro_monthly_url: e.target.value }
-                  })}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-blue-500"
                 />
               </div>
             </div>

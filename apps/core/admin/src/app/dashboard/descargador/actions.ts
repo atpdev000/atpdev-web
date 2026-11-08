@@ -48,8 +48,8 @@ export async function syncBuiltApkAction(): Promise<{ success: boolean; message:
       };
     }
 
-    const dest1 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/downloads/FTYdownloaderPro.apk');
-    const dest2 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/FTYdownloaderPro.apk');
+    const dest1 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/downloads/DescargadorPro.apk');
+    const dest2 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/DescargadorPro.apk');
 
     const dir1 = path.dirname(dest1);
     if (!fs.existsSync(dir1)) fs.mkdirSync(dir1, { recursive: true });
@@ -65,7 +65,7 @@ export async function syncBuiltApkAction(): Promise<{ success: boolean; message:
       apk: {
         ...(currentConfig.apk || {}),
         enabled: true,
-        file_url: '/downloads/FTYdownloaderPro.apk',
+        file_url: '/downloads/DescargadorPro.apk',
         file_size: sizeMb
       }
     });
@@ -92,8 +92,8 @@ export async function uploadApkFileAction(formData: FormData): Promise<{ success
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const dest1 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/downloads/FTYdownloaderPro.apk');
-    const dest2 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/FTYdownloaderPro.apk');
+    const dest1 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/downloads/DescargadorPro.apk');
+    const dest2 = path.resolve('d:/PROYECTOS/atpdev-web/apps/subdomains/web-apps/descargador/public/DescargadorPro.apk');
 
     const dir1 = path.dirname(dest1);
     if (!fs.existsSync(dir1)) fs.mkdirSync(dir1, { recursive: true });
@@ -107,7 +107,7 @@ export async function uploadApkFileAction(formData: FormData): Promise<{ success
       apk: {
         ...(currentConfig.apk || {}),
         enabled: true,
-        file_url: '/downloads/FTYdownloaderPro.apk',
+        file_url: '/downloads/DescargadorPro.apk',
         file_size: sizeMb
       }
     });

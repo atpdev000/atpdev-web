@@ -34,7 +34,7 @@ import {
 
 export default function PlanesPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
-  const [selectedMethod, setSelectedMethod] = useState<'card' | 'paypal' | 'yape' | 'code'>('card')
+  const [selectedMethod, setSelectedMethod] = useState<'card' | 'yape' | 'code'>('card')
   const [currentCurrency, setCurrentCurrency] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES.PEN)
   const { plan, isPro, activatePlan, cancelPlan } = useProPlan()
   const [feedback, setFeedback] = useState<string | null>(null)
@@ -106,10 +106,6 @@ export default function PlanesPage() {
     ? (paymentConfig?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00')
     : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
 
-  const paypalUrl = billingCycle === 'annual'
-    ? paymentConfig?.paypal_pro_annual_url
-    : paymentConfig?.paypal_pro_monthly_url
-
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
@@ -133,12 +129,6 @@ export default function PlanesPage() {
 
       // 2. Si no hay Stripe configurado, abrir WhatsApp para link de pago seguro con tarjeta
       window.open(whatsappCardHref, '_blank')
-    } else if (selectedMethod === 'paypal') {
-      if (paypalUrl) {
-        window.open(paypalUrl, '_blank')
-      } else {
-        window.open(whatsappHref, '_blank')
-      }
     } else if (selectedMethod === 'yape') {
       window.open(whatsappHref, '_blank')
     } else if (selectedMethod === 'code') {
@@ -424,22 +414,6 @@ export default function PlanesPage() {
                   <span>{isPEN ? 'Yape / Plin' : 'WhatsApp VIP'}</span>
                 </button>
 
-                {/* Tab PayPal */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedMethod('paypal')
-                    setCardError(null)
-                  }}
-                  className={`flex items-center gap-1 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
-                    selectedMethod === 'paypal'
-                      ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
-                      : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                  }`}
-                >
-                  <span className="font-extrabold italic text-blue-600 tracking-tighter">PayPal</span>
-                </button>
-
                 {/* Tab Licencia */}
                 <button
                   type="button"
@@ -541,26 +515,6 @@ export default function PlanesPage() {
                 >
                   <MessageCircle className="w-5 h-5" />
                   <span>{isPEN ? `Pagar ${currentPriceDisplay} por Yape / WhatsApp` : `Coordinar Pago ${currentPriceDisplay}`}</span>
-                </a>
-              </div>
-            )}
-
-            {/* Vista PayPal */}
-            {selectedMethod === 'paypal' && (
-              <div className="space-y-4 pt-1">
-                <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 text-xs text-blue-900 dark:text-blue-200 space-y-1">
-                  <p className="font-bold">Pago seguro con tu cuenta de PayPal o saldo internacional.</p>
-                  <p className="text-[11px] opacity-80">Total a pagar: <strong>{currentPriceDisplay}</strong></p>
-                </div>
-
-                <a
-                  href={paypalUrl || whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#0070ba] hover:bg-[#005ea6] shadow-md transition-all text-center flex items-center justify-center gap-2 text-base"
-                >
-                  <span className="italic font-black">P</span>
-                  <span>Pagar con PayPal ({currentPriceDisplay})</span>
                 </a>
               </div>
             )}
