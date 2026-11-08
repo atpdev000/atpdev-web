@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Sparkles } from 'lucide-react'
+import { ArrowLeft, Sparkles, Crown } from 'lucide-react'
 import { ThemeToggle } from '@/components/Layout/ThemeToggle'
 import { LanguageSelector } from '@/components/Layout/LanguageSelector'
 import { useI18n } from '@/lib/i18n/context'
+import { useProPlan } from '@/hooks/useProPlan'
 
 export default function MainHeader() {
   const { t } = useI18n()
+  const { isPro } = useProPlan()
   const [mounted, setMounted] = useState(false)
   const [siteTitle, setSiteTitle] = useState('Descargador Pro')
   const [apkConfig, setApkConfig] = useState<{
@@ -57,18 +59,16 @@ export default function MainHeader() {
         <div className="flex items-center justify-between gap-3">
           {/* Logo y Nombre de Marca */}
           <Link href="/" className="flex items-center gap-2.5 sm:gap-3 hover:opacity-90 transition-opacity min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-0.5 flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-              <div className="w-full h-full bg-white dark:bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                </svg>
-              </div>
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 sm:p-2.5 rounded-xl shadow-md shadow-blue-500/20 shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight truncate">
-                {siteTitle}
+              <h1 className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                Descargador <span className="text-blue-600 dark:text-blue-400">Pro</span>
               </h1>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate hidden sm:block">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate hidden sm:block">
                 {t.nav.subtitle}
               </p>
             </div>
@@ -90,10 +90,14 @@ export default function MainHeader() {
             </Link>
             <Link
               href="/planes"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold text-xs shadow-sm transition-all active:scale-95"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-sm transition-all hover:scale-105 active:scale-95 ${
+                mounted && isPro
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 ring-1 ring-emerald-400/40'
+                  : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600'
+              }`}
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{t.nav.plans}</span>
+              <Crown className={`w-3.5 h-3.5 ${mounted && isPro ? 'text-amber-300' : 'text-white'}`} />
+              <span>{mounted && isPro ? 'Mi Membresía PRO' : t.nav.plans}</span>
             </Link>
 
             {mounted && apkConfig?.enabled && (
@@ -116,6 +120,16 @@ export default function MainHeader() {
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <LanguageSelector />
             <ThemeToggle />
+
+            {/* Planes en móvil */}
+            <Link
+              href="/planes"
+              className={`lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-white font-bold text-xs shadow-xs ${
+                mounted && isPro ? 'bg-emerald-600 ring-1 ring-emerald-400/50' : 'bg-amber-500'
+              }`}
+            >
+              👑 {mounted && isPro ? 'Eres PRO' : 'PRO'}
+            </Link>
 
             <Link
               href="/"
