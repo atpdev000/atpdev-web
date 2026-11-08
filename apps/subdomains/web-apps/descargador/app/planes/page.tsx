@@ -111,7 +111,7 @@ export default function PlanesPage() {
     : paymentConfig?.paypal_pro_monthly_url
 
   // WhatsApp
-  const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
+  const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
   const currencyNotice = isPEN ? `en Perú por Yape/Plin (${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
   const defaultWhatsappMsg = `Hola ATP Dev 👋, quiero activar Premium en Descargador Pro ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago?`

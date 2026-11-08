@@ -103,7 +103,7 @@ export default function CheckoutModal({
     : paymentConfig?.paypal_pro_monthly_url
 
   // WhatsApp
-  const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
+  const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
   const currencyNotice = isPEN ? `en Perú (${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
   const defaultMsg = `Hola ATP Dev 👋, quiero mejorar a Premium en Descargador Pro ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`

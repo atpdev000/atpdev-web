@@ -211,7 +211,7 @@
     },
     "contact": {
       "email": "contacto@atpdev.dev",
-      "whatsapp": "+51987654321",
+      "whatsapp": "+51987006572",
       "support_url": "https://descargador.atpdev.dev/contact"
     },
     "apk": {
@@ -255,7 +255,7 @@
       "stripe_business_annual_url": "",
       "paypal_business_monthly_url": "",
       "paypal_business_annual_url": "",
-      "whatsapp_number": "+51987654321",
+      "whatsapp_number": "+51987006572",
       "whatsapp_message_pro": "Hola ATP Dev, deseo activar el Plan Pro Creador para Descargador Pro. ¿Me brindas los datos de pago por Yape o Tarjeta?",
       "whatsapp_message_business": "Hola ATP Dev, deseo contratar el Plan Business VIP para mi agencia. ¿Me brindas la información de activación?",
       "license_keys": [

@@ -36,7 +36,7 @@ export async function GET(req: Request) {
         pro_annual_price: detectedCurrency === 'PEN' ? 149.00 : 47.90,
         business_monthly_price: detectedCurrency === 'PEN' ? 45.00 : 11.99,
         business_annual_price: detectedCurrency === 'PEN' ? 450.00 : 139.90,
-        whatsapp_number: config.contact?.whatsapp || '+51987654321',
+        whatsapp_number: config.payments?.whatsapp_number || config.contact?.whatsapp || '+51987006572',
       },
       contact: config.contact,
     });
