@@ -21,7 +21,7 @@
     "dev:admin": "npm run dev --workspace=apps/core/admin -- -p 3001",
     "dev:chamba": "npm run dev --workspace=apps/subdomains/web-apps/chamba -- -p 3005",
     "dev:sorteos": "npm run dev --workspace=apps/subdomains/web-apps/sorteos",
-    "dev:descargador": "npm run dev --workspace=apps/subdomains/web-apps/descargador -- -p 3007",
+    "dev:descargador": "npm run dev --workspace=apps/subdomains/web-apps/descargador",
     "dev:descargas": "npm run dev:descargador",
     "dev:magic": "npm run dev --workspace=apps/subdomains/web-apps/interactivo-magic",
     "sync:magic": "npm run build:mobile --workspace=apps/subdomains/web-apps/interactivo-magic",
