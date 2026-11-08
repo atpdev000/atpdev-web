@@ -95,8 +95,8 @@ export default function CheckoutModal({
 
   // URLs de pasarela
   const stripeUrl = cycle === 'annual'
-    ? paymentConfig?.stripe_pro_annual_url
-    : paymentConfig?.stripe_pro_monthly_url
+    ? (paymentConfig?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00')
+    : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
 
   const paypalUrl = cycle === 'annual'
     ? paymentConfig?.paypal_pro_annual_url

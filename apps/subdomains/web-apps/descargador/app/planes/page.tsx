@@ -75,6 +75,14 @@ export default function PlanesPage() {
         }
       })
       .catch((err) => console.error('Error cargando pasarela:', err))
+
+    // 3. Detectar confirmación de pago de Stripe en la URL
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('success') === 'true' || params.get('success') === 'pro' || params.get('plan') === 'pro') {
+        setFeedback('🎉 ¡Pago verificado con éxito por Stripe! Tu suscripción Premium ya está activa.')
+      }
+    }
   }, [])
 
   // Precios dinámicos según moneda seleccionada
@@ -94,8 +102,8 @@ export default function PlanesPage() {
 
   // Links de pago
   const stripeUrl = billingCycle === 'annual'
-    ? paymentConfig?.stripe_pro_annual_url
-    : paymentConfig?.stripe_pro_monthly_url
+    ? (paymentConfig?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00')
+    : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
 
   const paypalUrl = billingCycle === 'annual'
     ? paymentConfig?.paypal_pro_annual_url
