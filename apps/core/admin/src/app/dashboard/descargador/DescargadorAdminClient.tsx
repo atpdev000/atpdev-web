@@ -50,7 +50,8 @@ import {
   DownloadCloud,
   CreditCard,
   Crown,
-  KeyRound
+  KeyRound,
+  Copy
 } from "lucide-react";
 import type { SubdomainConfig, SubdomainTheme } from "@atpdev/database";
 import { ACCENT_COLOR_MAP } from "@atpdev/database";
@@ -58,6 +59,7 @@ import {
   saveDescargadorConfigAction, 
   checkRailwayBackendHealthAction,
   checkBackendHealthAction,
+  checkGatewayPingAction,
   syncBuiltApkAction,
   uploadApkFileAction
 } from "./actions";
@@ -226,6 +228,54 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
 
   // Backend Health check state
   const [checkingHealth, setCheckingHealth] = useState(false);
+    // Stripe Gateway Ping state
+  const [stripePingResult, setStripePingResult] = useState<{
+    testing: boolean;
+    tested: boolean;
+    online?: boolean;
+    statusText?: string;
+    latencyMs?: number;
+  }>({
+    testing: false,
+    tested: false
+  });
+  const [copiedTestCard, setCopiedTestCard] = useState(false);
+
+  const handlePingStripe = async () => {
+    const targetUrl = config.payments?.stripe_pro_annual_url || config.payments?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00';
+    setStripePingResult({ testing: true, tested: false });
+    try {
+      const res = await checkGatewayPingAction(targetUrl);
+      setStripePingResult({
+        testing: false,
+        tested: true,
+        online: res.online,
+        statusText: res.statusText,
+        latencyMs: res.latencyMs
+      });
+    } catch (err: any) {
+      setStripePingResult({
+        testing: false,
+        tested: true,
+        online: false,
+        statusText: err?.message || 'Error de conexión',
+        latencyMs: 0
+      });
+    }
+  };
+
+  const copyToClipboard = (text: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedTestCard(true);
+      setTimeout(() => setCopiedTestCard(false), 2000);
+    }
+  };
+
+  const previewPlanesUrl = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:3007/planes'
+    : (config.full_domain ? `https://${config.full_domain}/planes` : 'https://descargador.atpdev.dev/planes');
+
   const [healthResult, setHealthResult] = useState<{
     tested: boolean;
     online: boolean;
@@ -867,7 +917,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 Consola Stripe
               </a>
               <a
-                href="/planes"
+                href={previewPlanesUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-400 border border-amber-500/30 transition"
@@ -903,6 +953,15 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handlePingStripe}
+                  disabled={stripePingResult.testing}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-semibold transition"
+                >
+                  <Activity className={`w-3.5 h-3.5 ${stripePingResult.testing ? 'animate-spin' : ''}`} />
+                  {stripePingResult.testing ? 'Verificando...' : 'Hacer Ping Gateway'}
+                </button>
                 <a
                   href="https://dashboard.stripe.com/payment-links"
                   target="_blank"
@@ -916,27 +975,133 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                   href={config.payments?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00'}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-sm"
                 >
-                  <CreditCard className="w-3.5 h-3.5 text-blue-400" />
-                  Probar Checkout (Ping)
+                  <CreditCard className="w-3.5 h-3.5" />
+                  Probar Checkout (Abrir)
                 </a>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                <span className="text-slate-500 block text-[11px]">Aplicación Vinculada:</span>
-                <span className="font-bold text-white">Descargador Pro (Web + App Android)</span>
+            {/* Resultado del Ping en Vivo */}
+            {stripePingResult.tested && (
+              <div className={`p-3 rounded-xl border text-xs flex items-center justify-between ${
+                stripePingResult.online
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${stripePingResult.online ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'}`} />
+                  <span><strong>Estado Gateway:</strong> {stripePingResult.statusText}</span>
+                </div>
+                <span className="font-mono text-[11px] bg-black/30 px-2 py-0.5 rounded">
+                  Latencia: {stripePingResult.latencyMs} ms
+                </span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                <span className="text-slate-500 block text-[11px]">Correo de Notificaciones / Cobros:</span>
-                <span className="font-bold text-purple-300">{config.contact?.email || 'contacto@atpdev.dev'}</span>
+            )}
+
+            {/* Campos Editables de Notificaciones y WhatsApp */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
+                <div>
+                  <span className="text-slate-400 block text-[11px] font-semibold">Aplicación Vinculada en Pasarela:</span>
+                  <span className="font-bold text-white text-sm block mt-1">Descargador Pro</span>
+                </div>
+                <span className="text-[10px] text-slate-500 mt-2 block">Web + Android APK Sync</span>
               </div>
-              <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/60">
-                <span className="text-slate-500 block text-[11px]">WhatsApp Cobros (Yape / Plin):</span>
-                <span className="font-bold text-emerald-400">{config.payments?.whatsapp_number || config.contact?.whatsapp || '+51 987006572'}</span>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-400 block text-[11px] font-semibold">Correo de Notificaciones / Cobros:</label>
+                  <span className="text-[10px] text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 font-bold">Editable</span>
+                </div>
+                <input
+                  type="email"
+                  value={config.payments?.notification_email || config.contact?.email || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setConfig({
+                      ...config,
+                      payments: { ...(config.payments || {}), notification_email: val },
+                      contact: { ...(config.contact || {}), email: val }
+                    });
+                  }}
+                  placeholder="admin@atpdev.dev o tu-correo@gmail.com"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-purple-300 font-mono text-xs focus:border-purple-500 outline-none"
+                />
+                <span className="text-[10px] text-slate-500 block">Correo que recibe notificaciones de pagos de Stripe y contacto</span>
               </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-400 block text-[11px] font-semibold">WhatsApp Cobros (Yape / Plin):</label>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 font-bold">Editable</span>
+                </div>
+                <input
+                  type="text"
+                  value={config.payments?.whatsapp_number || config.contact?.whatsapp || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setConfig({
+                      ...config,
+                      payments: { ...(config.payments || {}), whatsapp_number: val },
+                      contact: { ...(config.contact || {}), whatsapp: val }
+                    });
+                  }}
+                  placeholder="+51987006572"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-emerald-400 font-mono text-xs focus:border-emerald-500 outline-none"
+                />
+                <span className="text-[10px] text-slate-500 block">Número para asistencia de pagos y soporte directo</span>
+              </div>
+            </div>
+
+            {/* Datos Oficiales para Pruebas en Stripe Checkout */}
+            <div className="p-4 rounded-xl bg-slate-900/90 border border-blue-500/30 space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-blue-400" />
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">💳 Cuenta & Tarjeta Oficial para Pruebas (Test Mode)</h4>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30 font-semibold w-fit">
+                  Entorno de Sandbox Stripe
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <span className="text-slate-400 block text-[10px]">Número de Tarjeta de Prueba:</span>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="font-mono font-bold text-white tracking-widest text-xs">4242 4242 4242 4242</span>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard('4242424242424242')}
+                      className="text-[10px] px-2 py-0.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1"
+                    >
+                      {copiedTestCard ? <Check className="w-3 h-3 text-emerald-300" /> : <Copy className="w-3 h-3" />}
+                      {copiedTestCard ? 'Copiado' : 'Copiar'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <span className="text-slate-400 block text-[10px]">Vencimiento (MM/AA):</span>
+                  <span className="font-mono font-bold text-white mt-1 block text-xs">Cualquiera a futuro (ej: 12/28)</span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <span className="text-slate-400 block text-[10px]">CVC / Código de Seguridad:</span>
+                  <span className="font-mono font-bold text-white mt-1 block text-xs">123</span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800">
+                  <span className="text-slate-400 block text-[10px]">Código Postal / País:</span>
+                  <span className="font-mono font-bold text-white mt-1 block text-xs">15001 / Perú o EEUU</span>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-400">
+                💡 En la pasarela de prueba de Stripe puedes usar <strong>cualquier correo</strong> (incluso tu correo real o personal) para recibir el recibo simulado. No se te cobrará ningún dinero real y el sistema te redirigirá a <strong>/planes?success=true</strong> activando el plan Pro de prueba.
+              </p>
             </div>
           </div>
 

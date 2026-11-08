@@ -120,6 +120,9 @@ export interface SubdomainPayments {
   whatsapp_number?: string;
   whatsapp_message_pro?: string;
   whatsapp_message_business?: string;
+  // Notificaciones & Cuentas de Cobro
+  notification_email?: string;
+  stripe_account_email?: string;
   // Licencias / Códigos de activación
   license_keys?: string[];
 }
@@ -130,6 +133,7 @@ export interface SubdomainConfig {
   slug: string; // e.g. 'chamba'
   subdomain: string; // e.g. 'empleos' (empleos.atpdev.dev)
   full_domain: string; // e.g. 'empleos.atpdev.dev'
+  production_url?: string;
   devPort: number; // e.g. 3005
   category: string; // e.g. 'Convocatorias & Empleos Perú'
   status: 'active' | 'maintenance' | 'beta';

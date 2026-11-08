@@ -190,3 +190,42 @@ export async function checkBackendHealthAction(url: string, timeoutMs: number = 
 export async function checkRailwayBackendHealthAction(url: string = 'https://backend-freedownloaderpro.up.railway.app') {
   return checkBackendHealthAction(url);
 }
+
+export async function checkGatewayPingAction(url: string): Promise<{
+  online: boolean;
+  statusText: string;
+  latencyMs: number;
+  statusCode?: number;
+}> {
+  const start = Date.now();
+  const cleanUrl = (url || '').trim();
+  if (!cleanUrl || !cleanUrl.startsWith('http')) {
+    return { online: false, statusText: 'URL no configurada', latencyMs: 0 };
+  }
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(cleanUrl, {
+      method: 'GET',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    clearTimeout(timeout);
+    const latencyMs = Date.now() - start;
+    const ok = res.status < 400 || res.status === 301 || res.status === 302;
+    return {
+      online: ok,
+      statusText: ok ? `Operativo (HTTP ${res.status})` : `HTTP ${res.status}`,
+      statusCode: res.status,
+      latencyMs
+    };
+  } catch (err: any) {
+    return {
+      online: false,
+      statusText: err?.name === 'AbortError' ? 'Timeout (8s)' : (err?.message || 'Error de conexión'),
+      latencyMs: Date.now() - start
+    };
+  }
+}
