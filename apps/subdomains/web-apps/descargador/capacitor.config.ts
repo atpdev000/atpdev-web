@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.ftydownloader.pro',
-  appName: 'FTY Downloader Pro',
+  appName: 'Descargador Pro',
   webDir: 'out',
   server: {
     url: 'https://descargador-pro-nt6e.onrender.com',
