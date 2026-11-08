@@ -149,3 +149,59 @@ export async function getTrafficChartData(): Promise<TrafficChartData[]> {
     organico: 0
   }));
 }
+
+export type RecentVisit = {
+  id: string;
+  domain: string;
+  path: string;
+  user_agent: string | null;
+  session_id: string | null;
+  created_at: string;
+  device: string;
+  browser: string;
+};
+
+export async function getRecentVisits(limit = 25): Promise<RecentVisit[]> {
+  if (!adminSupabase) return [];
+
+  const { data, error } = await adminSupabase
+    .from('page_views')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching recent visits:', error);
+    return [];
+  }
+
+  return (data || []).map((v: PageView) => {
+    const ua = v.user_agent || '';
+    let device = 'Desktop';
+    if (/mobile|android|iphone|ipad|phone/i.test(ua)) {
+      device = 'Móvil';
+    } else if (/tablet|ipad/i.test(ua)) {
+      device = 'Tablet';
+    }
+
+    let browser = 'Navegador';
+    if (/edg/i.test(ua)) {
+      browser = 'Edge';
+    } else if (/bot|crawler|spider|headless/i.test(ua)) {
+      browser = 'Bot / Crawler';
+    } else if (/chrome|crios/i.test(ua) && !/edge|edg|opr/i.test(ua)) {
+      browser = 'Chrome';
+    } else if (/safari/i.test(ua) && !/chrome|crios|android/i.test(ua)) {
+      browser = 'Safari';
+    } else if (/firefox|fxios/i.test(ua)) {
+      browser = 'Firefox';
+    }
+
+    return {
+      ...v,
+      device,
+      browser,
+    };
+  });
+}
+

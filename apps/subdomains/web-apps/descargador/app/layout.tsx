@@ -5,6 +5,7 @@ import Script from 'next/script'
 import './globals.css'
 import AdManager from '@/components/AdManager'
 import ServerWarmup from '@/components/ServerWarmup'
+import AnalyticsTracker from '@/components/AnalyticsTracker'
 import DescargadorThemeListener from '@/components/DescargadorThemeListener'
 import { I18nProvider } from '@/lib/i18n/context'
 import { getSubdomainConfig } from '@atpdev/database'
@@ -231,6 +232,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <AdManager />
           <ServerWarmup />
+          <AnalyticsTracker />
           {children}
         </I18nProvider>
       </body>
