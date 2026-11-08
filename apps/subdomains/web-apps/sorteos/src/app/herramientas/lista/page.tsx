@@ -23,6 +23,7 @@ import ConfettiEffect from '@/components/ConfettiEffect';
 import { Countdown3DOverlay } from '@/components/Countdown3DOverlay';
 import { LiveStreamStage } from '@/components/LiveStreamStage';
 import { WinnerExportModal } from '@/components/WinnerExportModal';
+import { ListFileImporter } from '@/components/ListFileImporter';
 import { playWheelTick, playWinnerFanfare } from '@/lib/soundEffects';
 import { generateSha256Hash } from '@/lib/randomEngine';
 import { useLanguage } from '@/context/LanguageContext';
@@ -89,19 +90,9 @@ export default function SorteoListaPage() {
 
   const participants = getCleanParticipants();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target?.result as string;
-      if (content) {
-        setRawText(content);
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
+  const handleImportedNames = (newNames: string[]) => {
+    setRawText(newNames.join('\n'));
+    playWheelTick();
   };
 
   const handleToggleSound = () => {
@@ -267,24 +258,8 @@ export default function SorteoListaPage() {
               </span>
             </div>
 
-            {/* Bottom Actions: Import from file */}
-            <div className="flex items-center justify-between pt-1">
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="text-sm font-semibold text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Upload className="w-4 h-4" />
-                <span>{t('import_file_label')}</span>
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".txt,.csv"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-
+            {/* Opciones Avanzadas Toggle */}
+            <div className="flex items-center justify-end pt-1">
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
@@ -294,6 +269,9 @@ export default function SorteoListaPage() {
                 <span>{t('options_advanced_toggle')}</span>
               </button>
             </div>
+
+            {/* Subida Universal: Word, Excel, PDF, CSV, TXT e Imagen OCR */}
+            <ListFileImporter onImport={handleImportedNames} currentCount={participants.length} />
           </div>
 
           {/* Opciones Avanzadas (Ganadores, Suplentes, Duplicados) */}

@@ -17,6 +17,7 @@ import {
 } from '@/lib/soundEffects';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
+import { ListFileImporter } from '@/components/ListFileImporter';
 
 interface TeamResult {
   teamNumber: number;
@@ -393,6 +394,15 @@ export default function EquiposPage() {
     document.body.removeChild(link);
   };
 
+  const handleImportedNames = (newNames: string[], mode: 'replace' | 'append', fileName: string) => {
+    if (mode === 'append' && inputText.trim()) {
+      setInputText((prev) => `${prev.trim()}\n${newNames.join('\n')}`);
+    } else {
+      setInputText(newNames.join('\n'));
+    }
+    playCardFlip();
+  };
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Barra de Navegación de Herramientas (100% Responsiva con Scroll y Flechas) */}
@@ -499,7 +509,7 @@ export default function EquiposPage() {
             <textarea
               id="equipos-textarea"
               name="equiposTextarea"
-              rows={11}
+              rows={7}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Ingresa un nombre por línea:&#10;Carlos&#10;María&#10;Juan..."
@@ -510,6 +520,9 @@ export default function EquiposPage() {
               <span>{participantsList.length} participantes detectados</span>
               <span>1 nombre por línea</span>
             </div>
+
+            {/* Zona de Subida y Conversión Inteligente (Word, Excel, PDF, CSV, Imagen OCR) */}
+            <ListFileImporter onImport={handleImportedNames} currentCount={participantsList.length} />
           </div>
 
           {/* Right Column: Configuration & Controls (7 cols) */}
