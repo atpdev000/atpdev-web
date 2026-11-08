@@ -337,48 +337,28 @@ export default function CheckoutModal({
 
           {/* Formulario Tarjeta */}
           {selectedMethod === 'card' && (
-            <form onSubmit={handleCardSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Datos de tu tarjeta ({currentCurrency.code})
-                </label>
-                <div className={`flex items-center rounded-xl border bg-white dark:bg-slate-950 px-3 py-2 text-sm shadow-sm ${
-                  cardError ? 'border-red-500' : 'border-slate-300 dark:border-slate-700 focus-within:border-slate-500'
-                }`}>
-                  <CreditCard className="w-4 h-4 text-slate-400 shrink-0 mr-2" />
-                  <input
-                    type="text"
-                    placeholder="Número de tarjeta"
-                    value={cardNumber}
-                    onChange={(e) => {
-                      setCardError(null)
-                      const raw = e.target.value.replace(/\D/g, '').substring(0, 16)
-                      setCardNumber(raw.match(/.{1,4}/g)?.join(' ') || raw)
-                    }}
-                    className="w-full bg-transparent text-xs text-slate-900 dark:text-white font-mono outline-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder="MM/AA"
-                    value={cardExpiry}
-                    onChange={(e) => {
-                      setCardError(null)
-                      const raw = e.target.value.replace(/\D/g, '').substring(0, 4)
-                      setCardExpiry(raw.length >= 2 ? `${raw.substring(0, 2)}/${raw.substring(2)}` : raw)
-                    }}
-                    className="w-16 bg-transparent text-xs text-slate-900 dark:text-white font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-1"
-                  />
-                  <input
-                    type="text"
-                    placeholder="CVC"
-                    maxLength={4}
-                    value={cardCvc}
-                    onChange={(e) => {
-                      setCardError(null)
-                      setCardCvc(e.target.value.replace(/\D/g, ''))
-                    }}
-                    className="w-12 bg-transparent text-xs text-slate-900 dark:text-white font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-1"
-                  />
+            <div className="space-y-4">
+              <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 text-xs text-blue-900 dark:text-blue-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span className="font-bold text-xs">Pago Seguro con Tarjeta</span>
+                  </div>
+                  <span className="px-1.5 py-0.5 rounded bg-blue-200 dark:bg-blue-800 font-bold text-[9px]">
+                    {currentCurrency.flag} {currentCurrency.code}
+                  </span>
+                </div>
+                <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
+                  Aceptamos tarjetas de crédito y débito internacionales. Al completar tu pago en la pasarela oficial, tu cuenta se mejorará a <strong>Premium</strong> automáticamente en tiempo real.
+                </p>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-blue-200/60 dark:border-blue-900/40 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
+                  <span>💳 Visa</span>
+                  <span>•</span>
+                  <span>💳 Mastercard</span>
+                  <span>•</span>
+                  <span>💳 Amex</span>
+                  <span>•</span>
+                  <span>📱 Apple/Google Pay</span>
                 </div>
               </div>
 
@@ -391,20 +371,25 @@ export default function CheckoutModal({
 
               {/* Botón Rojo iLovePDF */}
               <button
-                type="submit"
+                type="button"
+                onClick={handleCardSubmit}
                 disabled={isProcessing}
                 className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#e5322d] hover:bg-[#c92520] shadow-lg shadow-red-500/25 transition-all text-center flex items-center justify-center gap-2 cursor-pointer text-sm"
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Validando...</span>
+                    <span>Conectando pasarela...</span>
                   </>
                 ) : (
-                  <span>Mejorar a Premium ({currentPriceDisplay})</span>
+                  <span>Pagar con Tarjeta Segura ({currentPriceDisplay})</span>
                 )}
               </button>
-            </form>
+
+              <p className="text-[10px] text-center text-slate-500 dark:text-slate-400">
+                🔒 Procesado mediante pasarela bancaria certificada PCI-DSS Nivel 1.
+              </p>
+            </div>
           )}
 
           {/* Formulario Yape */}

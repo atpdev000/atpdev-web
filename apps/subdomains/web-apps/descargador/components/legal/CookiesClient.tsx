@@ -13,8 +13,8 @@ export default function CookiesClient({ siteTitle, contactEmail }: { siteTitle: 
     <div className="container mx-auto px-4 max-w-4xl" suppressHydrationWarning>
       {/* Navegación y Encabezado */}
       <div className="mb-8">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline mb-4"
         >
           <ArrowLeft className="w-3.5 h-3.5" />

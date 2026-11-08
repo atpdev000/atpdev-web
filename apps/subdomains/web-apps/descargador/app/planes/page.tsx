@@ -418,40 +418,29 @@ export default function PlanesPage() {
 
             {/* Vista Tarjeta */}
             {selectedMethod === 'card' && (
-              <form onSubmit={handleUpgradeSubmit} className="space-y-4 pt-1">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Datos de tu tarjeta ({currentCurrency.code})
-                  </label>
-                  <div className={`flex items-center rounded-xl border bg-white dark:bg-slate-950 px-3 py-2.5 shadow-sm ${
-                    cardError ? 'border-red-500' : 'border-slate-300 dark:border-slate-700 focus-within:border-slate-500'
-                  }`}>
-                    <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mr-2" />
-                    <input
-                      type="text"
-                      placeholder="Número de tarjeta"
-                      value={cardNumber}
-                      onChange={handleCardNumberChange}
-                      className="w-full bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="MM / AA"
-                      value={cardExpiry}
-                      onChange={handleExpiryChange}
-                      className="w-20 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-2"
-                    />
-                    <input
-                      type="text"
-                      placeholder="CVC"
-                      maxLength={4}
-                      value={cardCvc}
-                      onChange={(e) => {
-                        setCardError(null)
-                        setCardCvc(e.target.value.replace(/\D/g, ''))
-                      }}
-                      className="w-16 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-2"
-                    />
+              <div className="space-y-4 pt-1">
+                {/* Banner de seguridad y tarjetas aceptadas */}
+                <div className="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 text-xs text-blue-900 dark:text-blue-200 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span className="font-bold text-sm">Pago Seguro con Tarjeta</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-blue-200 dark:bg-blue-800 font-bold text-[10px]">
+                      {currentCurrency.flag} {currentCurrency.code}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-blue-800 dark:text-blue-300 leading-relaxed">
+                    Aceptamos todas las tarjetas de crédito y débito con cifrado bancario SSL de 256 bits. Al completar tu pago en la pasarela oficial, tu cuenta se mejorará a <strong>Premium</strong> automáticamente en tiempo real.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-blue-200/60 dark:border-blue-900/40 text-[11px] font-semibold text-blue-700 dark:text-blue-300">
+                    <span>💳 Visa</span>
+                    <span>•</span>
+                    <span>💳 Mastercard</span>
+                    <span>•</span>
+                    <span>💳 American Express</span>
+                    <span>•</span>
+                    <span>📱 Apple Pay / Google Pay</span>
                   </div>
                 </div>
 
@@ -463,7 +452,8 @@ export default function PlanesPage() {
                 )}
 
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleUpgradeSubmit}
                   disabled={isProcessing}
                   className="w-full py-3.5 px-6 rounded-xl font-extrabold text-white bg-[#e5322d] hover:bg-[#c92520] active:scale-[0.99] shadow-lg shadow-red-500/25 transition-all text-center flex items-center justify-center gap-2 cursor-pointer text-base"
                 >
@@ -472,18 +462,15 @@ export default function PlanesPage() {
                       <Loader2 className="w-5 h-5 animate-spin" />
                       <span>Conectando pasarela...</span>
                     </>
-                  ) : stripeUrl ? (
-                    <span>Pagar con Tarjeta Segura ({currentPriceDisplay})</span>
                   ) : (
-                    <span>Pagar con Tarjeta ({currentPriceDisplay})</span>
+                    <span>Pagar con Tarjeta Segura ({currentPriceDisplay})</span>
                   )}
                 </button>
-                {!stripeUrl && (
-                  <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
-                    🔒 Pagos 100% seguros procesados con encriptación bancaria SSL. Recibirás tu link de pago oficial y activación inmediata.
-                  </p>
-                )}
-              </form>
+
+                <p className="text-[11px] text-center text-slate-500 dark:text-slate-400">
+                  🔒 Procesado mediante pasarela bancaria certificada PCI-DSS Nivel 1.
+                </p>
+              </div>
             )}
 
             {/* Vista Yape / WhatsApp */}
