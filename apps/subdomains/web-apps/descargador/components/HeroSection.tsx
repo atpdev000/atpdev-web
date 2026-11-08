@@ -56,8 +56,8 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
         {heroDescription}
       </p>
 
-      {/* Iconos de plataformas */}
-      <div className="flex justify-center items-center gap-6 sm:gap-8 mb-8 flex-wrap min-h-[72px]">
+      {/* Iconos de plataformas con min-height responsive para eliminar CLS en móviles */}
+      <div className="flex justify-center items-center gap-6 sm:gap-8 mb-8 flex-wrap min-h-[170px] sm:min-h-[76px]">
         <button
           type="button"
           onClick={() => handlePlatformClick('facebook')}

@@ -40,5 +40,39 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound()
   }
 
-  return <BlogPostClient initialPost={post} />
+  const postSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt,
+    "image": post.image ? [post.image.startsWith('http') ? post.image : `https://descargador.atpdev.dev${post.image}`] : [],
+    "datePublished": post.date,
+    "author": {
+      "@type": "Organization",
+      "name": "ATP DEV",
+      "url": "https://atpdev.dev"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Descargador Pro",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://descargador.atpdev.dev/icon.png"
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://descargador.atpdev.dev/blog/${slug}`
+    }
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(postSchema) }}
+      />
+      <BlogPostClient initialPost={post} />
+    </>
+  )
 }

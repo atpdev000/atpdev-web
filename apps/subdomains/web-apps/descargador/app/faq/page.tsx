@@ -51,8 +51,26 @@ export default function FAQPage() {
     }
   ]
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  }
+
   return (
     <div className="container mx-auto px-4 max-w-4xl">
+      {/* Schema.org FAQPage para Rich Snippets en Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* Encabezado */}
       <div className="mb-8 text-center max-w-2xl mx-auto">
         <Link

@@ -1,4 +1,4 @@
-﻿import TiktokDownloader from '@/components/platforms/TiktokDownloader'
+import TiktokDownloader from '@/components/platforms/TiktokDownloader'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
@@ -9,8 +9,36 @@ export const metadata: Metadata = {
 }
 
 export default function TiktokToolPage() {
+    const howToSchema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Cómo descargar videos de TikTok sin marca de agua gratis",
+        "description": "Pasos para descargar videos de TikTok limpios y sin logo en alta definición MP4 con Descargador Pro.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Copiar enlace de TikTok",
+                "text": "Abre TikTok, presiona en Compartir en el video y elige 'Copiar enlace'."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Pegar en Descargador Pro",
+                "text": "Pega el enlace en el buscador de la herramienta de TikTok."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Descargar sin marca",
+                "text": "Pulsa Descargar para obtener el video en MP4 sin marcas de agua ni logos."
+            }
+        ]
+    }
+
     return (
         <div className="container mx-auto px-4 max-w-5xl">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+            />
             {/* Botón Volver */}
             <div className="mb-6">
                 <Link 

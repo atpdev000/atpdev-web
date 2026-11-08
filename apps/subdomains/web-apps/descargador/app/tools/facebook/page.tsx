@@ -1,4 +1,4 @@
-﻿import FacebookDownloader from '@/components/platforms/FacebookDownloader'
+import FacebookDownloader from '@/components/platforms/FacebookDownloader'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
@@ -9,8 +9,36 @@ export const metadata: Metadata = {
 }
 
 export default function FacebookToolPage() {
+    const howToSchema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Cómo descargar videos de Facebook en HD gratis",
+        "description": "Pasos para descargar videos y Reels de Facebook en alta definición (1080p HD) con Descargador Pro.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Copiar enlace",
+                "text": "Abre Facebook, toca Compartir en el video o Reel y selecciona 'Copiar enlace'."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Pegar URL",
+                "text": "Pega el enlace en el campo de búsqueda de Descargador Pro."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Descargar video",
+                "text": "Selecciona la calidad deseada (1080p HD o SD) y descarga el archivo MP4."
+            }
+        ]
+    }
+
     return (
         <div className="container mx-auto px-4 max-w-5xl">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+            />
             {/* Botón Volver */}
             <div className="mb-6">
                 <Link 

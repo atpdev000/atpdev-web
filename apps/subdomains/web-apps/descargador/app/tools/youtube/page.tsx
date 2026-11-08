@@ -1,4 +1,4 @@
-﻿import { Metadata } from 'next'
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles } from 'lucide-react'
@@ -14,8 +14,37 @@ export default function YoutubeToolPage() {
     if (!FEATURES.YOUTUBE_ENABLED) {
         redirect('/')
     }
+
+    const howToSchema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "Cómo descargar videos y audios de YouTube en HD y MP3",
+        "description": "Pasos para descargar videos de YouTube en 1080p Full HD o extraer música en MP3 con Descargador Pro.",
+        "step": [
+            {
+                "@type": "HowToStep",
+                "name": "Copiar URL del video",
+                "text": "Abre YouTube, ve al video y copia la URL desde la barra de direcciones o el botón Compartir."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Pegar en Descargador Pro",
+                "text": "Pega la URL en la barra de búsqueda de la herramienta de YouTube."
+            },
+            {
+                "@type": "HowToStep",
+                "name": "Elegir formato y guardar",
+                "text": "Selecciona si deseas descargar el video en HD (MP4) o solo la pista de audio (MP3)."
+            }
+        ]
+    }
+
     return (
         <div className="container mx-auto px-4 max-w-5xl">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+            />
             {/* Botón Volver */}
             <div className="mb-6">
                 <Link 
