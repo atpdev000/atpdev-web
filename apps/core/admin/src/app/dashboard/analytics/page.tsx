@@ -8,6 +8,8 @@ export default async function AnalyticsPage() {
   const leads = await getLeads();
   const config = await getSiteConfig();
   const descargadorConfig = getSubdomainConfig("descargador");
+  const sorteosConfig = getSubdomainConfig("sorteos");
+  const chambaConfig = getSubdomainConfig("chamba");
 
   const totalLeads = leads.length;
   const leadsNuevos = leads.filter(l => l.status === "NUEVO").length;
@@ -19,6 +21,10 @@ export default async function AnalyticsPage() {
   const isGA4Configured = Boolean(config?.ga4_id);
   const gaIdDescargador = descargadorConfig?.seo?.google_analytics_id || "GTM-KGJN7SDL";
   const clarityIdDescargador = descargadorConfig?.seo?.microsoft_clarity_id || "zak4lzyye9";
+  const gaIdSorteos = sorteosConfig?.seo?.google_analytics_id || "GTM-KGJN7SDL";
+  const clarityIdSorteos = sorteosConfig?.seo?.microsoft_clarity_id || "zak4lzyye9";
+  const gaIdChamba = chambaConfig?.seo?.google_analytics_id || "GTM-KGJN7SDL";
+  const clarityIdChamba = chambaConfig?.seo?.microsoft_clarity_id || "zak4lzyye9";
 
   return (
     <div>
@@ -130,6 +136,36 @@ export default async function AnalyticsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Card Sorteos Pro */}
+          <div className="bg-black/30 border border-gray-800/80 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-white">Sorteos Pro</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">100% OK</span>
+            </div>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Google Tag:</span>
+                <span className="font-mono text-emerald-400 font-semibold">{gaIdSorteos}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Microsoft Clarity:</span>
+                <span className="font-mono text-cyan-400 font-semibold">{clarityIdSorteos}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Google AdSense:</span>
+                <span className="font-mono text-amber-400 font-semibold">{sorteosConfig?.monetization?.adsense_client_id?.slice(0, 15)}...</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Motor Interno:</span>
+                <span className="text-emerald-400 font-medium">/api/track (Supabase)</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-800/60 flex justify-between">
+              <a href="/dashboard/sorteos" className="text-xs text-pink-400 hover:text-pink-300 font-medium">Ver en CMS →</a>
+              <a href="https://clarity.microsoft.com" target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1">Clarity <ExternalLink size={12} /></a>
+            </div>
+          </div>
+
           {/* Card Descargador Pro */}
           <div className="bg-black/30 border border-gray-800/80 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
@@ -149,9 +185,43 @@ export default async function AnalyticsPage() {
                 <span className="text-gray-400">Google AdSense:</span>
                 <span className="font-mono text-amber-400 font-semibold">{descargadorConfig?.monetization?.adsense_client_id?.slice(0, 15)}...</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Motor Interno:</span>
+                <span className="text-emerald-400 font-medium">/api/track (Supabase)</span>
+              </div>
             </div>
             <div className="mt-3 pt-3 border-t border-gray-800/60 flex justify-between">
               <a href="/dashboard/descargador" className="text-xs text-blue-400 hover:text-blue-300 font-medium">Ver en CMS →</a>
+              <a href="https://clarity.microsoft.com" target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1">Clarity <ExternalLink size={12} /></a>
+            </div>
+          </div>
+
+          {/* Card Chamba Pro */}
+          <div className="bg-black/30 border border-gray-800/80 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-white">Chamba Pro</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">100% OK</span>
+            </div>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Google Tag:</span>
+                <span className="font-mono text-emerald-400 font-semibold">{gaIdChamba}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Microsoft Clarity:</span>
+                <span className="font-mono text-cyan-400 font-semibold">{clarityIdChamba}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Google AdSense:</span>
+                <span className="font-mono text-amber-400 font-semibold">ca-pub-54140098...</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Motor Interno:</span>
+                <span className="text-emerald-400 font-medium">/api/track (Supabase)</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-800/60 flex justify-between">
+              <a href="/dashboard/chamba" className="text-xs text-emerald-400 hover:text-emerald-300 font-medium">Ver en CMS →</a>
               <a href="https://clarity.microsoft.com" target="_blank" rel="noopener noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1">Clarity <ExternalLink size={12} /></a>
             </div>
           </div>

@@ -14,3 +14,5 @@ export const SITE_DESCRIPTION = 'Crea sorteos transparentes y certificados para 
 export const CONTACT_EMAIL = 'contacto@atpdev.pe';
 export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-5414009811868137';
 export const ADSENSE_PUB_ID = process.env.ADSENSE_PUB_ID || 'pub-5414009811868137';
+export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID || 'GTM-KGJN7SDL';
+export const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID || 'zak4lzyye9';

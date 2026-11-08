@@ -126,7 +126,13 @@
         "sorteo certificado",
         "sorteos online"
       ],
-      "canonical_url": "https://sorteos.atpdev.pe"
+      "canonical_url": "https://sorteos.atpdev.pe",
+      "google_analytics_id": "GTM-KGJN7SDL",
+      "microsoft_clarity_id": "zak4lzyye9",
+      "google_search_console_token": ""
+    },
+    "monetization": {
+      "adsense_client_id": "ca-pub-5414009811868137"
     },
     "modules": {
       "instagram_giveaways_enabled": true,

@@ -35,28 +35,28 @@ export const Footer: React.FC = () => {
           {/* Col 1: Herramientas Gratuitas */}
           <div className="space-y-3">
             <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_tools_title')}</p>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-zinc-400">
-              <li><Link href="/herramientas/lista" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_names')}</Link></li>
-              <li><Link href="/herramientas/ruleta" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_roulette')}</Link></li>
-              <li><Link href="/herramientas/dados" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_dice')}</Link></li>
-              <li><Link href="/herramientas/moneda" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_coin')}</Link></li>
-              <li><Link href="/herramientas/numeros" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_numbers')}</Link></li>
-              <li><Link href="/herramientas/equipos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_teams')}</Link></li>
-              <li><Link href="/herramientas/amigo-invisible" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('tool_secret_santa')}</Link></li>
+            <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
+              <li><Link href="/herramientas/lista" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_names')}</Link></li>
+              <li><Link href="/herramientas/ruleta" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_roulette')}</Link></li>
+              <li><Link href="/herramientas/dados" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_dice')}</Link></li>
+              <li><Link href="/herramientas/moneda" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_coin')}</Link></li>
+              <li><Link href="/herramientas/numeros" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_numbers')}</Link></li>
+              <li><Link href="/herramientas/equipos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_teams')}</Link></li>
+              <li><Link href="/herramientas/amigo-invisible" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_secret_santa')}</Link></li>
             </ul>
           </div>
 
           {/* Col 2: Sorteos Redes */}
           <div className="space-y-3">
             <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_social_title')}</p>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-zinc-400">
-              <li><Link href="/sorteos/nuevo?platform=instagram" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('footer_sorteo_ig')}</Link></li>
-              <li><Link href="/sorteos/nuevo?platform=tiktok" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors">{t('footer_sorteo_tiktok')}</Link></li>
-              <li><Link href="/sorteos/nuevo?platform=youtube" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">{t('footer_sorteo_yt')}</Link></li>
-              <li><Link href="/sorteos/nuevo?platform=facebook" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t('footer_sorteo_fb')}</Link></li>
-              <li><Link href="/sorteos/nuevo?platform=x" className="hover:text-slate-900 dark:hover:text-white transition-colors">{t('footer_sorteo_x')}</Link></li>
-              <li><Link href="/sorteos/nuevo?platform=threads" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">{t('footer_sorteo_threads')}</Link></li>
-              <li><Link href="/planes" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">{t('nav_pricing')}</Link></li>
+            <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
+              <li><Link href="/sorteos/nuevo?platform=instagram" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_ig')}</Link></li>
+              <li><Link href="/sorteos/nuevo?platform=tiktok" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_tiktok')}</Link></li>
+              <li><Link href="/sorteos/nuevo?platform=youtube" className="hover:text-red-600 dark:hover:text-red-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_yt')}</Link></li>
+              <li><Link href="/sorteos/nuevo?platform=facebook" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_fb')}</Link></li>
+              <li><Link href="/sorteos/nuevo?platform=x" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_x')}</Link></li>
+              <li><Link href="/sorteos/nuevo?platform=threads" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_threads')}</Link></li>
+              <li><Link href="/planes" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('nav_pricing')}</Link></li>
             </ul>
 
           </div>
@@ -64,13 +64,13 @@ export const Footer: React.FC = () => {
           {/* Col 3: Legal & Seguridad */}
           <div className="space-y-3">
             <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_legal_title')}</p>
-            <ul className="space-y-2 text-xs text-slate-600 dark:text-zinc-400">
-              <li><Link href="/quienes-somos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Quiénes Somos</Link></li>
-              <li><Link href="/contacto" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Contacto y Soporte</Link></li>
-              <li><Link href="/terminos-y-condiciones" className="hover:text-slate-900 dark:hover:text-white transition-colors">{t('footer_terms')}</Link></li>
-              <li><Link href="/politica-de-privacidad" className="hover:text-slate-900 dark:hover:text-white transition-colors">{t('footer_privacy')}</Link></li>
-              <li><Link href="/certificados/CERT-SP-98A41E8D" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">{t('nav_verify_cert')}</Link></li>
-              <li><Link href="/admin" className="text-slate-400 dark:text-zinc-600 hover:text-slate-600 dark:hover:text-zinc-400 transition-colors">{t('footer_admin')}</Link></li>
+            <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
+              <li><Link href="/quienes-somos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Quiénes Somos</Link></li>
+              <li><Link href="/contacto" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Contacto y Soporte</Link></li>
+              <li><Link href="/terminos-y-condiciones" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_terms')}</Link></li>
+              <li><Link href="/politica-de-privacidad" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_privacy')}</Link></li>
+              <li><Link href="/certificados/CERT-SP-98A41E8D" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors py-1.5 px-0.5 inline-block">{t('nav_verify_cert')}</Link></li>
+              <li><Link href="/admin" className="text-slate-400 dark:text-zinc-600 hover:text-slate-600 dark:hover:text-zinc-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_admin')}</Link></li>
             </ul>
           </div>
         </div>

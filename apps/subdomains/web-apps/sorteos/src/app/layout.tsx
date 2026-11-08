@@ -9,6 +9,7 @@ import { SorteosGlowWrapper } from "@/components/SorteosGlowWrapper";
 import { SorteosCustomCursor } from "@/components/SorteosCustomCursor";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { GoogleAdSense } from "@/components/GoogleAdSense";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { getSubdomainConfig } from "@atpdev/database";
 import { 
   SITE_URL, 
@@ -16,7 +17,9 @@ import {
   SITE_TITLE, 
   SITE_DESCRIPTION, 
   ADSENSE_CLIENT_ID, 
-  CONTACT_EMAIL 
+  CONTACT_EMAIL,
+  GA_MEASUREMENT_ID,
+  CLARITY_ID
 } from "@/lib/siteConfig";
 import "./globals.css";
 
@@ -104,8 +107,10 @@ export const metadata: Metadata = {
     },
   },
   verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     other: {
       "google-adsense-account": ADSENSE_CLIENT_ID,
+      "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "",
     },
   },
   icons: {
@@ -123,6 +128,8 @@ export default function RootLayout({
 }>) {
   const config = getSubdomainConfig("sorteos");
   const theme = config.theme || ({} as any);
+  const gaId = config.seo?.google_analytics_id || GA_MEASUREMENT_ID;
+  const clarityId = config.seo?.microsoft_clarity_id || CLARITY_ID;
   const accentHex = theme.accent_color || theme.primary_color || "#d91a7a";
   const neonThickness = theme.neon_thickness || "4px";
   const neonGlow = neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px";
@@ -149,13 +156,15 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Core Resource Hints */}
+        {/* Core Resource Hints & DNS Prefetches */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.clarity.ms" />
 
-        {/* Unified Structured Data (Schema.org @graph): WebSite, SoftwareApplication & Organization */}
+        {/* Unified Structured Data (Schema.org @graph): WebSite, SoftwareApplication, Organization & FAQPage */}
         <script
           id="ld-json-schema"
           key="ld-json-schema"
@@ -173,6 +182,11 @@ export default function RootLayout({
                   url: SITE_URL,
                   description: SITE_DESCRIPTION,
                   inLanguage: "es-ES",
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: `${SITE_URL}/herramientas/{search_term_string}`,
+                    "query-input": "required name=search_term_string",
+                  },
                 },
                 {
                   "@type": "SoftwareApplication",
@@ -200,6 +214,36 @@ export default function RootLayout({
                     email: CONTACT_EMAIL,
                     availableLanguage: ["Spanish", "English"],
                   },
+                },
+                {
+                  "@type": "FAQPage",
+                  "@id": `${SITE_URL}/#faq`,
+                  mainEntity: [
+                    {
+                      "@type": "Question",
+                      name: "¿Cómo funciona el algoritmo de sorteos y por qué es transparente?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Utilizamos generadores de números aleatorios criptográficamente seguros (CSPRNG) con cálculo de hash SHA-256 público y certificado inmutable anti-fraude.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "¿Puedo realizar sorteos gratis en Instagram, Facebook y YouTube?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Sí, dispones de sorteos gratis en redes sociales y todas nuestras herramientas de ruleta, listas, dados y números de forma ilimitada sin costo.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "¿Qué es el certificado de validez con hash criptográfico?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "Al concluir cada sorteo se genera un certificado público único con ID verificable que incluye la lista de participantes, ganador y huella digital SHA-256 inalterable.",
+                      },
+                    },
+                  ],
                 },
               ],
             }),
@@ -274,12 +318,86 @@ export default function RootLayout({
             ` : ''}
           `
         }} />
-        {/* Dynamically Load Google Fonts if customized */}
-        {(theme.font_headline || theme.font_body || theme.font_label) && (
-          <link
-            id="sorteos-ssr-fonts"
-            rel="stylesheet"
-            href={`https://fonts.googleapis.com/css2?${[theme.font_headline, theme.font_body, theme.font_label].filter((f: any): f is string => Boolean(f)).map((f: string) => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800;900`).join('&')}&display=swap`}
+
+        {/* Dynamically Load Google Fonts ONLY if customized outside standard next/font bundle */}
+        {(() => {
+          const defaultFonts = ['Space Grotesk', 'Inter', 'IBM Plex Mono'];
+          const customFonts = [theme.font_headline, theme.font_body, theme.font_label]
+            .filter((f: any): f is string => Boolean(f) && !defaultFonts.includes(f as string));
+          if (customFonts.length === 0) return null;
+          return (
+            <link
+              id="sorteos-ssr-fonts"
+              rel="stylesheet"
+              href={`https://fonts.googleapis.com/css2?${customFonts.map((f: string) => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800;900`).join('&')}&display=swap`}
+            />
+          );
+        })()}
+
+        {/* Google Consent Mode v2 Default Signals (AdSense & GA4 Compliance) */}
+        <script
+          id="google-consent-mode-default"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'granted',
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+
+        {/* Google Analytics 4 (GA4) & Google Tag (GTM) */}
+        {gaId && (
+          <>
+            <Script
+              async
+              src={
+                gaId.startsWith('GTM-')
+                  ? `https://www.googletagmanager.com/gtm.js?id=${gaId}`
+                  : `https://www.googletagmanager.com/gtag/js?id=${gaId}`
+              }
+              strategy="afterInteractive"
+            />
+            <Script id="google-tags-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                ${gaId.startsWith('G-') ? `gtag('config', '${gaId}', { page_path: window.location.pathname });` : ''}
+              `}
+            </Script>
+          </>
+        )}
+
+        {/* Microsoft Clarity Behavioral Analytics */}
+        {clarityId && (
+          <Script
+            id="microsoft-clarity-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${clarityId}");
+              `
+            }}
+          />
+        )}
+
+        {/* Google AdSense Script Inyección Oficial */}
+        {ADSENSE_CLIENT_ID && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
           />
         )}
       </head>
@@ -302,6 +420,7 @@ export default function RootLayout({
           src="/theme-init.js"
           strategy="beforeInteractive"
         />
+        <AnalyticsTracker />
         <GoogleAdSense clientId={ADSENSE_CLIENT_ID} />
         <SorteosThemeListener />
         <SorteosCustomCursor />
