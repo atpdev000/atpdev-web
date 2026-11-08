@@ -18,6 +18,7 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
 import { ListFileImporter } from '@/components/ListFileImporter';
+import { ExportResultHub } from '@/components/ExportResultHub';
 
 interface TeamResult {
   teamNumber: number;
@@ -773,24 +774,15 @@ export default function EquiposPage() {
                 <span>Asignar Capitanes</span>
               </button>
 
-              <button
-                type="button"
-                onClick={handleCopyAll}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-zinc-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-              >
-                {copiedAll ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedAll ? '¡Copiado Todo!' : 'Copiar Todo'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDownloadCsv}
-                className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-800 dark:text-zinc-200 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                title="Descargar tabla en formato CSV/Excel"
-              >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Excel / CSV</span>
-              </button>
+              {/* Botón Hub de Exportación: PDF, Word, Excel, Imagen */}
+              <ExportResultHub 
+                teams={teams}
+                drawTitle="División de Equipos al Azar"
+                auditHash={auditHash}
+                captureElementId="teams-results-container"
+                onCopyAll={handleCopyAll}
+                copiedAll={copiedAll}
+              />
 
               <button
                 type="button"
@@ -804,8 +796,8 @@ export default function EquiposPage() {
             </div>
           </div>
 
-          {/* Grid de Tarjetas de Equipos */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Grid de Tarjetas de Equipos (Capturable para Imagen HD) */}
+          <div id="teams-results-container" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {teams.map((team, idx) => (
               <div
                 key={idx}
