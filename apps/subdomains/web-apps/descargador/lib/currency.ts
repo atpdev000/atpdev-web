@@ -131,3 +131,4 @@ export function formatPrice(amount: number, currency: CurrencyConfig): string {
   }
   return `$${amount.toFixed(2)} ${currency.code}`;
 }
+

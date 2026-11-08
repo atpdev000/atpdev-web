@@ -39,7 +39,7 @@ export default function CookiesClient({ siteTitle, contactEmail }: { siteTitle: 
         {/* Introducción */}
         <div className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            {t.intro.replace('FTY Downloader Pro', siteTitle)}
+            {t.intro.replace('Descargador Pro', siteTitle)}
           </p>
         </div>
 

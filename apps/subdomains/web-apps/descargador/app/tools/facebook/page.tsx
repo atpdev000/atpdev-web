@@ -1,4 +1,4 @@
-import FacebookDownloader from '@/components/platforms/FacebookDownloader'
+﻿import FacebookDownloader from '@/components/platforms/FacebookDownloader'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
@@ -45,7 +45,7 @@ export default function FacebookToolPage() {
                         ¿Cómo descargar videos de Facebook gratis?
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Facebook es una de las mayores plataformas de video del mundo. Con <strong>FTY Downloader Pro</strong>, puedes guardar videos y Reels para verlos sin conexión o respaldar tus publicaciones sin perder calidad.
+                        Facebook es una de las mayores plataformas de video del mundo. Con <strong>Descargador Pro</strong>, puedes guardar videos y Reels para verlos sin conexión o respaldar tus publicaciones sin perder calidad.
                     </p>
                 </div>
 
@@ -84,3 +84,4 @@ export default function FacebookToolPage() {
         </div>
     )
 }
+

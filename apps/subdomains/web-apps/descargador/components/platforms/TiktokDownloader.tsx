@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
@@ -265,7 +265,7 @@ export default function TiktokDownloader({ initialUrl, autoSearch }: DownloaderP
             console.log(`💾 TikTok: Iniciando guardado nativo seguro de ${formatBytes(blob.size)}...`);
             const isAudio = fileExt === 'mp3';
             const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (pct) => setDownloadProgress(pct));
-            const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+            const typeFolder = isAudio ? 'DescargadorPro Audio' : 'DescargadorPro Video';
 
             console.log('✅ TK Guardado en:', saveRes.uri);
             scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);

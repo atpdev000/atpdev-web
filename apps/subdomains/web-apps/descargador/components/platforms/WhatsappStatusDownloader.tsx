@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
@@ -239,7 +239,7 @@ export default function WhatsappStatusDownloader() {
       } else if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
           title: 'Estado de WhatsApp',
-          text: 'Descargado con FTY Downloader Pro',
+          text: 'Descargado con Descargador Pro',
           url: item.uri
         })
       } else {
@@ -326,7 +326,7 @@ export default function WhatsappStatusDownloader() {
               </a>
 
               <a
-                href="/FTYdownloaderPro.apk"
+                href="/DescargadorPro.apk"
                 download
                 className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl hover:scale-105 transition-all shadow-lg shadow-emerald-600/30 active:scale-95 group"
               >
@@ -710,3 +710,4 @@ export default function WhatsappStatusDownloader() {
     </div>
   )
 }
+

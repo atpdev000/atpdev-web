@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Header from '@/components/Layout/Header'
@@ -81,7 +81,7 @@ export default function Home() {
   }>({
     enabled: true,
     version: 'v1.2.0',
-    file_url: '/downloads/FTYdownloaderPro.apk',
+    file_url: '/downloads/DescargadorPro.apk',
     file_size: '10.8 MB',
     release_notes: 'Descargas HD/4K sin marcas de agua, reproductor integrado en app tipo WhatsApp y solución de guardado.'
   })
@@ -216,7 +216,7 @@ export default function Home() {
 
           <div className="mt-6 text-center pb-6">
             <p className="text-xs text-gray-500 dark:text-slate-400">
-              FTYDownloader Pro • v1.0.0
+              Descargador Pro • v1.0.0
             </p>
           </div>
         </main>
@@ -266,7 +266,7 @@ export default function Home() {
                       </span>
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold text-white">
-                      Descarga {branding.site_title || 'FTYDownloader Pro'} para Android
+                      Descarga {branding.site_title || 'Descargador Pro'} para Android
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
                       {apkConfig.release_notes || 'Descargas ultra rápidas en segundo plano, soporte para estados de WhatsApp y reproductor nativo integrado.'}
@@ -275,7 +275,7 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
                   <a
-                    href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                    href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
                     download
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95"
                   >

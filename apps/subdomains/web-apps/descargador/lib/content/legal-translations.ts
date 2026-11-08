@@ -1,4 +1,4 @@
-import { Locale } from '@/lib/i18n/config';
+﻿import { Locale } from '@/lib/i18n/config';
 
 export interface CookiesTranslations {
   backToDownloader: string;
@@ -150,7 +150,7 @@ export const cookiesTranslations: Record<Locale, CookiesTranslations> = {
     backToDownloader: 'Volver al Descargador',
     title: 'Política de Cookies',
     lastUpdated: 'Última actualización: 1 de Enero de 2026 • Información de Almacenamiento Local',
-    intro: 'En FTY Downloader Pro, utilizamos cookies y tecnologías de almacenamiento local en el navegador (como LocalStorage) para que disfrutes de una navegación rápida, segura y adaptada a tus preferencias. Esta política explica qué tecnologías usamos, para qué sirven y cómo puedes configurarlas o desactivarlas.',
+    intro: 'En Descargador Pro, utilizamos cookies y tecnologías de almacenamiento local en el navegador (como LocalStorage) para que disfrutes de una navegación rápida, segura y adaptada a tus preferencias. Esta política explica qué tecnologías usamos, para qué sirven y cómo puedes configurarlas o desactivarlas.',
     sec1Title: '1. ¿Qué tipos de cookies y almacenamiento utilizamos?',
     cookieTechTitle: 'Cookies Técnicas Esenciales',
     cookieTechDesc: 'Requeridas para la navegación, seguridad de peticiones API y entrega del reproductor de video.',
@@ -173,7 +173,7 @@ export const cookiesTranslations: Record<Locale, CookiesTranslations> = {
     backToDownloader: 'Back to Downloader',
     title: 'Cookie Policy',
     lastUpdated: 'Last updated: January 1, 2026 • Local Storage & Cookies Information',
-    intro: 'At FTY Downloader Pro, we use cookies and browser local storage technologies (such as LocalStorage) to ensure you enjoy a fast, safe, and personalized browsing experience. This policy explains which technologies we utilize, their purposes, and how you can manage or disable them.',
+    intro: 'At Descargador Pro, we use cookies and browser local storage technologies (such as LocalStorage) to ensure you enjoy a fast, safe, and personalized browsing experience. This policy explains which technologies we utilize, their purposes, and how you can manage or disable them.',
     sec1Title: '1. What types of cookies and storage do we use?',
     cookieTechTitle: 'Essential Technical Cookies',
     cookieTechDesc: 'Required for core website navigation, API request security, and delivery of the integrated video player.',
@@ -196,7 +196,7 @@ export const cookiesTranslations: Record<Locale, CookiesTranslations> = {
     backToDownloader: 'Voltar ao Baixador',
     title: 'Política de Cookies',
     lastUpdated: 'Última atualização: 1 de Janeiro de 2026 • Informações sobre Armazenamento Local',
-    intro: 'No FTY Downloader Pro, utilizamos cookies e tecnologias de armazenamento local no navegador (como LocalStorage) para garantir uma navegação rápida, segura e adaptada às suas preferências. Esta política detalha quais tecnologias utilizamos, suas finalidades e como você pode gerenciá-las.',
+    intro: 'No Descargador Pro, utilizamos cookies e tecnologias de armazenamento local no navegador (como LocalStorage) para garantir uma navegação rápida, segura e adaptada às suas preferências. Esta política detalha quais tecnologias utilizamos, suas finalidades e como você pode gerenciá-las.',
     sec1Title: '1. Quais tipos de cookies e armazenamento utilizamos?',
     cookieTechTitle: 'Cookies Técnicos Essenciais',
     cookieTechDesc: 'Necessários para navegação, segurança das chamadas de API e execução do reprodutor de vídeo integrado.',
@@ -520,7 +520,7 @@ export const copyrightTranslations: Record<Locale, CopyrightTranslations> = {
     title: 'Política de Copyright y DMCA',
     lastUpdated: 'Protección de Propiedad Intelectual y Procedimiento de Notificación',
     sec1Title: '1. Respeto por los Derechos de Autor',
-    sec1Desc: 'En FTY Downloader Pro, respetamos escrupulosamente los derechos de propiedad intelectual de creadores, productoras y artistas. Nuestra plataforma funciona como una herramienta neutral de procesamiento y conversión de medios (format-shifting) para uso personal privado y legítimo, sin almacenar ni hospedar archivos audiovisuales de terceros en servidores propios.',
+    sec1Desc: 'En Descargador Pro, respetamos escrupulosamente los derechos de propiedad intelectual de creadores, productoras y artistas. Nuestra plataforma funciona como una herramienta neutral de procesamiento y conversión de medios (format-shifting) para uso personal privado y legítimo, sin almacenar ni hospedar archivos audiovisuales de terceros en servidores propios.',
     sec2Title: '2. Doctrina de Uso Justo (Fair Use)',
     sec2Desc: 'Recordamos a los usuarios que la descarga de material protegido sin autorización previa puede estar amparada exclusivamente bajo las excepciones de Uso Justo (Fair Use) aplicables en su país, limitadas estrictamente a:',
     fairUseItem1: 'Crítica, reseñas y comentarios académicos o culturales.',
@@ -541,7 +541,7 @@ export const copyrightTranslations: Record<Locale, CopyrightTranslations> = {
     title: 'Copyright & DMCA Policy',
     lastUpdated: 'Intellectual Property Protection & Notice Procedure',
     sec1Title: '1. Respect for Intellectual Property',
-    sec1Desc: 'At FTY Downloader Pro, we rigorously respect the intellectual property rights of content creators, studios, and artists. Our service operates strictly as a neutral media processing and format-shifting utility intended for private, non-commercial personal backup, hosting no third-party media files on its servers.',
+    sec1Desc: 'At Descargador Pro, we rigorously respect the intellectual property rights of content creators, studios, and artists. Our service operates strictly as a neutral media processing and format-shifting utility intended for private, non-commercial personal backup, hosting no third-party media files on its servers.',
     sec2Title: '2. Fair Use Doctrine',
     sec2Desc: 'Users are reminded that downloading protected media without prior copyright holder authorization is solely permissible under recognized Fair Use exceptions in their jurisdiction, including:',
     fairUseItem1: 'Criticism, commentary, scholarship, and cultural reviews.',
@@ -562,7 +562,7 @@ export const copyrightTranslations: Record<Locale, CopyrightTranslations> = {
     title: 'Política de Direitos Autorais e DMCA',
     lastUpdated: 'Proteção de Propriedade Intelectual e Procedimento de Notificação',
     sec1Title: '1. Respeito aos Direitos Autorais',
-    sec1Desc: 'No FTY Downloader Pro, respeitamos rigorosamente os direitos de propriedade intelectual de criadores, gravadoras e produtoras. Nossa plataforma atua unicamente como uma ferramenta neutra de conversão de mídia e backup pessoal privado, sem hospedar ou armazenar arquivos audiovisuais de terceiros em servidores próprios.',
+    sec1Desc: 'No Descargador Pro, respeitamos rigorosamente os direitos de propriedade intelectual de criadores, gravadoras e produtoras. Nossa plataforma atua unicamente como uma ferramenta neutra de conversão de mídia e backup pessoal privado, sem hospedar ou armazenar arquivos audiovisuais de terceiros em servidores próprios.',
     sec2Title: '2. Doutrina de Uso Justo (Fair Use)',
     sec2Desc: 'Lembramos a todos os usuários que o download de mídias protegidas sem autorização prévia só é permitido sob as hipóteses legais de Uso Justo previstas na lei, tais como:',
     fairUseItem1: 'Crítica, comentários e análises acadêmicas ou culturais.',
@@ -579,4 +579,5 @@ export const copyrightTranslations: Record<Locale, CopyrightTranslations> = {
     dmcaButtonText: 'Enviar Notificação DMCA'
   }
 };
+
 

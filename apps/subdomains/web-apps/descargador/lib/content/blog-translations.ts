@@ -1,4 +1,4 @@
-import { BlogPost } from '@/types/blog';
+﻿import { BlogPost } from '@/types/blog';
 import { Locale } from '@/lib/i18n/config';
 
 export interface LocalizedBlogItem {
@@ -33,7 +33,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <ul>
           <li><strong>Cloud Synchronization:</strong> Google Drive, Dropbox, and OneDrive with geographic redundancy.</li>
           <li><strong>Local Network Attached Storage (NAS):</strong> Essential for content creators working with high-bitrate 4K files.</li>
-          <li><strong>FTY Downloader Pro:</strong> Our verified utility to ensure saved online videos and audio retain complete metadata and pristine original quality.</li>
+          <li><strong>Descargador Pro:</strong> Our verified utility to ensure saved online videos and audio retain complete metadata and pristine original quality.</li>
         </ul>
 
         <h2>Conclusion</h2>
@@ -47,7 +47,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
       readTime: '10 min',
       content: `
         <h2>Complete Guide: Downloading Facebook Videos in High Resolution</h2>
-        <p>Facebook hosts millions of hours of rich video content. However, the native platform doesn't allow saving videos for offline viewing. In this guide, you will learn how to use <strong>FTY Downloader Pro</strong> to save any public Facebook video at maximum fidelity.</p>
+        <p>Facebook hosts millions of hours of rich video content. However, the native platform doesn't allow saving videos for offline viewing. In this guide, you will learn how to use <strong>Descargador Pro</strong> to save any public Facebook video at maximum fidelity.</p>
 
         <h3>Why Choose 4K Resolution?</h3>
         <p>Most social media videos are heavily compressed for mobile feeds. If you need to replay the video on high-definition displays or repurpose it for professional editing, you need the original uncompressed stream.</p>
@@ -55,7 +55,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <h2>Step-by-Step Instructions</h2>
         <ul>
           <li><strong>Find the video:</strong> Open Facebook and click on the three dots or share menu to "Copy Link".</li>
-          <li><strong>Paste the URL:</strong> Open FTY Downloader and paste the URL into the search field.</li>
+          <li><strong>Paste the URL:</strong> Open Descargador Pro and paste the URL into the search field.</li>
           <li><strong>Choose your format:</strong> Select MP4 and your preferred quality tier (720p, 1080p, or 4K UHD).</li>
           <li><strong>Download:</strong> Click Download and save the video directly to your device storage.</li>
         </ul>
@@ -79,7 +79,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <h3>Steps for High Resolution Clean Downloads</h3>
         <ul>
           <li><strong>Copy link:</strong> Open TikTok, find the clip, and tap "Share" > "Copy link".</li>
-          <li><strong>Paste into FTY Downloader:</strong> Insert the copied URL into our input bar.</li>
+          <li><strong>Paste into Descargador Pro:</strong> Insert the copied URL into our input bar.</li>
           <li><strong>Select No Watermark:</strong> Choose the HD MP4 option that strips away watermarks and metadata cleanly.</li>
         </ul>
 
@@ -113,7 +113,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <p>Modern creators need agility, fast media ingestion, and automated workflows to stay ahead of short-form trends across TikTok, YouTube Shorts, and Instagram Reels.</p>
         <h3>Top Recommendations</h3>
         <ul>
-          <li><strong>FTY Downloader Pro:</strong> Instant asset extraction and backup without loss of quality.</li>
+          <li><strong>Descargador Pro:</strong> Instant asset extraction and backup without loss of quality.</li>
           <li><strong>CapCut & DaVinci Resolve:</strong> Industry standard vertical video editing with AI captions.</li>
           <li><strong>Notion:</strong> Editorial calendar management and script drafting.</li>
         </ul>
@@ -146,7 +146,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
       readTime: '12 min',
       content: `
         <h2>Extracting Studio-Quality Audio from Videos</h2>
-        <p>Whether you want to listen to a conference offline or extract sound effects for editing, FTY Downloader provides lossless 320kbps MP3 conversions in seconds.</p>
+        <p>Whether you want to listen to a conference offline or extract sound effects for editing, Descargador Provides lossless 320kbps MP3 conversions in seconds.</p>
       `
     },
     'mega-guia-post-9': {
@@ -243,7 +243,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <ul>
           <li><strong>Sincronização em Nuvem:</strong> Google Drive, Dropbox e OneDrive com redundância geográfica.</li>
           <li><strong>Armazenamento Local (NAS):</strong> Essencial para criadores que lidam com arquivos de vídeo 4K pesados.</li>
-          <li><strong>FTY Downloader Pro:</strong> Nossa ferramenta recomendada para baixar e arquivar conteúdos online com fidelidade máxima.</li>
+          <li><strong>Descargador Pro:</strong> Nossa ferramenta recomendada para baixar e arquivar conteúdos online com fidelidade máxima.</li>
         </ul>
 
         <h2>Conclusão</h2>
@@ -257,7 +257,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
       readTime: '10 min',
       content: `
         <h2>Guia Completo: Download de Vídeos do Facebook em Alta Resolução</h2>
-        <p>O Facebook é um dos maiores acervos de vídeo do mundo, mas não oferece opção nativa para salvar mídias offline. Neste guia, mostramos como usar o <strong>FTY Downloader Pro</strong> para baixar qualquer vídeo público com máxima qualidade.</p>
+        <p>O Facebook é um dos maiores acervos de vídeo do mundo, mas não oferece opção nativa para salvar mídias offline. Neste guia, mostramos como usar o <strong>Descargador Pro</strong> para baixar qualquer vídeo público com máxima qualidade.</p>
 
         <h3>Por que Escolher a Resolução 4K?</h3>
         <p>A maioria dos vídeos nas redes sociais passa por forte compressão. Para exibir o vídeo em telas grandes ou utilizá-lo em edições profissionais, você precisa do arquivo com a máxima taxa de bits.</p>
@@ -265,7 +265,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <h2>Passo a Passo para Baixar</h2>
         <ul>
           <li><strong>Encontre o vídeo:</strong> Abra o Facebook e toque nos três pontos para "Copiar link".</li>
-          <li><strong>Cole o link:</strong> Acesse o FTY Downloader e insira o link no campo de busca.</li>
+          <li><strong>Cole o link:</strong> Acesse o Descargador Pro e insira o link no campo de busca.</li>
           <li><strong>Escolha o formato:</strong> Selecione MP4 e a resolução desejada (720p, 1080p ou 4K).</li>
           <li><strong>Baixar:</strong> Clique no botão e salve o arquivo diretamente no seu celular ou computador.</li>
         </ul>
@@ -283,7 +283,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
         <h3>Passos para Baixar em Alta Definição</h3>
         <ul>
           <li><strong>Copie o link:</strong> Abra o TikTok, vá no vídeo e clique em "Compartilhar" > "Copiar link".</li>
-          <li><strong>Cole no FTY Downloader:</strong> Cole a URL na nossa barra de busca.</li>
+          <li><strong>Cole no Descargador Pro:</strong> Cole a URL na nossa barra de busca.</li>
           <li><strong>Selecione Sem Marca d'Água:</strong> Escolha a opção HD limpa para baixar sem logos.</li>
         </ul>
       `
@@ -490,4 +490,5 @@ export function getLocalizedPost(post: BlogPost, locale: Locale): BlogPost {
     content: post.content
   };
 }
+
 

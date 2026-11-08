@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Página no encontrada - FTYDownloader Pro',
+  title: 'Página no encontrada - Descargador Pro',
 }
 
 export default function NotFound() {

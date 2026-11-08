@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -294,7 +294,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             setDownloadDetails('¡Guardado en la Galería!')
             scheduleNotification('Descarga Completada', `Guardado en Galería (${defaultFilename})`)
             await Toast.show({
-              text: `✅ ¡Descarga completada! Guardado en Galería (FTY Downloader Pro).`,
+              text: `✅ ¡Descarga completada! Guardado en Galería (Descargador Pro).`,
               duration: 'long'
             }).catch(() => {})
             addToHistory({
@@ -740,7 +740,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         });
 
         const savedUri = saveRes.uri;
-        const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+        const typeFolder = isAudio ? 'DescargadorPro Audio' : 'DescargadorPro Video';
 
         scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 
@@ -906,7 +906,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           try {
             const saveRes = await saveNativeMediaFile(blob, filename, isAudio);
             const savedUri = saveRes.uri;
-            const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+            const typeFolder = isAudio ? 'DescargadorPro Audio' : 'DescargadorPro Video';
 
             scheduleNotification('Descarga Completada', `Guardado en ${typeFolder}/${filename}`);
 

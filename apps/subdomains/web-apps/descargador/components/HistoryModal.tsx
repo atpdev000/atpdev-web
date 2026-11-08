@@ -114,13 +114,13 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
 
             // 2. Enlace compartido mediante Capacitor Share o Web Share como último recurso
             const shareUrl = item.originalUrl || item.filePath || (typeof window !== 'undefined' ? window.location.href : '');
-            const shareTitle = item.title || 'FTY Downloader Pro';
+            const shareTitle = item.title || 'Descargador Pro';
 
             if (Capacitor.isNativePlatform()) {
                 try {
                     await Share.share({
                         title: shareTitle,
-                        text: `Descargado con FTY Downloader Pro: ${shareTitle}`,
+                        text: `Descargado con Descargador Pro: ${shareTitle}`,
                         url: shareUrl,
                         dialogTitle: 'Compartir descarga'
                     });
@@ -532,7 +532,7 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
                                     className="w-full max-w-md"
                                 />
                             ) : (
-                                <p className="text-xs text-slate-400">Audio guardado en la carpeta FTYdownloaderPro Audio</p>
+                                <p className="text-xs text-slate-400">Audio guardado en la carpeta DescargadorPro Audio</p>
                             )}
                         </div>
                     ) : (selectedPreview.filePath && !videoError) ? (
@@ -555,7 +555,7 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
                             </div>
                             <p className="font-bold text-base">Video guardado en el dispositivo</p>
                             <p className="text-xs text-slate-300 max-w-xs">
-                                Este archivo fue descargado en tu Galería de videos o en la carpeta <span className="text-blue-400 font-mono">FTYdownloaderPro Video</span> de tu teléfono.
+                                Este archivo fue descargado en tu Galería de videos o en la carpeta <span className="text-blue-400 font-mono">DescargadorPro Video</span> de tu teléfono.
                             </p>
                             {selectedPreview.filePath && Capacitor.isNativePlatform() && (
                                 <button

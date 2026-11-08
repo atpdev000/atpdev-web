@@ -25,7 +25,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
             <h3 className="font-extrabold text-base mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              FTYDownloader Pro
+              Descargador Pro
             </h3>
             <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
               {t.footer.bio}
@@ -72,7 +72,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-200 dark:border-slate-800/80 pt-6 text-center text-xs text-slate-500 dark:text-slate-400">
           <p>
-            &copy; {new Date().getFullYear()} FTYDownloader Pro. {t.footer.rights}
+            &copy; {new Date().getFullYear()} Descargador Pro. {t.footer.rights}
           </p>
           <p className="mt-1 text-[11px] opacity-75">
             Facebook, TikTok, Instagram, Twitter / 𝕏, Threads — Marcas registradas de sus respectivos propietarios.

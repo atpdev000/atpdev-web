@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -18,7 +18,7 @@ export default function MainHeader() {
   }>({
     enabled: true,
     version: 'v1.2.0',
-    file_url: '/downloads/FTYdownloaderPro.apk'
+    file_url: '/downloads/DescargadorPro.apk'
   })
 
   useEffect(() => {
@@ -98,7 +98,7 @@ export default function MainHeader() {
 
             {mounted && apkConfig?.enabled && (
               <a
-                href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
                 download
                 suppressHydrationWarning
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all hover:scale-105"
@@ -137,3 +137,4 @@ export default function MainHeader() {
     </header>
   )
 }
+

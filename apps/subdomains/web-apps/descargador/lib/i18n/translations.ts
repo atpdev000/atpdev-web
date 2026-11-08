@@ -17,14 +17,14 @@ export const translations = {
     },
     hero: {
       verifiedBadge: 'Herramienta Verificada y Segura - 2026',
-      titlePrefix: 'FTYDownloader',
+      titlePrefix: 'Descargador',
       titleHighlight: 'Pro',
       subtitle: 'Descarga videos y audios de Facebook, TikTok, Instagram, Twitter y Threads en alta calidad HD y sin marcas de agua. Rápido, seguro y completamente gratis.',
       ctaDownload: 'Comenzar a Descargar',
       ctaFeatures: 'Ver Características'
     },
     toolsCard: {
-      title: 'FTY Downloader - Descargador Multiplataforma',
+      title: 'Descargador Pro - Descargador Multiplataforma',
       subtitle: 'Descarga videos y audios de Facebook, TikTok, Instagram, Twitter / 𝕏 y Threads en alta calidad HD y sin marcas de agua.',
       legalNoticeTitle: 'Aviso Legal:',
       legalNoticeText: 'Para gestión de contenido propio. Respeta los derechos de autor y las normas de cada plataforma.'
@@ -144,14 +144,14 @@ export const translations = {
     },
     hero: {
       verifiedBadge: 'Verified & Secure Tool - 2026',
-      titlePrefix: 'FTYDownloader',
+      titlePrefix: 'Descargador',
       titleHighlight: 'Pro',
       subtitle: 'Download videos and audio from Facebook, TikTok, Instagram, Twitter, and Threads in high definition HD without watermarks. Fast, secure, and completely free.',
       ctaDownload: 'Start Downloading',
       ctaFeatures: 'View Features'
     },
     toolsCard: {
-      title: 'FTY Downloader - Multiplatform Downloader',
+      title: 'Descargador Pro - Multiplatform Downloader',
       subtitle: 'Download videos and audio from Facebook, TikTok, Instagram, Twitter / 𝕏 and Threads in high definition HD with no watermarks.',
       legalNoticeTitle: 'Legal Notice:',
       legalNoticeText: 'For personal content management. Please respect copyright and terms of service of each platform.'
@@ -271,14 +271,14 @@ export const translations = {
     },
     hero: {
       verifiedBadge: 'Ferramenta Verificada e Segura - 2026',
-      titlePrefix: 'FTYDownloader',
+      titlePrefix: 'Descargador',
       titleHighlight: 'Pro',
       subtitle: 'Baixe vídeos e áudios do Facebook, TikTok, Instagram, Twitter e Threads em alta qualidade HD e sem marca d\'água. Rápido, seguro e 100% grátis.',
       ctaDownload: 'Começar a Baixar',
       ctaFeatures: 'Ver Recursos'
     },
     toolsCard: {
-      title: 'FTY Downloader - Baixador Multiplataforma',
+      title: 'Descargador Pro - Baixador Multiplataforma',
       subtitle: 'Baixe vídeos e áudios do Facebook, TikTok, Instagram, Twitter / 𝕏 e Threads em alta definição HD e sem marca d\'água.',
       legalNoticeTitle: 'Aviso Legal:',
       legalNoticeText: 'Para gerenciamento de conteúdo próprio. Respeite os direitos autorais e as regras de cada plataforma.'

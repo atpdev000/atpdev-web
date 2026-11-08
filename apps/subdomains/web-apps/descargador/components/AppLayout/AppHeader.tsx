@@ -15,7 +15,7 @@ export default function AppHeader() {
         <>
             <div className="py-2 px-3 sm:px-4 flex items-center justify-between transition-colors border-b border-gray-100 dark:border-slate-800/80 max-w-full relative z-50">
                 <h1 className="text-base sm:text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate min-w-0 mr-1 sm:mr-2">
-                    FTY Downloader Pro
+                    Descargador Pro
                 </h1>
 
                 <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { formatBytes } from '@/lib/utils'
@@ -242,7 +242,7 @@ export default function TwitterDownloader({ initialUrl, autoSearch }: Downloader
             const isAudio = Boolean(format.isAudio);
             const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (pct) => setDownloadProgress(pct));
             savedFilePath = saveRes?.uri || '';
-            const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+            const typeFolder = isAudio ? 'DescargadorPro Audio' : 'DescargadorPro Video';
 
             await scheduleNotification(
               '¡Descarga completada!',
@@ -548,3 +548,4 @@ export default function TwitterDownloader({ initialUrl, autoSearch }: Downloader
     </div>
   )
 }
+

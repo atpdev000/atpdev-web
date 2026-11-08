@@ -16,12 +16,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   if (!post) {
     return {
-      title: 'Artículo No Encontrado - FTYDownloader Pro',
+      title: 'Artículo No Encontrado - Descargador Pro',
     }
   }
 
   return {
-    title: `${post.title} - FTYDownloader Pro`,
+    title: `${post.title} - Descargador Pro`,
     description: post.excerpt,
     openGraph: {
       title: post.title,

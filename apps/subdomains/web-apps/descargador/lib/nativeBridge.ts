@@ -1,4 +1,4 @@
-import { registerPlugin, Capacitor } from '@capacitor/core';
+﻿import { registerPlugin, Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export interface WhatsAppStatusPluginInterface {
@@ -98,8 +98,8 @@ export async function saveNativeMediaFile(
   isAudio: boolean = false,
   onProgress?: (progress: number) => void
 ): Promise<{ success: boolean; uri: string; path: string }> {
-  const baseFolder = 'Download/FTYdownloaderPro/download';
-  const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+  const baseFolder = 'Download/DescargadorPro/download';
+  const typeFolder = isAudio ? 'DescargadorPro Audio' : 'DescargadorPro Video';
 
   // Helper para crear directorios tolerando directorios preexistentes sin arrojar excepción
   const safeMkdir = async (dirPath: string, directory: Directory): Promise<boolean> => {
@@ -133,10 +133,10 @@ export async function saveNativeMediaFile(
   const extOk = await safeMkdir(`${baseFolder}/${typeFolder}`, Directory.ExternalStorage);
   if (!extOk) {
     console.warn('⚠️ No se pudo crear en ExternalStorage, probando Documents...');
-    const docOk = await safeMkdir(`FTYdownloaderPro/${typeFolder}`, Directory.Documents);
+    const docOk = await safeMkdir(`DescargadorPro/${typeFolder}`, Directory.Documents);
     if (docOk) {
       targetDirectory = Directory.Documents;
-      finalPath = `FTYdownloaderPro/${typeFolder}/${filename}`;
+      finalPath = `DescargadorPro/${typeFolder}/${filename}`;
     } else {
       console.warn('⚠️ No se pudo crear en Documents, usando almacenamiento interno seguro Data...');
       targetDirectory = Directory.Data;
@@ -230,3 +230,4 @@ export async function downloadAndCombineNative(
     isAudio
   });
 }
+

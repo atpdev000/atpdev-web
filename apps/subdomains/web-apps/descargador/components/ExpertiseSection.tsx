@@ -37,7 +37,7 @@ export default function ExpertiseSection() {
                         Líderes en gestión de contenido multimedia
                     </p>
                     <p className="mt-4 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-slate-300">
-                        En FTY Downloader Pro, nos tomamos en serio la integridad de tus archivos y la seguridad de tu navegación.
+                        En Descargador Pro, nos tomamos en serio la integridad de tus archivos y la seguridad de tu navegación.
                         Nuestra plataforma está diseñada cumpliendo los más altos estándares de rendimiento y ética digital.
                     </p>
                 </div>

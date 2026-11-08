@@ -105,7 +105,7 @@ export default function Header() {
               </Link>
               {mounted && apkConfig?.enabled && (
                 <a
-                  href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                  href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
                   download
                   suppressHydrationWarning
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-all hover:scale-105"
@@ -151,7 +151,7 @@ export default function Header() {
               {/* APK en móvil */}
               {mounted && apkConfig?.enabled && (
                 <a
-                  href={apkConfig.file_url || '/downloads/FTYdownloaderPro.apk'}
+                  href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
                   download
                   suppressHydrationWarning
                   className="lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs"

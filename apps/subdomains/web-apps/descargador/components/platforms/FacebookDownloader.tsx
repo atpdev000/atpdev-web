@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -284,7 +284,7 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
         try {
           console.log(`💾 FB: Iniciando guardado por chunks de ${formatBytes(blob.size)}...`);
 
-          const typeFolder = isAudio ? 'FTYdownloaderPro Audio' : 'FTYdownloaderPro Video';
+          const typeFolder = isAudio ? 'DescargadorPro Audio' : 'DescargadorPro Video';
           const saveRes = await saveNativeMediaFile(blob, filename, isAudio, (pct) => setDownloadProgress(pct));
 
           console.log('✅ FB Guardado en:', saveRes.uri);

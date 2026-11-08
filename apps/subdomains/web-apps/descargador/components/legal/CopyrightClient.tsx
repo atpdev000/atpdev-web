@@ -42,7 +42,7 @@ export default function CopyrightClient({ siteTitle, contactEmail }: { siteTitle
             {t.sec1Title}
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            {t.sec1Desc.replace('FTY Downloader Pro', siteTitle)}
+            {t.sec1Desc.replace('Descargador Pro', siteTitle)}
           </p>
         </div>
 

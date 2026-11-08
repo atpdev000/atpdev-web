@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+﻿import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles } from 'lucide-react'
@@ -6,7 +6,7 @@ import { FEATURES } from '@/lib/featureFlags'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
 
 export const metadata: Metadata = {
-    title: 'Descargar Videos de YouTube en HD y MP3 | FTY Downloader Pro',
+    title: 'Descargar Videos de YouTube en HD y MP3 | Descargador Pro',
     description: 'Gestiona y respalda videos de YouTube en la mejor calidad disponible (1080p, 4K y MP3). Rápido, seguro y profesional.',
 }
 
@@ -50,7 +50,7 @@ export default function YoutubeToolPage() {
                         ¿Cómo descargar videos de YouTube en HD?
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Con <strong>FTY Downloader Pro</strong>, puedes procesar enlaces de videos largos, Shorts y transmisiones finalizadas para verlos sin conexión en cualquier dispositivo.
+                        Con <strong>Descargador Pro</strong>, puedes procesar enlaces de videos largos, Shorts y transmisiones finalizadas para verlos sin conexión en cualquier dispositivo.
                     </p>
                 </div>
 
@@ -89,3 +89,4 @@ export default function YoutubeToolPage() {
         </div>
     )
 }
+

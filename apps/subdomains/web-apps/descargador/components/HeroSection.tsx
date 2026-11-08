@@ -175,7 +175,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
       <div className="max-w-xl mx-auto bg-gradient-to-r from-blue-50/90 to-purple-50/90 dark:from-slate-900/90 dark:to-slate-800/90 p-6 rounded-2xl border border-blue-100 dark:border-slate-800 shadow-sm mb-12 backdrop-blur-md">
         <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center justify-center gap-2">
           <span className="flex h-3 w-3 rounded-full bg-green-500 animate-pulse"></span>
-          ¡Lleva FTY Downloader en tu Android!
+          ¡Lleva Descargador Pro en tu Android!
         </h3>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
@@ -195,7 +195,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
           </a>
 
           <a
-            href="/FTYdownloaderPro.apk"
+            href="/downloads/DescargadorPro.apk"
             download
             className="flex items-center gap-3 bg-emerald-600 text-white px-6 py-2.5 rounded-xl hover:bg-emerald-700 hover:scale-105 transition-all shadow-md group"
           >

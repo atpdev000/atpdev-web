@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { ArrowLeft, Target, Rocket, Shield, Sparkles, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Sobre Nosotros | FTY Downloader Pro - Misión y Ecosistema',
-  description: 'Conoce la visión de FTY Downloader Pro. Especialistas en procesamiento multimedia dedicados a garantizar la accesibilidad y respaldo legítimo de contenidos digitales.',
+  title: 'Sobre Nosotros | Descargador Pro - Misión y Ecosistema',
+  description: 'Conoce la visión de Descargador Pro. Especialistas en procesamiento multimedia dedicados a garantizar la accesibilidad y respaldo legítimo de contenidos digitales.',
 }
 
 export default function AboutPage() {
@@ -32,7 +32,7 @@ export default function AboutPage() {
             Preservación y Respaldo de Contenidos Digitales
           </h1>
           <p className="text-sm sm:text-base text-blue-100 leading-relaxed max-w-2xl mx-auto opacity-95">
-            FTY Downloader Pro es una plataforma técnica creada para creadores, educadores y usuarios que buscan respaldar su contenido multimedia con la máxima fidelidad y velocidad.
+            Descargador Pro es una plataforma técnica creada para creadores, educadores y usuarios que buscan respaldar su contenido multimedia con la máxima fidelidad y velocidad.
           </p>
         </div>
       </section>

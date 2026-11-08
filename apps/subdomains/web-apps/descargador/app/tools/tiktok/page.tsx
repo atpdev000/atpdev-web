@@ -1,4 +1,4 @@
-import TiktokDownloader from '@/components/platforms/TiktokDownloader'
+﻿import TiktokDownloader from '@/components/platforms/TiktokDownloader'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
@@ -45,7 +45,7 @@ export default function TiktokToolPage() {
                         ¿Cómo descargar videos de TikTok sin marca de agua?
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                        Con <strong>FTY Downloader Pro</strong>, puedes remover automáticamente la marca de agua flotante de TikTok para obtener el video original en la máxima resolución posible.
+                        Con <strong>Descargador Pro</strong>, puedes remover automáticamente la marca de agua flotante de TikTok para obtener el video original en la máxima resolución posible.
                     </p>
                 </div>
 
@@ -84,3 +84,4 @@ export default function TiktokToolPage() {
         </div>
     )
 }
+

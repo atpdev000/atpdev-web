@@ -10,12 +10,12 @@ export default function SEOContentSection() {
                     La Solución Profesional para Descargas Multimedia
                 </h2>
                 <p className="text-base sm:text-lg leading-relaxed text-gray-600 dark:text-slate-300 mb-6">
-                    Bienvenido a <strong>FTY Downloader Pro</strong>, la herramienta de archivado digital líder en la web.
+                    Bienvenido a <strong>Descargador Pro</strong>, la herramienta de archivado digital líder en la web.
                     En un mundo donde el contenido es efímero, nuestra misión es permitirte preservar videos educativos,
                     tutoriales técnicos, momentos inspiradores y entretenimiento de alta calidad de forma permanente en tus dispositivos.
                 </p>
                 <p className="text-sm sm:text-base leading-relaxed text-gray-600 dark:text-slate-400">
-                    A diferencia de otros descargadores básicos, FTY utiliza algoritmos de procesamiento avanzados que analizan el flujo de datos original.
+                    A diferencia de otros descargadores básicos, Descargador Pro utiliza algoritmos de procesamiento avanzados que analizan el flujo de datos original.
                     Esto nos permite extraer el archivo "fuente" (source file) sin recodificación, garantizando que el video que guardas es bit-por-bit idéntico
                     a la máxima calidad disponible en el servidor de origen, ya sea <strong>Full HD (1080p)</strong> o incluso <strong>Ultra HD (4K)</strong>.
                 </p>
@@ -40,7 +40,7 @@ export default function SEOContentSection() {
                         <ol className="list-decimal pl-6 space-y-3 marker:text-blue-600 dark:marker:text-blue-400 marker:font-bold text-sm sm:text-base text-gray-700 dark:text-slate-300">
                             <li><strong>Localiza el video:</strong> Abre la aplicación de Facebook o navega en tu PC. Si es un Reel, ábrelo en pantalla completa.</li>
                             <li><strong>Obtén el enlace limpio:</strong> Haz clic en los tres puntos (...) o en "Compartir" y selecciona "Copiar enlace". Evita copiar la URL del navegador si tiene parámetros extraños.</li>
-                            <li><strong>Procesamiento:</strong> Pega el enlace en FTY Downloader. Nuestro sistema escaneará las variantes SD y HD.</li>
+                            <li><strong>Procesamiento:</strong> Pega el enlace en Descargador Pro. Nuestro sistema escaneará las variantes SD y HD.</li>
                             <li><strong>Selección de Calidad:</strong> Siempre verás dos opciones principales: "Normal Quality" (ideal para móviles con poco espacio) y "HD Quality" (recomendado para PC y TV). Elige HD para mayor nitidez.</li>
                         </ol>
                     </article>
@@ -52,7 +52,7 @@ export default function SEOContentSection() {
                         </h3>
                         <p className="mb-4 text-sm sm:text-base text-gray-600 dark:text-slate-300 leading-relaxed">
                             La marca de agua de TikTok puede ser molesta si quieres guardar un recuerdo limpio o reutilizar tu propio contenido.
-                            FTY Downloader utiliza un método de "bypass" legítimo para acceder al stream original:
+                            Descargador Pro utiliza un método de "bypass" legítimo para acceder al stream original:
                         </p>
                         <ol className="list-decimal pl-6 space-y-3 marker:text-purple-600 dark:marker:text-purple-400 marker:font-bold text-sm sm:text-base text-gray-700 dark:text-slate-300">
                             <li><strong>Encuentra tu TikTok:</strong> Abre el video deseado en la app.</li>
@@ -91,7 +91,7 @@ export default function SEOContentSection() {
                         <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Por qué mi descarga falla o dice "Error"?</h4>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                             Esto suele ocurrir si el video es <strong>Privado</strong> (solo visible para amigos) o si tiene restricciones de edad/región.
-                            FTY Downloader solo puede procesar videos que son 100% Públicos. Asegúrate de que el enlace sea accesible desde una ventana de incógnito.
+                            Descargador Pro solo puede procesar videos que son 100% Públicos. Asegúrate de que el enlace sea accesible desde una ventana de incógnito.
                         </p>
                     </div>
                     <div>
@@ -109,7 +109,7 @@ export default function SEOContentSection() {
                         </p>
                     </div>
                     <div>
-                        <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿FTY Downloader es gratuito de verdad?</h4>
+                        <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Descargador Pro es gratuito de verdad?</h4>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                             Sí, es una herramienta gratuita financiada mediante publicidad discreta. No limitamos la velocidad de descarga ni el número de videos que puedes procesar por día.
                         </p>
@@ -162,7 +162,7 @@ export default function SEOContentSection() {
                 <div className="bg-amber-50/80 dark:bg-amber-950/30 border-l-4 border-amber-500 dark:border-amber-400 p-6 rounded-r-2xl border border-amber-200/60 dark:border-amber-800/40">
                     <p className="text-sm font-bold text-amber-900 dark:text-amber-200 mb-2">Respeto a la Propiedad Intelectual</p>
                     <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
-                        FTY Downloader Pro no aloja ningún contenido pirata ni videos en sus servidores. Somos una herramienta de "intercambio de formato" (format-shifting).
+                        Descargador Pro no aloja ningún contenido pirata ni videos en sus servidores. Somos una herramienta de "intercambio de formato" (format-shifting).
                         Todos los videos se descargan directamente de los servidores de sus respectivas plataformas (CDN).
                     </p>
                     <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 leading-relaxed mt-2">

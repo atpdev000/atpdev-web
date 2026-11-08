@@ -21,7 +21,7 @@ const features = [
   },
   {
     title: 'Totalmente Gratuito',
-    description: 'Disfruta de todas las funciones premium sin pagar un centavo. FTY Downloader se mantiene gracias a anuncios no intrusivos, para ser siempre gratis para ti.'
+    description: 'Disfruta de todas las funciones premium sin pagar un centavo. Descargador Pro se mantiene gracias a anuncios no intrusivos o planes VIP opcionales, para ser siempre accesible para ti.'
   }
 ]
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -131,9 +131,10 @@ export default function ToolsPage() {
       {/* Aviso legal */}
       <div className="max-w-4xl mx-auto p-5 sm:p-6 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-2xl mb-8">
         <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200 text-center leading-relaxed">
-          <strong>Aviso Ético y Legal:</strong> FTYDownloader Pro es una plataforma independiente para la gestión y respaldo de contenido propio, dominio público o bajo excepciones de Uso Justo (Fair Use). Respeta los derechos de propiedad intelectual de los creadores originales.
+          <strong>Aviso Ético y Legal:</strong> Descargador Pro es una plataforma independiente para la gestión y respaldo de contenido propio, dominio público o bajo excepciones de Uso Justo (Fair Use). Respeta los derechos de propiedad intelectual de los creadores originales.
         </p>
       </div>
     </div>
   )
 }
+

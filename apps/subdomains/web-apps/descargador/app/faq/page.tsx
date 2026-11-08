@@ -3,15 +3,15 @@ import Link from 'next/link'
 import { HelpCircle, ArrowLeft, MessageSquare, ExternalLink } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Preguntas Frecuentes (FAQ) - FTY Downloader Pro',
+  title: 'Preguntas Frecuentes (FAQ) - Descargador Pro',
   description: 'Resuelve tus dudas sobre cómo descargar videos de redes sociales, formatos compatibles, calidad 1080p, audio MP3 y seguridad.',
 }
 
 export default function FAQPage() {
   const faqs = [
     {
-      question: "¿Es realmente gratuito FTY Downloader Pro?",
-      answer: "Sí, el servicio de FTY Downloader Pro es 100% gratuito. No existen cuotas de suscripción obligatorias ni límites en el número de descargas que puedes realizar. Nuestra plataforma se financia a través de publicidad responsable en el sitio web y en la app, lo que nos permite mantener servidores de alta velocidad sin costo para los creadores de contenido."
+      question: "¿Es realmente gratuito Descargador Pro?",
+      answer: "Sí, el servicio de Descargador Pro ofrece descargas gratuitas ilimitadas. Nuestra plataforma se financia a través de publicidad no intrusiva y planes opcionales Premium para quienes desean descargas por lotes, velocidad prioritaria y 100% sin anuncios."
     },
     {
       question: "¿Qué plataformas y redes sociales son compatibles?",
@@ -19,7 +19,7 @@ export default function FAQPage() {
     },
     {
       question: "¿Cómo garantizan la calidad de los videos descargados?",
-      answer: "FTY Downloader Pro utiliza tecnología de extracción directa de flujo. Analizamos los metadatos de la publicación y conectamos directamente con el flujo fuente original que la red social utiliza para el streaming, entregando la máxima resolución disponible (720p, 1080p Full HD y calidades superiores sin compresión destructiva)."
+      answer: "Descargador Pro utiliza tecnología de extracción directa de flujo. Analizamos los metadatos de la publicación y conectamos directamente con el flujo fuente original que la red social utiliza para el streaming, entregando la máxima resolución disponible (720p, 1080p Full HD y calidades superiores sin compresión destructiva)."
     },
     {
       question: "¿Puedo extraer audio MP3 de cualquier video?",
@@ -31,11 +31,11 @@ export default function FAQPage() {
     },
     {
       question: "¿Cómo descargo en teléfonos Android o iPhone?",
-      answer: "En Android (web o app), la descarga se guarda automáticamente en tu Galería de videos o en la carpeta Downloads/FTYdownloaderPro. En dispositivos Apple con iOS (iPhone/iPad), Safari te preguntará si deseas descargar el archivo, guardándose de inmediato en la aplicación predeterminada 'Archivos' (Files), desde donde podrás compartirlo a WhatsApp o guardarlo en tu Carrete."
+      answer: "En Android (web o app), la descarga se guarda automáticamente en tu Galería de videos o en la carpeta Downloads/DescargadorPro. En dispositivos Apple con iOS (iPhone/iPad), Safari te preguntará si deseas descargar el archivo, guardándose de inmediato en la aplicación predeterminada 'Archivos' (Files), desde donde podrás compartirlo a WhatsApp o guardarlo en tu Carrete."
     },
     {
       question: "¿Necesito registrarme o crear una cuenta?",
-      answer: "No. Puedes usar todas las funciones de FTY Downloader Pro de forma completamente anónima. No solicitamos correos electrónicos, contraseñas ni vinculación con tus cuentas de redes sociales."
+      answer: "No. Puedes usar todas las funciones básicas de Descargador Pro de forma completamente anónima. No solicitamos correos electrónicos obligatorios, contraseñas ni vinculación con tus cuentas de redes sociales."
     },
     {
       question: "¿Por qué a veces recibo un error al intentar procesar un enlace?",
@@ -47,7 +47,7 @@ export default function FAQPage() {
     },
     {
       question: "¿Cumplen con las normativas de derechos de autor?",
-      answer: "FTY Downloader Pro es una herramienta neutral diseñada para la gestión y copia de seguridad de contenido propio o bajo excepciones de Uso Justo (Fair Use) para fines educativos, de crítica o comentario. Respetamos rigurosamente los derechos de propiedad intelectual y contamos con un procedimiento ágil de notificación DMCA."
+      answer: "Descargador Pro es una herramienta neutral diseñada para la gestión y copia de seguridad de contenido propio o bajo excepciones de Uso Justo (Fair Use) para fines educativos, de crítica o comentario. Respetamos rigurosamente los derechos de propiedad intelectual y contamos con un procedimiento ágil de notificación DMCA."
     }
   ]
 
@@ -69,7 +69,7 @@ export default function FAQPage() {
           Preguntas Frecuentes
         </h1>
         <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
-          Todo lo que necesitas saber sobre descargas, formatos compatibles, calidad y seguridad en FTY Downloader Pro.
+          Todo lo que necesitas saber sobre descargas, formatos compatibles, calidad y seguridad en Descargador Pro.
         </p>
       </div>
 
