@@ -40,7 +40,7 @@ export default function BlogPreview() {
             <div className="p-6">
               <div className="flex justify-between items-center mb-3 text-xs">
                 <span className="text-blue-600 dark:text-blue-400 font-semibold">{post.readTime}</span>
-                <span className="text-slate-400 dark:text-slate-500">{post.date}</span>
+                <span className="text-slate-600 dark:text-slate-300 font-medium">{post.date}</span>
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-snug">
                 {post.title}
@@ -50,6 +50,7 @@ export default function BlogPreview() {
               </p>
               <Link
                 href={`/blog/${post.slug}`}
+                aria-label={`Leer artículo: ${post.title}`}
                 className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold text-xs"
               >
                 {t.blog?.readMore || 'Leer más →'}

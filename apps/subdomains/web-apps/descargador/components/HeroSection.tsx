@@ -57,7 +57,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
       </p>
 
       {/* Iconos de plataformas */}
-      <div className="flex justify-center items-center gap-6 sm:gap-8 mb-8 flex-wrap">
+      <div className="flex justify-center items-center gap-6 sm:gap-8 mb-8 flex-wrap min-h-[72px]">
         <button
           type="button"
           onClick={() => handlePlatformClick('facebook')}
@@ -173,10 +173,10 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
 
       {/* SECCIÓN INTERACTIVA DE APP ANDROID */}
       <div className="max-w-xl mx-auto bg-gradient-to-r from-blue-50/90 to-purple-50/90 dark:from-slate-900/90 dark:to-slate-800/90 p-6 rounded-2xl border border-blue-100 dark:border-slate-800 shadow-sm mb-12 backdrop-blur-md">
-        <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center justify-center gap-2">
+        <h2 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center justify-center gap-2">
           <span className="flex h-3 w-3 rounded-full bg-green-500 animate-pulse"></span>
           ¡Lleva Descargador Pro en tu Android!
-        </h3>
+        </h2>
 
         <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
           <a
@@ -189,7 +189,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
               <path d="M3.609 1.814L13.792 12 3.61 22.186a2.156 2.156 0 0 1-.41-.708V2.522a2.156 2.156 0 0 1 .41-.708zm1.066-.341a2.13 2.13 0 0 1 1.763.15l13.064 7.625c.983.573.983 1.506 0 2.079L6.438 19.336a2.13 2.13 0 0 1-1.763.15L14.858 12 4.675 1.473zm-.11 20.31s-.001 0 0 0z" />
             </svg>
             <div className="text-left">
-              <p className="text-[10px] uppercase leading-none opacity-80">Disponible en</p>
+              <p className="text-[10px] uppercase leading-none font-medium text-slate-200">Disponible en</p>
               <p className="text-lg font-bold leading-tight">Google Play</p>
             </div>
           </a>
@@ -203,7 +203,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             <div className="text-left">
-              <p className="text-[10px] uppercase leading-none opacity-80">Descarga Directa</p>
+              <p className="text-[10px] uppercase leading-none font-medium text-emerald-100">Descarga Directa</p>
               <p className="text-lg font-bold leading-tight">Archivo APK</p>
             </div>
           </a>

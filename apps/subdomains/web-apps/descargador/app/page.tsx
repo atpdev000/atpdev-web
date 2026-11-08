@@ -69,7 +69,14 @@ export default function Home() {
     hero_description?: string
     announcement_text?: string
     announcement_enabled?: boolean
-  }>({})
+  }>({
+    site_title: 'Descargador Pro',
+    hero_badge: 'Motor Ultra Rápido • Sin Marcas de Agua • 1080p/4K',
+    hero_title_prefix: 'Descarga videos y audios gratis con',
+    hero_title_highlight: 'Descargador Pro',
+    hero_description: 'La herramienta más potente para descargar contenido multimedia de YouTube, TikTok, Facebook e Instagram en MP4 o MP3 al instante.',
+    announcement_enabled: false
+  })
   const [apkConfig, setApkConfig] = useState<{
     enabled?: boolean
     version?: string

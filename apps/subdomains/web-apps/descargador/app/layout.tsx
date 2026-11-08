@@ -197,8 +197,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             />
           )}
 
-          {/* Scripts de Ezoic y consentimiento cargados solo en producción para evitar error 403 en localhost */}
-          {process.env.NODE_ENV === 'production' && (
+          {/* Scripts de Ezoic y consentimiento cargados solo en producción si Ezoic está habilitado en CMS */}
+          {process.env.NODE_ENV === 'production' && config?.monetization?.ezoic_enabled === true && (
             <>
               <Script
                 strategy="afterInteractive"
