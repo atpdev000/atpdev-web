@@ -7,7 +7,7 @@ export const FEATURES = {
      * - Play Store builds: false (compliance with YouTube ToS)
      * - Ezoic Compliance: false on web, true on native
      */
-    YOUTUBE_ENABLED: process.env.NEXT_PUBLIC_ENABLE_YOUTUBE === 'true' || Capacitor.isNativePlatform(),
+    YOUTUBE_ENABLED: process.env.NEXT_PUBLIC_ENABLE_YOUTUBE !== 'false' && process.env.NEXT_PUBLIC_APP_VERSION !== 'playstore',
 
     /**
      * Current app version identifier

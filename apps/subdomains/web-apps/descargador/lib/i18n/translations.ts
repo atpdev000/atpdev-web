@@ -30,6 +30,7 @@ export const translations = {
       legalNoticeText: 'Para gestión de contenido propio. Respeta los derechos de autor y las normas de cada plataforma.'
     },
     platforms: {
+      youtube: 'YouTube',
       facebook: 'Facebook',
       tiktok: 'TikTok',
       instagram: 'Instagram',
@@ -157,6 +158,7 @@ export const translations = {
       legalNoticeText: 'For personal content management. Please respect copyright and terms of service of each platform.'
     },
     platforms: {
+      youtube: 'YouTube',
       facebook: 'Facebook',
       tiktok: 'TikTok',
       instagram: 'Instagram',
@@ -284,6 +286,7 @@ export const translations = {
       legalNoticeText: 'Para gerenciamento de conteúdo próprio. Respeite os direitos autorais e as regras de cada plataforma.'
     },
     platforms: {
+      youtube: 'YouTube',
       facebook: 'Facebook',
       tiktok: 'TikTok',
       instagram: 'Instagram',
