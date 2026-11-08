@@ -36,7 +36,7 @@ import AnnouncementBar from '@/components/Layout/AnnouncementBar'
 export default function Home() {
   const { isNative } = usePlatform()
   const { t } = useI18n()
-  const defaultPlatform: Platform = FEATURES.YOUTUBE_ENABLED ? 'youtube' : 'facebook'
+  const defaultPlatform: Platform = 'facebook'
   const [activePlatform, setActivePlatform] = useState<Platform>(defaultPlatform)
   const [autoSearchPayload, setAutoSearchPayload] = useState<{
     platform: Platform
