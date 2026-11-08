@@ -293,20 +293,24 @@ export default async function RootLayout({
           gtag('set', 'ads_data_redaction', true);
         `}</Script>
 
-        {/* Google Analytics 4 */}
+        {/* Google Analytics 4 & Google Tag (GTM / GA4) */}
         {config?.ga4_id && (
           <>
             <Script 
-              id="ga4-script"
+              id="google-tag-script"
               async 
-              src={`https://www.googletagmanager.com/gtag/js?id=${config.ga4_id}`}
+              src={
+                config.ga4_id.startsWith('GTM-')
+                  ? `https://www.googletagmanager.com/gtm.js?id=${config.ga4_id}`
+                  : `https://www.googletagmanager.com/gtag/js?id=${config.ga4_id}`
+              }
               strategy="afterInteractive"
             />
-            <Script id="ga4-config" strategy="afterInteractive">{`
+            <Script id="google-tag-config" strategy="afterInteractive">{`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', '${config.ga4_id}');
+              ${config.ga4_id.startsWith('G-') ? `gtag('config', '${config.ga4_id}');` : ''}
             `}</Script>
           </>
         )}
