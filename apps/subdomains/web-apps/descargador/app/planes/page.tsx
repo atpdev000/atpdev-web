@@ -19,7 +19,12 @@ import {
   Info,
   Shield,
   Globe,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Copy,
+  ArrowRight,
+  Zap
 } from 'lucide-react'
 import { useProPlan } from '@/hooks/useProPlan'
 import Header from '@/components/Layout/Header'
@@ -36,7 +41,7 @@ export default function PlanesPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'yape' | 'code'>('card')
   const [currentCurrency, setCurrentCurrency] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES.PEN)
-  const { plan, isPro, activatePlan, cancelPlan } = useProPlan()
+  const { plan, planDetails, isPro, activatePlan, cancelPlan } = useProPlan()
   const [feedback, setFeedback] = useState<string | null>(null)
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null)
 
@@ -52,6 +57,8 @@ export default function PlanesPage() {
   const [licenseError, setLicenseError] = useState<string | null>(null)
   const [isVerifyingCode, setIsVerifyingCode] = useState(false)
   const [copiedCode, setCopiedCode] = useState(false)
+  const [showLicenseKey, setShowLicenseKey] = useState(false)
+  const [showUpgradeOptions, setShowUpgradeOptions] = useState(false)
 
   useEffect(() => {
     // 1. Detectar moneda local automáticamente
@@ -222,40 +229,6 @@ export default function PlanesPage() {
           </div>
         )}
 
-        {/* Tarjeta de Clave Multiplataforma (Web + App Android) */}
-        {isPro && (
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-purple-50/80 dark:from-slate-900/90 dark:via-indigo-950/40 dark:to-slate-900/90 border border-blue-200/80 dark:border-blue-800/60 shadow-sm animate-fade-in flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Crown className="w-5 h-5 text-amber-500 shrink-0" />
-                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
-                  Tu Clave de Activación Multiplataforma (Android + Web)
-                </h3>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                ¿Usas la aplicación de Android o cambiaste de dispositivo? Ingresa esta clave en la pestaña <strong>Licencia</strong> para desbloquear Premium al instante sin volver a pagar.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-950 px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-900/60 shrink-0 shadow-xs">
-              <code className="font-mono font-black text-sm text-blue-600 dark:text-blue-400 tracking-wider">
-                PRO-ATP-2026
-              </code>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText('PRO-ATP-2026')
-                  setCopiedCode(true)
-                  setTimeout(() => setCopiedCode(false), 2500)
-                }}
-                className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 text-xs font-bold hover:bg-blue-100 transition cursor-pointer ml-1"
-              >
-                {copiedCode ? '¡Copiado! ✓' : 'Copiar Clave'}
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Barra Superior: Volver, Moneda y Estado */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
@@ -310,9 +283,154 @@ export default function PlanesPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* CHECKOUT CARD ESTILO iLovePDF (Descargador Pro Oficial) */}
         {/* ========================================================================= */}
-        <div className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl p-6 sm:p-10 space-y-8">
+        {/* PANEL DE MEMBRESÍA PREMIUM ACTIVA (Para usuarios Pro) */}
+        {/* ========================================================================= */}
+        {isPro && (
+          <div className="w-full max-w-2xl mx-auto bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-3xl border border-amber-500/40 dark:border-amber-500/30 shadow-2xl p-6 sm:p-10 space-y-8 relative overflow-hidden animate-fade-in">
+            {/* Glow decorativo de fondo */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-amber-500/10 dark:bg-amber-500/5 blur-3xl pointer-events-none" />
+
+            {/* Cabecera con Estado y Badge */}
+            <div className="text-center space-y-3 relative z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold shadow-xs">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Suscripción Premium Activa</span>
+              </div>
+
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <Crown className="w-8 h-8 text-amber-500 animate-bounce" />
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                  Descargador <span className="text-blue-600 dark:text-blue-400">Pro</span>
+                </h1>
+              </div>
+
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Membresía: <strong className="text-amber-500">{planDetails.billingCycle === 'annual' ? 'Plan Anual VIP (S/. 149.00/año)' : 'Plan Mensual (S/. 14.90/mes)'}</strong>
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <span>Activado: {planDetails.activatedAt ? new Date(planDetails.activatedAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Reciente'}</span>
+                <span>•</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                  {planDetails.expiresAt ? `Válido hasta: ${new Date(planDetails.expiresAt).toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' })}` : (planDetails.billingCycle === 'annual' ? 'Válido por 1 Año' : 'Válido por 30 Días')}
+                </span>
+              </div>
+            </div>
+
+            {/* Tarjeta de Clave de Activación con Ojo (Eye / EyeOff) */}
+            <div className="p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-4 h-4 text-amber-500" />
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+                    Tu Clave de Activación Multiplataforma
+                  </span>
+                </div>
+                <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/40">
+                  Android + Web
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowLicenseKey(!showLicenseKey)}
+                    className="p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition cursor-pointer shrink-0 shadow-xs"
+                    title={showLicenseKey ? 'Ocultar código de licencia' : 'Mostrar código de licencia'}
+                  >
+                    {showLicenseKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Código de Licencia:</span>
+                    <span className="font-mono text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 tracking-wider select-all">
+                      {showLicenseKey ? (planDetails.licenseCode || 'PRO-ATP-2026') : '•••• - •••• - ••••'}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(planDetails.licenseCode || 'PRO-ATP-2026')
+                    setCopiedCode(true)
+                    setTimeout(() => setCopiedCode(false), 2500)
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition shadow-sm cursor-pointer shrink-0"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>{copiedCode ? '¡Copiado! ✓' : 'Copiar Clave'}</span>
+                </button>
+              </div>
+
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                💡 ¿Instalaste la <strong>App de Android</strong> o abriste otro dispositivo? Solo ingresa este código en la pestaña <strong>Licencia</strong> y tu plan se activará al instante sin volver a pagar.
+              </p>
+            </div>
+
+            {/* Beneficios Desbloqueados al 100% */}
+            <div className="space-y-3 relative z-10">
+              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-center">
+                Beneficios Activos en tu Cuenta
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                <div className="p-3 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
+                  <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[3]" />
+                  <span className="font-semibold">100% Libre de Anuncios y Popups</span>
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
+                  <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[3]" />
+                  <span className="font-semibold">Descargas en 1080p, 2K y 4K</span>
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
+                  <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[3]" />
+                  <span className="font-semibold">Audio MP3 a 320 kbps (Estudio)</span>
+                </div>
+                <div className="p-3 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2.5 text-emerald-800 dark:text-emerald-300">
+                  <Check className="w-4 h-4 text-emerald-500 shrink-0 stroke-[3]" />
+                  <span className="font-semibold">Motor FFmpeg Prioritario (Sin Colas)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Botón Principal para ir a Descargar */}
+            <div className="pt-2 flex flex-col items-center gap-4 relative z-10">
+              <Link
+                href="/tools"
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-extrabold text-sm sm:text-base text-center transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 hover:scale-[1.01]"
+              >
+                <Download className="w-5 h-5" />
+                <span>Ir a Descargar Videos en 4K</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowUpgradeOptions(!showUpgradeOptions)}
+                  className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 font-semibold underline transition cursor-pointer"
+                >
+                  {showUpgradeOptions ? 'Ocultar opciones de cambio de plan ▲' : '¿Deseas cambiar o extender tu plan? Ver opciones ▼'}
+                </button>
+
+                <span className="text-slate-400">•</span>
+
+                <button
+                  type="button"
+                  onClick={handleResetToFree}
+                  className="text-red-500 hover:text-red-600 dark:text-red-400 font-semibold underline transition cursor-pointer"
+                >
+                  Desvincular / Cerrar Sesión Premium
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(!isPro || showUpgradeOptions) && (
+          <div className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl p-6 sm:p-10 space-y-8">
           {/* Logo Superior: Descargador ❤️ Pro */}
           <div className="text-center space-y-1">
             <div className="flex items-center justify-center gap-2">
@@ -641,6 +759,9 @@ export default function PlanesPage() {
             </div>
           </div>
         </div>
+
+        
+        )}
 
         {/* Tabla Comparativa */}
         <div className="max-w-3xl mx-auto space-y-6 pt-4">

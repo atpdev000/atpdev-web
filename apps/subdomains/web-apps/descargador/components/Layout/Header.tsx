@@ -5,9 +5,12 @@ import Link from 'next/link'
 import { ThemeToggle } from './ThemeToggle'
 import { LanguageSelector } from './LanguageSelector'
 import { useI18n } from '@/lib/i18n/context'
+import { useProPlan } from '@/hooks/useProPlan'
+import { Crown } from 'lucide-react'
 
 export default function Header() {
   const { t } = useI18n()
+  const { isPro } = useProPlan()
   const [mounted, setMounted] = useState(false)
   const [siteTitle, setSiteTitle] = useState('Descargador Pro')
   const [apkConfig, setApkConfig] = useState<{
@@ -99,9 +102,14 @@ export default function Header() {
               </Link>
               <Link
                 href="/planes"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold text-xs shadow-xs hover:from-amber-600 hover:to-yellow-600 transition-all hover:scale-105"
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white font-bold text-xs shadow-xs transition-all hover:scale-105 ${
+                  mounted && isPro
+                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 ring-1 ring-emerald-400/40'
+                    : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600'
+                }`}
               >
-                {t.nav.plans}
+                <Crown className={`w-3.5 h-3.5 ${mounted && isPro ? 'text-amber-300' : 'text-white'}`} />
+                <span>{mounted && isPro ? 'Mi Membresía PRO' : t.nav.plans}</span>
               </Link>
               {mounted && apkConfig?.enabled && (
                 <a
@@ -143,9 +151,11 @@ export default function Header() {
               {/* Planes en móvil */}
               <Link
                 href="/planes"
-                className="lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500 text-white font-bold text-xs shadow-xs"
+                className={`lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-white font-bold text-xs shadow-xs ${
+                  mounted && isPro ? 'bg-emerald-600 ring-1 ring-emerald-400/50' : 'bg-amber-500'
+                }`}
               >
-                👑 PRO
+                👑 {mounted && isPro ? 'Eres PRO' : 'PRO'}
               </Link>
 
               {/* APK en móvil */}
