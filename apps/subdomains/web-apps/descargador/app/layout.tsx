@@ -146,15 +146,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"}>
         <DescargadorThemeListener />
         <I18nProvider>
-          {/* Google Analytics 4 (GA4) */}
+          {/* Google Analytics & Google Tag (GA4 / GTM) */}
           {config?.seo?.google_analytics_id && (
             <>
               <Script
                 strategy="afterInteractive"
-                src={`https://www.googletagmanager.com/gtag/js?id=${config.seo.google_analytics_id}`}
+                src={
+                  config.seo.google_analytics_id.startsWith('GTM-')
+                    ? `https://www.googletagmanager.com/gtm.js?id=${config.seo.google_analytics_id}`
+                    : `https://www.googletagmanager.com/gtag/js?id=${config.seo.google_analytics_id}`
+                }
               />
               <Script
-                id="google-analytics-init"
+                id="google-tag-init"
                 strategy="afterInteractive"
                 dangerouslySetInnerHTML={{
                   __html: `
