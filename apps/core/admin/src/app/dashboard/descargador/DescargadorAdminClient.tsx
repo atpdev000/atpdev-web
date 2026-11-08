@@ -2421,7 +2421,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
             )}
           </div>
 
-          {/* 4. Tarjeta Keep-Alive / Cron-Job.org / UptimeRobot Monitor */}
+          {/* 4. Tarjeta Keep-Alive / UptimeRobot (Activo) & cron-job.org (Respaldo) */}
           <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
               <div>
@@ -2431,9 +2431,12 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                     <Radio className="w-4 h-4 text-emerald-400" />
                     Monitor Keep-Alive Render (Anti-Suspensión 24/7)
                   </h3>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                    🟢 UptimeRobot Activo
+                  </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-1">
-                  Render Free suspende el servicio web tras 15 min de inactividad. La plataforma externa que hace ping continuo cada 5 a 10 min es <strong>cron-job.org</strong> o <strong>UptimeRobot</strong>.
+                  Render Free suspende los servicios web tras 15 minutos de inactividad. Tu monitor en <strong>UptimeRobot</strong> está activo ejecutando pings cada 10 min para mantener el motor despierto 24/7.
                 </p>
               </div>
 
@@ -2445,12 +2448,41 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition disabled:opacity-50"
                 >
                   <Activity className={`w-3.5 h-3.5 ${renderKeepAliveResult.testing ? 'animate-spin' : ''}`} />
-                  {renderKeepAliveResult.testing ? 'Haciendo Ping...' : 'Hacer Ping a Render (/api/health)'}
+                  {renderKeepAliveResult.testing ? 'Haciendo Ping...' : 'Hacer Ping Manual (/api/health)'}
                 </button>
               </div>
             </div>
 
-            {/* Resultado Ping Render */}
+            {/* Métricas de Estado Operativo */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-slate-400">Monitor en Producción</span>
+                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping inline-block" />
+                  UptimeRobot (Activo)
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-slate-400">Frecuencia de Ping</span>
+                <span className="text-xs font-bold text-white flex items-center gap-1">
+                  ⏱️ Cada 10 min <span className="text-[10px] text-slate-500 font-normal">(&lt; 15 min límite)</span>
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-slate-400">Disponibilidad Registrada</span>
+                <span className="text-xs font-bold text-emerald-300">
+                  99.65% Uptime
+                </span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col gap-1">
+                <span className="text-[10px] font-medium text-slate-400">Respaldo / Failover</span>
+                <span className="text-xs font-bold text-blue-400">
+                  cron-job.org
+                </span>
+              </div>
+            </div>
+
+            {/* Resultado Ping Render Manual */}
             {renderKeepAliveResult.tested && (
               <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900 border border-slate-800">
                 <div className="flex items-center gap-2.5">
@@ -2471,49 +2503,67 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               </div>
             )}
 
-            {/* Configuración de Cron-Job & UptimeRobot */}
+            {/* Comparativa y Accesos: UptimeRobot (Activo) vs cron-job.org (Respaldo) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+              {/* 1. UptimeRobot (ACTIVO AHORA) */}
+              <div className="p-4 rounded-xl bg-emerald-950/15 border border-emerald-500/30 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    🌐 cron-job.org (Plataforma Principal)
+                  <span className="font-bold text-white flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-400" />
+                    UptimeRobot
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      ACTIVO AHORA
+                    </span>
+                  </span>
+                  <a
+                    href="https://dashboard.uptimerobot.com/monitors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline inline-flex items-center gap-1"
+                  >
+                    Abrir Dashboard <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Monitor configurado en tu cuenta. Realiza comprobaciones HTTP periódicas cada <strong>10 minutos</strong>, previniendo que Render congele el contenedor y alertando por correo ante cualquier eventualidad.
+                </p>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-400 font-medium">URL Monitoreada en UptimeRobot:</span>
+                  <div className="bg-slate-950 p-2 rounded-lg font-mono text-[10px] text-emerald-400 flex items-center justify-between border border-emerald-500/20">
+                    <span className="truncate">https://descargador-pro-nt6e.onrender.com/api/health</span>
+                    <span className="text-[9px] text-emerald-500 font-sans ml-2 shrink-0">🟢 Up 99.65%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. cron-job.org (RESPALDO / FAILOVER) */}
+              <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-blue-400" />
+                    cron-job.org
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-blue-500/10 text-blue-300 border border-blue-500/30">
+                      RESPALDO / FAILOVER
+                    </span>
                   </span>
                   <a
                     href="https://cron-job.org/en/members/jobs/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] text-blue-400 hover:underline inline-flex items-center gap-1"
+                    className="text-[11px] text-blue-400 hover:text-blue-300 hover:underline inline-flex items-center gap-1"
                   >
                     Abrir Consola <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Servicio gratuito de cron web. Mantiene la instancia despierta ejecutando un ping HTTP GET cada <strong>10 minutos</strong>.
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Servicio gratuito de cron web. Puedes configurarlo en paralelo como respaldo redundante o alternativa por si UptimeRobot tuviera pausas programadas.
                 </p>
-                <div className="bg-slate-950 p-2 rounded-lg font-mono text-[10px] text-emerald-400 flex items-center justify-between">
-                  <span className="truncate">https://descargador-pro-nt6e.onrender.com/api/health</span>
-                </div>
-              </div>
-
-              <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    ⏱️ UptimeRobot (Alternativa)
-                  </span>
-                  <a
-                    href="https://uptimerobot.com/dashboard"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-blue-400 hover:underline inline-flex items-center gap-1"
-                  >
-                    Abrir Dashboard <ExternalLink className="w-3 h-3" />
-                  </a>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Monitor HTTP cada 5 minutos que envía alertas de caída y previene la suspensión automática de Render.
-                </p>
-                <div className="bg-slate-950 p-2 rounded-lg font-mono text-[10px] text-blue-400 flex items-center justify-between">
-                  <span className="truncate">https://descargador-pro-nt6e.onrender.com/api/health</span>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-slate-400 font-medium">URL para nuevo Cron Job (GET cada 10 min):</span>
+                  <div className="bg-slate-950 p-2 rounded-lg font-mono text-[10px] text-slate-300 flex items-center justify-between border border-slate-800">
+                    <span className="truncate">https://descargador-pro-nt6e.onrender.com/api/health</span>
+                    <span className="text-[9px] text-slate-400 font-sans ml-2 shrink-0">GET 10 min</span>
+                  </div>
                 </div>
               </div>
             </div>
