@@ -52,7 +52,8 @@ import {
   Crown,
   KeyRound
 } from "lucide-react";
-import { SubdomainConfig, SubdomainTheme, ACCENT_COLOR_MAP } from "@atpdev/database";
+import type { SubdomainConfig, SubdomainTheme } from "@atpdev/database";
+import { ACCENT_COLOR_MAP } from "@atpdev/database";
 import { 
   saveDescargadorConfigAction, 
   checkRailwayBackendHealthAction,

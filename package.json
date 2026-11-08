@@ -18,7 +18,7 @@
     "build:magic": "npm run build --workspace=apps/subdomains/web-apps/interactivo-magic",
     "dev": "turbo run dev --continue=always",
     "dev:portal": "npm run dev --workspace=apps/core/portal -- -p 3000",
-    "dev:admin": "npm run dev --workspace=apps/core/admin -- -p 3001",
+    "dev:admin": "npm run dev --workspace=apps/core/admin",
     "dev:chamba": "npm run dev --workspace=apps/subdomains/web-apps/chamba -- -p 3005",
     "dev:sorteos": "npm run dev --workspace=apps/subdomains/web-apps/sorteos",
     "dev:descargador": "npm run dev --workspace=apps/subdomains/web-apps/descargador",
