@@ -1,55 +1,51 @@
-import { AdMob, AdOptions, AdLoadInfo, InterstitialAdPluginEvents } from '@capacitor-community/admob';
-import { Capacitor } from '@capacitor/core';
-import { useEffect, useState } from 'react';
+import { AdMob, AdLoadInfo, InterstitialAdPluginEvents } from '@capacitor-community/admob'
+import { Capacitor } from '@capacitor/core'
+import { useEffect, useState } from 'react'
+import { useProPlan } from './useProPlan'
 
 export function useAdMobInterstitial() {
-    const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false)
+  const { isPro } = useProPlan()
 
-    useEffect(() => {
-        if (!Capacitor.isNativePlatform()) return;
+  useEffect(() => {
+    // Si el usuario es PRO o no está en dispositivo nativo, no precargar anuncios
+    if (!Capacitor.isNativePlatform() || isPro) return
 
-        // Prepare ad on mount
-        const prepareInterstitial = async () => {
-            try {
-                AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
-                    setIsLoaded(true);
-                });
+    const prepareInterstitial = async () => {
+      try {
+        AdMob.addListener(InterstitialAdPluginEvents.Loaded, (info: AdLoadInfo) => {
+          setIsLoaded(true)
+        })
 
-                await AdMob.prepareInterstitial({
-                    adId: 'ca-app-pub-5414009811868137/9123842162' // PROD Interstitial ID
-                    // isTesting: true
-                });
-            } catch (e) {
-                console.error('Interstitial prepare failed', e);
-            }
-        };
+        await AdMob.prepareInterstitial({
+          adId: 'ca-app-pub-5414009811868137/9123842162' // PROD Interstitial ID
+        })
+      } catch (e) {
+        console.error('Interstitial prepare failed', e)
+      }
+    }
 
-        prepareInterstitial();
+    prepareInterstitial()
+  }, [isPro])
 
-        return () => {
-            // Cleanup listeners if needed
-            // AdMob.removeAllListeners().catch(console.error);
-        };
-    }, []);
+  const showInterstitial = async () => {
+    // Si el usuario es PRO, nunca mostrar anuncios intersticiales
+    if (!Capacitor.isNativePlatform() || isPro) return
 
-    const showInterstitial = async () => {
-        if (!Capacitor.isNativePlatform()) return;
+    try {
+      if (isLoaded) {
+        await AdMob.showInterstitial()
+        setIsLoaded(false)
+        await AdMob.prepareInterstitial({
+          adId: 'ca-app-pub-5414009811868137/9123842162'
+        })
+      } else {
+        console.log('Interstitial not ready yet')
+      }
+    } catch (e) {
+      console.error('Show interstitial failed', e)
+    }
+  }
 
-        try {
-            if (isLoaded) {
-                await AdMob.showInterstitial();
-                // Reset loaded state and prepare next ad
-                setIsLoaded(false);
-                await AdMob.prepareInterstitial({
-                    adId: 'ca-app-pub-5414009811868137/9123842162'
-                });
-            } else {
-                console.log('Interstitial not ready yet');
-            }
-        } catch (e) {
-            console.error('Show interstitial failed', e);
-        }
-    };
-
-    return { showInterstitial, isLoaded };
+  return { showInterstitial, isLoaded }
 }

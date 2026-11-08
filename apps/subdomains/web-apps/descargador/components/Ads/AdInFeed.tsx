@@ -2,16 +2,19 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useProPlan } from '@/hooks/useProPlan'
 
 interface AdInFeedProps {
   adSlot: string
 }
 
 export default function AdInFeed({ adSlot }: AdInFeedProps) {
+  const { isPro } = useProPlan()
   const adRef = useRef<HTMLModElement>(null)
   const [isLocalhost, setIsLocalhost] = useState(false)
 
   useEffect(() => {
+    if (isPro) return
     if (typeof window === 'undefined') return
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     setIsLocalhost(isLocal)
@@ -26,7 +29,10 @@ export default function AdInFeed({ adSlot }: AdInFeedProps) {
     } catch (e) {
       // Ignorar errores de layout de AdSense
     }
-  }, [])
+  }, [isPro])
+
+  // Si el usuario es PRO, no mostrar ningún anuncio
+  if (isPro) return null
 
   if (isLocalhost) {
     return (

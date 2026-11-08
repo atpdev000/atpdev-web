@@ -2,6 +2,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useProPlan } from '@/hooks/useProPlan'
 
 interface AdProps {
   adSlot: string
@@ -10,10 +11,12 @@ interface AdProps {
 }
 
 export default function AdDisplay({ adSlot, width = 300, height = 600 }: AdProps) {
+  const { isPro } = useProPlan()
   const adRef = useRef<HTMLModElement>(null)
   const [isLocalhost, setIsLocalhost] = useState(false)
 
   useEffect(() => {
+    if (isPro) return
     if (typeof window === 'undefined') return
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     setIsLocalhost(isLocal)
@@ -29,7 +32,10 @@ export default function AdDisplay({ adSlot, width = 300, height = 600 }: AdProps
     } catch (e) {
       // Ignorar errores de tamaño no crítico de AdSense
     }
-  }, [])
+  }, [isPro])
+
+  // Si el usuario es PRO, no mostrar ningún anuncio
+  if (isPro) return null
 
   if (isLocalhost) {
     return (
