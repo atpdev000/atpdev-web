@@ -280,11 +280,13 @@ export function JobFilterClient({
       <div className={`space-y-5 ${isMobileExpanded ? "block" : "hidden lg:block"}`}>
         {/* Ordenar Convocatorias (Instant Auto-Apply) */}
         <div className="space-y-1.5">
-          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label htmlFor="sort-select" className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <ArrowUpDown size={14} className="text-emerald-600 dark:text-emerald-400" />
             <span>Ordenar Resultados</span>
           </label>
           <select
+            id="sort-select"
+            aria-label="Ordenar Resultados"
             value={sort}
             onChange={(e) => {
               const val = e.target.value;
@@ -328,11 +330,13 @@ export function JobFilterClient({
 
         {/* Régimen Laboral Filter (Instant Auto-Apply) */}
         <div className="space-y-1.5">
-          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label htmlFor="regimen-select" className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <Award size={14} className="text-amber-600 dark:text-amber-400" />
             <span>Régimen Laboral</span>
           </label>
           <select
+            id="regimen-select"
+            aria-label="Régimen Laboral"
             value={regimen}
             onChange={(e) => {
               const val = e.target.value;
@@ -353,11 +357,13 @@ export function JobFilterClient({
 
         {/* Especialidad / Categoría Filter (Instant Auto-Apply) */}
         <div className="space-y-1.5">
-          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label htmlFor="categoria-select" className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <Briefcase size={14} className="text-emerald-600 dark:text-emerald-400" />
             <span>Área Profesional / Especialidad</span>
           </label>
           <select
+            id="categoria-select"
+            aria-label="Área Profesional o Especialidad"
             value={categoria}
             onChange={(e) => {
               const val = e.target.value;
@@ -383,11 +389,13 @@ export function JobFilterClient({
 
         {/* Región Filter (Instant Auto-Apply) */}
         <div className="space-y-1.5">
-          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label htmlFor="region-filter-select" className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <MapPin size={14} className="text-purple-600 dark:text-purple-400" />
             <span>Región / Departamento</span>
           </label>
           <select
+            id="region-filter-select"
+            aria-label="Región o Departamento"
             value={region}
             onChange={(e) => {
               const val = e.target.value;
@@ -428,11 +436,13 @@ export function JobFilterClient({
 
         {/* Nivel Educativo Filter (Instant Auto-Apply) */}
         <div className="space-y-1.5">
-          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label htmlFor="educacion-select" className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <GraduationCap size={14} className="text-cyan-600 dark:text-cyan-400" />
             <span>Nivel Educativo</span>
           </label>
           <select
+            id="educacion-select"
+            aria-label="Nivel Educativo"
             value={educacion}
             onChange={(e) => {
               const val = e.target.value;
@@ -453,11 +463,13 @@ export function JobFilterClient({
 
         {/* Rango de Sueldo Filter (Instant Auto-Apply) */}
         <div className="space-y-1.5">
-          <label className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <label htmlFor="sueldo-select" className="text-xs font-mono font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <span className="text-emerald-600 dark:text-emerald-400 font-bold font-mono">S/</span>
             <span>Rango de Remuneración</span>
           </label>
           <select
+            id="sueldo-select"
+            aria-label="Rango de Remuneración"
             value={sueldo}
             onChange={(e) => {
               const val = e.target.value;

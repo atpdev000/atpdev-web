@@ -291,6 +291,9 @@ export function EntityLogo({ entityName, logoUrl, size = 'banner' }: EntityLogoP
         <img
           src={imageSrc}
           alt={entityName}
+          width={isBanner ? 200 : 96}
+          height={isBanner ? 80 : 96}
+          loading="lazy"
           className={`${isBanner ? 'max-h-20 sm:max-h-24 max-w-[88%]' : 'w-full h-full'} object-contain drop-shadow`}
           onError={handleImgError}
         />
@@ -311,6 +314,9 @@ export function EntityLogo({ entityName, logoUrl, size = 'banner' }: EntityLogoP
         <img
           src="/logos/escudo-nacional-peru.svg"
           alt="Escudo Nacional del Perú"
+          width={96}
+          height={96}
+          loading="lazy"
           className="w-full h-full object-contain p-1 drop-shadow"
         />
       </div>

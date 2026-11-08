@@ -75,7 +75,10 @@ export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor
         <form onSubmit={handleSearch} className="p-2 sm:p-2.5 rounded-2xl border border-slate-300 dark:border-slate-700/80 bg-slate-50/70 dark:bg-slate-900/90 shadow-sm sm:flex items-center gap-2 transition-all">
           <div className="flex-1 flex items-center gap-3 px-3.5 py-2.5 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus-within:border-emerald-500 transition-colors">
             <Search size={18} className="text-slate-400 flex-shrink-0" />
+            <label htmlFor="search-input" className="sr-only">Puesto, profesión o institución</label>
             <input
+              id="search-input"
+              aria-label="Puesto, profesión o institución"
               type="text"
               placeholder="Puesto, profesión o institución (ej. Abogado, SUNAT, Administrador)..."
               value={query}
@@ -86,7 +89,10 @@ export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor
 
           <div className="flex items-center gap-2 px-3.5 py-2.5 bg-white dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white sm:w-56 focus-within:border-emerald-500 transition-colors mt-2 sm:mt-0">
             <MapPin size={18} className="text-slate-400 flex-shrink-0" />
+            <label htmlFor="search-region-select" className="sr-only">Departamento o región</label>
             <select
+              id="search-region-select"
+              aria-label="Departamento o región"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               className="w-full bg-transparent text-sm text-slate-800 dark:text-slate-200 focus:outline-none cursor-pointer"
@@ -124,7 +130,7 @@ export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor
           <button
             type="submit"
             disabled={isPending}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-75 disabled:cursor-wait shadow-sm transition-colors mt-2 sm:mt-0"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm flex items-center justify-center gap-2 cursor-pointer flex-shrink-0 disabled:opacity-75 disabled:cursor-wait shadow-sm transition-colors mt-2 sm:mt-0"
           >
             {isPending ? (
               <>

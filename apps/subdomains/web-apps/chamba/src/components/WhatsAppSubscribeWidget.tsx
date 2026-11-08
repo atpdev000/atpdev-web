@@ -65,10 +65,13 @@ export default function WhatsAppSubscribeWidget({
 
         <div className="w-full md:w-auto flex flex-col sm:flex-row items-center gap-2.5">
           <div className="w-full sm:w-auto">
+            <label htmlFor="subscribe-region-select" className="sr-only">Seleccionar región para alertas de convocatorias</label>
             <select
+              id="subscribe-region-select"
+              aria-label="Seleccionar región para alertas de convocatorias"
               value={selectedRegion}
               onChange={(e) => setSelectedRegion(e.target.value)}
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:border-emerald-500"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
             >
               <option value="Nacional">Todas las Regiones</option>
               <option value="Lima">Lima y Callao</option>
@@ -86,7 +89,7 @@ export default function WhatsAppSubscribeWidget({
               <button
                 type="button"
                 onClick={handleJoinWhatsApp}
-                className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Canal WhatsApp</span>
               </button>
@@ -95,7 +98,7 @@ export default function WhatsAppSubscribeWidget({
               <button
                 type="button"
                 onClick={handleJoinTelegram}
-                className="w-full sm:w-auto px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 bg-sky-700 hover:bg-sky-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Send size={13} />
                 <span>Telegram</span>

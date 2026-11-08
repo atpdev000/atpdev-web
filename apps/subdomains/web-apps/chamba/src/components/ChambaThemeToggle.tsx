@@ -72,7 +72,7 @@ export function ChambaThemeToggle({ className = "" }: { className?: string }) {
       onClick={toggleTheme}
       title={isLight ? "Cambiar a Modo Oscuro" : "Cambiar a Modo Claro"}
       aria-label={isLight ? "Cambiar a Modo Oscuro" : "Cambiar a Modo Claro"}
-      className={`relative group p-2 rounded-xl border transition-all duration-300 flex items-center justify-center cursor-pointer shadow-sm active:scale-95 ${
+      className={`relative group p-2 rounded-xl border transition-colors duration-200 flex items-center justify-center cursor-pointer shadow-sm active:scale-95 ${
         isLight
           ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-amber-600 hover:text-amber-700 shadow-slate-200/50"
           : "bg-white/5 hover:bg-white/10 border-white/10 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/30 shadow-black/40"

@@ -134,7 +134,7 @@ export function JobCard({ job }: JobCardProps) {
           )}
           <Link
             href={`/empleos/${job.slug}`}
-            className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 group/btn cursor-pointer shadow-xs"
+            className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 group/btn cursor-pointer shadow-xs"
             aria-label={`Ver detalles, bases y requisitos de ${job.title}`}
           >
             <span>Ver Convocatoria</span>

@@ -175,13 +175,19 @@ export default function RootLayout({
             }
           `
         }} />
-        {/* Dynamically Load Google Fonts if customized */}
-        {(theme.font_headline || theme.font_body || theme.font_label) && (
-          <link
-            rel="stylesheet"
-            href={`https://fonts.googleapis.com/css2?${[theme.font_headline, theme.font_body, theme.font_label].filter((f): f is string => Boolean(f)).map((f: string) => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800;900`).join('&')}&display=swap`}
-          />
-        )}
+        {/* Dynamically Load Google Fonts only if customized outside standard next/font bundle */}
+        {(() => {
+          const defaultFonts = ['Space Grotesk', 'Inter', 'IBM Plex Mono'];
+          const customFonts = [theme.font_headline, theme.font_body, theme.font_label]
+            .filter((f): f is string => Boolean(f) && !defaultFonts.includes(f as string));
+          if (customFonts.length === 0) return null;
+          return (
+            <link
+              rel="stylesheet"
+              href={`https://fonts.googleapis.com/css2?${customFonts.map((f: string) => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800;900`).join('&')}&display=swap`}
+            />
+          );
+        })()}
         {/* Google Consent Mode v2 Default Signals (AdSense & GA4 Compliance) */}
         <script
           id="google-consent-mode-default"
@@ -364,32 +370,32 @@ export default function RootLayout({
                     </Link>
                   </li>
                   <li>
-                    <Link href="/calculadora-sueldo" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/calculadora-sueldo" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Calculadora de Sueldo Neto CAS
                     </Link>
                   </li>
                   <li>
-                    <Link href="/crear-cv-cas" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/crear-cv-cas" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Creador de CV para el Estado
                     </Link>
                   </li>
                   <li>
-                    <Link href="/simulador-entrevista-ia" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/simulador-entrevista-ia" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Simulador de Entrevista con IA
                     </Link>
                   </li>
                   <li>
-                    <Link href="/comparador-regimenes" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/comparador-regimenes" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Comparador CAS vs 728 vs 276
                     </Link>
                   </li>
                   <li>
-                    <Link href="/plantillas-anexos" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/plantillas-anexos" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Descarga de Anexos SERVIR
                     </Link>
                   </li>
                   <li>
-                    <Link href="/preguntas-entrevista-cas" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/preguntas-entrevista-cas" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Preguntas de Examen CAS
                     </Link>
                   </li>
@@ -439,7 +445,7 @@ export default function RootLayout({
                     </Link>
                   </li>
                   <li>
-                    <Link href="/empleos?regimen=CAS" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+                    <Link href="/empleos?regimen=CAS" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                       Convocatorias del Estado (CAS)
                     </Link>
                   </li>
@@ -459,60 +465,60 @@ export default function RootLayout({
                 </Link>
               </div>
               <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-slate-600 dark:text-slate-400">
-                <Link href="/empleos/en/lima" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Lima</Link>
+                <Link href="/empleos/en/lima" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Lima</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/arequipa" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Arequipa</Link>
+                <Link href="/empleos/en/arequipa" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Arequipa</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/callao" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Callao</Link>
+                <Link href="/empleos/en/callao" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Callao</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/cusco" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Cusco</Link>
+                <Link href="/empleos/en/cusco" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Cusco</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/la-libertad" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">La Libertad (Trujillo)</Link>
+                <Link href="/empleos/en/la-libertad" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">La Libertad (Trujillo)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/piura" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Piura</Link>
+                <Link href="/empleos/en/piura" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Piura</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/lambayeque" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Lambayeque (Chiclayo)</Link>
+                <Link href="/empleos/en/lambayeque" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Lambayeque (Chiclayo)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/junin" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Junín (Huancayo)</Link>
+                <Link href="/empleos/en/junin" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Junín (Huancayo)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/ancash" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Áncash (Chimbote/Huaraz)</Link>
+                <Link href="/empleos/en/ancash" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Áncash (Chimbote/Huaraz)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/ica" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Ica</Link>
+                <Link href="/empleos/en/ica" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Ica</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/cajamarca" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Cajamarca</Link>
+                <Link href="/empleos/en/cajamarca" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Cajamarca</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/puno" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Puno</Link>
+                <Link href="/empleos/en/puno" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Puno</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/san-martin" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">San Martín (Tarapoto)</Link>
+                <Link href="/empleos/en/san-martin" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">San Martín (Tarapoto)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/loreto" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Loreto (Iquitos)</Link>
+                <Link href="/empleos/en/loreto" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Loreto (Iquitos)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/huanuco" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Huánuco</Link>
+                <Link href="/empleos/en/huanuco" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Huánuco</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/ayacucho" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Ayacucho</Link>
+                <Link href="/empleos/en/ayacucho" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Ayacucho</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/tacna" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Tacna</Link>
+                <Link href="/empleos/en/tacna" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Tacna</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/moquegua" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Moquegua</Link>
+                <Link href="/empleos/en/moquegua" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Moquegua</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/tumbes" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Tumbes</Link>
+                <Link href="/empleos/en/tumbes" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Tumbes</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/ucayali" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Ucayali (Pucallpa)</Link>
+                <Link href="/empleos/en/ucayali" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Ucayali (Pucallpa)</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/pasco" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Pasco</Link>
+                <Link href="/empleos/en/pasco" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Pasco</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/amazonas" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Amazonas</Link>
+                <Link href="/empleos/en/amazonas" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Amazonas</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/apurimac" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Apurímac</Link>
+                <Link href="/empleos/en/apurimac" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Apurímac</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/huancavelica" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Huancavelica</Link>
+                <Link href="/empleos/en/huancavelica" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Huancavelica</Link>
                 <span className="text-slate-300 dark:text-slate-700">•</span>
-                <Link href="/empleos/en/madre-de-dios" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Madre de Dios</Link>
+                <Link href="/empleos/en/madre-de-dios" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">Madre de Dios</Link>
               </div>
             </div>
 
             {/* Bottom Bar: Disclaimer Legal No Gubernamental */}
-            <div className="border-t border-slate-200 dark:border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 text-center md:text-left">
+            <div className="border-t border-slate-200 dark:border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-600 dark:text-slate-400 font-medium text-center md:text-left">
               <p>
                 © {new Date().getFullYear()} <strong>chamba pro</strong> — Desarrollado por <a href="https://atpdev.dev" target="_blank" className="text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold">ATP DEV</a>. Todos los derechos reservados.
               </p>

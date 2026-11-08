@@ -248,7 +248,7 @@ export function HeaderNav() {
           {/* Explorar Convocatorias */}
           <Link
             href="/empleos"
-            className="hidden sm:flex px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-colors items-center gap-1.5 shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
+            className="hidden sm:flex px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs sm:text-sm transition-colors items-center gap-1.5 shadow-xs cursor-pointer shrink-0 whitespace-nowrap"
           >
             <Compass size={15} className="text-white shrink-0" />
             <span>Explorar Convocatorias</span>
