@@ -100,6 +100,10 @@ export default function CheckoutModal({
     ? (paymentConfig?.stripe_pro_annual_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00')
     : (paymentConfig?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01')
 
+  const mercadopagoUrl = cycle === 'annual'
+    ? (paymentConfig?.mercadopago_pro_annual_url || 'https://mpago.la/1tGtPwz')
+    : (paymentConfig?.mercadopago_pro_monthly_url || 'https://mpago.la/1qwLLFy')
+
   // WhatsApp
   const phone = (paymentConfig?.whatsapp_number || '+51987006572').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
@@ -152,6 +156,10 @@ export default function CheckoutModal({
 
       window.open(whatsappCardHref, '_blank')
     } else if (selectedMethod === 'yape') {
+      if (mercadopagoUrl) {
+        window.open(mercadopagoUrl, '_blank')
+        return
+      }
       window.open(whatsappHref, '_blank')
     }
   }
@@ -377,17 +385,42 @@ export default function CheckoutModal({
           {selectedMethod === 'yape' && (
             <div className="space-y-3 pt-1">
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Paga de inmediato por {isPEN ? 'Yape, Plin o Transferencia bancaria' : 'WhatsApp VIP'}: <strong>{currentPriceDisplay}</strong>
+                {isPEN
+                  ? 'Paga con QR oficial de Yape, Plin o PagoEfectivo sin compartir tu número telefónico.'
+                  : 'Asistencia y coordinación de pago directo por WhatsApp:'}
               </p>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Pagar por WhatsApp ({currentPriceDisplay})</span>
-              </a>
+              {mercadopagoUrl ? (
+                <div className="space-y-2">
+                  <a
+                    href={mercadopagoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-[#009ee3] hover:bg-[#0089c7] shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
+                  >
+                    <span>Pagar con Yape / Plin QR ({currentPriceDisplay})</span>
+                  </a>
+                  <div className="text-center">
+                    <a
+                      href={whatsappHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11px] text-slate-500 hover:text-emerald-500 underline"
+                    >
+                      ¿Prefieres coordinar por WhatsApp? Clic aquí
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3 px-6 rounded-xl font-extrabold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all text-center flex items-center justify-center gap-2 text-sm"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Pagar por WhatsApp ({currentPriceDisplay})</span>
+                </a>
+              )}
             </div>
           )}
 
