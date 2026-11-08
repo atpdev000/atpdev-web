@@ -9,7 +9,7 @@ import { useI18n } from '@/lib/i18n/context'
 export default function Header() {
   const { t } = useI18n()
   const [mounted, setMounted] = useState(false)
-  const [siteTitle, setSiteTitle] = useState('FTYDownloader Pro')
+  const [siteTitle, setSiteTitle] = useState('Descargador Pro')
   const [apkConfig, setApkConfig] = useState<{
     enabled?: boolean
     version?: string
@@ -18,7 +18,7 @@ export default function Header() {
   }>({
     enabled: true,
     version: 'v1.2.0',
-    file_url: '/downloads/FTYdownloaderPro.apk',
+    file_url: '/downloads/DescargadorPro.apk',
     file_size: '10.8 MB'
   })
 
@@ -72,7 +72,7 @@ export default function Header() {
               </div>
               <div>
                 <h1 className="text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                  FTYDownloader <span className="text-blue-600 dark:text-blue-400">Pro</span>
+                  Descargador <span className="text-blue-600 dark:text-blue-400">Pro</span>
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block">
                   {t.nav.subtitle}

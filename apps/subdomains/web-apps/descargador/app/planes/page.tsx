@@ -18,7 +18,8 @@ import {
   Loader2,
   Info,
   Shield,
-  Globe
+  Globe,
+  AlertCircle
 } from 'lucide-react'
 import { useProPlan } from '@/hooks/useProPlan'
 import Header from '@/components/Layout/Header'
@@ -43,6 +44,7 @@ export default function PlanesPage() {
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
   const [cardCvc, setCardCvc] = useState('')
+  const [cardError, setCardError] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
 
   // Estado de código de licencia
@@ -103,25 +105,44 @@ export default function PlanesPage() {
   const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
   const currencyNotice = isPEN ? `en Perú por Yape/Plin (${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${billingCycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
-  const defaultWhatsappMsg = `Hola ATP Dev 👋, quiero mejorar a Premium ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago?`
+  const defaultWhatsappMsg = `Hola ATP Dev 👋, quiero activar Premium en Descargador Pro ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago?`
   const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(defaultWhatsappMsg)}`
 
   // Manejar submit del botón principal "Mejorar a Premium"
   const handleUpgradeSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setCardError(null)
 
     if (selectedMethod === 'card') {
+      // 1. Si hay link de Stripe conectado
       if (stripeUrl) {
         window.open(stripeUrl, '_blank')
         return
       }
+
+      // 2. Validación estricta: NO aceptar campos vacíos!
+      const cleanCard = cardNumber.replace(/\s/g, '')
+      if (!cleanCard || cleanCard.length < 15) {
+        setCardError('Por favor ingresa un número de tarjeta válido (16 dígitos).')
+        return
+      }
+
+      if (!cardExpiry || cardExpiry.length < 5) {
+        setCardError('Por favor ingresa la fecha de expiración (MM/AA).')
+        return
+      }
+
+      if (!cardCvc || cardCvc.length < 3) {
+        setCardError('Por favor ingresa el código de seguridad CVC (3 dígitos).')
+        return
+      }
+
+      // 3. Informar que debe completar el pago de forma segura por WhatsApp o Stripe
       setIsProcessing(true)
       setTimeout(() => {
         setIsProcessing(false)
-        activatePlan('pro', 'CARD-PREMIUM', billingCycle)
-        setFeedback(`🎉 ¡Felicidades! Tu cuenta ha sido mejorada a Premium (${billingCycle === 'annual' ? 'Anual' : 'Mensual'}). Ya puedes descargar en 1080p y 4K.`)
-        setTimeout(() => setFeedback(null), 8000)
-      }, 1200)
+        setCardError('La pasarela de tarjeta directa está en sincronización bancaria. Por favor completa tu pago seguro por Yape / WhatsApp o canjea tu código de licencia.')
+      }, 1000)
     } else if (selectedMethod === 'paypal') {
       if (paypalUrl) {
         window.open(paypalUrl, '_blank')
@@ -169,18 +190,26 @@ export default function PlanesPage() {
   }
 
   const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCardError(null)
     const raw = e.target.value.replace(/\D/g, '').substring(0, 16)
     const formatted = raw.match(/.{1,4}/g)?.join(' ') || raw
     setCardNumber(formatted)
   }
 
   const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCardError(null)
     const raw = e.target.value.replace(/\D/g, '').substring(0, 4)
     if (raw.length >= 2) {
       setCardExpiry(`${raw.substring(0, 2)}/${raw.substring(2)}`)
     } else {
       setCardExpiry(raw)
     }
+  }
+
+  const handleResetToFree = () => {
+    cancelPlan()
+    setFeedback('Has restablecido la cuenta a Plan Gratuito. Ya puedes probar el flujo de compra desde cero.')
+    setTimeout(() => setFeedback(null), 5000)
   }
 
   return (
@@ -240,29 +269,39 @@ export default function PlanesPage() {
             </div>
 
             {isPro && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
-                <Crown className="w-3.5 h-3.5" />
-                <span>Plan Premium Activo</span>
+              <div className="flex items-center gap-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>Plan Premium Activo</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleResetToFree}
+                  className="text-xs text-red-500 hover:text-red-700 underline font-semibold transition cursor-pointer"
+                  title="Cancelar y restablecer a plan gratuito"
+                >
+                  (Desactivar Plan)
+                </button>
               </div>
             )}
           </div>
         </div>
 
         {/* ========================================================================= */}
-        {/* CHECKOUT CARD ESTILO iLovePDF (Con cambio automático de moneda por país) */}
+        {/* CHECKOUT CARD ESTILO iLovePDF (Descargador Pro Oficial) */}
         {/* ========================================================================= */}
         <div className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xl p-6 sm:p-10 space-y-8">
-          {/* Logo Superior tipo I ❤️ FTY */}
+          {/* Logo Superior: Descargador ❤️ Pro */}
           <div className="text-center space-y-1">
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                FTY
+                Descargador
               </span>
-              <span className="text-2xl sm:text-3xl text-red-500 inline-block">
+              <span className="text-2xl sm:text-3xl text-red-500 inline-block animate-pulse">
                 ❤️
               </span>
-              <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                PRO
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-blue-600 dark:text-blue-400">
+                Pro
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white pt-2">
@@ -330,7 +369,10 @@ export default function PlanesPage() {
                 {/* Tab Tarjeta */}
                 <button
                   type="button"
-                  onClick={() => setSelectedMethod('card')}
+                  onClick={() => {
+                    setSelectedMethod('card')
+                    setCardError(null)
+                  }}
                   className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'card'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -341,10 +383,13 @@ export default function PlanesPage() {
                   <span>Tarjeta</span>
                 </button>
 
-                {/* Tab Yape / WhatsApp (Prioritario en Perú) */}
+                {/* Tab Yape / WhatsApp */}
                 <button
                   type="button"
-                  onClick={() => setSelectedMethod('yape')}
+                  onClick={() => {
+                    setSelectedMethod('yape')
+                    setCardError(null)
+                  }}
                   className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'yape'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -358,7 +403,10 @@ export default function PlanesPage() {
                 {/* Tab PayPal */}
                 <button
                   type="button"
-                  onClick={() => setSelectedMethod('paypal')}
+                  onClick={() => {
+                    setSelectedMethod('paypal')
+                    setCardError(null)
+                  }}
                   className={`flex items-center gap-1 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'paypal'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -371,7 +419,10 @@ export default function PlanesPage() {
                 {/* Tab Licencia */}
                 <button
                   type="button"
-                  onClick={() => setSelectedMethod('code')}
+                  onClick={() => {
+                    setSelectedMethod('code')
+                    setCardError(null)
+                  }}
                   className={`flex items-center gap-1.5 pb-2 text-xs sm:text-sm font-bold transition shrink-0 ${
                     selectedMethod === 'code'
                       ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -391,7 +442,9 @@ export default function PlanesPage() {
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                     Datos de tu tarjeta ({currentCurrency.code})
                   </label>
-                  <div className="flex items-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 shadow-sm focus-within:border-slate-500 focus-within:ring-1 focus-within:ring-slate-400">
+                  <div className={`flex items-center rounded-xl border bg-white dark:bg-slate-950 px-3 py-2.5 shadow-sm ${
+                    cardError ? 'border-red-500' : 'border-slate-300 dark:border-slate-700 focus-within:border-slate-500'
+                  }`}>
                     <CreditCard className="w-5 h-5 text-slate-400 shrink-0 mr-2" />
                     <input
                       type="text"
@@ -412,11 +465,21 @@ export default function PlanesPage() {
                       placeholder="CVC"
                       maxLength={4}
                       value={cardCvc}
-                      onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
+                      onChange={(e) => {
+                        setCardError(null)
+                        setCardCvc(e.target.value.replace(/\D/g, ''))
+                      }}
                       className="w-16 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-2"
                     />
                   </div>
                 </div>
+
+                {cardError && (
+                  <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 text-xs text-red-600 dark:text-red-400 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{cardError}</span>
+                  </div>
+                )}
 
                 <button
                   type="submit"
@@ -426,7 +489,7 @@ export default function PlanesPage() {
                   {isProcessing ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Procesando pago seguro...</span>
+                      <span>Validando tarjeta...</span>
                     </>
                   ) : (
                     <span>Mejorar a Premium ({currentPriceDisplay})</span>
@@ -517,7 +580,7 @@ export default function PlanesPage() {
                 >
                   {isVerifyingCode ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Verificando licencia...</span>
                     </>
                   ) : (

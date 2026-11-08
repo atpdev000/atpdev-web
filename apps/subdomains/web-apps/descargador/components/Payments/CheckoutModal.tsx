@@ -12,7 +12,8 @@ import {
   Loader2,
   Lock,
   Shield,
-  Globe
+  Globe,
+  AlertCircle
 } from 'lucide-react'
 import { PlanType } from '@/hooks/useProPlan'
 import {
@@ -66,6 +67,7 @@ export default function CheckoutModal({
   const [cardNumber, setCardNumber] = useState('')
   const [cardExpiry, setCardExpiry] = useState('')
   const [cardCvc, setCardCvc] = useState('')
+  const [cardError, setCardError] = useState<string | null>(null)
   const [licenseCode, setLicenseCode] = useState('')
   const [isVerifying, setIsVerifying] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -104,7 +106,7 @@ export default function CheckoutModal({
   const phone = (paymentConfig?.whatsapp_number || '+51987654321').replace(/[^0-9]/g, '')
   const orderRef = `ATP-PRO-${Math.floor(1000 + Math.random() * 9000)}`
   const currencyNotice = isPEN ? `en Perú (${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})` : `(${cycle === 'annual' ? `Anual ${annualTotalDisplay}` : `Mensual ${monthlyPriceDisplay}`})`
-  const defaultMsg = `Hola ATP Dev 👋, quiero mejorar a Premium ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
+  const defaultMsg = `Hola ATP Dev 👋, quiero mejorar a Premium en Descargador Pro ${currencyNotice}. Orden: #${orderRef}. ¿Me brindas los datos de pago por Yape o Tarjeta?`
   const customMsg = paymentConfig?.whatsapp_message_pro || defaultMsg
   const whatsappHref = `https://wa.me/${phone}?text=${encodeURIComponent(customMsg)}`
 
@@ -137,19 +139,37 @@ export default function CheckoutModal({
     }
   }
 
-  // Submit botón principal
+  // Submit botón principal con validación estricta
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setCardError(null)
+
     if (selectedMethod === 'card') {
       if (stripeUrl) {
         window.open(stripeUrl, '_blank')
         return
       }
+
+      const cleanCard = cardNumber.replace(/\s/g, '')
+      if (!cleanCard || cleanCard.length < 15) {
+        setCardError('Por favor ingresa un número de tarjeta válido (16 dígitos).')
+        return
+      }
+
+      if (!cardExpiry || cardExpiry.length < 5) {
+        setCardError('Por favor ingresa la fecha de expiración (MM/AA).')
+        return
+      }
+
+      if (!cardCvc || cardCvc.length < 3) {
+        setCardError('Por favor ingresa el código CVC (3 dígitos).')
+        return
+      }
+
       setIsProcessing(true)
       setTimeout(() => {
         setIsProcessing(false)
-        onSuccess('pro', 'CARD-PREMIUM')
-        onClose()
+        setCardError('La pasarela de tarjeta directa está en sincronización bancaria. Por favor completa tu pago seguro por Yape / WhatsApp o canjea tu código de licencia.')
       }, 1000)
     } else if (selectedMethod === 'paypal') {
       window.open(paypalUrl || whatsappHref, '_blank')
@@ -174,24 +194,24 @@ export default function CheckoutModal({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Logo Superior tipo I ❤️ FTY */}
+        {/* Logo Superior: Descargador ❤️ Pro */}
         <div className="text-center space-y-1 pt-1">
           <div className="flex items-center justify-center gap-1.5">
             <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-              FTY
+              Descargador
             </span>
-            <span className="text-2xl text-red-500 inline-block">
+            <span className="text-2xl text-red-500 inline-block animate-pulse">
               ❤️
             </span>
-            <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-              PRO
+            <span className="text-2xl font-black tracking-tight text-blue-600 dark:text-blue-400">
+              Pro
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
             Mejora a Premium
           </h2>
 
-          {/* Selector de Moneda en el Modal */}
+          {/* Selector de Moneda */}
           <div className="pt-1 flex items-center justify-center">
             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-300">
               <Globe className="w-3 h-3 text-slate-400" />
@@ -271,7 +291,10 @@ export default function CheckoutModal({
           <div className="flex items-center gap-4 sm:gap-5 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
             <button
               type="button"
-              onClick={() => setSelectedMethod('card')}
+              onClick={() => {
+                setSelectedMethod('card')
+                setCardError(null)
+              }}
               className={`flex items-center gap-1.5 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'card'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -284,7 +307,10 @@ export default function CheckoutModal({
 
             <button
               type="button"
-              onClick={() => setSelectedMethod('yape')}
+              onClick={() => {
+                setSelectedMethod('yape')
+                setCardError(null)
+              }}
               className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'yape'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -297,7 +323,10 @@ export default function CheckoutModal({
 
             <button
               type="button"
-              onClick={() => setSelectedMethod('paypal')}
+              onClick={() => {
+                setSelectedMethod('paypal')
+                setCardError(null)
+              }}
               className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'paypal'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -309,7 +338,10 @@ export default function CheckoutModal({
 
             <button
               type="button"
-              onClick={() => setSelectedMethod('code')}
+              onClick={() => {
+                setSelectedMethod('code')
+                setCardError(null)
+              }}
               className={`flex items-center gap-1 pb-2 text-xs font-bold transition shrink-0 ${
                 selectedMethod === 'code'
                   ? 'text-[#e5322d] border-b-2 border-[#e5322d]'
@@ -328,13 +360,16 @@ export default function CheckoutModal({
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                   Datos de tu tarjeta ({currentCurrency.code})
                 </label>
-                <div className="flex items-center rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-sm shadow-sm focus-within:border-slate-500">
+                <div className={`flex items-center rounded-xl border bg-white dark:bg-slate-950 px-3 py-2 text-sm shadow-sm ${
+                  cardError ? 'border-red-500' : 'border-slate-300 dark:border-slate-700 focus-within:border-slate-500'
+                }`}>
                   <CreditCard className="w-4 h-4 text-slate-400 shrink-0 mr-2" />
                   <input
                     type="text"
                     placeholder="Número de tarjeta"
                     value={cardNumber}
                     onChange={(e) => {
+                      setCardError(null)
                       const raw = e.target.value.replace(/\D/g, '').substring(0, 16)
                       setCardNumber(raw.match(/.{1,4}/g)?.join(' ') || raw)
                     }}
@@ -345,6 +380,7 @@ export default function CheckoutModal({
                     placeholder="MM/AA"
                     value={cardExpiry}
                     onChange={(e) => {
+                      setCardError(null)
                       const raw = e.target.value.replace(/\D/g, '').substring(0, 4)
                       setCardExpiry(raw.length >= 2 ? `${raw.substring(0, 2)}/${raw.substring(2)}` : raw)
                     }}
@@ -355,11 +391,21 @@ export default function CheckoutModal({
                     placeholder="CVC"
                     maxLength={4}
                     value={cardCvc}
-                    onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => {
+                      setCardError(null)
+                      setCardCvc(e.target.value.replace(/\D/g, ''))
+                    }}
                     className="w-12 bg-transparent text-xs text-slate-900 dark:text-white font-mono outline-none text-center border-l border-slate-200 dark:border-slate-800 ml-2 pl-1"
                   />
                 </div>
               </div>
+
+              {cardError && (
+                <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 text-[11px] text-red-600 dark:text-red-400 flex items-start gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>{cardError}</span>
+                </div>
+              )}
 
               {/* Botón Rojo iLovePDF */}
               <button
@@ -370,7 +416,7 @@ export default function CheckoutModal({
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Procesando...</span>
+                    <span>Validando...</span>
                   </>
                 ) : (
                   <span>Mejorar a Premium ({currentPriceDisplay})</span>
