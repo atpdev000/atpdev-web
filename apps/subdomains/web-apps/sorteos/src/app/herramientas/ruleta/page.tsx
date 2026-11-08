@@ -19,9 +19,10 @@ import { ToolSwitcher } from '@/components/ToolSwitcher';
 import ConfettiEffect from '@/components/ConfettiEffect';
 import { LiveStreamStage } from '@/components/LiveStreamStage';
 import { WinnerExportModal } from '@/components/WinnerExportModal';
-import { isAudioMuted, toggleAudioMute } from '@/lib/soundEffects';
+import { isAudioMuted, toggleAudioMute, playCardFlip } from '@/lib/soundEffects';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
+import { ListFileImporter } from '@/components/ListFileImporter';
 
 const DEFAULT_OPTIONS = [
   'Premio Mayor 🎁',
@@ -96,6 +97,16 @@ export default function RuletaPage() {
 
   const handleWinnerSelected = (selected: string) => {
     setWinner(selected);
+  };
+
+  const handleImportOptions = (newOptions: string[], mode: 'replace' | 'append') => {
+    if (mode === 'append') {
+      setOptions((prev) => Array.from(new Set([...prev, ...newOptions])));
+    } else {
+      setOptions(newOptions.length >= 2 ? newOptions : [...newOptions, 'Opción 2']);
+    }
+    setWinner(null);
+    playCardFlip();
   };
 
   return (
@@ -191,7 +202,18 @@ export default function RuletaPage() {
         {/* Right: Options Manager & Presets */}
         <div className="lg:col-span-5 space-y-6">
           <div className="interactive-card bg-white dark:bg-[#0f172a] rounded-2xl p-6 sm:p-8 space-y-5 border border-slate-200 dark:border-white/10 shadow-sm">
-            <h2 className="text-lg font-bold font-display text-slate-900 dark:text-white">{t('options_config_title')}</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold font-display text-slate-900 dark:text-white">{t('options_config_title')}</h2>
+              <button
+                type="button"
+                onClick={() => setOptions([])}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-950/30 text-slate-600 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Limpiar todas las opciones"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Limpiar</span>
+              </button>
+            </div>
 
             {/* Presets */}
             <div className="space-y-1.5">
@@ -278,6 +300,9 @@ export default function RuletaPage() {
                 <span>Reiniciar Ganador</span>
               </button>
             </div>
+
+            {/* Subida Universal: Word, Excel, PDF, CSV, TXT e Imagen OCR */}
+            <ListFileImporter onImport={handleImportOptions} currentCount={options.length} />
           </div>
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
 } from '@/lib/soundEffects';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
+import { ListFileImporter } from '@/components/ListFileImporter';
 
 interface Match {
   giver: string;
@@ -78,6 +79,16 @@ export default function AmigoInvisiblePage() {
       return;
     }
     setParticipants(participants.filter((_, i) => i !== idx));
+  };
+
+  const handleImportParticipants = (newParticipants: string[], mode: 'replace' | 'append') => {
+    if (mode === 'append') {
+      setParticipants((prev) => Array.from(new Set([...prev, ...newParticipants])));
+    } else {
+      setParticipants(newParticipants.length >= 3 ? newParticipants : [...newParticipants, 'Participante Extra']);
+    }
+    setMatches([]);
+    playCardFlip();
   };
 
   const handleStartDraw = () => {
@@ -204,7 +215,31 @@ export default function AmigoInvisiblePage() {
         {/* Left Form: Participants & Rules */}
         <div className="lg:col-span-6 space-y-6">
           <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 sm:p-8 space-y-5 border border-slate-200 dark:border-white/10 shadow-sm">
-            <h2 className="text-lg font-bold font-display text-slate-900 dark:text-white">{t('secret_santa_participants_label')} ({participants.length})</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold font-display text-slate-900 dark:text-white">
+                {t('secret_santa_participants_label')} ({participants.length})
+              </h2>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setParticipants(['Carlos Gómez', 'Lucía Fernández', 'Andrés Mendoza', 'Valeria Silva', 'Mateo Torres', 'Sofía Vargas', 'Diego Ramos'])}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 text-xs font-bold border border-pink-200 dark:border-pink-900/30 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Cargar participantes de ejemplo"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-pink-600 dark:text-purple-400" />
+                  <span>Cargar Demo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setParticipants([])}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-950/30 text-slate-600 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Limpiar toda la lista"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Limpiar</span>
+                </button>
+              </div>
+            </div>
 
             {/* Add person form */}
             <form onSubmit={handleAddPerson} className="flex gap-2">
@@ -250,6 +285,9 @@ export default function AmigoInvisiblePage() {
                 </div>
               ))}
             </div>
+
+            {/* Subida Universal: Word, Excel, PDF, CSV, TXT e Imagen OCR */}
+            <ListFileImporter onImport={handleImportParticipants} currentCount={participants.length} />
 
             {/* Extra details: Budget and Date */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
