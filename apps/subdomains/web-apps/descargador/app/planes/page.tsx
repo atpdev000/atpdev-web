@@ -51,6 +51,7 @@ export default function PlanesPage() {
   const [licenseCode, setLicenseCode] = useState('')
   const [licenseError, setLicenseError] = useState<string | null>(null)
   const [isVerifyingCode, setIsVerifyingCode] = useState(false)
+  const [copiedCode, setCopiedCode] = useState(false)
 
   useEffect(() => {
     // 1. Detectar moneda local automáticamente
@@ -220,6 +221,40 @@ export default function PlanesPage() {
               <Download className="w-4 h-4" />
               <span>Descargar Ahora</span>
             </Link>
+          </div>
+        )}
+
+        {/* Tarjeta de Clave Multiplataforma (Web + App Android) */}
+        {isPro && (
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/80 to-purple-50/80 dark:from-slate-900/90 dark:via-indigo-950/40 dark:to-slate-900/90 border border-blue-200/80 dark:border-blue-800/60 shadow-sm animate-fade-in flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-500 shrink-0" />
+                <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  Tu Clave de Activación Multiplataforma (Android + Web)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
+                ¿Usas la aplicación de Android o cambiaste de dispositivo? Ingresa esta clave en la pestaña <strong>Licencia</strong> para desbloquear Premium al instante sin volver a pagar.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-950 px-4 py-2.5 rounded-xl border border-blue-200 dark:border-blue-900/60 shrink-0 shadow-xs">
+              <code className="font-mono font-black text-sm text-blue-600 dark:text-blue-400 tracking-wider">
+                PRO-ATP-2026
+              </code>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText('PRO-ATP-2026')
+                  setCopiedCode(true)
+                  setTimeout(() => setCopiedCode(false), 2500)
+                }}
+                className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 text-xs font-bold hover:bg-blue-100 transition cursor-pointer ml-1"
+              >
+                {copiedCode ? '¡Copiado! ✓' : 'Copiar Clave'}
+              </button>
+            </div>
           </div>
         )}
 
