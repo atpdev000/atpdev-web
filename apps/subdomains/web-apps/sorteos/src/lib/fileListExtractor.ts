@@ -55,6 +55,13 @@ export function cleanExtractedNames(rawText: string): string[] {
     // Remover prefijos de lista como "1.", "1)", "1.-", "01.", "[1]", "-", "*", "•"
     clean = clean.replace(/^(\d+[\.\)\-\s]+|\[\d+\]\s*|[\-\*\•\–\—]\s*)/, '').trim();
 
+    // Limpieza inteligente para OCR: remover artefactos de escaneo como "|", "]", "[", "/", ":" o letras sueltas de casillas
+    clean = clean.replace(/^([\|\\\/\]\[\)\(\>\<\:\;\_\+\~]\s*)+/, '').trim();
+    clean = clean.replace(/^[a-zA-Z0-9]\s+(?=[a-zA-ZáéíóúñÁÉÍÓÚÑ]{2,})/, '').trim();
+
+    // Remover sufijos de OCR o anotaciones entre corchetes tipo "[OC", "[-", "]"
+    clean = clean.replace(/\s*(\[.*?\]?|[\-\]\;\|\:\*]+)$/, '').trim();
+
     // Si tiene comas o punto y coma y parece una lista en una sola línea (ej. Carlos, Juan, Pedro)
     if (clean.includes(',') && !clean.includes(' ') && clean.length > 3) {
       const parts = clean.split(',');

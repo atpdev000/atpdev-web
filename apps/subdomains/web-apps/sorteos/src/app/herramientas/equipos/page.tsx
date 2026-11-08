@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, Sparkles, Shuffle, Copy, Check, ShieldAlert, 
   Trophy, ShieldCheck, Volume2, VolumeX, Maximize2, Minimize2, Share2, Tv,
-  Crown, Edit2, Download, Plus, Minus, ArrowRight, Layers, FileSpreadsheet, RefreshCw
+  Crown, Edit2, Download, Plus, Minus, ArrowRight, Layers, FileSpreadsheet, RefreshCw, Trash2
 } from 'lucide-react';
 import { divideIntoTeams, generateSha256Hash } from '@/lib/randomEngine';
 import ConfettiEffect from '@/components/ConfettiEffect';
@@ -488,21 +488,24 @@ export default function EquiposPage() {
                 <Users className="w-4 h-4 text-pink-600 dark:text-purple-400" />
                 <span>Participantes ({participantsList.length})</span>
               </label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setInputText("Alejandro\nBeatriz\nCarlos\nDaniela\nEduardo\nFernanda\nGabriel\nHelena\nIgnacio\nJimena\nKevin\nLaura\nMartín\nNatalia\nOscar\nPatricia")}
-                  className="text-xs text-pink-600 hover:text-pink-700 dark:text-purple-400 hover:underline transition-colors font-medium cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 text-xs font-bold border border-pink-200 dark:border-pink-900/30 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Cargar lista de ejemplo"
                 >
-                  Cargar Demo
+                  <Sparkles className="w-3.5 h-3.5 text-pink-600 dark:text-purple-400" />
+                  <span>Cargar Demo</span>
                 </button>
-                <span className="text-slate-300 dark:text-zinc-700">•</span>
                 <button
                   type="button"
                   onClick={() => setInputText('')}
-                  className="text-xs text-slate-400 hover:text-rose-500 dark:text-zinc-500 dark:hover:text-rose-400 transition-colors font-medium cursor-pointer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-white/5 dark:hover:bg-rose-950/30 text-slate-600 hover:text-rose-600 dark:text-zinc-400 dark:hover:text-rose-300 text-xs font-bold border border-slate-200 dark:border-white/10 transition-all cursor-pointer shadow-xs active:scale-95"
+                  title="Limpiar toda la lista"
                 >
-                  Limpiar
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Limpiar</span>
                 </button>
               </div>
             </div>

@@ -49,7 +49,7 @@ export const ExportResultHub: React.FC<ExportResultHubProps> = ({
     } else if (type === 'image') {
       setIsExportingImage(true);
       try {
-        await exportTeamsToImage(captureElementId, `equipos-${Date.now()}.png`);
+        await exportTeamsToImage(teams, drawTitle, auditHash, `equipos-sorteopro-${Date.now()}.png`);
         setExportSuccess('Imagen HD (.png) descargada con éxito');
       } catch (err: any) {
         alert(err.message || 'Error al generar imagen');

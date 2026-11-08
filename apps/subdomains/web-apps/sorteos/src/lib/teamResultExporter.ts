@@ -302,29 +302,208 @@ export function exportTeamsToPdf(
 }
 
 /**
- * 4. Exportar a Imagen HD (.png) con html2canvas
+ * 4. Exportar a Imagen HD (.png) nativa con HTML5 Canvas 2D
+ * (100% inmune a errores de CSS moderno como 'lab' o 'oklch')
  */
 export async function exportTeamsToImage(
-  elementId: string,
+  teams: TeamExportData[],
+  drawTitle: string = 'División de Equipos al Azar',
+  auditHash: string = '',
   fileName: string = 'equipos-sorteopro.png'
 ): Promise<void> {
-  if (!window.html2canvas) {
-    await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
-  }
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('No se pudo inicializar el motor gráfico Canvas 2D');
 
-  const target = document.getElementById(elementId);
-  if (!target) throw new Error('No se encontró el contenedor de resultados para capturar.');
+  const width = 1200;
+  const numTeams = teams.length;
+  const cols = numTeams > 4 ? 3 : 2;
+  const rows = Math.ceil(numTeams / cols);
 
-  const canvas = await window.html2canvas(target, {
-    scale: 2, // Calidad Retina HD
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    logging: false
+  // Calcular altura dinámica
+  const maxMembers = Math.max(...teams.map((t) => t.members.length), 1);
+  const cardHeight = 70 + maxMembers * 38;
+  const headerHeight = 220;
+  const footerHeight = 110;
+  const gap = 24;
+  const paddingX = 48;
+  const totalHeight = headerHeight + rows * cardHeight + (rows - 1) * gap + footerHeight;
+
+  canvas.width = width;
+  canvas.height = totalHeight;
+
+  // 1. Fondo degradado profesional estilo Dark Studio
+  const bgGrad = ctx.createLinearGradient(0, 0, width, totalHeight);
+  bgGrad.addColorStop(0, '#0b0f19');
+  bgGrad.addColorStop(0.5, '#0f172a');
+  bgGrad.addColorStop(1, '#1e1b4b');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, width, totalHeight);
+
+  // Decoración de fondo (luces difusas)
+  const glow = ctx.createRadialGradient(width / 2, 80, 20, width / 2, 80, 500);
+  glow.addColorStop(0, 'rgba(219, 39, 119, 0.25)');
+  glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, 400);
+
+  // 2. Cabecera
+  // Marca
+  ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'left';
+  ctx.fillText('sorteos', paddingX, 60);
+
+  const brandWidth = ctx.measureText('sorteos ').width;
+  ctx.fillStyle = '#ec4899';
+  ctx.fillText('pro', paddingX + brandWidth, 60);
+
+  // Badge Oficial
+  ctx.font = 'bold 13px monospace';
+  ctx.fillStyle = '#f472b6';
+  ctx.fillText('• RESULTADO CERTIFICADO CSPRNG', paddingX + brandWidth + 60, 58);
+
+  // Título Principal
+  ctx.font = '900 42px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(drawTitle.toUpperCase(), paddingX, 120);
+
+  // Metadatos
+  const dateStr = new Date().toLocaleString('es-PE', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+  const totalMembers = teams.reduce((acc, t) => acc + t.members.length, 0);
+  ctx.font = '500 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText(`📅 ${dateStr}   •   👥 ${totalMembers} Participantes distribuidos en ${numTeams} Equipos`, paddingX, 160);
+
+  // Línea separadora
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(paddingX, 185);
+  ctx.lineTo(width - paddingX, 185);
+  ctx.stroke();
+
+  // 3. Grid de Tarjetas de Equipos
+  const totalGridWidth = width - paddingX * 2;
+  const colWidth = (totalGridWidth - (cols - 1) * gap) / cols;
+
+  teams.forEach((team, idx) => {
+    const colIdx = idx % cols;
+    const rowIdx = Math.floor(idx / cols);
+    const cardX = paddingX + colIdx * (colWidth + gap);
+    const cardY = headerHeight + rowIdx * (cardHeight + gap);
+
+    // Fondo de tarjeta con esquinas redondeadas
+    ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1;
+    if (typeof (ctx as any).roundRect === 'function') {
+      ctx.beginPath();
+      (ctx as any).roundRect(cardX, cardY, colWidth, cardHeight, 18);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillRect(cardX, cardY, colWidth, cardHeight);
+      ctx.strokeRect(cardX, cardY, colWidth, cardHeight);
+    }
+
+    // Cabecera de la tarjeta del equipo
+    ctx.fillStyle = 'rgba(219, 39, 119, 0.15)';
+    if (typeof (ctx as any).roundRect === 'function') {
+      ctx.beginPath();
+      (ctx as any).roundRect(cardX, cardY, colWidth, 54, [18, 18, 0, 0]);
+      ctx.fill();
+    } else {
+      ctx.fillRect(cardX, cardY, colWidth, 54);
+    }
+
+    // Nombre del equipo
+    ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    ctx.fillText(team.name, cardX + 16, cardY + 35);
+
+    // Conteo de integrantes
+    ctx.font = 'bold 13px monospace';
+    ctx.fillStyle = '#f472b6';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${team.members.length} miembros`, cardX + colWidth - 16, cardY + 34);
+
+    // Lista de integrantes
+    team.members.forEach((member, mIdx) => {
+      const isCaptain = member === team.captain;
+      const memberY = cardY + 68 + mIdx * 38;
+
+      // Fondo de la fila de integrante
+      ctx.fillStyle = isCaptain ? 'rgba(245, 158, 11, 0.18)' : 'rgba(255, 255, 255, 0.04)';
+      ctx.strokeStyle = isCaptain ? 'rgba(245, 158, 11, 0.4)' : 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+
+      if (typeof (ctx as any).roundRect === 'function') {
+        ctx.beginPath();
+        (ctx as any).roundRect(cardX + 12, memberY, colWidth - 24, 32, 10);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillRect(cardX + 12, memberY, colWidth - 24, 32);
+      }
+
+      // Número de integrante
+      ctx.fillStyle = isCaptain ? '#f59e0b' : '#ec4899';
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`${mIdx + 1}.`, cardX + 22, memberY + 21);
+
+      // Nombre del integrante
+      ctx.font = isCaptain ? 'bold 15px -apple-system, sans-serif' : '500 15px -apple-system, sans-serif';
+      ctx.fillStyle = isCaptain ? '#fef3c7' : '#e2e8f0';
+      ctx.fillText(member, cardX + 46, memberY + 21);
+
+      // Badge de Capitán
+      if (isCaptain) {
+        ctx.font = 'bold 11px monospace';
+        ctx.fillStyle = '#f59e0b';
+        ctx.textAlign = 'right';
+        ctx.fillText('👑 CAPITÁN', cardX + colWidth - 24, memberY + 20);
+      }
+    });
   });
 
+  // 4. Pie de Verificación
+  const footerY = totalHeight - footerHeight + 20;
+
+  // Caja de Huella Criptográfica
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 1;
+  if (typeof (ctx as any).roundRect === 'function') {
+    ctx.beginPath();
+    (ctx as any).roundRect(paddingX, footerY, width - paddingX * 2, 60, 14);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  ctx.font = 'bold 13px -apple-system, sans-serif';
+  ctx.fillStyle = '#10b981';
+  ctx.textAlign = 'left';
+  ctx.fillText('🔒 Verificación Criptográfica Inmutable (SHA-256):', paddingX + 16, footerY + 25);
+
+  ctx.font = '12px monospace';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText(auditHash || 'Algoritmo CSPRNG de alta entropía auditado y verificado', paddingX + 16, footerY + 46);
+
+  ctx.font = 'bold 13px -apple-system, sans-serif';
+  ctx.fillStyle = '#f472b6';
+  ctx.textAlign = 'right';
+  ctx.fillText('sorteos.atpdev.dev', width - paddingX - 16, footerY + 36);
+
+  // 5. Descargar la imagen PNG directamente
+  const dataUrl = canvas.toDataURL('image/png', 1.0);
   const link = document.createElement('a');
   link.download = fileName;
-  link.href = canvas.toDataURL('image/png', 1.0);
+  link.href = dataUrl;
   link.click();
 }
 
