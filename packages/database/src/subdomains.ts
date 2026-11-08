@@ -39,6 +39,9 @@ export interface SubdomainSEO {
   meta_description: string;
   keywords: string[];
   canonical_url: string;
+  google_analytics_id?: string;
+  microsoft_clarity_id?: string;
+  google_search_console_token?: string;
 }
 
 export interface SubdomainModules {

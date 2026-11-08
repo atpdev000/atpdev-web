@@ -82,6 +82,9 @@ export function generateMetadata(): Metadata {
       ],
       shortcut: '/favicon.ico',
       apple: [{ url: '/icons/icon-192.png', sizes: '180x180', type: 'image/png' }]
+    },
+    verification: {
+      google: config?.seo?.google_search_console_token || undefined
     }
   }
 }
@@ -143,6 +146,47 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"}>
         <DescargadorThemeListener />
         <I18nProvider>
+          {/* Google Analytics 4 (GA4) */}
+          {config?.seo?.google_analytics_id && (
+            <>
+              <Script
+                strategy="afterInteractive"
+                src={`https://www.googletagmanager.com/gtag/js?id=${config.seo.google_analytics_id}`}
+              />
+              <Script
+                id="google-analytics-init"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', '${config.seo.google_analytics_id}', {
+                      page_path: window.location.pathname,
+                    });
+                  `
+                }}
+              />
+            </>
+          )}
+
+          {/* Microsoft Clarity (Heatmaps & Grabación de Sesiones) */}
+          {config?.seo?.microsoft_clarity_id && (
+            <Script
+              id="microsoft-clarity-init"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  (function(c,l,a,r,i,t,y){
+                      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                  })(window, document, "clarity", "script", "${config.seo.microsoft_clarity_id}");
+                `
+              }}
+            />
+          )}
+
           {/* Google AdSense Oficial cargado dinámicamente desde el CMS Admin */}
           {config?.monetization?.adsense_enabled !== false && config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_client_id && (
             <Script

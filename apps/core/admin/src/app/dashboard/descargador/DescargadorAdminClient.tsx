@@ -2767,6 +2767,81 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 outline-none"
               />
             </div>
+
+            {/* Medición & Indexación: Search Console, Analytics & Clarity */}
+            <div className="md:col-span-2 pt-4 border-t border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-emerald-400" />
+                  Medición de Visitas, Mapas de Calor & Indexación
+                </h3>
+                <span className="text-[11px] text-slate-400">
+                  Herramientas 100% gratuitas recomendadas
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <label className="text-xs font-medium text-slate-200 flex items-center justify-between">
+                    <span>Google Analytics 4</span>
+                    <span className="text-[10px] text-emerald-400 font-mono font-bold">G-XXXXXXXXXX</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="G-XXXXXXXXXX"
+                    value={config.seo.google_analytics_id || ''}
+                    onChange={(e) => setConfig({
+                      ...config,
+                      seo: { ...config.seo, google_analytics_id: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-xs focus:border-emerald-500 outline-none font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400 leading-tight">
+                    Mide usuarios en tiempo real, canales de tráfico y conversiones.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <label className="text-xs font-medium text-slate-200 flex items-center justify-between">
+                    <span>Microsoft Clarity</span>
+                    <span className="text-[10px] text-blue-400 font-mono font-bold">Project ID</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej: 9kz4x2p8"
+                    value={config.seo.microsoft_clarity_id || ''}
+                    onChange={(e) => setConfig({
+                      ...config,
+                      seo: { ...config.seo, microsoft_clarity_id: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-xs focus:border-blue-500 outline-none font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400 leading-tight">
+                    Grabación de sesiones y mapas de calor 100% gratis e ilimitado.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
+                  <label className="text-xs font-medium text-slate-200 flex items-center justify-between">
+                    <span>Search Console</span>
+                    <span className="text-[10px] text-amber-400 font-mono font-bold">HTML Meta Tag</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Token de verificación"
+                    value={config.seo.google_search_console_token || ''}
+                    onChange={(e) => setConfig({
+                      ...config,
+                      seo: { ...config.seo, google_search_console_token: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-white text-xs focus:border-amber-500 outline-none font-mono"
+                  />
+                  <p className="text-[10px] text-slate-400 leading-tight">
+                    Verifica tu dominio en Google Search Console al instante.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

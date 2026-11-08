@@ -193,7 +193,10 @@
         "convertidor mp3",
         "bajar videos online"
       ],
-      "canonical_url": "https://descargador.atpdev.dev"
+      "canonical_url": "https://descargador.atpdev.dev",
+      "google_analytics_id": "",
+      "microsoft_clarity_id": "",
+      "google_search_console_token": ""
     },
     "modules": {
       "youtube_enabled": true,
