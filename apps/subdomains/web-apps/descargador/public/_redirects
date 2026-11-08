@@ -1,3 +1,4 @@
 # Netlify & Cloudflare Pages Redirects
 # Proxy all /api/* requests seamlessly to the main API backend on Render
 /api/*  https://descargador-pro-nt6e.onrender.com/api/:splat  200!
+

@@ -96,6 +96,32 @@ export interface SubdomainBackend {
   timeout_seconds?: number;
 }
 
+export interface SubdomainPayments {
+  enabled?: boolean;
+  provider?: 'multi' | 'stripe' | 'paypal' | 'mercadopago' | 'whatsapp';
+  currency?: string; // 'USD' | 'PEN'
+  // Pro Creador
+  pro_monthly_price?: number;
+  pro_annual_price?: number;
+  stripe_pro_monthly_url?: string;
+  stripe_pro_annual_url?: string;
+  paypal_pro_monthly_url?: string;
+  paypal_pro_annual_url?: string;
+  // Business VIP
+  business_monthly_price?: number;
+  business_annual_price?: number;
+  stripe_business_monthly_url?: string;
+  stripe_business_annual_url?: string;
+  paypal_business_monthly_url?: string;
+  paypal_business_annual_url?: string;
+  // WhatsApp VIP / Yape / Plin
+  whatsapp_number?: string;
+  whatsapp_message_pro?: string;
+  whatsapp_message_business?: string;
+  // Licencias / Códigos de activación
+  license_keys?: string[];
+}
+
 export interface SubdomainConfig {
   id: string; // e.g. 'chamba'
   name: string; // e.g. 'Chamba Pro'
@@ -113,6 +139,7 @@ export interface SubdomainConfig {
   apk?: SubdomainAPK;
   monetization?: SubdomainMonetization;
   backend?: SubdomainBackend;
+  payments?: SubdomainPayments;
   updated_at?: string;
 }
 
@@ -409,6 +436,27 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     auto_fallback_enabled: true,
     timeout_seconds: 30
   },
+  payments: {
+    enabled: true,
+    provider: 'multi',
+    currency: 'USD',
+    pro_monthly_price: 3.99,
+    pro_annual_price: 47.90,
+    stripe_pro_monthly_url: '',
+    stripe_pro_annual_url: '',
+    paypal_pro_monthly_url: '',
+    paypal_pro_annual_url: '',
+    business_monthly_price: 11.99,
+    business_annual_price: 139.90,
+    stripe_business_monthly_url: '',
+    stripe_business_annual_url: '',
+    paypal_business_monthly_url: '',
+    paypal_business_annual_url: '',
+    whatsapp_number: '+51987654321',
+    whatsapp_message_pro: 'Hola ATP Dev, deseo activar el Plan Pro Creador para Descargador Pro. ¿Me brindas los datos de pago por Yape o Tarjeta?',
+    whatsapp_message_business: 'Hola ATP Dev, deseo contratar el Plan Business VIP para mi agencia. ¿Me brindas la información de activación?',
+    license_keys: ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']
+  },
   updated_at: new Date().toISOString()
 };
 
@@ -545,6 +593,10 @@ export function saveSubdomainConfig(id: string, updates: Partial<SubdomainConfig
       seo: { ...current.seo, ...(updates.seo || {}) },
       modules: { ...current.modules, ...(updates.modules || {}) },
       contact: { ...current.contact, ...(updates.contact || {}) },
+      apk: { ...(current.apk || {}), ...(updates.apk || {}) },
+      monetization: { ...(current.monetization || {}), ...(updates.monetization || {}) },
+      backend: { ...(current.backend || {}), ...(updates.backend || {}) },
+      payments: { ...(current.payments || {}), ...(updates.payments || {}) },
       updated_at: new Date().toISOString()
     };
 

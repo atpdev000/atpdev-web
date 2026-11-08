@@ -239,7 +239,28 @@
       "auto_fallback_enabled": true,
       "timeout_seconds": 30
     },
-    "updated_at": "2026-11-07T18:19:00.000Z"
+    "payments": {
+      "enabled": true,
+      "provider": "multi",
+      "currency": "USD",
+      "pro_monthly_price": 3.99,
+      "pro_annual_price": 47.90,
+      "stripe_pro_monthly_url": "",
+      "stripe_pro_annual_url": "",
+      "paypal_pro_monthly_url": "",
+      "paypal_pro_annual_url": "",
+      "business_monthly_price": 11.99,
+      "business_annual_price": 139.90,
+      "stripe_business_monthly_url": "",
+      "stripe_business_annual_url": "",
+      "paypal_business_monthly_url": "",
+      "paypal_business_annual_url": "",
+      "whatsapp_number": "+51987654321",
+      "whatsapp_message_pro": "Hola ATP Dev, deseo activar el Plan Pro Creador para Descargador Pro. ¿Me brindas los datos de pago por Yape o Tarjeta?",
+      "whatsapp_message_business": "Hola ATP Dev, deseo contratar el Plan Business VIP para mi agencia. ¿Me brindas la información de activación?",
+      "license_keys": ["PRO-ATP-2026", "VIP-ATP-2026", "DESCARGADOR-PRO-VIP"]
+    },
+    "updated_at": "2026-11-07T19:10:00.000Z"
   },
   "magic": {
     "id": "magic",

@@ -1,17 +1,47 @@
 // app/planes/page.tsx
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Check, Sparkles, Crown, Zap, ShieldCheck, HelpCircle, ArrowLeft, Download } from 'lucide-react'
-import { useProPlan } from '@/hooks/useProPlan'
+import {
+  Check,
+  Sparkles,
+  Crown,
+  Zap,
+  ShieldCheck,
+  HelpCircle,
+  ArrowLeft,
+  Download,
+  KeyRound,
+  CreditCard,
+  MessageCircle,
+  CheckCircle2
+} from 'lucide-react'
+import { useProPlan, PlanType } from '@/hooks/useProPlan'
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
+import CheckoutModal, { PaymentConfig } from '@/components/Payments/CheckoutModal'
 
 export default function PlanesPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
-  const { plan, isPro, activatePlan, cancelPlan } = useProPlan()
+  const { plan, planDetails, isPro, activatePlan, cancelPlan } = useProPlan()
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null)
+  
+  // Modal de Pago
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<'pro' | 'business'>('pro')
+
+  useEffect(() => {
+    fetch('/api/payments')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.payments) {
+          setPaymentConfig(data.payments)
+        }
+      })
+      .catch((err) => console.error('Error cargando pasarela:', err))
+  }, [])
 
   const faqs = [
     {
@@ -21,6 +51,10 @@ export default function PlanesPage() {
     {
       q: '¿Las descargas en 720p, TikTok y Facebook siguen siendo gratis?',
       a: '¡Sí! Las descargas estándar en 720p, los archivos de solo audio MP3/M4A y las descargas de TikTok y Facebook son 100% gratuitas e ilimitadas para siempre.'
+    },
+    {
+      q: '¿Puedo pagar por Yape, Plin o Transferencia bancaria en Perú?',
+      a: '¡Por supuesto! Selecciona la opción "Yape / WhatsApp" en el modal de pago y recibirás los datos de inmediato para activar tu cuenta en menos de 2 minutos.'
     },
     {
       q: '¿Puedo cancelar mi suscripción en cualquier momento?',
@@ -36,15 +70,23 @@ export default function PlanesPage() {
     }
   ]
 
-  const handleSelectPlan = (selectedPlan: 'free' | 'pro' | 'business') => {
-    if (selectedPlan === 'free') {
+  const handleOpenCheckout = (targetPlan: 'pro' | 'business') => {
+    setSelectedPlanForCheckout(targetPlan)
+    setIsCheckoutOpen(true)
+  }
+
+  const handlePaymentSuccess = (newPlan: PlanType, code?: string) => {
+    activatePlan(newPlan, code, billingCycle)
+    setFeedback(`🎉 ¡Felicidades! Se ha activado tu suscripción ${newPlan === 'pro' ? 'Pro Creador' : 'Business VIP'}. Las descargas en 1080p, 2K y 4K ya están 100% desbloqueadas.`)
+    setTimeout(() => setFeedback(null), 8000)
+  }
+
+  const handleDowngradeFree = () => {
+    if (confirm('¿Estás seguro de que deseas volver al Plan Gratuito? Perderás las descargas en 1080p/4K.')) {
       cancelPlan()
       setFeedback('Has cambiado al Plan Gratuito.')
-    } else {
-      activatePlan(selectedPlan)
-      setFeedback(`¡Felicidades! Se ha activado tu suscripción ${selectedPlan === 'pro' ? 'Pro Creador' : 'Business'}. Ya puedes descargar en 1080p y 4K.`)
+      setTimeout(() => setFeedback(null), 5000)
     }
-    setTimeout(() => setFeedback(null), 5000)
   }
 
   return (
@@ -52,18 +94,25 @@ export default function PlanesPage() {
       <Header />
 
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-        {/* Banner de confirmación */}
+        {/* Banner de confirmación / Éxito */}
         {feedback && (
-          <div className="p-4 rounded-xl bg-green-100 dark:bg-green-950/70 border border-green-300 dark:border-green-800 text-green-800 dark:text-green-300 flex items-center justify-between text-sm font-semibold animate-fade-in">
-            <span>{feedback}</span>
-            <Link href="/tools" className="underline font-bold ml-4">
-              Ir a Descargar Ahora →
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-green-500/20 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 flex items-center justify-between text-sm font-semibold animate-fade-in shadow-lg">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+              <span>{feedback}</span>
+            </div>
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-500 transition ml-4 shrink-0"
+            >
+              <Download className="w-4 h-4" />
+              <span>Descargar Ahora</span>
             </Link>
           </div>
         )}
 
-        {/* Botón Volver */}
-        <div>
+        {/* Botón Volver y Estado del Plan */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <Link
             href="/tools"
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -71,13 +120,25 @@ export default function PlanesPage() {
             <ArrowLeft className="w-4 h-4" />
             <span>Volver a las Herramientas de Descarga</span>
           </Link>
+
+          {isPro && (
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 text-xs font-bold">
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span>Plan Activo: {plan === 'business' ? 'Business VIP' : 'Pro Creador'}</span>
+              {planDetails?.licenseCode && (
+                <span className="font-mono text-[10px] text-amber-400 bg-amber-500/20 px-1.5 py-0.5 rounded">
+                  {planDetails.licenseCode}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Encabezado */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-600/20 border border-amber-500/40 text-amber-700 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Planes y Precios - Descargador PRO</span>
+            <span>Planes y Precios Oficiales - Descargador PRO</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
@@ -85,7 +146,7 @@ export default function PlanesPage() {
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-            Elige el plan ideal para creadores, editores de contenido y usuarios exigentes. Descarga con video y audio combinados a máxima calidad.
+            Elige el plan ideal para creadores, editores de contenido y agencias. Desbloquea combinaciones Full HD y 4K a máxima velocidad con FFmpeg sin colas.
           </p>
 
           {/* Selector Mensual / Anual */}
@@ -162,12 +223,12 @@ export default function PlanesPage() {
             <div className="pt-8">
               <button
                 type="button"
-                onClick={() => handleSelectPlan('free')}
+                onClick={handleDowngradeFree}
                 disabled={plan === 'free'}
                 className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all ${
                   plan === 'free'
                     ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
-                    : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200'
+                    : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 cursor-pointer'
                 }`}
               >
                 {plan === 'free' ? '✓ Plan Actual' : 'Cambiar a Gratuito'}
@@ -193,10 +254,10 @@ export default function PlanesPage() {
 
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-extrabold text-slate-900 dark:text-white">
-                  ${billingCycle === 'annual' ? '3.99' : '4.99'}
+                  ${billingCycle === 'annual' ? (paymentConfig?.pro_monthly_price || '3.99') : '4.99'}
                 </span>
                 <span className="text-xs text-slate-500">
-                  / mes {billingCycle === 'annual' ? '(facturado $47.90/año)' : ''}
+                  / mes {billingCycle === 'annual' ? `(facturado $${paymentConfig?.pro_annual_price || '47.90'}/año)` : ''}
                 </span>
               </div>
 
@@ -231,10 +292,20 @@ export default function PlanesPage() {
             <div className="pt-8">
               <button
                 type="button"
-                onClick={() => handleSelectPlan('pro')}
-                className="w-full py-3.5 px-4 rounded-xl font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 shadow-lg shadow-amber-500/30 transition-all cursor-pointer"
+                onClick={() => handleOpenCheckout('pro')}
+                className="w-full py-3.5 px-4 rounded-xl font-extrabold text-white bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 shadow-lg shadow-amber-500/30 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                {plan === 'pro' ? '✓ Plan Pro Activo' : 'Activar Plan Pro Creador'}
+                {plan === 'pro' ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>✓ Plan Pro Activo</span>
+                  </>
+                ) : (
+                  <>
+                    <Crown className="w-4 h-4" />
+                    <span>Activar Plan Pro Creador</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -249,10 +320,10 @@ export default function PlanesPage() {
 
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-extrabold text-slate-900 dark:text-white">
-                  ${billingCycle === 'annual' ? '11.99' : '14.99'}
+                  ${billingCycle === 'annual' ? (paymentConfig?.business_monthly_price || '11.99') : '14.99'}
                 </span>
                 <span className="text-xs text-slate-500">
-                  / mes {billingCycle === 'annual' ? '(facturado $139.90/año)' : ''}
+                  / mes {billingCycle === 'annual' ? `(facturado $${paymentConfig?.business_annual_price || '139.90'}/año)` : ''}
                 </span>
               </div>
 
@@ -283,13 +354,45 @@ export default function PlanesPage() {
             <div className="pt-8">
               <button
                 type="button"
-                onClick={() => handleSelectPlan('business')}
-                className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-all cursor-pointer"
+                onClick={() => handleOpenCheckout('business')}
+                className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                {plan === 'business' ? '✓ Plan Business Activo' : 'Elegir Plan Business'}
+                {plan === 'business' ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>✓ Plan Business Activo</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4 text-amber-400" />
+                    <span>Elegir Plan Business</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Barra de Canje Rápido de Licencia */}
+        <div className="p-6 rounded-2xl bg-slate-100 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-4xl mx-auto shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+              <KeyRound className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">¿Tienes un Código de Activación o Licencia?</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Canjea tu cupón o clave de licencia adquirida por WhatsApp o promoción.</p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleOpenCheckout('pro')}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-sm"
+          >
+            <KeyRound className="w-4 h-4" />
+            <span>Canjear Código Ahora</span>
+          </button>
         </div>
 
         {/* Sección de Preguntas Frecuentes */}
@@ -299,7 +402,7 @@ export default function PlanesPage() {
               Preguntas Frecuentes
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              Todo lo que necesitas saber sobre las descargas en alta calidad y tu suscripción.
+              Todo lo que necesitas saber sobre las descargas en alta calidad, pagos y tu suscripción.
             </p>
           </div>
 
@@ -342,6 +445,16 @@ export default function PlanesPage() {
       </main>
 
       <Footer />
+
+      {/* Modal de Checkout / Pasarela */}
+      <CheckoutModal
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        plan={selectedPlanForCheckout}
+        billingCycle={billingCycle}
+        paymentConfig={paymentConfig}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   )
 }

@@ -47,7 +47,10 @@ import {
   Upload,
   FileUp,
   DollarSign,
-  DownloadCloud
+  DownloadCloud,
+  CreditCard,
+  Crown,
+  KeyRound
 } from "lucide-react";
 import { SubdomainConfig, SubdomainTheme, ACCENT_COLOR_MAP } from "@atpdev/database";
 import { 
@@ -102,7 +105,7 @@ const ACCENT_PRESETS = [
 
 export default function DescargadorAdminClient({ initialConfig }: Props) {
   const [config, setConfig] = useState<SubdomainConfig>(initialConfig);
-  const [activeTab, setActiveTab] = useState<'modules' | 'monetization' | 'apk' | 'branding' | 'seo' | 'contact' | 'backend' | 'theme'>('modules');
+  const [activeTab, setActiveTab] = useState<'modules' | 'monetization' | 'payments' | 'apk' | 'branding' | 'seo' | 'contact' | 'backend' | 'theme'>('modules');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -364,6 +367,18 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
         >
           <DollarSign className="w-4 h-4" />
           Publicidad & AdSense
+        </button>
+
+        <button
+          onClick={() => setActiveTab('payments')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition shrink-0 ${
+            activeTab === 'payments'
+              ? 'bg-amber-600/10 text-amber-400 border border-amber-500/30'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          Planes & Pagos PRO
         </button>
 
         <button
@@ -822,6 +837,415 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               Ver Archivo
               <ExternalLink className="w-3 h-3" />
             </a>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: PLANES & PASARELAS DE PAGO PRO */}
+      {activeTab === 'payments' && (
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-amber-400" />
+                Gestión de Planes, Pasarelas de Pago & Licencias PRO
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Controla los precios de Pro Creador y Business, enlaces de Stripe, cobro por Yape/WhatsApp y códigos de activación inmediata.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href="https://dashboard.stripe.com"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
+                Consola Stripe
+              </a>
+              <a
+                href="/planes"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-400 border border-amber-500/30 transition"
+              >
+                <Crown className="w-3.5 h-3.5" />
+                Vista Previa /planes
+              </a>
+            </div>
+          </div>
+
+          {/* Toggle Activar Pasarela */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <Crown className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Estado de las Membresías PRO</h3>
+                <p className="text-xs text-slate-400">Habilita o pausa la venta pública y el modal de suscripción en la web</p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setConfig({
+                ...config,
+                payments: { ...(config.payments || {}), enabled: !(config.payments?.enabled ?? true) }
+              })}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                (config.payments?.enabled ?? true) ? 'bg-amber-600' : 'bg-slate-700'
+              }`}
+            >
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                (config.payments?.enabled ?? true) ? 'translate-x-6' : 'translate-x-1'
+              }`} />
+            </button>
+          </div>
+
+          {/* Selector de Pasarela & Moneda */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+              <label className="text-xs font-semibold text-slate-300">Modo de Pasarela Activo</label>
+              <select
+                value={config.payments?.provider || 'multi'}
+                onChange={(e) => setConfig({
+                  ...config,
+                  payments: { ...(config.payments || {}), provider: e.target.value as any }
+                })}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-amber-500"
+              >
+                <option value="multi">Multicanal (Recomendado: Stripe + PayPal + WhatsApp/Yape)</option>
+                <option value="stripe">Solo Tarjeta Online (Stripe)</option>
+                <option value="paypal">Solo PayPal</option>
+                <option value="whatsapp">Solo WhatsApp / Yape Directo</option>
+              </select>
+              <p className="text-[11px] text-slate-400">
+                El modo multicanal ofrece la mayor tasa de conversión al dar opciones para Perú y el extranjero.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+              <label className="text-xs font-semibold text-slate-300">Moneda Base</label>
+              <select
+                value={config.payments?.currency || 'USD'}
+                onChange={(e) => setConfig({
+                  ...config,
+                  payments: { ...(config.payments || {}), currency: e.target.value }
+                })}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs outline-none focus:border-amber-500"
+              >
+                <option value="USD">USD ($ Dólares Americanos)</option>
+                <option value="PEN">PEN (S/. Soles Peruanos)</option>
+              </select>
+              <p className="text-[11px] text-slate-400">
+                Determina el símbolo y nomenclatura mostrada en las tablas de precios.
+              </p>
+            </div>
+          </div>
+
+          {/* Tarjeta Plan Pro Creador */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-amber-500/30 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400">
+                  <Crown className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Plan 1: Pro Creador (1080p, 4K, 60fps)</h3>
+                  <p className="text-xs text-slate-400">Configuración de precios y links de pago para creadores</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 text-xs font-bold">
+                Más Vendido
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Precio Mensual ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="3.99"
+                  value={config.payments?.pro_monthly_price ?? 3.99}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), pro_monthly_price: parseFloat(e.target.value) || 0 }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Precio Anual Total ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="47.90"
+                  value={config.payments?.pro_annual_price ?? 47.90}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), pro_annual_price: parseFloat(e.target.value) || 0 }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Stripe Payment Link (Pro Mensual)</label>
+                <input
+                  type="text"
+                  placeholder="https://buy.stripe.com/..."
+                  value={config.payments?.stripe_pro_monthly_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), stripe_pro_monthly_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Stripe Payment Link (Pro Anual)</label>
+                <input
+                  type="text"
+                  placeholder="https://buy.stripe.com/..."
+                  value={config.payments?.stripe_pro_annual_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), stripe_pro_annual_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-xs font-medium text-slate-300">PayPal Checkout Link (Pro Opcional)</label>
+                <input
+                  type="text"
+                  placeholder="https://paypal.me/..."
+                  value={config.payments?.paypal_pro_monthly_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), paypal_pro_monthly_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-blue-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Tarjeta Plan Business VIP */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Plan 2: Business VIP (Agencias & Lotes)</h3>
+                  <p className="text-xs text-slate-400">Para estudios audiovisuales, descargas batch y API</p>
+                </div>
+              </div>
+              <span className="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-400 text-xs font-bold">
+                Empresarial
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Precio Mensual ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="11.99"
+                  value={config.payments?.business_monthly_price ?? 11.99}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), business_monthly_price: parseFloat(e.target.value) || 0 }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Precio Anual Total ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="139.90"
+                  value={config.payments?.business_annual_price ?? 139.90}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), business_annual_price: parseFloat(e.target.value) || 0 }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Stripe Payment Link (Business Mensual)</label>
+                <input
+                  type="text"
+                  placeholder="https://buy.stripe.com/..."
+                  value={config.payments?.stripe_business_monthly_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), stripe_business_monthly_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-purple-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Stripe Payment Link (Business Anual)</label>
+                <input
+                  type="text"
+                  placeholder="https://buy.stripe.com/..."
+                  value={config.payments?.stripe_business_annual_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), stripe_business_annual_url: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-purple-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Configuración WhatsApp VIP / Yape / Plin */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400">
+                <Phone className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Ventas Directas por WhatsApp (Yape / Plin / Transferencia)</h3>
+                <p className="text-xs text-slate-400">Permite a los usuarios de Perú y Latam pagar al instante y coordinar activación</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5 md:col-span-2">
+                <label className="text-xs font-medium text-slate-300">Número de WhatsApp de Ventas</label>
+                <input
+                  type="text"
+                  placeholder="+51987654321"
+                  value={config.payments?.whatsapp_number || config.contact?.whatsapp || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), whatsapp_number: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Mensaje predeterminado para Pro Creador</label>
+                <textarea
+                  rows={2}
+                  placeholder="Hola ATP Dev, deseo activar el Plan Pro Creador..."
+                  value={config.payments?.whatsapp_message_pro || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), whatsapp_message_pro: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-slate-300">Mensaje predeterminado para Business VIP</label>
+                <textarea
+                  rows={2}
+                  placeholder="Hola ATP Dev, deseo contratar el Plan Business VIP..."
+                  value={config.payments?.whatsapp_message_business || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), whatsapp_message_business: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Gestor de Códigos de Licencia Pro */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Códigos de Activación y Licencias Válidas</h3>
+                  <p className="text-xs text-slate-400">Códigos que los clientes pueden ingresar en /planes para desbloquear PRO de inmediato</p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const randomCode = `PRO-ATP-${Math.floor(1000 + Math.random() * 9000)}`;
+                  const currentKeys = config.payments?.license_keys || ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP'];
+                  if (!currentKeys.includes(randomCode)) {
+                    setConfig({
+                      ...config,
+                      payments: { ...(config.payments || {}), license_keys: [...currentKeys, randomCode] }
+                    });
+                  }
+                }}
+                className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Generar Código PRO
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-slate-300">
+                Lista de Códigos Activos (separados por coma o salto de línea):
+              </label>
+              <textarea
+                rows={3}
+                value={(config.payments?.license_keys || ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']).join(', ')}
+                onChange={(e) => {
+                  const keys = e.target.value.split(/[,;\n]+/).map(k => k.trim()).filter(Boolean);
+                  setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), license_keys: keys }
+                  });
+                }}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-purple-300 text-xs font-mono outline-none focus:border-purple-500"
+                placeholder="PRO-ATP-2026, VIP-ATP-2026, DESCARGADOR-PRO-VIP"
+              />
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {(config.payments?.license_keys || ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']).map((code, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-[11px]"
+                  >
+                    <span>{code}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const filtered = (config.payments?.license_keys || []).filter(k => k !== code);
+                        setConfig({
+                          ...config,
+                          payments: { ...(config.payments || {}), license_keys: filtered }
+                        });
+                      }}
+                      className="text-slate-400 hover:text-red-400 ml-1"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
