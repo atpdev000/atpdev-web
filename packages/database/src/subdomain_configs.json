@@ -210,7 +210,7 @@
       "blog_enabled": true
     },
     "contact": {
-      "email": "contacto@atpdev.dev",
+      "email": "achataipepercy30@gmail.com",
       "whatsapp": "+51987006572",
       "support_url": "https://descargador.atpdev.dev/contact"
     },
@@ -264,9 +264,10 @@
         "VIP-ATP-2026",
         "DESCARGADOR-PRO-VIP",
         "PRO-ATP-9805"
-      ]
+      ],
+      "notification_email": "achataipepercy30@gmail.com"
     },
-    "updated_at": "2026-11-08T00:27:10.233Z"
+    "updated_at": "2026-11-08T15:19:34.966Z"
   },
   "magic": {
     "id": "magic",

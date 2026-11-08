@@ -123,6 +123,7 @@ export interface SubdomainPayments {
   // Notificaciones & Cuentas de Cobro
   notification_email?: string;
   stripe_account_email?: string;
+  mercadopago_account_email?: string;
   // Licencias / Códigos de activación
   license_keys?: string[];
 }

@@ -51,7 +51,8 @@ import {
   CreditCard,
   Crown,
   KeyRound,
-  Copy
+  Copy,
+  QrCode
 } from "lucide-react";
 import type { SubdomainConfig, SubdomainTheme } from "@atpdev/database";
 import { ACCENT_COLOR_MAP } from "@atpdev/database";
@@ -240,6 +241,41 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
     tested: false
   });
   const [copiedTestCard, setCopiedTestCard] = useState(false);
+
+    // Mercado Pago Gateway Ping state
+  const [mpPingResult, setMpPingResult] = useState<{
+    testing: boolean;
+    tested: boolean;
+    online?: boolean;
+    statusText?: string;
+    latencyMs?: number;
+  }>({
+    testing: false,
+    tested: false
+  });
+
+  const handlePingMercadoPago = async (customUrl?: string) => {
+    const targetUrl = customUrl || config.payments?.mercadopago_pro_monthly_url || config.payments?.mercadopago_pro_annual_url || 'https://mpago.la/1qwLLFy';
+    setMpPingResult({ testing: true, tested: false });
+    try {
+      const res = await checkGatewayPingAction(targetUrl);
+      setMpPingResult({
+        testing: false,
+        tested: true,
+        online: res.online,
+        statusText: res.statusText,
+        latencyMs: res.latencyMs
+      });
+    } catch (err: any) {
+      setMpPingResult({
+        testing: false,
+        tested: true,
+        online: false,
+        statusText: err?.message || 'Error de conexión',
+        latencyMs: 0
+      });
+    }
+  };
 
   const handlePingStripe = async () => {
     const targetUrl = config.payments?.stripe_pro_annual_url || config.payments?.stripe_pro_monthly_url || 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00';
@@ -1102,6 +1138,156 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               <p className="text-[11px] text-slate-400">
                 💡 En la pasarela de prueba de Stripe puedes usar <strong>cualquier correo</strong> (incluso tu correo real o personal) para recibir el recibo simulado. No se te cobrará ningún dinero real y el sistema te redirigirá a <strong>/planes?success=true</strong> activando el plan Pro de prueba.
               </p>
+            </div>
+          </div>
+
+          {/* Card de Mercado Pago Perú Gateway (Yape / Plin / PagoEfectivo) */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-950 to-blue-950/40 border border-cyan-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#009ee3]/20 border border-[#009ee3]/30 text-[#009ee3] flex items-center justify-center font-black text-lg shrink-0 shadow-lg shadow-[#009ee3]/10">
+                  MP
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white">Mercado Pago Perú (Yape & Plin)</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold border bg-cyan-500/15 border-cyan-500/30 text-cyan-400">
+                      🇵🇪 Pasarela Oficial Perú
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Cobros locales automatizados con <strong>Yape</strong>, <strong>Plin</strong>, <strong>PagoEfectivo CIP</strong> y tarjetas bancarias nacionales sin exponer tu número de teléfono.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handlePingMercadoPago()}
+                  disabled={mpPingResult.testing}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-semibold transition"
+                >
+                  <Activity className={`w-3.5 h-3.5 ${mpPingResult.testing ? 'animate-spin' : ''}`} />
+                  {mpPingResult.testing ? 'Verificando...' : 'Hacer Ping MP'}
+                </button>
+                <a
+                  href="https://www.mercadopago.com.pe/payment-links"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#009ee3] hover:bg-[#0089c7] text-white text-xs font-bold transition shadow-sm"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Consola Mercado Pago
+                </a>
+                <a
+                  href={config.payments?.mercadopago_pro_monthly_url || 'https://mpago.la/1qwLLFy'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition shadow-sm"
+                >
+                  <QrCode className="w-3.5 h-3.5" />
+                  Probar Checkout Yape
+                </a>
+              </div>
+            </div>
+
+            {/* Resultado del Ping Mercado Pago */}
+            {mpPingResult.tested && (
+              <div className={`p-3 rounded-xl border text-xs flex items-center justify-between ${
+                mpPingResult.online
+                  ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300'
+                  : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${mpPingResult.online ? 'bg-cyan-400 animate-pulse' : 'bg-rose-400'}`} />
+                  <span><strong>Estado Mercado Pago:</strong> {mpPingResult.statusText}</span>
+                </div>
+                <span className="font-mono text-[11px] bg-black/30 px-2 py-0.5 rounded">
+                  Latencia: {mpPingResult.latencyMs} ms
+                </span>
+              </div>
+            )}
+
+            {/* Enlaces Editables de Mercado Pago Perú */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-slate-800/80 text-xs">
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-400 block text-[11px] font-semibold">Link Yape / Plin Mensual (S/. 14.90):</label>
+                  <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20 font-bold">Editable</span>
+                </div>
+                <input
+                  type="text"
+                  value={config.payments?.mercadopago_pro_monthly_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), mercadopago_pro_monthly_url: e.target.value }
+                  })}
+                  placeholder="https://mpago.la/1qwLLFy"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
+                />
+                <span className="text-[10px] text-slate-500 block">Enlace de cobro para suscripción mensual en Soles</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-400 block text-[11px] font-semibold">Link Yape / Plin Anual (S/. 149.00):</label>
+                  <span className="text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20 font-bold">Editable</span>
+                </div>
+                <input
+                  type="text"
+                  value={config.payments?.mercadopago_pro_annual_url || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), mercadopago_pro_annual_url: e.target.value }
+                  })}
+                  placeholder="https://mpago.la/1tGtPwz"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
+                />
+                <span className="text-[10px] text-slate-500 block">Enlace de cobro con descuento anual en Soles</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-400 block text-[11px] font-semibold">Cuenta / Correo Mercado Pago:</label>
+                  <span className="text-[10px] text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 font-bold">Editable</span>
+                </div>
+                <input
+                  type="email"
+                  value={config.payments?.mercadopago_account_email || config.payments?.notification_email || config.contact?.email || ''}
+                  onChange={(e) => setConfig({
+                    ...config,
+                    payments: { ...(config.payments || {}), mercadopago_account_email: e.target.value }
+                  })}
+                  placeholder="tu-correo@mercadopago.com"
+                  className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-purple-300 font-mono text-xs focus:border-purple-500 outline-none"
+                />
+                <span className="text-[10px] text-slate-500 block">Cuenta titular para recibir el dinero de las ventas en Perú</span>
+              </div>
+            </div>
+
+            {/* Caja de Explicación de Privacidad y QR Yape/Plin */}
+            <div className="p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <QrCode className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <span className="font-bold text-white">¿Por qué usar Mercado Pago para Yape & Plin?</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Genera un código QR dinámico y comprobante de pago oficial por cada transacción. El usuario paga desde su app de Yape o Plin al instante y <strong>tu número de teléfono personal se mantiene 100% privado</strong>.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={config.payments?.mercadopago_pro_annual_url || 'https://mpago.la/1tGtPwz'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition"
+                >
+                  Probar Link Anual ↗
+                </a>
+              </div>
             </div>
           </div>
 
