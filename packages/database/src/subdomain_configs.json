@@ -355,5 +355,80 @@
       "support_url": "https://atpdev.dev/contacto"
     },
     "updated_at": "2026-10-31T19:40:00.000Z"
+  },
+  "perusabor": {
+    "id": "perusabor",
+    "name": "Perú Sabor Inteligente",
+    "slug": "perusabor",
+    "subdomain": "sabor",
+    "full_domain": "sabor.atpdev.dev",
+    "devPort": 3009,
+    "category": "Gastronomía Peruana, Chef IA & Gestión de Restaurantes",
+    "status": "active",
+    "theme": {
+      "accent_color": "#c22929",
+      "accent_name": "red",
+      "theme_mode": "dark",
+      "radius_style": "rounded-3xl",
+      "radius_scale": "full",
+      "seed_color": "#c22929",
+      "color_theme": "red",
+      "primary_color": "#c22929",
+      "secondary_color": "#7f1d1d",
+      "tertiary_color": "#f59e0b",
+      "neutral_color": "#78716c",
+      "font_headline": "Plus Jakarta Sans",
+      "font_body": "Inter",
+      "font_label": "IBM Plex Mono",
+      "glow_style": "full-border",
+      "neon_thickness": "4px",
+      "cursor_effect": "cursor-culinary",
+      "global_background_image": ""
+    },
+    "branding": {
+      "site_title": "perú sabor inteligente",
+      "site_tagline": "Gastronomía Peruana con Inteligencia Artificial & Gestión de Restaurantes",
+      "hero_badge": "Patrimonio Culinario • Inteligencia Artificial • Operación Pro",
+      "hero_title_prefix": "La Grandeza Culinaria del Perú con",
+      "hero_title_highlight": "Precisión Inteligente",
+      "hero_description": "Explora recetas regionales de Costa, Sierra y Selva. Obtén fichas técnicas estandarizadas, escala porciones de 4 a 100 personas y opera tu restaurante con Chef IA Perú.",
+      "logo_url": "/icon.svg",
+      "favicon_url": "/icon.svg",
+      "announcement_text": "🇵🇪 Recetas regionales de Costa, Sierra y Selva con fichas técnicas e inocuidad alimentaria.",
+      "announcement_enabled": true
+    },
+    "seo": {
+      "meta_title": "Perú Sabor Inteligente — Gastronomía Peruana, Chef IA & Fichas Técnicas",
+      "meta_description": "Descubre, documenta, prepara, costea y gestiona la gastronomía peruana. Fichas técnicas, cálculo de porciones, menús, compras, inventario y asistente Chef IA Perú.",
+      "keywords": [
+        "gastronomia peruana",
+        "recetas peruanas",
+        "chef ia peru",
+        "ficha tecnica restaurante",
+        "ceviche peruano",
+        "lomo saltado",
+        "costeo de recetas",
+        "escalador de porciones",
+        "gestion de restaurantes"
+      ],
+      "canonical_url": "https://sabor.atpdev.dev",
+      "google_analytics_id": "GTM-KGJN7SDL",
+      "microsoft_clarity_id": "zak4lzyye9"
+    },
+    "modules": {
+      "catalog_enabled": true,
+      "chef_ia_enabled": true,
+      "portion_scaler_enabled": true,
+      "costing_simulator_enabled": true,
+      "menu_generator_enabled": true,
+      "inventory_manager_enabled": true,
+      "table_orders_enabled": true
+    },
+    "contact": {
+      "email": "contacto@atpdev.dev",
+      "whatsapp": "+51987654321",
+      "support_url": "https://atpdev.dev/contacto"
+    },
+    "updated_at": "2026-11-09T12:00:00.000Z"
   }
 }

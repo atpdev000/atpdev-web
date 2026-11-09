@@ -22,7 +22,8 @@ import {
   Download,
   Sparkles,
   Sun,
-  Moon
+  Moon,
+  UtensilsCrossed
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -137,6 +138,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           icon: <Sparkles size={17} />, 
           href: "/dashboard/magic",
           badge: "3008"
+        },
+        { 
+          label: "Perú Sabor Pro", 
+          icon: <UtensilsCrossed size={17} />, 
+          href: "/dashboard/perusabor",
+          badge: "3009"
         },
       ]
     },

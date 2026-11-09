@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace=apps/core/portal && npm run build --workspace=apps/core/admin && npm run build --workspace=apps/subdomains/web-apps/chamba && npm run build --workspace=apps/subdomains/web-apps/sorteos && npm run build --workspace=apps/subdomains/web-apps/descargador && npm run build --workspace=apps/subdomains/web-apps/interactivo-magic",
+    "build": "npm run build --workspace=apps/core/portal && npm run build --workspace=apps/core/admin && npm run build --workspace=apps/subdomains/web-apps/chamba && npm run build --workspace=apps/subdomains/web-apps/sorteos && npm run build --workspace=apps/subdomains/web-apps/descargador && npm run build --workspace=apps/subdomains/web-apps/interactivo-magic && npm run build --workspace=apps/subdomains/web-apps/perusabor",
     "build:portal": "npm run build --workspace=apps/core/portal",
     "build:admin": "npm run build --workspace=apps/core/admin",
     "build:chamba": "npm run build --workspace=apps/subdomains/web-apps/chamba",
@@ -16,6 +16,7 @@
     "build:descargador": "npm run build --workspace=apps/subdomains/web-apps/descargador",
     "build:descargas": "npm run build:descargador",
     "build:magic": "npm run build --workspace=apps/subdomains/web-apps/interactivo-magic",
+    "build:perusabor": "npm run build --workspace=apps/subdomains/web-apps/perusabor",
     "dev": "turbo run dev --continue=always",
     "dev:portal": "npm run dev --workspace=apps/core/portal -- -p 3000",
     "dev:admin": "npm run dev --workspace=apps/core/admin",
@@ -24,6 +25,7 @@
     "dev:descargador": "npm run dev --workspace=apps/subdomains/web-apps/descargador",
     "dev:descargas": "npm run dev:descargador",
     "dev:magic": "npm run dev --workspace=apps/subdomains/web-apps/interactivo-magic",
+    "dev:perusabor": "npm run dev --workspace=apps/subdomains/web-apps/perusabor",
     "sync:magic": "npm run build:mobile --workspace=apps/subdomains/web-apps/interactivo-magic",
     "android:magic": "npm run android --workspace=apps/subdomains/web-apps/interactivo-magic",
     "test": "npm test --workspace=packages/database",
