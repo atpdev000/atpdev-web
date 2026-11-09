@@ -108,8 +108,8 @@ export default function GenerarStudioPage() {
   const [cryptoAddress, setCryptoAddress] = useState('bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq');
   const [cryptoAmount, setCryptoAmount] = useState('0.05');
 
-  // ===================== PASO 2: DISEÑO QR CON ESPECIFICACIÓN COMPLETA =====================
-  const [designTab, setDesignTab] = useState<'marco' | 'forma' | 'color' | 'logo' | 'api'>('marco');
+  // ===================== PASO 2: DISEÑO QR PROFESIONAL =====================
+  const [designTab, setDesignTab] = useState<'marco' | 'forma' | 'color' | 'logo'>('marco');
 
   const [designConfig, setDesignConfig] = useState<QRDesignConfig>({
     transparent: false,
@@ -1085,18 +1085,18 @@ export default function GenerarStudioPage() {
                   Diseña tu código QR
                 </h2>
                 <p className="text-xs text-slate-400">
-                  Marco, forma, colores, logos oficiales y parámetros de API.
+                  Personaliza marco, forma de puntos, colores y logotipo.
                 </p>
               </div>
             </div>
 
-            {/* Pestañas de diseño: Marco | Forma | Color | Logo | API */}
-            <div className="grid grid-cols-5 gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+            {/* Pestañas de diseño: Marco | Forma | Color | Logo */}
+            <div className="grid grid-cols-4 gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
               <button
                 type="button"
                 onClick={() => setDesignTab('marco')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'marco' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  designTab === 'marco' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Marco
@@ -1104,8 +1104,8 @@ export default function GenerarStudioPage() {
               <button
                 type="button"
                 onClick={() => setDesignTab('forma')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'forma' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  designTab === 'forma' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Forma
@@ -1113,8 +1113,8 @@ export default function GenerarStudioPage() {
               <button
                 type="button"
                 onClick={() => setDesignTab('color')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'color' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  designTab === 'color' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Color
@@ -1122,21 +1122,11 @@ export default function GenerarStudioPage() {
               <button
                 type="button"
                 onClick={() => setDesignTab('logo')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'logo' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  designTab === 'logo' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Logo
-              </button>
-              <button
-                type="button"
-                onClick={() => setDesignTab('api')}
-                className={`py-2 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                  designTab === 'api' ? 'bg-cyan-600 text-white shadow' : 'text-cyan-400 hover:text-white'
-                }`}
-              >
-                <Code className="w-3 h-3" />
-                <span>API</span>
               </button>
             </div>
 
@@ -1479,93 +1469,93 @@ export default function GenerarStudioPage() {
                   </div>
 
                   {/* Toggle Fondo del Logo */}
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
-                    <span className="text-xs font-bold text-slate-300">
-                      Sin Fondo Detrás del Logo (no_logo_bg):
-                    </span>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        Fondo Protector Detrás del Logo:
+                      </span>
+                      <span className="text-[11px] text-slate-400 block">
+                        Dibuja un círculo de protección para garantizar que el código QR sea 100% legible.
+                      </span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
                       <input
                         type="checkbox"
-                        checked={designConfig.no_logo_bg}
-                        onChange={(e) => setDesignConfig({ ...designConfig, no_logo_bg: e.target.checked })}
+                        checked={!designConfig.no_logo_bg}
+                        onChange={(e) => setDesignConfig({ ...designConfig, no_logo_bg: !e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
 
-                  {/* Logos Oficiales (Incluyendo TikTok) */}
-                  <div>
-                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-2">
-                      Logos Oficiales de Plataformas y Redes (optionlogo):
-                    </span>
-                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                      {[
-                        { id: 'app', label: '📱 App Móvil' },
-                        { id: 'pdf', label: '📄 PDF' },
-                        { id: 'vcard', label: '📇 V-Card' },
-                        { id: 'wifi', label: '📶 Wi-Fi' },
-                        { id: 'calendar', label: '📅 Evento' },
-                        { id: 'images', label: '🖼 Galería' },
-                        { id: 'tiktok', label: '🎵 TikTok' },
-                        { id: 'whatsapp', label: 'WA WhatsApp' },
-                        { id: 'instagram', label: '📸 Instagram' },
-                        { id: 'facebook', label: '📘 Facebook' },
-                        { id: 'youtube', label: '🔴 YouTube' },
-                        { id: 'twitter', label: '𝕏 Twitter/X' },
-                        { id: 'linkedin', label: '💼 LinkedIn' },
-                        { id: 'spotify', label: '♫ Spotify' },
-                        { id: 'telegram', label: '✈ Telegram' },
-                        { id: 'pinterest', label: '📌 Pinterest' },
-                        { id: 'paypal', label: '🅿 PayPal' },
-                        { id: 'btc', label: '₿ Bitcoin' },
-                        { id: 'email', label: '✉ Email' },
-                        { id: 'link', label: '🔗 Enlace' },
-                        { id: 'location', label: '📍 Ubicación' },
-                        { id: 'none', label: '✖ Ninguno' },
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setDesignConfig({ ...designConfig, optionlogo: item.id as QROptionLogo })}
-                          className={`p-2 rounded-xl border text-[11px] font-bold text-center truncate transition-all cursor-pointer ${
-                            designConfig.optionlogo === item.id
-                              ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-sm'
-                              : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
+                  {/* Logos Oficiales y Redes Sociales con Diseño de Alto Contraste */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-200 uppercase tracking-wide">
+                        Selecciona un Logotipo Oficial:
+                      </span>
+                      <span className="text-[11px] text-cyan-400 font-medium">
+                        Logos vectoriales HD
+                      </span>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {/* SUB-PESTAÑA 5: API DEVELOPERS */}
-              {designTab === 'api' && (
-                <div className="space-y-4 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-                    <span className="text-xs font-black uppercase text-cyan-400 font-mono">
-                      URL del Endpoint API en Vivo:
-                    </span>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold">
-                      GET / POST Activo
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Puedes incrustar este código QR dinámicamente en cualquier sitio web, aplicación móvil o sistema backend usando tu endpoint:
-                  </p>
-
-                  <div className="bg-slate-900 p-3 rounded-xl border border-slate-800 font-mono text-xs text-cyan-300 break-all select-all">
-                    https://lectorqr.atpdev.dev/api/qr?data={encodeURIComponent(computeRawData())}&pattern={designConfig.pattern}&marker={designConfig.marker}&marker_in={designConfig.marker_in}&optionlogo={designConfig.optionlogo}&outer_frame={designConfig.outer_frame}&framelabel={encodeURIComponent(designConfig.framelabel)}&frontcolor={encodeURIComponent(designConfig.frontcolor)}&backcolor={encodeURIComponent(designConfig.backcolor)}
-                  </div>
-
-                  <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-slate-400 block">Ejemplo en HTML &lt;img&gt;:</span>
-                    <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300 select-all">
-                      {`<img src="https://lectorqr.atpdev.dev/api/qr?data=${computeRawData()}&optionlogo=${designConfig.optionlogo}" alt="QR Code" width="300" />`}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                      {[
+                        { id: 'app', name: 'App Móvil', category: 'iOS / Android', badgeBg: 'bg-sky-500 text-white', symbol: '📱' },
+                        { id: 'pdf', name: 'Documento PDF', category: 'Archivo Digital', badgeBg: 'bg-red-600 text-white font-black', symbol: 'PDF' },
+                        { id: 'tiktok', name: 'TikTok', category: 'Red Oficial', badgeBg: 'bg-black text-cyan-300 border border-pink-500/80', symbol: '🎵' },
+                        { id: 'whatsapp', name: 'WhatsApp', category: 'Chat Directo', badgeBg: 'bg-emerald-600 text-white', symbol: 'WA' },
+                        { id: 'instagram', name: 'Instagram', category: 'Fotos & Reels', badgeBg: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white', symbol: 'IG' },
+                        { id: 'facebook', name: 'Facebook', category: 'Red Social', badgeBg: 'bg-blue-600 text-white', symbol: 'f' },
+                        { id: 'youtube', name: 'YouTube', category: 'Canal de Video', badgeBg: 'bg-red-600 text-white', symbol: '▶' },
+                        { id: 'twitter', name: 'X / Twitter', category: 'Microblogging', badgeBg: 'bg-black text-white border border-slate-700', symbol: '𝕏' },
+                        { id: 'spotify', name: 'Spotify', category: 'Música & Podcast', badgeBg: 'bg-[#1DB954] text-black font-black', symbol: '♫' },
+                        { id: 'linkedin', name: 'LinkedIn', category: 'Red Profesional', badgeBg: 'bg-[#0A66C2] text-white', symbol: 'in' },
+                        { id: 'telegram', name: 'Telegram', category: 'Mensajería', badgeBg: 'bg-[#26A5E4] text-white', symbol: '✈' },
+                        { id: 'pinterest', name: 'Pinterest', category: 'Tableros', badgeBg: 'bg-[#E60023] text-white font-serif', symbol: 'P' },
+                        { id: 'paypal', name: 'PayPal', category: 'Pagos Online', badgeBg: 'bg-[#003087] text-cyan-400 font-bold', symbol: '🅿' },
+                        { id: 'btc', name: 'Bitcoin (BTC)', category: 'Criptomoneda', badgeBg: 'bg-[#F7931A] text-white font-bold', symbol: '₿' },
+                        { id: 'wifi', name: 'Wi-Fi', category: 'Red Inalámbrica', badgeBg: 'bg-cyan-600 text-white font-bold', symbol: 'WiFi' },
+                        { id: 'vcard', name: 'V-Card Contacto', category: 'Ficha Personal', badgeBg: 'bg-indigo-600 text-white', symbol: '📇' },
+                        { id: 'email', name: 'E-mail', category: 'Correo Electrónico', badgeBg: 'bg-rose-600 text-white', symbol: '@' },
+                        { id: 'link', name: 'Enlace Web', category: 'URL / Dominio', badgeBg: 'bg-blue-600 text-white', symbol: '🔗' },
+                        { id: 'location', name: 'Ubicación', category: 'Google Maps / GPS', badgeBg: 'bg-red-500 text-white', symbol: '📍' },
+                        { id: 'calendar', name: 'Evento Agenda', category: 'Fecha y Hora', badgeBg: 'bg-amber-600 text-white', symbol: '📅' },
+                        { id: 'images', name: 'Galería Fotos', category: 'Álbum Digital', badgeBg: 'bg-emerald-600 text-white', symbol: '🖼' },
+                        { id: 'none', name: 'Sin Logotipo', category: 'Solo Código QR', badgeBg: 'bg-slate-800 text-slate-300', symbol: '✖' },
+                      ].map((item) => {
+                        const isSelected = designConfig.optionlogo === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setDesignConfig({ ...designConfig, optionlogo: item.id as QROptionLogo })}
+                            className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center gap-3 relative group ${
+                              isSelected
+                                ? 'bg-blue-950/80 border-cyan-400 shadow-lg shadow-cyan-500/25 ring-1 ring-cyan-400'
+                                : 'bg-slate-950/90 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                            }`}
+                          >
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shadow-md flex-shrink-0 ${item.badgeBg}`}>
+                              {item.symbol}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className={`text-xs font-bold truncate block ${isSelected ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                                  {item.name}
+                                </span>
+                                {isSelected && (
+                                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0" />
+                                )}
+                              </div>
+                              <span className="text-[10px] text-slate-400 font-medium truncate block">
+                                {item.category}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
