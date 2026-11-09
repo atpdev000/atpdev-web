@@ -36,3 +36,4 @@ export function playScanSuccessBeep() {
     // Ignore haptic error
   }
 }
+

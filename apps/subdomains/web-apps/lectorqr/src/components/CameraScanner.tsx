@@ -390,3 +390,4 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
 };
 
 export default CameraScanner;
+

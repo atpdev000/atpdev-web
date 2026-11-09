@@ -21,7 +21,12 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  Send
+  Send,
+  Calendar,
+  FileCode,
+  Smartphone,
+  Binary,
+  Video
 } from 'lucide-react';
 import { ScannedCode, CodeType } from '../types';
 import Link from 'next/link';
@@ -69,13 +74,25 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
     }
   };
 
-  // Generador de archivo .vcf para contactos
+  // Descarga de V-Card (.vcf)
   const downloadVCard = () => {
     const blob = new Blob([code.rawText], { type: 'text/vcard;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', `${code.parsedData.contact?.name || 'contacto'}.vcf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Descarga de Evento (.ics)
+  const downloadICS = () => {
+    const blob = new Blob([code.rawText], { type: 'text/calendar;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${code.parsedData.event?.title || 'evento'}.ics`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -88,15 +105,25 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
       case 'wifi':
         return { label: 'Red Wi-Fi', icon: Wifi, color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20' };
       case 'contact':
-        return { label: 'Contacto vCard', icon: User, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' };
+        return { label: 'Contacto V-Card', icon: User, color: 'text-purple-500 bg-purple-500/10 border-purple-500/20' };
       case 'whatsapp':
         return { label: 'Chat de WhatsApp', icon: MessageSquare, color: 'text-green-500 bg-green-500/10 border-green-500/20' };
       case 'email':
         return { label: 'Correo Electrónico', icon: Mail, color: 'text-amber-500 bg-amber-500/10 border-amber-500/20' };
       case 'phone':
-        return { label: 'Número Telefónico', icon: Phone, color: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20' };
+        return { label: 'Llamada Telefónica', icon: Phone, color: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20' };
       case 'sms':
         return { label: 'Mensaje SMS', icon: Send, color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20' };
+      case 'event':
+        return { label: 'Evento de Calendario', icon: Calendar, color: 'text-sky-500 bg-sky-500/10 border-sky-500/20' };
+      case 'pdf':
+        return { label: 'Documento PDF', icon: FileCode, color: 'text-red-500 bg-red-500/10 border-red-500/20' };
+      case 'app':
+        return { label: 'Aplicación Móvil', icon: Smartphone, color: 'text-blue-600 bg-blue-600/10 border-blue-600/20' };
+      case 'video':
+        return { label: 'Vídeo en Línea', icon: Video, color: 'text-rose-500 bg-rose-500/10 border-rose-500/20' };
+      case 'crypto':
+        return { label: 'Criptomoneda / Billetera 2D', icon: Binary, color: 'text-amber-400 bg-amber-400/10 border-amber-400/20' };
       case 'geo':
         return { label: 'Ubicación Geográfica', icon: MapPin, color: 'text-rose-500 bg-rose-500/10 border-rose-500/20' };
       default:
@@ -160,31 +187,69 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
       {/* Structured Content Area */}
       <div className="py-5 space-y-4">
         
-        {/* CASE: URL */}
-        {code.type === 'url' && code.parsedData.url && (
+        {/* CASE: URL / VIDEO / PDF */}
+        {(code.type === 'url' || code.type === 'video' || code.type === 'pdf') && (
           <div className="space-y-3">
             <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 break-all">
-              <span className="text-xs text-slate-400 font-semibold block mb-1">Destino Web:</span>
+              <span className="text-xs text-slate-400 font-semibold block mb-1">
+                {code.type === 'pdf' ? 'Documento PDF:' : code.type === 'video' ? 'Vídeo en Línea:' : 'Destino Web:'}
+              </span>
               <a
-                href={code.parsedData.url}
+                href={code.parsedData.url || code.rawText}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-bold text-blue-400 hover:underline flex items-center gap-1.5"
               >
-                <span>{code.parsedData.url}</span>
+                <span>{code.parsedData.url || code.rawText}</span>
                 <ExternalLink className="w-3.5 h-3.5 shrink-0" />
               </a>
             </div>
 
             <a
-              href={code.parsedData.url}
+              href={code.parsedData.url || code.rawText}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-3.5 px-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all"
             >
               <ExternalLink className="w-4 h-4" />
-              <span>Abrir Enlace Web</span>
+              <span>{code.type === 'pdf' ? 'Abrir Documento PDF' : code.type === 'video' ? 'Ver Vídeo' : 'Abrir Enlace Web'}</span>
             </a>
+          </div>
+        )}
+
+        {/* CASE: EVENTO DE CALENDARIO */}
+        {code.type === 'event' && code.parsedData.event && (
+          <div className="space-y-3">
+            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
+              <h4 className="text-base font-bold text-white font-display">
+                {code.parsedData.event.title}
+              </h4>
+              {code.parsedData.event.location && (
+                <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                  <MapPin className="w-3.5 h-3.5 text-rose-400" />
+                  <span>{code.parsedData.event.location}</span>
+                </div>
+              )}
+              {code.parsedData.event.startDate && (
+                <div className="text-xs text-cyan-400 font-mono">
+                  Fecha: {code.parsedData.event.startDate}
+                </div>
+              )}
+              {code.parsedData.event.description && (
+                <p className="text-xs text-slate-400 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+                  {code.parsedData.event.description}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={downloadICS}
+              className="w-full py-3.5 px-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition-all cursor-pointer"
+            >
+              <Calendar className="w-4 h-4" />
+              <span>Añadir a mi Calendario (.ics)</span>
+            </button>
           </div>
         )}
 
@@ -245,6 +310,9 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
               <h4 className="text-lg font-black text-white font-display">
                 {code.parsedData.contact.name}
               </h4>
+              {code.parsedData.contact.title && (
+                <p className="text-xs text-cyan-400 font-semibold">{code.parsedData.contact.title}</p>
+              )}
               {code.parsedData.contact.org && (
                 <p className="text-xs text-slate-400 font-medium">{code.parsedData.contact.org}</p>
               )}
@@ -319,12 +387,6 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
                   <p className="text-sm text-slate-300 font-medium">{code.parsedData.email.subject}</p>
                 </div>
               )}
-              {code.parsedData.email.body && (
-                <div>
-                  <span className="text-xs text-slate-400 font-semibold block">Mensaje:</span>
-                  <p className="text-xs text-slate-400 bg-slate-900 p-2 rounded-lg">{code.parsedData.email.body}</p>
-                </div>
-              )}
             </div>
 
             <a
@@ -383,30 +445,29 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
           </div>
         )}
 
-        {/* CASE: GEO LOCATION */}
-        {code.type === 'geo' && code.parsedData.geo && (
+        {/* CASE: CRIPTO / 2D */}
+        {code.type === 'crypto' && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-1">
-              <span className="text-xs text-slate-400 font-semibold block">Coordenadas GPS:</span>
-              <p className="text-sm font-bold text-rose-400 font-mono">
-                Lat: {code.parsedData.geo.latitude}, Lng: {code.parsedData.geo.longitude}
+            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
+              <span className="text-xs text-slate-400 font-semibold block mb-1">Dirección Cripto / Billetera:</span>
+              <p className="text-xs font-mono font-bold text-amber-400 break-all">
+                {code.rawText}
               </p>
             </div>
 
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${code.parsedData.geo.latitude},${code.parsedData.geo.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3.5 px-4 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 transition-all"
+            <button
+              type="button"
+              onClick={() => handleCopy(code.rawText)}
+              className="w-full py-3.5 px-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-amber-600/30 transition-all cursor-pointer"
             >
-              <MapPin className="w-4 h-4" />
-              <span>Ver en Google Maps</span>
-            </a>
+              <Copy className="w-4 h-4" />
+              <span>{copied ? '¡Dirección Copiada!' : 'Copiar Dirección'}</span>
+            </button>
           </div>
         )}
 
         {/* CASE: RAW TEXT / GENERIC FALLBACK */}
-        {code.type === 'text' && (
+        {(code.type === 'text' || code.type === 'geo') && (
           <div className="space-y-3">
             <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
               <span className="text-xs text-slate-400 font-semibold block mb-1">Texto detectado:</span>
