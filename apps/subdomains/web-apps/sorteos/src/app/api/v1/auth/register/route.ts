@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
   const email = cleanStr(body.email, 254).toLowerCase();
   const password = String(body.password ?? '');
   const language = cleanStr(body.language, 8) || 'es';
+  const requestedPlan = cleanStr(body.plan, 20).toLowerCase();
+  const validPlan = (['free', 'pro', 'business', 'enterprise'].includes(requestedPlan) ? requestedPlan : 'free') as 'free' | 'pro' | 'business' | 'enterprise';
 
   if (!isEmail(email)) return fail('Email inválido.', 400);
   if (!isStrongPassword(password)) return fail('La contraseña debe tener al menos 8 caracteres.', 400);
@@ -28,16 +30,16 @@ export async function POST(req: NextRequest) {
   const id = uid('usr');
   const now = new Date().toISOString();
   db.users.set({ id, name, email, passwordHash: hash, salt,
-    role: 'user', status: 'active', plan: 'free',
+    role: 'user', status: 'active', plan: validPlan,
     language, createdAt: now, updatedAt: now,
   });
   db.usersByEmail.set(email, id);
-  audit(id, 'user.register', 'user', id);
-  logEvent('auth.register', { userId: id });
+  audit(id, 'user.register', 'user', id, { plan: validPlan });
+  logEvent('auth.register', { userId: id, plan: validPlan });
 
   return ok({
     message: 'Usuario registrado exitosamente (RF-001).',
-    user: { id, name, email, plan: 'free', status: 'active' },
+    user: { id, name, email, plan: validPlan, status: 'active' },
     token: signJwt(id, email, 'user'),
   });
 }

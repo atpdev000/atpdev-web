@@ -93,7 +93,11 @@ function RegistroContent() {
         auth: false,
       });
       setToken(data.token);
-      router.push('/dashboard');
+      if (selectedPlan && selectedPlan !== 'free') {
+        router.push(`/dashboard?payment=success&plan=${selectedPlan}`);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al registrar');
       setLoading(false);

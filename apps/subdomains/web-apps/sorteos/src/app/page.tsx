@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { InstagramIcon, FacebookIcon, YoutubeIcon } from '@/components/SocialIcons';
 import { HomeHashVerifier } from '@/components/HomeHashVerifier';
-import { PRICING_PLANS } from '@/lib/types';
+import { PricingSection } from '@/components/PricingSection';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
 
@@ -291,73 +291,8 @@ export default function HomePage() {
       </section>
 
       {/* ─── PRICING TABLE SECTION ─────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <span className="text-xs font-bold text-pink-600 dark:text-purple-400 uppercase tracking-wider">
-            {t('home_pricing_badge')}
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 dark:text-white tracking-tight">
-            {t('home_pricing_title')}
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-zinc-400">
-            {t('home_pricing_desc')}
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {PRICING_PLANS.map((plan) => (
-            <div
-              key={plan.id}
-              className={`interactive-card rounded-3xl p-7 flex flex-col justify-between gap-6 border transition-all ${
-                plan.isPopular
-                  ? 'bg-white dark:bg-[#0f172a] border-[#d91a7a] dark:border-purple-500 shadow-xl shadow-pink-500/10 scale-105 relative'
-                  : 'bg-white dark:bg-[#0f172a] border-slate-200 dark:border-white/10 shadow-sm'
-              }`}
-            >
-              {plan.isPopular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-[#d91a7a] text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
-                  {t('home_plan_popular')}
-                </div>
-              )}
-
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white">{plan.name}</h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 min-h-[32px]">{plan.tagline}</p>
-                </div>
-
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold font-display text-slate-900 dark:text-white">
-                    {plan.priceMonthly === 0 ? '0€' : `${plan.priceMonthly}€`}
-                  </span>
-                  {plan.priceMonthly > 0 && (
-                    <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">{t('home_plan_per_month')}</span>
-                  )}
-                </div>
-
-                <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-2.5 text-xs text-slate-600 dark:text-zinc-300">
-                  {plan.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-pink-600 dark:text-purple-400 shrink-0 mt-0.5" />
-                      <span>{feat}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Link
-                href={plan.id === 'free' ? '/sorteos/nuevo' : '/planes'}
-                className={`w-full py-3.5 rounded-xl font-bold font-display text-xs text-center transition-all cursor-pointer ${
-                  plan.isPopular
-                    ? 'btn-pro-primary py-3.5 w-full text-xs'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-white/10 dark:hover:bg-white/20 dark:text-white border border-slate-200 dark:border-white/10'
-                }`}
-              >
-                {plan.ctaLabel}
-              </Link>
-            </div>
-          ))}
-        </div>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <PricingSection showTitle={true} />
       </section>
 
       {/* ─── FAQ SECTION ───────────────────────────────────────────────── */}
