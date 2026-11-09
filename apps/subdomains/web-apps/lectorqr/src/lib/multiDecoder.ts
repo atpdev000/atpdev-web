@@ -34,12 +34,12 @@ export async function detectAllQRsInCanvas(
     }
   }
 
-  // 2. Si encontramos varios códigos con BarcodeDetector, retornamos
-  if (foundCodesMap.size > 1) {
+  // 2. Si BarcodeDetector encontró 12 o más códigos (rejilla completa), retornamos directo
+  if (foundCodesMap.size >= 12) {
     return Array.from(foundCodesMap.values());
   }
 
-  // 3. Fallback inteligente con jsQR (Escaneo completo + Multi-rejilla)
+  // 3. Fallback y complemento con jsQR (Escaneo completo + Multi-rejilla adaptativa)
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   if (!ctx) return Array.from(foundCodesMap.values());
 
@@ -58,21 +58,21 @@ export async function detectAllQRsInCanvas(
     }
   } catch (e) {}
 
-  // B) Si la imagen es grande (posible collage o múltiples QR como 3x4 o 4x3)
+  // B) Si la imagen es grande (posible collage o múltiples QR como 3x4, 4x3, 2x2, 4x4)
   // Dividir en cuadrícula con superposición (overlap) para asegurar que ningún QR quede cortado
   const gridConfigs = [
-    { rows: 2, cols: 2 },
-    { rows: 3, cols: 3 },
-    { rows: 4, cols: 3 },
-    { rows: 3, cols: 4 },
+    { rows: 4, cols: 3 }, // Configuración típica de hojas de 12 QR (3 columnas x 4 filas)
+    { rows: 3, cols: 4 }, // 4 columnas x 3 filas
+    { rows: 3, cols: 3 }, // 9 QR
+    { rows: 2, cols: 2 }, // 4 QR
+    { rows: 4, cols: 4 }, // 16 QR
   ];
 
   for (const grid of gridConfigs) {
-    // Si ya encontramos al menos 4 códigos en una cuadrícula anterior, podemos seguir buscando para ser exhaustivos
     const tileW = Math.floor(w / grid.cols);
     const tileH = Math.floor(h / grid.rows);
-    const overlapX = Math.floor(tileW * 0.18);
-    const overlapY = Math.floor(tileH * 0.18);
+    const overlapX = Math.floor(tileW * 0.22);
+    const overlapY = Math.floor(tileH * 0.22);
 
     for (let r = 0; r < grid.rows; r++) {
       for (let c = 0; c < grid.cols; c++) {
@@ -83,10 +83,31 @@ export async function detectAllQRsInCanvas(
         const currentW = endX - startX;
         const currentH = endY - startY;
 
-        if (currentW > 40 && currentH > 40) {
+        if (currentW > 30 && currentH > 30) {
           try {
             const tileData = ctx.getImageData(startX, startY, currentW, currentH);
-            const res = jsQR(tileData.data, currentW, currentH, { inversionAttempts: 'attemptBoth' });
+            let res = jsQR(tileData.data, currentW, currentH, { inversionAttempts: 'attemptBoth' });
+            
+            // Si no detecta en primera pasada, intentar normalización de contraste para QRs coloreados
+            if (!res && currentW > 60) {
+              const data = tileData.data;
+              // Aumentar contraste para códigos de color claro (amarillo, celeste, etc.)
+              const highContrastData = new Uint8ClampedArray(data.length);
+              for (let p = 0; p < data.length; p += 4) {
+                const r = data[p];
+                const g = data[p + 1];
+                const b = data[p + 2];
+                // Luma estándar
+                const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+                const enhanced = luma < 185 ? 0 : 255;
+                highContrastData[p] = enhanced;
+                highContrastData[p + 1] = enhanced;
+                highContrastData[p + 2] = enhanced;
+                highContrastData[p + 3] = 255;
+              }
+              res = jsQR(highContrastData, currentW, currentH, { inversionAttempts: 'attemptBoth' });
+            }
+
             if (res && res.data) {
               const raw = res.data.trim();
               if (!foundCodesMap.has(raw)) {
@@ -97,9 +118,6 @@ export async function detectAllQRsInCanvas(
         }
       }
     }
-
-    // Si ya encontramos 3 o más códigos, terminamos la exploración
-    if (foundCodesMap.size >= 8) break;
   }
 
   return Array.from(foundCodesMap.values());
@@ -148,3 +166,4 @@ export async function decodeImageFiles(files: FileList | File[]): Promise<Scanne
 
   return Array.from(allResultsMap.values());
 }
+

@@ -237,3 +237,4 @@ export const MultiScanResultCard: React.FC<MultiScanResultCardProps> = ({
 };
 
 export default MultiScanResultCard;
+

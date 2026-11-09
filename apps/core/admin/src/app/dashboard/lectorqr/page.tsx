@@ -441,3 +441,4 @@ export default function LectorQRAdminDashboard() {
     </div>
   );
 }
+

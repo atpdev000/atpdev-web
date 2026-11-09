@@ -102,3 +102,4 @@ export default function PoliticaPrivacidadPage() {
     </div>
   );
 }
+

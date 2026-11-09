@@ -96,70 +96,131 @@ export interface ScannedCode {
   };
 }
 
-export type FrameStyle = 
-  | 'none' 
-  | 'bottom-banner' 
-  | 'top-banner' 
-  | 'rounded-card' 
-  | 'speech-bubble' 
-  | 'badge';
+// =================== PARÁMETROS AVANZADOS QR.IO / API ===================
 
-export type DotShape = 
-  | 'squares' 
-  | 'dots' 
-  | 'rounded' 
-  | 'diamond';
+export type QRPattern = 
+  | 'default'
+  | 'circle'
+  | 'star'
+  | 'diamond'
+  | 'sparkle'
+  | 'danger'
+  | 'cross'
+  | 'plus'
+  | 'x'
+  | 'heart'
+  | 'shake'
+  | 'blob'
+  | 'special-circle'
+  | 'special-diamond'
+  | 'ribbon'
+  | 'ellipse';
 
-export type EyeFrameStyle = 
-  | 'square' 
-  | 'rounded' 
-  | 'circle';
+export type QRMarkerOut = 
+  | 'default'
+  | 'flurry'
+  | 'sdoz'
+  | 'drop_in'
+  | 'drop'
+  | 'dropeye'
+  | 'dropeyeleft'
+  | 'dropeyeright'
+  | 'squarecircle'
+  | 'circle'
+  | 'rounded'
+  | 'flower'
+  | 'leaf';
 
-export type EyeBallStyle = 
-  | 'square' 
-  | 'circle' 
-  | 'diamond';
+export type QRMarkerIn = 
+  | 'default'
+  | 'flurry'
+  | 'sdoz'
+  | 'drop'
+  | 'circle'
+  | 'rounded'
+  | 'sun'
+  | 'star'
+  | 'diamond'
+  | 'danger'
+  | 'cross'
+  | 'plus'
+  | 'x'
+  | 'heart';
 
-export type PresetLogo = 
-  | 'none' 
-  | 'upload' 
-  | 'whatsapp' 
-  | 'instagram' 
-  | 'facebook' 
-  | 'tiktok' 
-  | 'youtube' 
-  | 'twitter' 
-  | 'wifi' 
-  | 'linkedin' 
-  | 'pdf' 
-  | 'appstore' 
+export type QROptionLogo = 
+  | 'none'
+  | 'upload'
+  | 'tiktok'
+  | 'whatsapp'
+  | 'instagram'
+  | 'facebook'
+  | 'youtube'
+  | 'twitter'
+  | 'linkedin'
+  | 'spotify'
+  | 'telegram'
+  | 'pinterest'
+  | 'discord'
+  | 'twitch'
+  | 'paypal'
+  | 'btc'
+  | 'wifi'
+  | 'email'
+  | 'link'
+  | 'location'
+  | 'vcard'
+  | 'pdf'
+  | 'appstore'
   | 'googleplay';
 
+export type QROuterFrame = 
+  | 'none'
+  | 'bottom'
+  | 'top'
+  | 'balloon-bottom'
+  | 'balloon-top'
+  | 'ribbon-bottom'
+  | 'ribbon-top'
+  | 'phone'
+  | 'cine';
+
+export type QRLabelFont = 
+  | 'Arial, Helvetica, sans-serif'
+  | "'Times New Roman', Times, serif"
+  | "'Courier New', Courier, monospace";
+
 export interface QRDesignConfig {
-  // Marco (Frame)
-  frameStyle: FrameStyle;
-  frameText: string;
-  frameColor: string;
-  frameTextColor: string;
+  // Parámetros Principales
+  data?: string;
+  title?: string;
+  folderid?: number;
 
-  // Forma (Shape & Dots)
-  dotShape: DotShape;
-  eyeFrame: EyeFrameStyle;
-  eyeBall: EyeBallStyle;
+  // Parámetros de Color y Forma
+  transparent: boolean;       // 'on' | 'off'
+  backcolor: string;          // default #FFFFFF
+  frontcolor: string;         // default #000000
+  gradient: boolean;          // 'on' | 'off'
+  radial: boolean;            // 'on' | 'off'
+  gradient_color: string;     // color 2
+  marker_out_color: string;   // outside corners
+  marker_in_color: string;    // inside corners
+  pattern: QRPattern;         // estilo de puntos
+  marker: QRMarkerOut;        // estilo marco de ojos
+  marker_in: QRMarkerIn;      // estilo pupila de ojos
 
-  // Colores (Colors & Gradient)
-  colorType: 'solid' | 'gradient';
-  fgColor: string;
-  gradientColor2: string;
-  gradientDirection: 'horizontal' | 'vertical' | 'diagonal';
-  bgColor: string;
-  customEyeColor: boolean;
-  eyeColor: string;
-
-  // Logo
-  logo: PresetLogo;
+  // Logotipo
+  optionlogo: QROptionLogo;
   customLogoUrl?: string;
-  logoSize: number; // percentage (e.g. 20-30%)
+  no_logo_bg: boolean;        // 'on' | 'off'
+  logoSize?: number;
+
+  // Marco
+  outer_frame: QROuterFrame;
+  framelabel: string;         // default "SCAN ME"
+  label_font: QRLabelFont;
+  custom_frame_color: boolean;// 'on' | 'off'
+  framecolor: string;         // default #000000
+  frame_text_color?: string;  // default #ffffff
 
   // Calidad
   errorCorrection: 'L' | 'M' | 'Q' | 'H';
