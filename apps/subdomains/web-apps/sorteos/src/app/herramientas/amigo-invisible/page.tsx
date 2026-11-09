@@ -17,6 +17,7 @@ import {
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
 import { ListFileImporter } from '@/components/ListFileImporter';
+import { ExportResultHub } from '@/components/ExportResultHub';
 
 interface Match {
   giver: string;
@@ -339,7 +340,7 @@ export default function AmigoInvisiblePage() {
         <div className="lg:col-span-6 space-y-4">
           {matches.length > 0 ? (
             <div className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 sm:p-8 space-y-5 border border-slate-200 dark:border-white/10 shadow-sm">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-100 dark:border-white/10">
                 <div>
                   <h3 className="text-lg font-bold font-display text-slate-900 dark:text-white flex items-center gap-2">
                     <Gift className="w-5 h-5 text-amber-500" />
@@ -349,6 +350,14 @@ export default function AmigoInvisiblePage() {
                     {t('secret_santa_instructions')}
                   </p>
                 </div>
+                <ExportResultHub
+                  variant="secret-santa"
+                  matches={matches}
+                  budget={budget}
+                  deadline={deadline}
+                  auditHash={auditHash}
+                  buttonText="Exportar Todo (PDF, Word, Excel, Imagen)"
+                />
               </div>
 
               {/* Match list with 3D Flip style */}

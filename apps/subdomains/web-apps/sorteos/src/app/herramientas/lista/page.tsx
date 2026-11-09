@@ -24,6 +24,7 @@ import { Countdown3DOverlay } from '@/components/Countdown3DOverlay';
 import { LiveStreamStage } from '@/components/LiveStreamStage';
 import { WinnerExportModal } from '@/components/WinnerExportModal';
 import { ListFileImporter } from '@/components/ListFileImporter';
+import { ExportResultHub } from '@/components/ExportResultHub';
 import { playWheelTick, playWinnerFanfare } from '@/lib/soundEffects';
 import { generateSha256Hash } from '@/lib/randomEngine';
 import { useLanguage } from '@/context/LanguageContext';
@@ -420,7 +421,17 @@ export default function SorteoListaPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+              <ExportResultHub
+                variant="draw-list"
+                title={title || 'Sorteo por Nombres al Azar'}
+                winners={winners}
+                substitutes={substitutes}
+                totalParticipants={participants.length}
+                auditHash={auditHash || ''}
+                buttonText="Exportar Todo (PDF, Word, Excel, Imagen)"
+              />
+
               <button
                 type="button"
                 onClick={handleCopyWinners}
@@ -433,10 +444,11 @@ export default function SorteoListaPage() {
               <button
                 type="button"
                 onClick={() => setShowExportModal(true)}
-                className="py-2.5 px-4 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
+                className="py-2.5 px-4 rounded-xl bg-pink-50 hover:bg-pink-100 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 font-semibold text-xs flex items-center gap-1.5 transition-colors border border-pink-200 dark:border-pink-900/30 cursor-pointer"
+                title="Generar tarjeta animada o video"
               >
                 <Share2 className="w-4 h-4" />
-                <span>{t('btn_export')}</span>
+                <span>Tarjeta Ganador</span>
               </button>
 
               <button

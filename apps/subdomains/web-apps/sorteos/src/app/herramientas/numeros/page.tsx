@@ -11,6 +11,7 @@ import { ToolSwitcher } from '@/components/ToolSwitcher';
 import { Countdown3DOverlay } from '@/components/Countdown3DOverlay';
 import { LiveStreamStage } from '@/components/LiveStreamStage';
 import { WinnerExportModal } from '@/components/WinnerExportModal';
+import { ExportResultHub } from '@/components/ExportResultHub';
 import { 
   playBallBounce, playWinnerFanfare, isAudioMuted, toggleAudioMute 
 } from '@/lib/soundEffects';
@@ -324,21 +325,21 @@ export default function NumerosPage() {
               </h2>
             </div>
             <div className="flex items-center gap-2">
+              <ExportResultHub
+                variant="numbers"
+                numbers={results}
+                min={min}
+                max={max}
+                auditHash={auditHash}
+                buttonText="Exportar Todo (PDF, Word, Excel, Imagen)"
+              />
               <button
                 type="button"
                 onClick={handleCopy}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copied ? t('btn_copied') : t('btn_copy')}</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleDownloadCsv}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>CSV</span>
               </button>
             </div>
           </div>

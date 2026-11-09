@@ -19,6 +19,7 @@ import { ToolSwitcher } from '@/components/ToolSwitcher';
 import ConfettiEffect from '@/components/ConfettiEffect';
 import { LiveStreamStage } from '@/components/LiveStreamStage';
 import { WinnerExportModal } from '@/components/WinnerExportModal';
+import { ExportResultHub } from '@/components/ExportResultHub';
 import { isAudioMuted, toggleAudioMute, playCardFlip } from '@/lib/soundEffects';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
@@ -179,13 +180,22 @@ export default function RuletaPage() {
               <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-display">
                 {winner}
               </p>
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+                <ExportResultHub
+                  variant="draw-list"
+                  title="Sorteo de Ruleta Aleatoria"
+                  winners={[winner]}
+                  substitutes={[]}
+                  totalParticipants={options.length}
+                  buttonText="Exportar Resultado (PDF, Word, Excel, Imagen)"
+                />
                 <button
                   type="button"
                   onClick={() => setShowExportModal(true)}
-                  className="text-xs font-semibold text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-pink-100 hover:bg-pink-200 dark:bg-pink-900/40 text-xs font-semibold text-pink-700 dark:text-pink-300 flex items-center gap-1.5 cursor-pointer transition-colors"
                 >
-                  <Share2 className="w-3.5 h-3.5" /> {t('btn_export')}
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>Tarjeta Video</span>
                 </button>
               </div>
             </div>
