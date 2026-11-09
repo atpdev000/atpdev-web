@@ -485,3 +485,4 @@ function drawPresetLogo(
 
   ctx.restore();
 }
+

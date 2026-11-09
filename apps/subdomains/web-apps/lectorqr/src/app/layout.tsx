@@ -2,12 +2,35 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import GoogleAdSense from '../components/GoogleAdSense';
+import CookieBanner from '../components/CookieBanner';
 
 export const metadata: Metadata = {
-  title: 'Lector QR Pro • Escáner de Códigos QR y de Barras Ultrarrápido',
-  description: 'Lector y escáner profesional de códigos QR y códigos de barras en tiempo real. Decodifica enlaces, Wi-Fi, contactos vCard, WhatsApp, genera códigos personalizados y guarda tu historial sin límites.',
-  keywords: ['lector qr', 'escanear qr online', 'generador qr gratis', 'lector codigos de barra', 'escanear wifi qr', 'qr pro', 'atp dev'],
+  title: 'Lector QR Pro • Escáner de Códigos QR, Barras & Generador 100% Online',
+  description: 'Lector y escáner profesional de códigos QR y códigos de barras en tiempo real. Decodifica collages y múltiples códigos QR a la vez, enlaces, Wi-Fi, contactos vCard, WhatsApp, genera códigos con marcos personalizados y descarga en HD.',
+  keywords: [
+    'lector qr', 
+    'escanear qr online', 
+    'escanear multiples qr',
+    'generador qr gratis', 
+    'lector codigos de barra', 
+    'escanear wifi qr', 
+    'qr pro', 
+    'atp dev'
+  ],
   authors: [{ name: 'ATP DEV Perú' }],
+  metadataBase: new URL('https://lectorqr.atpdev.dev'),
+  alternates: {
+    canonical: 'https://lectorqr.atpdev.dev',
+  },
+  openGraph: {
+    title: 'Lector QR Pro • Escáner y Generador de Códigos QR',
+    description: 'Decodificación instantánea de múltiples códigos QR por cámara o imagen. Generador con marcos, formas y logos.',
+    url: 'https://lectorqr.atpdev.dev',
+    siteName: 'Lector QR Pro',
+    locale: 'es_PE',
+    type: 'website',
+  },
 };
 
 export const viewport: Viewport = {
@@ -32,6 +55,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" 
           rel="stylesheet" 
         />
+        {/* Google AdSense Script */}
+        <GoogleAdSense clientId="pub-5414009811868137" />
       </head>
       <body className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black antialiased">
         <Navbar />
@@ -39,6 +64,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <CookieBanner />
       </body>
     </html>
   );

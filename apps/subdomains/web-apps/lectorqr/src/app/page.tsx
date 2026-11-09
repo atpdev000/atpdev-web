@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import CameraScanner from '../components/CameraScanner';
 import ScanResultCard from '../components/ScanResultCard';
+import MultiScanResultCard from '../components/MultiScanResultCard';
+import AdBanner from '../components/AdBanner';
 import { ScannedCode } from '../types';
 import { 
   Sparkles, 
@@ -11,22 +13,25 @@ import {
   QrCode, 
   History, 
   Wifi, 
-  Share2, 
-  ExternalLink,
   ChevronRight,
   Upload,
-  Image as ImageIcon
+  Layers,
+  HelpCircle,
+  Lock,
+  Smartphone,
+  Globe
 } from 'lucide-react';
 import Link from 'next/link';
-import jsQR from 'jsqr';
+import { decodeImageFiles } from '../lib/multiDecoder';
 import { playScanSuccessBeep } from '../lib/sound';
-import { parseScannedContent } from '../lib/parser';
 
 export default function HomePage() {
   const [activeResult, setActiveResult] = useState<ScannedCode | null>(null);
+  const [multiResults, setMultiResults] = useState<ScannedCode[] | null>(null);
   const [isScanningActive, setIsScanningActive] = useState<boolean>(true);
   const [recentScans, setRecentScans] = useState<ScannedCode[]>([]);
   const [isDraggingGlobal, setIsDraggingGlobal] = useState<boolean>(false);
+  const [isProcessingDrop, setIsProcessingDrop] = useState<boolean>(false);
 
   // Cargar historial reciente
   useEffect(() => {
@@ -41,88 +46,77 @@ export default function HomePage() {
     } catch (e) {
       console.warn('Error reading history', e);
     }
-  }, [activeResult]);
+  }, [activeResult, multiResults]);
 
-  const handleScanSuccess = useCallback((code: ScannedCode) => {
-    setActiveResult(code);
+  // Manejar resultado de escaneo (sea 1 código o varios)
+  const handleScanSuccess = useCallback((result: ScannedCode | ScannedCode[]) => {
     setIsScanningActive(false);
 
-    // Guardar en localStorage
-    try {
-      const stored = localStorage.getItem('lectorqr_history');
-      let history: ScannedCode[] = [];
-      if (stored) {
-        history = JSON.parse(stored);
+    if (Array.isArray(result)) {
+      if (result.length === 1) {
+        setActiveResult(result[0]);
+        setMultiResults(null);
+      } else {
+        setMultiResults(result);
+        setActiveResult(null);
       }
-      const filtered = history.filter((item) => item.rawText !== code.rawText);
-      const updated = [code, ...filtered].slice(0, 100);
-      localStorage.setItem('lectorqr_history', JSON.stringify(updated));
-      setRecentScans(updated.slice(0, 3));
 
-      // Comprobar apertura automática si está habilitada
-      const autoOpen = localStorage.getItem('lectorqr_auto_open') === 'true';
-      if (autoOpen && code.type === 'url' && code.parsedData.url) {
-        window.open(code.parsedData.url, '_blank');
+      // Guardar todos en historial
+      try {
+        const stored = localStorage.getItem('lectorqr_history');
+        let history: ScannedCode[] = stored ? JSON.parse(stored) : [];
+        const newCodes = result.filter(r => !history.some(h => h.rawText === r.rawText));
+        const updated = [...newCodes, ...history].slice(0, 100);
+        localStorage.setItem('lectorqr_history', JSON.stringify(updated));
+        setRecentScans(updated.slice(0, 3));
+      } catch (e) {
+        console.warn('Error saving to history', e);
       }
-    } catch (e) {
-      console.warn('Error saving to history', e);
+
+    } else {
+      setActiveResult(result);
+      setMultiResults(null);
+
+      // Guardar código individual en historial
+      try {
+        const stored = localStorage.getItem('lectorqr_history');
+        let history: ScannedCode[] = stored ? JSON.parse(stored) : [];
+        const filtered = history.filter((item) => item.rawText !== result.rawText);
+        const updated = [result, ...filtered].slice(0, 100);
+        localStorage.setItem('lectorqr_history', JSON.stringify(updated));
+        setRecentScans(updated.slice(0, 3));
+
+        // Auto apertura de URL si está habilitada
+        const autoOpen = localStorage.getItem('lectorqr_auto_open') === 'true';
+        if (autoOpen && result.type === 'url' && result.parsedData.url) {
+          window.open(result.parsedData.url, '_blank');
+        }
+      } catch (e) {
+        console.warn('Error saving to history', e);
+      }
     }
   }, []);
 
-  // Función para procesar un archivo de imagen arrastrado o pegado
-  const decodeImageFile = useCallback((file: File) => {
-    if (!file || !file.type.startsWith('image/')) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = async () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        ctx.drawImage(img, 0, 0);
-
-        // 1. Probar BarcodeDetector nativo
-        if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
-          try {
-            const detector = new (window as any).BarcodeDetector({
-              formats: ['qr_code', 'ean_13', 'code_128', 'data_matrix', 'aztec', 'pdf417'],
-            });
-            const barcodes = await detector.detect(canvas);
-            if (barcodes && barcodes.length > 0) {
-              playScanSuccessBeep();
-              const parsed = parseScannedContent(barcodes[0].rawValue, barcodes[0].format.toUpperCase());
-              handleScanSuccess(parsed);
-              return;
-            }
-          } catch (e) {
-            // fallback a jsQR
-          }
-        }
-
-        // 2. jsQR Fallback
-        const imageData = ctx.getImageData(0, 0, img.width, img.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
-          inversionAttempts: 'attemptBoth',
-        });
-
-        if (code && code.data) {
-          playScanSuccessBeep();
-          const parsed = parseScannedContent(code.data, 'QR_CODE');
-          handleScanSuccess(parsed);
-        } else {
-          alert('No se detectó ningún código QR o de barras en la imagen. Intenta con una imagen más nítida.');
-        }
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+  // Procesar archivos arrastrados o pegados (soporta múltiples QR en 1 imagen o varios archivos)
+  const processFiles = useCallback(async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+    setIsProcessingDrop(true);
+    try {
+      const detected = await decodeImageFiles(files);
+      if (detected && detected.length > 0) {
+        playScanSuccessBeep();
+        handleScanSuccess(detected.length === 1 ? detected[0] : detected);
+      } else {
+        alert('No se detectó ningún código QR o de barras en la imagen. Intenta con una imagen más nítida o con mayor contraste.');
+      }
+    } catch (err) {
+      console.warn('Error processing files', err);
+    } finally {
+      setIsProcessingDrop(false);
+    }
   }, [handleScanSuccess]);
 
-  // Listener global de Drag & Drop en toda la ventana
+  // Listener global de Drag & Drop y Ctrl+V en toda la ventana
   useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault();
@@ -130,7 +124,6 @@ export default function HomePage() {
     };
 
     const handleDragLeave = (e: DragEvent) => {
-      // Verificar si salió de la ventana
       if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= window.innerWidth || e.clientY >= window.innerHeight) {
         setIsDraggingGlobal(false);
       }
@@ -139,24 +132,24 @@ export default function HomePage() {
     const handleDrop = (e: DragEvent) => {
       e.preventDefault();
       setIsDraggingGlobal(false);
-      const file = e.dataTransfer?.files?.[0];
-      if (file) {
-        decodeImageFile(file);
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0) {
+        processFiles(files);
       }
     };
 
-    // Listener para pegar capturas de pantalla con Ctrl+V
     const handlePaste = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
       if (!items) return;
+      const imageFiles: File[] = [];
       for (let i = 0; i < items.length; i++) {
         if (items[i].type.startsWith('image/')) {
           const file = items[i].getAsFile();
-          if (file) {
-            decodeImageFile(file);
-            break;
-          }
+          if (file) imageFiles.push(file);
         }
+      }
+      if (imageFiles.length > 0) {
+        processFiles(imageFiles);
       }
     };
 
@@ -171,10 +164,11 @@ export default function HomePage() {
       window.removeEventListener('drop', handleDrop);
       window.removeEventListener('paste', handlePaste);
     };
-  }, [decodeImageFile]);
+  }, [processFiles]);
 
   const handleNewScan = () => {
     setActiveResult(null);
+    setMultiResults(null);
     setIsScanningActive(true);
   };
 
@@ -195,7 +189,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="space-y-10 py-2 sm:py-6 relative">
+    <div className="space-y-12 py-2 sm:py-6 relative">
       
       {/* Overlay Universal de Arrastrar y Soltar */}
       {isDraggingGlobal && (
@@ -204,31 +198,45 @@ export default function HomePage() {
             <Upload className="w-10 h-10" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-white font-display text-center">
-            Suelta la imagen aquí para decodificar
+            Suelta la imagen o collage aquí para decodificar
           </h2>
           <p className="text-sm text-cyan-300 font-medium mt-2 text-center max-w-md">
-            Lector QR Pro procesará automáticamente el código QR o código de barras contenido en tu archivo.
+            Lector QR Pro procesará automáticamente todos los códigos QR individuales contenidos en tu imagen.
           </p>
         </div>
       )}
 
       {/* Header Title & Status Badge */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider shadow-sm">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider shadow-sm font-mono">
           <Zap className="w-3.5 h-3.5 animate-pulse text-cyan-400" />
-          <span>Motor Dual BarcodeDetector + jsQR a 60 FPS</span>
+          <span>Motor Multi-QR y Visión Dual a 60 FPS</span>
         </div>
         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white font-display tracking-tight">
           Lector y Escáner de <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">Códigos QR</span>
         </h1>
         <p className="text-sm sm:text-base text-slate-400 font-medium">
-          Apunta tu cámara, arrastra una imagen desde tu ordenador o pega una captura con <kbd className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-xs font-mono">Ctrl+V</kbd>.
+          Apunta tu cámara, arrastra imágenes con múltiples códigos o pega capturas de pantalla con <kbd className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-xs font-mono">Ctrl+V</kbd>.
         </p>
       </div>
 
+      {/* Indicador de procesamiento cuando se suelta imagen */}
+      {isProcessingDrop && (
+        <div className="max-w-md mx-auto p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold flex items-center justify-center gap-2 animate-pulse">
+          <Layers className="w-4 h-4 animate-spin" />
+          <span>Explorando y decodificando múltiples códigos QR en la cuadrícula...</span>
+        </div>
+      )}
+
       {/* Main Scanner or Result Display */}
       <div className="w-full flex justify-center">
-        {activeResult ? (
+        {multiResults && multiResults.length > 1 ? (
+          <MultiScanResultCard
+            codes={multiResults}
+            onNewScan={handleNewScan}
+            onToggleFavorite={handleToggleFavorite}
+          />
+        ) : activeResult ? (
           <ScanResultCard
             code={activeResult}
             onNewScan={handleNewScan}
@@ -243,7 +251,7 @@ export default function HomePage() {
       </div>
 
       {/* Quick Recent Scans preview */}
-      {!activeResult && recentScans.length > 0 && (
+      {!activeResult && !multiResults && recentScans.length > 0 && (
         <div className="max-w-lg mx-auto bg-slate-900/60 border border-slate-800/80 rounded-3xl p-5 backdrop-blur-md">
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
             <div className="flex items-center gap-2">
@@ -268,6 +276,7 @@ export default function HomePage() {
                 type="button"
                 onClick={() => {
                   setActiveResult(scan);
+                  setMultiResults(null);
                   setIsScanningActive(false);
                 }}
                 className="w-full text-left p-3 rounded-2xl bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 flex items-center justify-between gap-3 transition-all cursor-pointer group"
@@ -292,17 +301,20 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Espacio Publicitario Oficial AdSense */}
+      <AdBanner slot="5414009811868137" />
+
       {/* Highlights & Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto pt-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         <div className="bg-slate-900/50 border border-slate-800/80 p-6 rounded-3xl space-y-3 hover:border-slate-700 transition-all">
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-            <Zap className="w-6 h-6" />
+            <Layers className="w-6 h-6" />
           </div>
           <h3 className="text-base font-bold text-white font-display">
-            Decodificación Ultrarrápida
+            Soporte para Múltiples Códigos
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed font-medium">
-            Procesamiento en tiempo real con aceleración por hardware mediante <code className="text-blue-400 bg-slate-800/50 px-1 py-0.5 rounded">BarcodeDetector</code> nativo y fallback garantizado en cualquier dispositivo.
+            Sube o arrastra imágenes que contengan cuadrículas de 12 o más códigos QR en una sola foto. Nuestro algoritmo escanea cada cuadrante individualmente.
           </p>
         </div>
 
@@ -326,7 +338,7 @@ export default function HomePage() {
             Privacidad Total en el Navegador
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed font-medium">
-            Tus fotos, capturas de pantalla y transmisiones de cámara nunca salen de tu dispositivo. Todo el análisis de visión se procesa de forma 100% local en tu memoria RAM.
+            Tus fotos, capturas de pantalla y transmisiones de cámara nunca salen de tu dispositivo. Todo el cómputo se realiza de forma 100% local en tu memoria RAM.
           </p>
         </div>
       </div>
@@ -336,13 +348,13 @@ export default function HomePage() {
         <div className="space-y-2 text-center sm:text-left">
           <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-cyan-400 font-mono">
             <QrCode className="w-4 h-4" />
-            <span>Estudio Creativo QR</span>
+            <span>Estudio Creativo QR estilo QR.io</span>
           </div>
           <h3 className="text-xl sm:text-2xl font-black text-white font-display">
             ¿Necesitas crear tu propio código QR?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-medium">
-            Personaliza colores de primer plano y fondo, añade marcos con texto (ESCÁNAME), iconos de WhatsApp o Wi-Fi, y exporta en PNG ultra nítido 1024x1024 o SVG vectorial.
+            Elige entre 15 tipos de contenido, agrega marcos con llamadas a la acción (ESCÁNAME), logotipos personalizados y descarga en PNG ultra nítido o SVG vectorial.
           </p>
         </div>
         <Link
@@ -352,6 +364,64 @@ export default function HomePage() {
           <Sparkles className="w-4 h-4" />
           <span>Generar Código QR</span>
         </Link>
+      </div>
+
+      {/* Educational & FAQ Section (Essential for Google AdSense Quality Compliance) */}
+      <div className="max-w-4xl mx-auto space-y-6 pt-6">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-cyan-400 text-xs font-bold uppercase tracking-wider font-mono">
+            <HelpCircle className="w-3.5 h-3.5" />
+            <span>Guía y Preguntas Frecuentes</span>
+          </div>
+          <h2 className="text-2xl font-black text-white font-display">
+            Todo lo que necesitas saber sobre Códigos QR
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto">
+            Aprende cómo funcionan, sus estándares de seguridad y las ventajas de los códigos bidimensionales modernos.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-2">
+            <h3 className="text-sm font-bold text-white font-display flex items-center gap-2">
+              <Globe className="w-4 h-4 text-cyan-400" />
+              ¿Cómo decodificar múltiples códigos QR en una imagen?
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Lector QR Pro cuenta con una tecnología de partición de cuadrícula en mosaico. Al subir una imagen con varios códigos (como un collage de 12 o 16 códigos), el motor escanea simultáneamente la imagen completa y cada cuadrante individual para extraer todos los resultados a la vez.
+            </p>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-2">
+            <h3 className="text-sm font-bold text-white font-display flex items-center gap-2">
+              <Lock className="w-4 h-4 text-emerald-400" />
+              ¿Qué es el QRishing y cómo protegerte?
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              El <em>QRishing</em> es una técnica de phishing mediante la cual ciberdelincuentes sustituyen códigos QR legítimos por enlaces maliciosos. Lector QR Pro previsualiza la URL completa antes de abrirla para que verifiques siempre el dominio antes de navegar.
+            </p>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-2">
+            <h3 className="text-sm font-bold text-white font-display flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-blue-400" />
+              ¿Qué formatos de códigos de barras son compatibles?
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Además de códigos QR estándar (ISO/IEC 18004), la aplicación decodifica códigos comerciales 1D (EAN-13, EAN-8, UPC-A, Code 128, Code 39) y matrices 2D (Data Matrix, Aztec y PDF-417 de documentos de identidad).
+            </p>
+          </div>
+
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-2">
+            <h3 className="text-sm font-bold text-white font-display flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              ¿Los códigos generados caducan o tienen límite?
+            </h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              No. Todos los códigos generados en nuestro estudio son estáticos de acceso directo: la información está codificada directamente en los módulos. Funcionarán para siempre sin requerir suscripciones ni cuotas de mantenimiento.
+            </p>
+          </div>
+        </div>
       </div>
 
     </div>

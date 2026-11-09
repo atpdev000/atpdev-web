@@ -8,23 +8,24 @@ import {
   Flashlight, 
   Upload, 
   AlertCircle, 
-  RefreshCw,
-  Scan,
-  Sparkles,
-  Zap
+  RefreshCw, 
+  Scan, 
+  Zap,
+  Layers
 } from 'lucide-react';
 import { playScanSuccessBeep } from '../lib/sound';
 import { parseScannedContent } from '../lib/parser';
+import { detectAllQRsInCanvas, decodeImageFiles } from '../lib/multiDecoder';
 import { ScannedCode } from '../types';
 
 interface CameraScannerProps {
-  onScanSuccess: (code: ScannedCode) => void;
+  onScanSuccess: (code: ScannedCode | ScannedCode[]) => void;
   isScanningActive: boolean;
 }
 
 export const CameraScanner: React.FC<CameraScannerProps> = ({
   onScanSuccess,
-  isScanningActive
+  isScanningActive,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -58,7 +59,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
 
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
-        videoRef.current.setAttribute('playsinline', 'true'); // iOS Safari
+        videoRef.current.setAttribute('playsinline', 'true');
         await videoRef.current.play();
       }
 
@@ -73,7 +74,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         setCameraError('No se encontró ninguna cámara activa en este dispositivo. Puedes usar la opción de subir imagen.');
       } else {
-        setCameraError('No se pudo acceder a la cámara. Puedes subir una foto o captura de pantalla con código QR.');
+        setCameraError('No se pudo acceder a la cámara. Puedes subir una foto, captura o collage con códigos QR.');
       }
     }
   }, [facingMode]);
@@ -115,12 +116,11 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     };
   }, [isScanningActive, facingMode]);
 
-  // Loop de escaneo continuo
+  // Loop de escaneo continuo por cámara
   useEffect(() => {
     let animationFrameId: number;
     let isDetecting = false;
 
-    // Verificar si el navegador soporta BarcodeDetector nativo
     const hasNativeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window;
     let nativeDetector: any = null;
     if (hasNativeDetector) {
@@ -160,10 +160,15 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
                 isDetecting = true;
                 const barcodes = await nativeDetector.detect(canvas);
                 if (barcodes && barcodes.length > 0) {
-                  const first = barcodes[0];
                   playScanSuccessBeep();
-                  const parsed = parseScannedContent(first.rawValue, first.format.toUpperCase());
-                  onScanSuccess(parsed);
+                  if (barcodes.length === 1) {
+                    const first = barcodes[0];
+                    const parsed = parseScannedContent(first.rawValue, first.format.toUpperCase());
+                    onScanSuccess(parsed);
+                  } else {
+                    const allParsed = barcodes.map((b: any) => parseScannedContent(b.rawValue, b.format.toUpperCase()));
+                    onScanSuccess(allParsed);
+                  }
                   return;
                 }
               } catch (e) {
@@ -203,66 +208,30 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     };
   }, [isScanningActive, onScanSuccess]);
 
-  // Manejar escaneo desde archivo o imagen seleccionada
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // Manejar escaneo desde uno o múltiples archivos seleccionados
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsProcessingImage(true);
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = async () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-
-          // Probar BarcodeDetector nativo primero
-          if (typeof window !== 'undefined' && 'BarcodeDetector' in window) {
-            try {
-              const detector = new (window as any).BarcodeDetector({
-                formats: ['qr_code', 'ean_13', 'code_128', 'data_matrix'],
-              });
-              const barcodes = await detector.detect(canvas);
-              if (barcodes && barcodes.length > 0) {
-                playScanSuccessBeep();
-                const parsed = parseScannedContent(barcodes[0].rawValue, barcodes[0].format.toUpperCase());
-                onScanSuccess(parsed);
-                setIsProcessingImage(false);
-                return;
-              }
-            } catch (err) {
-              // Continuar a jsQR
-            }
-          }
-
-          // jsQR
-          const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: 'attemptBoth',
-          });
-
-          if (code && code.data) {
-            playScanSuccessBeep();
-            const parsed = parseScannedContent(code.data, 'QR_CODE');
-            onScanSuccess(parsed);
-          } else {
-            alert('No se detectó ningún código QR o de barras en la imagen seleccionada. Prueba con una imagen más nítida o centrada.');
-          }
+    try {
+      const detected = await decodeImageFiles(files);
+      if (detected && detected.length > 0) {
+        playScanSuccessBeep();
+        if (detected.length === 1) {
+          onScanSuccess(detected[0]);
+        } else {
+          onScanSuccess(detected);
         }
-        setIsProcessingImage(false);
-      };
-      img.src = event.target?.result as string;
-    };
-
-    reader.readAsDataURL(file);
-    // Limpiar input para permitir seleccionar la misma imagen
-    e.target.value = '';
+      } else {
+        alert('No se detectó ningún código QR o de barras en la imagen seleccionada. Prueba con una imagen más nítida o centrada.');
+      }
+    } catch (err) {
+      console.warn('Error processing image files:', err);
+    } finally {
+      setIsProcessingImage(false);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -282,23 +251,19 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
       {isScanningActive && !cameraError && (
         <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
           
-          {/* Dimmed surround */}
           <div className="relative w-64 h-64 sm:w-72 sm:h-72">
-            
-            {/* Esquinas del visor (Target Crosshairs) */}
+            {/* Esquinas del visor */}
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-xl shadow-lg" />
             <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-xl shadow-lg" />
             <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-xl shadow-lg" />
             <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-xl shadow-lg" />
 
-            {/* Glowing Laser line */}
+            {/* Línea Láser Animada */}
             <div className="absolute left-2 right-2 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_15px_#22d3ee] animate-laser rounded-full" />
             
-            {/* Center target indicator */}
             <div className="absolute inset-0 flex items-center justify-center opacity-30">
               <Scan className="w-12 h-12 text-blue-400 stroke-[1]" />
             </div>
-
           </div>
 
           <p className="mt-6 text-xs font-black uppercase tracking-wider text-white bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-md">
@@ -308,7 +273,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         </div>
       )}
 
-      {/* Camera Error Message with Direct Upload Fallback */}
+      {/* Camera Error Message with Direct Multi-Upload Fallback */}
       {cameraError && (
         <div className="p-6 text-center text-white space-y-4 max-w-sm z-10">
           <AlertCircle className="w-12 h-12 text-amber-400 mx-auto" />
@@ -320,10 +285,10 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase flex items-center justify-center gap-2 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-600/30"
             >
               <Upload className="w-4 h-4" />
-              <span>Escanear Imagen / Captura</span>
+              <span>Escanear Imagen / Collage QR</span>
             </button>
             <button
               type="button"
@@ -337,7 +302,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
         </div>
       )}
 
-      {/* Floating Bottom Controls (Torch, Camera Switch, Upload File) */}
+      {/* Floating Bottom Controls (Torch, Camera Switch, Multi-Upload File) */}
       <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between gap-3">
         
         {/* Flashlight / Torch */}
@@ -354,11 +319,12 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           </button>
         )}
 
-        {/* Upload file hidden input and trigger */}
+        {/* Upload file input (with multiple files support) */}
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
+          multiple
           onChange={handleFileUpload}
           className="hidden"
         />
@@ -370,7 +336,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           className="flex-1 py-3 px-4 rounded-2xl bg-black/65 backdrop-blur-md hover:bg-black/85 text-white font-black text-xs uppercase tracking-wide border border-white/20 flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
         >
           <Upload className="w-4 h-4 text-cyan-400" />
-          <span>{isProcessingImage ? 'Leyendo imagen...' : 'Subir Imagen QR'}</span>
+          <span>{isProcessingImage ? 'Analizando múltiples QR...' : 'Subir Imagen o Múltiples QR'}</span>
         </button>
 
         {/* Switch Front/Back Camera */}
@@ -390,4 +356,3 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
 };
 
 export default CameraScanner;
-

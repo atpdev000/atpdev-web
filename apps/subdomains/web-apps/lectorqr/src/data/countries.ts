@@ -37,3 +37,4 @@ export const COUNTRIES: CountryItem[] = [
   { code: 'KR', name: 'Corea del Sur', dialCode: '82', flag: '🇰🇷' },
   { code: 'AU', name: 'Australia', dialCode: '61', flag: '🇦🇺' },
 ];
+
