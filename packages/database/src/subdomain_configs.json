@@ -430,5 +430,77 @@
       "support_url": "https://atpdev.dev/contacto"
     },
     "updated_at": "2026-11-09T12:00:00.000Z"
+  },
+  "lectorqr": {
+    "id": "lectorqr",
+    "name": "Lector QR Pro",
+    "slug": "lectorqr",
+    "subdomain": "lectorqr",
+    "full_domain": "lectorqr.atpdev.dev",
+    "devPort": 3010,
+    "category": "Productividad & Herramientas QR",
+    "status": "active",
+    "theme": {
+      "accent_color": "#0ea5e9",
+      "accent_name": "sky",
+      "theme_mode": "dark",
+      "radius_style": "rounded-3xl",
+      "radius_scale": "full",
+      "seed_color": "#0ea5e9",
+      "color_theme": "sky",
+      "primary_color": "#0ea5e9",
+      "secondary_color": "#0369a1",
+      "tertiary_color": "#0284c7",
+      "neutral_color": "#64748b",
+      "font_headline": "Plus Jakarta Sans",
+      "font_body": "Inter",
+      "font_label": "JetBrains Mono",
+      "glow_style": "full-border",
+      "neon_thickness": "4px",
+      "cursor_effect": "cursor-default",
+      "global_background_image": ""
+    },
+    "branding": {
+      "site_title": "lector qr pro",
+      "site_tagline": "Escáner de Códigos QR, Barras & Estudio Creativo",
+      "hero_badge": "Detección Dual 60 FPS • Sin Límites • 100% Privado",
+      "hero_title_prefix": "Escáner y Generador Profesional de",
+      "hero_title_highlight": "Códigos QR",
+      "hero_description": "Decodificación instantánea en tiempo real de redes Wi-Fi, enlaces web, contactos vCard, WhatsApp y códigos de barras con estudio de diseño y exportación en alta resolución.",
+      "logo_url": "/icon.svg",
+      "favicon_url": "/icon.svg",
+      "announcement_text": "⚡ Nuevo motor de reconocimiento acelerado por hardware para cámaras y fotos.",
+      "announcement_enabled": true
+    },
+    "seo": {
+      "meta_title": "Lector QR Pro — Escáner y Generador de Códigos QR y de Barras",
+      "meta_description": "Escáner profesional de códigos QR en línea. Conecta a Wi-Fi al instante, exporta contactos vCard, abre WhatsApp y diseña códigos QR personalizados en alta resolución.",
+      "keywords": [
+        "lector qr",
+        "escanear qr online",
+        "generador qr gratis",
+        "lector codigos de barra",
+        "escanear wifi qr",
+        "lector qr pro",
+        "qr code generator"
+      ],
+      "canonical_url": "https://lectorqr.atpdev.dev",
+      "google_analytics_id": "GTM-KGJN7SDL",
+      "microsoft_clarity_id": "zak4lzyye9"
+    },
+    "modules": {
+      "camera_scanner_enabled": true,
+      "image_upload_scanner_enabled": true,
+      "qr_generator_enabled": true,
+      "history_export_enabled": true,
+      "vcard_export_enabled": true,
+      "wifi_quick_connect_enabled": true
+    },
+    "contact": {
+      "email": "contacto@atpdev.dev",
+      "whatsapp": "+51987654321",
+      "support_url": "https://atpdev.dev/contacto"
+    },
+    "updated_at": "2026-11-09T16:30:00.000Z"
   }
 }

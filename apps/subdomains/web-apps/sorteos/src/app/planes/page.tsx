@@ -130,14 +130,14 @@ export default function PlanesPage() {
       
       {/* ─── 1. HERO DUOLINGO STYLE: SUPER PRO BADGE & CHUNKY BILLING SWITCH ─── */}
       <div className="text-center space-y-6 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-emerald-500/15 via-purple-500/15 to-amber-500/15 border-2 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs uppercase tracking-wider shadow-sm">
-          <Sparkles className="w-4 h-4 text-[#58cc02] animate-bounce" />
-          <span>Sorteos Pro • Planes & Super Membresías</span>
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 border-2 border-pink-500/30 text-pink-600 dark:text-pink-400 font-extrabold text-xs uppercase tracking-wider shadow-sm">
+          <Sparkles className="w-4 h-4 text-[#d91a7a] animate-bounce" />
+          <span>Sorteos Pro • Planes & Membresías</span>
           <Crown className="w-4 h-4 text-amber-500" />
         </div>
 
         <h1 className="text-4xl sm:text-6xl font-black font-display text-slate-900 dark:text-white tracking-tight leading-tight">
-          Sorteos transparentes con <span className="bg-gradient-to-r from-[#58cc02] via-[#1cb0f6] to-[#a855f7] bg-clip-text text-transparent">Super Poderes</span>
+          Sorteos transparentes con <span className="bg-gradient-to-r from-[#d91a7a] via-[#ec4899] to-[#8b5cf6] bg-clip-text text-transparent">Super Poderes</span>
         </h1>
         
         <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto">
@@ -152,21 +152,21 @@ export default function PlanesPage() {
       {/* ─── 3. DUOLINGO "GARANTÍA DE CONFIANZA EN 3 PASOS" ─────────────────── */}
       <div className="rounded-3xl p-8 sm:p-12 border-2 border-b-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1222] shadow-sm space-y-8">
         <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-xs">
-            <ShieldCheck className="w-4 h-4" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 text-[#d91a7a] dark:text-pink-400 font-bold text-xs">
+            <ShieldCheck className="w-4 h-4 text-[#d91a7a]" />
             <span>Transparencia Criptográfica Garantizada</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black font-display text-slate-900 dark:text-white">
             ¿Por qué los mejores creadores eligen Sorteos Pro?
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
-            Diseñado como los mejores paywalls del mundo: claridad absoluta, cero letra pequeña y valor instantáneo.
+            Diseñado para máxima conversión y confianza: claridad absoluta, cero letra pequeña y valor instantáneo.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-[#58cc02] flex items-center justify-center font-black text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-pink-500/15 text-[#d91a7a] flex items-center justify-center font-black text-xl shadow-xs">
               🛡️
             </div>
             <h3 className="font-black text-base text-slate-900 dark:text-white font-display">
@@ -178,7 +178,7 @@ export default function PlanesPage() {
           </div>
 
           <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 text-[#1cb0f6] flex items-center justify-center font-black text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-xl shadow-xs">
               ⚡
             </div>
             <h3 className="font-black text-base text-slate-900 dark:text-white font-display">
@@ -190,7 +190,7 @@ export default function PlanesPage() {
           </div>
 
           <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border-2 border-slate-200 dark:border-slate-800 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-500 flex items-center justify-center font-black text-xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-pink-500/15 text-[#d91a7a] flex items-center justify-center font-black text-xl shadow-xs">
               🎬
             </div>
             <h3 className="font-black text-base text-slate-900 dark:text-white font-display">
@@ -206,7 +206,7 @@ export default function PlanesPage() {
       {/* ─── 4. MATRIZ COMPARATIVA ESTILO DUOLINGO SUPER (Interactive Table) ─ */}
       <div className="rounded-3xl p-6 sm:p-10 border-2 border-b-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1222] shadow-sm space-y-8 overflow-hidden">
         <div className="text-center space-y-2 max-w-xl mx-auto">
-          <span className="text-xs font-black uppercase text-[#58cc02] tracking-wider block">
+          <span className="text-xs font-black uppercase text-[#d91a7a] tracking-wider block">
             Tabla Comparativa Detallada
           </span>
           <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
@@ -224,13 +224,13 @@ export default function PlanesPage() {
                 <th className="py-4 px-4 text-center text-xs font-black uppercase text-slate-700 dark:text-slate-300 w-28">
                   Free
                 </th>
-                <th className="py-4 px-4 text-center text-xs font-black uppercase text-[#58cc02] bg-[#58cc02]/10 rounded-t-2xl w-36">
+                <th className="py-4 px-4 text-center text-xs font-black uppercase text-[#d91a7a] bg-[#d91a7a]/10 rounded-t-2xl w-36">
                   ⚡ Pro Creador
                 </th>
-                <th className="py-4 px-4 text-center text-xs font-black uppercase text-[#1cb0f6] w-32">
+                <th className="py-4 px-4 text-center text-xs font-black uppercase text-purple-600 dark:text-purple-400 w-32">
                   Business
                 </th>
-                <th className="py-4 px-4 text-center text-xs font-black uppercase text-[#ff9600] w-32">
+                <th className="py-4 px-4 text-center text-xs font-black uppercase text-slate-700 dark:text-slate-300 w-32">
                   Enterprise
                 </th>
               </tr>
@@ -247,7 +247,7 @@ export default function PlanesPage() {
                   <td className="py-4 px-4 text-center font-medium text-slate-600 dark:text-slate-400">
                     {typeof row.free === 'boolean' ? (
                       row.free ? (
-                        <Check className="w-4 h-4 text-emerald-500 mx-auto stroke-[3]" />
+                        <Check className="w-4 h-4 text-slate-700 dark:text-slate-300 mx-auto stroke-[3]" />
                       ) : (
                         <XCircle className="w-4 h-4 text-slate-300 dark:text-slate-700 mx-auto" />
                       )
@@ -257,10 +257,10 @@ export default function PlanesPage() {
                   </td>
 
                   {/* Pro Creador (Super Column) */}
-                  <td className="py-4 px-4 text-center font-bold text-slate-900 dark:text-white bg-[#58cc02]/5">
+                  <td className="py-4 px-4 text-center font-bold text-slate-900 dark:text-white bg-[#d91a7a]/5">
                     {typeof row.pro === 'boolean' ? (
                       row.pro ? (
-                        <Check className="w-4 h-4 text-[#58cc02] mx-auto stroke-[3]" />
+                        <Check className="w-4 h-4 text-[#d91a7a] mx-auto stroke-[3]" />
                       ) : (
                         <XCircle className="w-4 h-4 text-slate-300 dark:text-slate-700 mx-auto" />
                       )
@@ -273,7 +273,7 @@ export default function PlanesPage() {
                   <td className="py-4 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
                     {typeof row.business === 'boolean' ? (
                       row.business ? (
-                        <Check className="w-4 h-4 text-[#1cb0f6] mx-auto stroke-[3]" />
+                        <Check className="w-4 h-4 text-purple-600 dark:text-purple-400 mx-auto stroke-[3]" />
                       ) : (
                         <XCircle className="w-4 h-4 text-slate-300 dark:text-slate-700 mx-auto" />
                       )
@@ -286,7 +286,7 @@ export default function PlanesPage() {
                   <td className="py-4 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
                     {typeof row.enterprise === 'boolean' ? (
                       row.enterprise ? (
-                        <Check className="w-4 h-4 text-amber-500 mx-auto stroke-[3]" />
+                        <Check className="w-4 h-4 text-slate-800 dark:text-slate-200 mx-auto stroke-[3]" />
                       ) : (
                         <XCircle className="w-4 h-4 text-slate-300 dark:text-slate-700 mx-auto" />
                       )
@@ -304,7 +304,7 @@ export default function PlanesPage() {
       {/* ─── 5. FAQ ACORDIONES INTERACTIVOS TÁCTILES ────────────────────────── */}
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-mono text-[#58cc02] font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-1.5 text-xs font-mono text-[#d91a7a] font-bold uppercase tracking-wider">
             <HelpCircle className="w-4 h-4" />
             <span>{t('pricing_faq_title')}</span>
           </div>
@@ -324,17 +324,17 @@ export default function PlanesPage() {
                 key={idx} 
                 className={`rounded-2xl border-2 transition-all duration-200 overflow-hidden cursor-pointer ${
                   isOpen 
-                    ? 'border-[#58cc02] dark:border-[#58cc02] bg-white dark:bg-[#0f172a] shadow-md'
+                    ? 'border-[#d91a7a] dark:border-[#ec4899] bg-white dark:bg-[#0f172a] shadow-md'
                     : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0c1222] hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
                 onClick={() => setOpenFaq(isOpen ? null : idx)}
               >
                 <div className="p-5 flex items-center justify-between gap-4">
                   <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-                    <span className="text-[#58cc02] font-black text-sm">Q{idx + 1}.</span>
+                    <span className="text-[#d91a7a] font-black text-sm">Q{idx + 1}.</span>
                     <span>{faq.q}</span>
                   </h3>
-                  <div className={`w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 bg-[#58cc02]/15 text-[#58cc02]' : 'text-slate-400'}`}>
+                  <div className={`w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 bg-pink-50 dark:bg-pink-950/40 text-[#d91a7a]' : 'text-slate-400'}`}>
                     <ChevronDown className="w-4 h-4" />
                   </div>
                 </div>
@@ -350,14 +350,14 @@ export default function PlanesPage() {
         </div>
       </div>
 
-      {/* ─── 6. FINAL BOTTOM CTA BANNER (High Conversion Duolingo Push) ─────── */}
-      <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-2 border-b-6 border-purple-500 shadow-2xl relative overflow-hidden text-center space-y-6">
-        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#58cc02]/20 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#1cb0f6]/20 blur-3xl pointer-events-none" />
+      {/* ─── 6. FINAL BOTTOM CTA BANNER (High Conversion Brand Push) ─────── */}
+      <div className="rounded-3xl p-8 sm:p-12 bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white border-2 border-b-6 border-[#d91a7a] shadow-2xl relative overflow-hidden text-center space-y-6">
+        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#d91a7a]/25 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#7c3aed]/25 blur-3xl pointer-events-none" />
 
         <div className="space-y-3 relative z-10 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-emerald-300 font-bold text-xs">
-            <Gift className="w-4 h-4 text-emerald-300" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-500/20 text-pink-300 font-bold text-xs border border-pink-500/30">
+            <Gift className="w-4 h-4 text-pink-300" />
             <span>Comienza gratis hoy mismo</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black font-display tracking-tight">
@@ -371,7 +371,7 @@ export default function PlanesPage() {
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
           <Link
             href="/sorteos/nuevo"
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#58cc02] hover:bg-[#4eb302] text-white font-black font-display text-sm tracking-wide uppercase transition-all duration-150 border-b-4 border-[#3b8702] active:border-b-0 active:translate-y-1 shadow-lg shadow-[#58cc02]/30 flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-black font-display text-sm tracking-wide uppercase transition-all duration-150 border-b-4 border-[#9f1239] active:border-b-0 active:translate-y-1 shadow-lg shadow-pink-500/30 flex items-center justify-center gap-2"
           >
             <Sparkles className="w-4 h-4" />
             <span>Crear Sorteo Gratis Ahora</span>

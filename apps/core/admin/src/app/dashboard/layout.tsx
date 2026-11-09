@@ -23,7 +23,8 @@ import {
   Sparkles,
   Sun,
   Moon,
-  UtensilsCrossed
+  UtensilsCrossed,
+  QrCode
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -144,6 +145,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           icon: <UtensilsCrossed size={17} />, 
           href: "/dashboard/perusabor",
           badge: "3009"
+        },
+        { 
+          label: "Lector QR Pro", 
+          icon: <QrCode size={17} />, 
+          href: "/dashboard/lectorqr",
+          badge: "3010"
         },
       ]
     },
