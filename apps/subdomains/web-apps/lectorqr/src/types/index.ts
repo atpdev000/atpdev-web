@@ -170,11 +170,15 @@ export type QROptionLogo =
   | 'location'
   | 'vcard'
   | 'pdf'
+  | 'app'
   | 'appstore'
-  | 'googleplay';
+  | 'googleplay'
+  | 'calendar'
+  | 'images';
 
 export type QROuterFrame = 
   | 'none'
+  | 'rounded-card'
   | 'bottom'
   | 'top'
   | 'balloon-bottom'
@@ -182,7 +186,8 @@ export type QROuterFrame =
   | 'ribbon-bottom'
   | 'ribbon-top'
   | 'phone'
-  | 'cine';
+  | 'cine'
+  | 'badge';
 
 export type QRLabelFont = 
   | 'Arial, Helvetica, sans-serif'

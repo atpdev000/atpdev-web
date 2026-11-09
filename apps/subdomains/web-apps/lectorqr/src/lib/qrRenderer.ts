@@ -79,6 +79,22 @@ export async function renderCustomQRCode(
     canvasWidth = targetWidth + borderS * 2;
     qrX = borderS;
     qrY = borderS;
+  } else if (outerFrame === 'rounded-card') {
+    const bannerH = Math.round(targetWidth * 0.25);
+    canvasHeight = targetWidth + bannerH + 20;
+    canvasWidth = targetWidth + 24;
+    qrWidth = targetWidth;
+    qrHeight = targetWidth;
+    qrX = 12;
+    qrY = 12;
+  } else if (outerFrame === 'badge') {
+    const bannerH = Math.round(targetWidth * 0.2);
+    canvasHeight = targetWidth + bannerH + 16;
+    canvasWidth = targetWidth + 16;
+    qrWidth = targetWidth;
+    qrHeight = targetWidth;
+    qrX = 8;
+    qrY = bannerH + 8;
   }
 
   canvas.width = canvasWidth;
@@ -311,6 +327,41 @@ export async function renderCustomQRCode(
       ctx.textBaseline = 'middle';
       ctx.font = `bold 12px ${labelFont}`;
       ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, canvasHeight - qrY / 2);
+
+    } else if (outerFrame === 'rounded-card') {
+      // Tarjeta redondeada con borde envolvente y pastilla inferior moderna (Estilo Tarjeta Redondeada)
+      ctx.strokeStyle = frameBg;
+      ctx.lineWidth = Math.max(3, Math.round(targetWidth * 0.015));
+      roundRect(ctx, 4, 4, canvasWidth - 8, canvasHeight - 8, Math.round(targetWidth * 0.06));
+      ctx.stroke();
+
+      const pillW = Math.round(canvasWidth * 0.78);
+      const pillH = Math.round(canvasHeight * 0.11);
+      const pillX = (canvasWidth - pillW) / 2;
+      const pillY = canvasHeight - pillH - 12;
+
+      ctx.fillStyle = frameBg;
+      roundRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
+      ctx.fill();
+
+      ctx.fillStyle = frameTextColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fontSize = Math.max(13, Math.round(canvasWidth * 0.046));
+      ctx.font = `900 ${fontSize}px ${labelFont}`;
+      ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, pillY + pillH / 2);
+
+    } else if (outerFrame === 'badge') {
+      const ribbonH = Math.round(canvasHeight * 0.12);
+      ctx.fillStyle = frameBg;
+      ctx.fillRect(0, 0, canvasWidth, ribbonH);
+
+      ctx.fillStyle = frameTextColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fontSize = Math.max(13, Math.round(canvasWidth * 0.048));
+      ctx.font = `900 ${fontSize}px ${labelFont}`;
+      ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, ribbonH / 2);
     }
 
     ctx.restore();
@@ -626,6 +677,58 @@ function drawVectorPlatformLogo(
     ctx.fillStyle = '#FFFFFF';
     ctx.font = `bold ${Math.round(size * 0.45)}px sans-serif`;
     ctx.fillText('📍', cx, cy);
+
+  } else if (logoType === 'pdf') {
+    ctx.fillStyle = '#DC2626';
+    roundRect(ctx, cx - radius, cy - radius * 0.75, radius * 2, radius * 1.5, radius * 0.25);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+    ctx.fillText('PDF', cx, cy);
+
+  } else if (logoType === 'app' || logoType === 'appstore') {
+    ctx.fillStyle = '#0284C7';
+    roundRect(ctx, cx - radius, cy - radius, radius * 2, radius * 2, radius * 0.35);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+    ctx.fillText('APP', cx, cy);
+
+  } else if (logoType === 'googleplay') {
+    ctx.fillStyle = '#01875F';
+    roundRect(ctx, cx - radius, cy - radius, radius * 2, radius * 2, radius * 0.35);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(cx - radius * 0.35, cy - radius * 0.45);
+    ctx.lineTo(cx + radius * 0.45, cy);
+    ctx.lineTo(cx - radius * 0.35, cy + radius * 0.45);
+    ctx.closePath();
+    ctx.fill();
+
+  } else if (logoType === 'vcard') {
+    ctx.fillStyle = '#4F46E5';
+    roundRect(ctx, cx - radius, cy - radius * 0.75, radius * 2, radius * 1.5, radius * 0.25);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${Math.round(size * 0.3)}px sans-serif`;
+    ctx.fillText('VCARD', cx, cy);
+
+  } else if (logoType === 'calendar') {
+    ctx.fillStyle = '#D97706';
+    roundRect(ctx, cx - radius, cy - radius * 0.8, radius * 2, radius * 1.6, radius * 0.25);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+    ctx.fillText('CAL', cx, cy);
+
+  } else if (logoType === 'images') {
+    ctx.fillStyle = '#059669';
+    roundRect(ctx, cx - radius, cy - radius * 0.8, radius * 2, radius * 1.6, radius * 0.25);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `bold ${Math.round(size * 0.36)}px sans-serif`;
+    ctx.fillText('IMG', cx, cy);
 
   } else {
     // Default Star

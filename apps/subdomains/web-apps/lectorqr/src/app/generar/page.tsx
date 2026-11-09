@@ -123,14 +123,14 @@ export default function GenerarStudioPage() {
     pattern: 'default',
     marker: 'default',
     marker_in: 'default',
-    optionlogo: 'tiktok',
+    optionlogo: 'link',
     no_logo_bg: false,
     logoSize: 22,
-    outer_frame: 'bottom',
-    framelabel: 'SCAN ME',
+    outer_frame: 'rounded-card',
+    framelabel: 'ESCÁNAME',
     label_font: 'Arial, Helvetica, sans-serif',
-    custom_frame_color: false,
-    framecolor: '#000000',
+    custom_frame_color: true,
+    framecolor: '#0284c7',
     frame_text_color: '#ffffff',
     errorCorrection: 'H',
     margin: 2,
@@ -140,6 +140,83 @@ export default function GenerarStudioPage() {
   const [downloading, setDownloading] = useState(false);
   const [exportResolution, setExportResolution] = useState<number>(1024);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
+
+  // Manejador de cambio de formato con sincronización inteligente de logo y CTA
+  const handleSelectType = (type: CodeType) => {
+    setActiveType(type);
+
+    let newLogo: QROptionLogo = 'link';
+    let newLabel = 'ESCÁNAME';
+
+    switch (type) {
+      case 'url':
+        newLogo = 'link';
+        newLabel = 'VISITAR SITIO';
+        break;
+      case 'text':
+        newLogo = 'none';
+        newLabel = 'LEER MENSAJE';
+        break;
+      case 'email':
+        newLogo = 'email';
+        newLabel = 'ENVIAR CORREO';
+        break;
+      case 'phone':
+        newLogo = 'link';
+        newLabel = 'LLAMAR AHORA';
+        break;
+      case 'sms':
+        newLogo = 'email';
+        newLabel = 'ENVIAR SMS';
+        break;
+      case 'contact':
+        newLogo = 'vcard';
+        newLabel = vcardName ? `CONTACTO: ${vcardName.split(' ')[0].toUpperCase()}` : 'GUARDAR CONTACTO';
+        break;
+      case 'whatsapp':
+        newLogo = 'whatsapp';
+        newLabel = 'CHATEAR EN WHATSAPP';
+        break;
+      case 'wifi':
+        newLogo = 'wifi';
+        newLabel = wifiSsid ? `WI-FI: ${wifiSsid.toUpperCase()}` : 'CONECTAR WI-FI';
+        break;
+      case 'pdf':
+        newLogo = 'pdf';
+        newLabel = 'VER DOCUMENTO PDF';
+        break;
+      case 'app':
+        newLogo = 'app';
+        newLabel = appName ? `DESCARGAR ${appName.toUpperCase()}` : 'DESCARGAR APP';
+        break;
+      case 'images':
+        newLogo = 'images';
+        newLabel = 'VER GALERÍA';
+        break;
+      case 'video':
+        newLogo = 'youtube';
+        newLabel = 'VER VÍDEO';
+        break;
+      case 'social':
+        newLogo = (socialNetwork as QROptionLogo) || 'tiktok';
+        newLabel = `SEGUIR EN ${socialNetwork.toUpperCase()}`;
+        break;
+      case 'event':
+        newLogo = 'calendar';
+        newLabel = eventTitle ? `EVENTO: ${eventTitle.toUpperCase()}` : 'AGENDAR EVENTO';
+        break;
+      case 'crypto':
+        newLogo = 'btc';
+        newLabel = 'PAGAR CON CRIPTO';
+        break;
+    }
+
+    setDesignConfig((prev) => ({
+      ...prev,
+      optionlogo: newLogo,
+      framelabel: newLabel,
+    }));
+  };
 
   // Calcular la cadena raw según el tipo activo
   const computeRawData = useCallback((): string => {
@@ -171,8 +248,14 @@ export default function GenerarStudioPage() {
         return buildWifiString(wifiSsid, wifiPass, wifiAuth, wifiHidden);
       case 'pdf':
         return pdfUrl.startsWith('http') ? pdfUrl : `https://${pdfUrl}`;
-      case 'app':
-        return appIosUrl || appAndroidUrl || 'https://atpdev.pe';
+      case 'app': {
+        if (appIosUrl && appAndroidUrl) {
+          return `https://atpdev.pe/app?name=${encodeURIComponent(appName)}&ios=${encodeURIComponent(appIosUrl)}&android=${encodeURIComponent(appAndroidUrl)}`;
+        }
+        if (appIosUrl) return appIosUrl;
+        if (appAndroidUrl) return appAndroidUrl;
+        return `https://atpdev.pe/app/${encodeURIComponent((appName || 'miapp').toLowerCase().replace(/\s+/g, '-'))}`;
+      }
       case 'images':
         return imagesUrl.startsWith('http') ? imagesUrl : `https://${imagesUrl}`;
       case 'video':
@@ -426,7 +509,7 @@ export default function GenerarStudioPage() {
                   <button
                     key={t.id}
                     type="button"
-                    onClick={() => setActiveType(t.id as CodeType)}
+                    onClick={() => handleSelectType(t.id as CodeType)}
                     className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer ${
                       isActive
                         ? 'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-400 shadow-md'
@@ -440,8 +523,10 @@ export default function GenerarStudioPage() {
               })}
             </div>
 
-            {/* Formularios Dinámicos */}
+            {/* Formularios Dinámicos para los 15 Formatos */}
             <div className="bg-slate-950/80 p-5 rounded-2xl border border-slate-800 space-y-4">
+              
+              {/* 1. ENLACE URL */}
               {activeType === 'url' && (
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
@@ -460,42 +545,65 @@ export default function GenerarStudioPage() {
                 </div>
               )}
 
-              {activeType === 'social' && (
+              {/* 2. TEXTO PLANO */}
+              {activeType === 'text' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                    Texto Libre o Mensaje:
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={textVal}
+                    onChange={(e) => setTextVal(e.target.value)}
+                    placeholder="Introduce el texto que deseas codificar..."
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm resize-none focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              )}
+
+              {/* 3. E-MAIL */}
+              {activeType === 'email' && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
-                        Plataforma Oficial:
-                      </label>
-                      <select
-                        value={socialNetwork}
-                        onChange={(e) => setSocialNetwork(e.target.value as any)}
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs cursor-pointer font-bold"
-                      >
-                        <option value="tiktok">🎵 TikTok Oficial</option>
-                        <option value="instagram">📸 Instagram</option>
-                        <option value="facebook">📘 Facebook</option>
-                        <option value="youtube">🔴 YouTube</option>
-                        <option value="linkedin">💼 LinkedIn</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
-                        Usuario (@handle):
-                      </label>
-                      <input
-                        type="text"
-                        value={socialHandle}
-                        onChange={(e) => setSocialHandle(e.target.value)}
-                        placeholder="tuusuario"
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Correo Destinatario:
+                    </label>
+                    <input
+                      type="email"
+                      value={emailTo}
+                      onChange={(e) => setEmailTo(e.target.value)}
+                      placeholder="contacto@ejemplo.com"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Asunto:
+                    </label>
+                    <input
+                      type="text"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                      placeholder="Consulta Comercial"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Mensaje Predefinido:
+                    </label>
+                    <textarea
+                      rows={2}
+                      value={emailBody}
+                      onChange={(e) => setEmailBody(e.target.value)}
+                      placeholder="Hola, me gustaría solicitar información..."
+                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                    />
                   </div>
                 </div>
               )}
 
-              {/* Teléfonos con Selector Internacional */}
+              {/* 4. LLAMADA & 5. SMS & 7. WHATSAPP */}
               {(activeType === 'phone' || activeType === 'sms' || activeType === 'whatsapp') && (
                 <div className="space-y-3">
                   <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
@@ -535,7 +643,7 @@ export default function GenerarStudioPage() {
                   {activeType === 'whatsapp' && (
                     <div>
                       <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
-                        Mensaje Pre-escrito:
+                        Mensaje Pre-escrito de WhatsApp:
                       </label>
                       <textarea
                         rows={2}
@@ -545,10 +653,112 @@ export default function GenerarStudioPage() {
                       />
                     </div>
                   )}
+
+                  {activeType === 'sms' && (
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Mensaje de Texto SMS:
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={smsMessage}
+                        onChange={(e) => setSmsMessage(e.target.value)}
+                        className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Wi-Fi */}
+              {/* 6. V-CARD (CONTACTO) */}
+              {activeType === 'contact' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Nombre Completo:
+                      </label>
+                      <input
+                        type="text"
+                        value={vcardName}
+                        onChange={(e) => {
+                          setVcardName(e.target.value);
+                          if (e.target.value.trim()) {
+                            setDesignConfig((prev) => ({
+                              ...prev,
+                              framelabel: `CONTACTO: ${e.target.value.trim().split(' ')[0].toUpperCase()}`
+                            }));
+                          }
+                        }}
+                        placeholder="Carlos Mendoza"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Empresa / Organización:
+                      </label>
+                      <input
+                        type="text"
+                        value={vcardOrg}
+                        onChange={(e) => setVcardOrg(e.target.value)}
+                        placeholder="ATP DEV Perú"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Cargo / Título:
+                      </label>
+                      <input
+                        type="text"
+                        value={vcardTitle}
+                        onChange={(e) => setVcardTitle(e.target.value)}
+                        placeholder="Director de Tecnología"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Teléfono Móvil:
+                      </label>
+                      <input
+                        type="tel"
+                        value={vcardPhone}
+                        onChange={(e) => setVcardPhone(e.target.value)}
+                        placeholder="987654321"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Correo Electrónico:
+                      </label>
+                      <input
+                        type="email"
+                        value={vcardEmail}
+                        onChange={(e) => setVcardEmail(e.target.value)}
+                        placeholder="carlos@atpdev.pe"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Sitio Web:
+                      </label>
+                      <input
+                        type="url"
+                        value={vcardWebsite}
+                        onChange={(e) => setVcardWebsite(e.target.value)}
+                        placeholder="https://atpdev.pe"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 8. WI-FI */}
               {activeType === 'wifi' && (
                 <div className="space-y-3">
                   <div>
@@ -558,44 +768,307 @@ export default function GenerarStudioPage() {
                     <input
                       type="text"
                       value={wifiSsid}
-                      onChange={(e) => setWifiSsid(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm"
+                      onChange={(e) => {
+                        setWifiSsid(e.target.value);
+                        if (e.target.value.trim()) {
+                          setDesignConfig((prev) => ({
+                            ...prev,
+                            framelabel: `WI-FI: ${e.target.value.trim().toUpperCase()}`
+                          }));
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-bold"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Contraseña:
+                      </label>
+                      <input
+                        type="text"
+                        value={wifiPass}
+                        onChange={(e) => setWifiPass(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Tipo de Seguridad:
+                      </label>
+                      <select
+                        value={wifiAuth}
+                        onChange={(e) => setWifiAuth(e.target.value as any)}
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold cursor-pointer"
+                      >
+                        <option value="WPA">WPA / WPA2 / WPA3 (Estándar)</option>
+                        <option value="WEP">WEP (Antiguo)</option>
+                        <option value="nopass">Sin Contraseña (Abierta)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 9. DOCUMENTO PDF */}
+              {activeType === 'pdf' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                    Enlace Directo al Archivo PDF:
+                  </label>
+                  <input
+                    type="url"
+                    value={pdfUrl}
+                    onChange={(e) => setPdfUrl(e.target.value)}
+                    placeholder="https://tudominio.com/documento.pdf"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                  />
+                  <span className="text-[11px] text-slate-400 block">
+                    Al escanear el QR se abrirá o descargará el documento PDF directamente.
+                  </span>
+                </div>
+              )}
+
+              {/* 10. APLICACIÓN MÓVIL (APP STORE / PLAY STORE) */}
+              {activeType === 'app' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Nombre de la App:
+                    </label>
+                    <input
+                      type="text"
+                      value={appName}
+                      onChange={(e) => {
+                        setAppName(e.target.value);
+                        setDesignConfig((prev) => ({
+                          ...prev,
+                          framelabel: e.target.value.trim() ? `DESCARGAR ${e.target.value.trim().toUpperCase()}` : 'DESCARGAR APP'
+                        }));
+                      }}
+                      placeholder="Mi App Pro"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-bold"
                     />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
-                      Contraseña:
+                      Enlace a Apple App Store (iOS):
                     </label>
                     <input
-                      type="text"
-                      value={wifiPass}
-                      onChange={(e) => setWifiPass(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                      type="url"
+                      value={appIosUrl}
+                      onChange={(e) => setAppIosUrl(e.target.value)}
+                      placeholder="https://apps.apple.com/app/id123456789"
+                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Enlace a Google Play Store (Android):
+                    </label>
+                    <input
+                      type="url"
+                      value={appAndroidUrl}
+                      onChange={(e) => setAppAndroidUrl(e.target.value)}
+                      placeholder="https://play.google.com/store/apps/details?id=com.atpdev.app"
+                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
                     />
                   </div>
                 </div>
               )}
 
-              {/* Otros tipos genéricos */}
-              {activeType === 'text' && (
-                <textarea
-                  rows={4}
-                  value={textVal}
-                  onChange={(e) => setTextVal(e.target.value)}
-                  placeholder="Introduce el texto..."
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm resize-none"
-                />
+              {/* 11. IMÁGENES */}
+              {activeType === 'images' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                    Enlace al Álbum o Galería de Fotos:
+                  </label>
+                  <input
+                    type="url"
+                    value={imagesUrl}
+                    onChange={(e) => setImagesUrl(e.target.value)}
+                    placeholder="https://photos.app.goo.gl/album-demo"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                  />
+                </div>
               )}
 
-              {activeType === 'pdf' && (
-                <input
-                  type="url"
-                  value={pdfUrl}
-                  onChange={(e) => setPdfUrl(e.target.value)}
-                  placeholder="https://tudominio.com/documento.pdf"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm"
-                />
+              {/* 12. VÍDEO */}
+              {activeType === 'video' && (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                    Enlace de YouTube o Vídeo Web:
+                  </label>
+                  <input
+                    type="url"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                  />
+                </div>
               )}
+
+              {/* 13. REDES SOCIALES */}
+              {activeType === 'social' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Plataforma Oficial:
+                      </label>
+                      <select
+                        value={socialNetwork}
+                        onChange={(e) => {
+                          const net = e.target.value as any;
+                          setSocialNetwork(net);
+                          setDesignConfig((prev) => ({
+                            ...prev,
+                            optionlogo: net,
+                            framelabel: `SEGUIR EN ${net.toUpperCase()}`
+                          }));
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs cursor-pointer font-bold"
+                      >
+                        <option value="tiktok">🎵 TikTok Oficial</option>
+                        <option value="instagram">📸 Instagram</option>
+                        <option value="facebook">📘 Facebook</option>
+                        <option value="youtube">🔴 YouTube</option>
+                        <option value="linkedin">💼 LinkedIn</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Usuario (@handle):
+                      </label>
+                      <input
+                        type="text"
+                        value={socialHandle}
+                        onChange={(e) => setSocialHandle(e.target.value)}
+                        placeholder="tuusuario"
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 14. EVENTO */}
+              {activeType === 'event' && (
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Título del Evento:
+                    </label>
+                    <input
+                      type="text"
+                      value={eventTitle}
+                      onChange={(e) => {
+                        setEventTitle(e.target.value);
+                        if (e.target.value.trim()) {
+                          setDesignConfig((prev) => ({
+                            ...prev,
+                            framelabel: `EVENTO: ${e.target.value.trim().toUpperCase()}`
+                          }));
+                        }
+                      }}
+                      placeholder="Conferencia Tech 2026"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Ubicación / Lugar:
+                    </label>
+                    <input
+                      type="text"
+                      value={eventLocation}
+                      onChange={(e) => setEventLocation(e.target.value)}
+                      placeholder="Lima Convention Center"
+                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Fecha y Hora Inicio:
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={eventStart}
+                        onChange={(e) => setEventStart(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Fecha y Hora Fin:
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={eventEnd}
+                        onChange={(e) => setEventEnd(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 15. CRIPTO / CÓDIGO 2D */}
+              {activeType === 'crypto' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Criptomoneda:
+                      </label>
+                      <select
+                        value={cryptoCoin}
+                        onChange={(e) => {
+                          const coin = e.target.value as any;
+                          setCryptoCoin(coin);
+                          setDesignConfig((prev) => ({
+                            ...prev,
+                            optionlogo: coin === 'bitcoin' ? 'btc' : 'link'
+                          }));
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs cursor-pointer font-bold"
+                      >
+                        <option value="bitcoin">₿ Bitcoin (BTC)</option>
+                        <option value="ethereum">Ξ Ethereum (ETH)</option>
+                        <option value="solana">◎ Solana (SOL)</option>
+                        <option value="usdt">₮ Tether (USDT)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        Monto Sugerido (opcional):
+                      </label>
+                      <input
+                        type="text"
+                        value={cryptoAmount}
+                        onChange={(e) => setCryptoAmount(e.target.value)}
+                        placeholder="0.05"
+                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      Dirección de Billetera (Wallet Address):
+                    </label>
+                    <input
+                      type="text"
+                      value={cryptoAddress}
+                      onChange={(e) => setCryptoAddress(e.target.value)}
+                      placeholder="bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"
+                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                    />
+                  </div>
+                </div>
+              )}
+
             </div>
 
           </div>
@@ -674,19 +1147,20 @@ export default function GenerarStudioPage() {
               {designTab === 'marco' && (
                 <div className="space-y-4">
                   <span className="text-xs font-semibold text-slate-400 block">
-                    Estilos de Marco (outer_frame):
+                    Estilos de Marco:
                   </span>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                     {[
-                      { id: 'none', label: 'none (Sin Marco)' },
-                      { id: 'bottom', label: 'bottom (Inferior)' },
-                      { id: 'top', label: 'top (Superior)' },
-                      { id: 'balloon-bottom', label: 'balloon-bottom' },
-                      { id: 'balloon-top', label: 'balloon-top' },
-                      { id: 'ribbon-bottom', label: 'ribbon-bottom' },
-                      { id: 'ribbon-top', label: 'ribbon-top' },
-                      { id: 'phone', label: 'phone (Celular)' },
-                      { id: 'cine', label: 'cine (Marco Cine)' },
+                      { id: 'rounded-card', label: 'Tarjeta Redondeada' },
+                      { id: 'none', label: 'Sin Marco' },
+                      { id: 'bottom', label: 'Banner Inferior' },
+                      { id: 'top', label: 'Banner Superior' },
+                      { id: 'balloon-bottom', label: 'Globo Inferior' },
+                      { id: 'balloon-top', label: 'Globo Superior' },
+                      { id: 'ribbon-bottom', label: 'Cinta Inferior' },
+                      { id: 'ribbon-top', label: 'Cinta Superior' },
+                      { id: 'phone', label: 'Marco Celular' },
+                      { id: 'cine', label: 'Marco Cine' },
                     ].map((m) => (
                       <button
                         key={m.id}
@@ -694,7 +1168,7 @@ export default function GenerarStudioPage() {
                         onClick={() => setDesignConfig({ ...designConfig, outer_frame: m.id as QROuterFrame })}
                         className={`p-2.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
                           designConfig.outer_frame === m.id
-                            ? 'bg-blue-600/20 border-blue-500 text-blue-400'
+                            ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-sm'
                             : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
                         }`}
                       >
@@ -705,58 +1179,64 @@ export default function GenerarStudioPage() {
 
                   {designConfig.outer_frame !== 'none' && (
                     <div className="space-y-3 pt-3 border-t border-slate-800">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                          Texto del Marco (CTA):
+                        </label>
+                        <input
+                          type="text"
+                          value={designConfig.framelabel}
+                          onChange={(e) => setDesignConfig({ ...designConfig, framelabel: e.target.value })}
+                          placeholder="ESCÁNAME"
+                          className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-bold focus:border-blue-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                           <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
-                            Texto del Marco (framelabel):
+                            Color Marco:
                           </label>
-                          <input
-                            type="text"
-                            value={designConfig.framelabel}
-                            onChange={(e) => setDesignConfig({ ...designConfig, framelabel: e.target.value })}
-                            placeholder="SCAN ME"
-                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-bold"
-                          />
+                          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <input
+                              type="color"
+                              value={designConfig.framecolor}
+                              onChange={(e) => setDesignConfig({ ...designConfig, framecolor: e.target.value, custom_frame_color: true })}
+                              className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
+                            />
+                            <span className="text-xs font-mono font-bold text-white uppercase">{designConfig.framecolor}</span>
+                          </div>
                         </div>
 
                         <div>
                           <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
-                            Tipografía (label_font):
+                            Color Texto:
+                          </label>
+                          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <input
+                              type="color"
+                              value={designConfig.frame_text_color || '#ffffff'}
+                              onChange={(e) => setDesignConfig({ ...designConfig, frame_text_color: e.target.value })}
+                              className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
+                            />
+                            <span className="text-xs font-mono font-bold text-white uppercase">{designConfig.frame_text_color || '#ffffff'}</span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                            Tipografía:
                           </label>
                           <select
                             value={designConfig.label_font}
                             onChange={(e) => setDesignConfig({ ...designConfig, label_font: e.target.value as QRLabelFont })}
-                            className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs cursor-pointer"
+                            className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs cursor-pointer font-medium"
                           >
-                            <option value="Arial, Helvetica, sans-serif">Arial / Sans-serif Moderno</option>
-                            <option value="'Times New Roman', Times, serif">Times New Roman / Serif Clásico</option>
-                            <option value="'Courier New', Courier, monospace">Courier New / Monospace Tech</option>
+                            <option value="Arial, Helvetica, sans-serif">Arial / Sans-serif</option>
+                            <option value="'Times New Roman', Times, serif">Times New Roman / Serif</option>
+                            <option value="'Courier New', Courier, monospace">Courier New / Mono</option>
                           </select>
                         </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 pt-1">
-                        <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
-                          <input
-                            type="checkbox"
-                            checked={designConfig.custom_frame_color}
-                            onChange={(e) => setDesignConfig({ ...designConfig, custom_frame_color: e.target.checked })}
-                            className="rounded text-blue-600"
-                          />
-                          <span>Color Personalizado de Marco (custom_frame_color)</span>
-                        </label>
-
-                        {designConfig.custom_frame_color && (
-                          <div className="flex items-center gap-2 bg-slate-950 px-2 py-1 rounded-xl border border-slate-800">
-                            <input
-                              type="color"
-                              value={designConfig.framecolor}
-                              onChange={(e) => setDesignConfig({ ...designConfig, framecolor: e.target.value })}
-                              className="w-6 h-6 rounded cursor-pointer bg-transparent"
-                            />
-                            <span className="text-xs font-mono font-bold text-white">{designConfig.framecolor}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   )}
@@ -1021,6 +1501,12 @@ export default function GenerarStudioPage() {
                     </span>
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                       {[
+                        { id: 'app', label: '📱 App Móvil' },
+                        { id: 'pdf', label: '📄 PDF' },
+                        { id: 'vcard', label: '📇 V-Card' },
+                        { id: 'wifi', label: '📶 Wi-Fi' },
+                        { id: 'calendar', label: '📅 Evento' },
+                        { id: 'images', label: '🖼 Galería' },
                         { id: 'tiktok', label: '🎵 TikTok' },
                         { id: 'whatsapp', label: 'WA WhatsApp' },
                         { id: 'instagram', label: '📸 Instagram' },
@@ -1033,11 +1519,9 @@ export default function GenerarStudioPage() {
                         { id: 'pinterest', label: '📌 Pinterest' },
                         { id: 'paypal', label: '🅿 PayPal' },
                         { id: 'btc', label: '₿ Bitcoin' },
-                        { id: 'wifi', label: '📶 Wi-Fi' },
                         { id: 'email', label: '✉ Email' },
                         { id: 'link', label: '🔗 Enlace' },
                         { id: 'location', label: '📍 Ubicación' },
-                        { id: 'pdf', label: '📄 PDF' },
                         { id: 'none', label: '✖ Ninguno' },
                       ].map((item) => (
                         <button
