@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.site_config (
   bio_long text default 'Bachiller en Ingeniería de Sistemas por la Universidad Nacional José María Arguedas (UNAJMA).',
   avatar_url text default '/avatar.png',
   -- Contacto
-  email text default 'achataipepercy@gmail.com',
+  email text default 'contacto@atpdev.dev',
   phone text default '+51 987 006 572',
   location text default 'Andahuaylas, Apurímac, Perú',
   -- Redes Sociales (URL + enabled flag para cada una)
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS public.site_config (
 
 -- Insertar fila por defecto
 INSERT INTO public.site_config (id, whatsapp_url, whatsapp_enabled, email, phone) 
-VALUES (1, 'https://wa.me/51987006572', true, 'achataipepercy@gmail.com', '+51 987 006 572') 
+VALUES (1, 'https://wa.me/51987006572', true, 'contacto@atpdev.dev', '+51 987 006 572') 
 ON CONFLICT (id) DO NOTHING;
 
 -- RLS

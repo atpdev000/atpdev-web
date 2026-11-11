@@ -1142,7 +1142,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                       contact: { ...(config.contact || {}), email: val }
                     });
                   }}
-                  placeholder="admin@atpdev.dev o tu-correo@gmail.com"
+                  placeholder="contacto@atpdev.dev o admin@atpdev.dev"
                   className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-purple-300 font-mono text-xs focus:border-purple-500 outline-none"
                 />
                 <span className="text-[10px] text-slate-500 block">Correo que recibe notificaciones de pagos de Stripe y contacto</span>

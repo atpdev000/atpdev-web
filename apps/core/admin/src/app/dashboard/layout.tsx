@@ -25,7 +25,8 @@ import {
   Moon,
   UtensilsCrossed,
   QrCode,
-  ScanLine
+  ScanLine,
+  Server
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -166,6 +167,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       items: [
         { label: "AI Models", icon: <BrainCircuit size={17} />, href: "/dashboard/ai-models" },
         { label: "Leads (CRM)", icon: <Users size={17} />, href: "/dashboard/leads" },
+        { label: "Cloud & Correo", icon: <Server size={17} />, href: "/dashboard/cloud-hub", badge: "Live" },
         { label: "Analytics", icon: <BarChart3 size={17} />, href: "/dashboard/analytics" },
         { label: "Perfil Pro.", icon: <User2 size={17} />, href: "/dashboard/profile" },
         { label: "Settings", icon: <Settings size={17} />, href: "/dashboard/settings" },

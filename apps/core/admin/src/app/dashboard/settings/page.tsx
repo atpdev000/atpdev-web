@@ -1,5 +1,5 @@
 import { getSiteConfig } from "@atpdev/database";
-import { User, Type, Palette, Globe, Link2, Shield, Database, Save, ExternalLink, MessageCircle } from "lucide-react";
+import { User, Type, Palette, Globe, Link2, Shield, Database, Save, ExternalLink, MessageCircle, Mail, Server } from "lucide-react";
 import { saveSettings } from "./actions";
 import { SOCIAL_ICON_MAP } from "@/components/SocialIcons";
 import { ThemeBuilder } from "./ThemeBuilder";
@@ -77,7 +77,7 @@ export default async function SettingsPage() {
                 <div><h2 className="text-lg font-bold text-slate-900 dark:text-white">Contacto</h2><p className="text-xs text-slate-500 dark:text-gray-400">Datos de la sección de contacto.</p></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div><label className={labelClass}>Email</label><input type="email" name="email" defaultValue={config?.email || "achataipepercy@gmail.com"} className={inputClass} /></div>
+                <div><label className={labelClass}>Email</label><input type="email" name="email" defaultValue={config?.email || "contacto@atpdev.dev"} className={inputClass} /></div>
                 <div><label className={labelClass}>Celular</label><input type="text" name="phone" defaultValue={config?.phone || "+51 987 006 572"} className={inputClass} /></div>
                 <div><label className={labelClass}>Ubicación</label><input type="text" name="location" defaultValue={config?.location || ""} className={inputClass} /></div>
               </div>
@@ -194,12 +194,78 @@ export default async function SettingsPage() {
                 ))}
               </div>
             </div>
+            {/* CORREO CORPORATIVO & ZOHO */}
             <div className="bg-white dark:bg-[#262626] border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4"><div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400"><Database size={18} /></div><h3 className="text-sm font-bold text-slate-900 dark:text-white">Base de Datos</h3></div>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400"><Mail size={18} /></div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Correo Corporativo</h3>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">Zoho Mail</span>
+              </div>
               <div className="space-y-3">
-                {[{ label: "Proveedor", value: "Supabase" },{ label: "Plan", value: "Free Tier" },{ label: "Tablas", value: "projects, leads, site_config" }].map((item, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs py-1.5"><span className="text-slate-500 dark:text-gray-400">{item.label}</span><span className="text-slate-900 dark:text-white font-semibold">{item.value}</span></div>
+                <div className="text-xs space-y-1">
+                  <p className="text-slate-500 dark:text-gray-400">Canal Oficial:</p>
+                  <p className="font-mono font-bold text-slate-900 dark:text-white text-[11px]">contacto@atpdev.dev</p>
+                </div>
+                <div className="text-xs space-y-1">
+                  <p className="text-slate-500 dark:text-gray-400">Emisor Servidor:</p>
+                  <p className="font-mono text-slate-700 dark:text-slate-300 text-[11px]">hello@atpdev.dev (smtp.zoho.com)</p>
+                </div>
+                <div className="pt-2 flex flex-col gap-1.5">
+                  <a
+                    href="https://mail.zoho.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition"
+                  >
+                    <span>Abrir Webmail (Zoho)</span>
+                    <ExternalLink size={13} />
+                  </a>
+                  <a
+                    href="/dashboard/cloud-hub"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition"
+                  >
+                    <span>Configurar Métodos de Acceso</span>
+                    <Server size={13} />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* BASE DE DATOS SUPABASE */}
+            <div className="bg-white dark:bg-[#262626] border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400"><Database size={18} /></div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Base de Datos</h3>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Supabase</span>
+              </div>
+              <div className="space-y-3">
+                {[{ label: "Project ID", value: "yeeupdgjfrkkaurytyrs" },{ label: "Motor", value: "PostgreSQL 15+" },{ label: "Tablas", value: "projects, leads, site_config" }].map((item, i) => (
+                  <div key={i} className="flex justify-between items-center text-xs py-1.5"><span className="text-slate-500 dark:text-gray-400">{item.label}</span><span className="text-slate-900 dark:text-white font-mono font-semibold">{item.value}</span></div>
                 ))}
+                <div className="pt-2 flex flex-col gap-1.5">
+                  <a
+                    href="https://supabase.com/dashboard/project/yeeupdgjfrkkaurytyrs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition"
+                  >
+                    <span>Abrir Supabase Studio</span>
+                    <ExternalLink size={13} />
+                  </a>
+                  <a
+                    href="https://supabase.com/dashboard/project/yeeupdgjfrkkaurytyrs/editor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition"
+                  >
+                    <span>Editor de Tablas</span>
+                    <ExternalLink size={13} />
+                  </a>
+                </div>
               </div>
             </div>
             <div className="bg-white dark:bg-[#262626] border border-slate-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm">

@@ -130,8 +130,8 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
                 </div>
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-wider transition-colors" style={{ color: 'var(--text-color)', opacity: 0.6 }}>{ui.emailLabel}</p>
-                  <a href={`mailto:${config?.email || 'achataipepercy@gmail.com'}`} className="text-lg font-medium transition-colors hover:opacity-80" style={{ color: 'var(--primary)' }}>
-                    {config?.email || 'achataipepercy@gmail.com'}
+                  <a href={`mailto:${config?.email || 'contacto@atpdev.dev'}`} className="text-lg font-medium transition-colors hover:opacity-80" style={{ color: 'var(--primary)' }}>
+                    {config?.email || 'contacto@atpdev.dev'}
                   </a>
                 </div>
               </div>

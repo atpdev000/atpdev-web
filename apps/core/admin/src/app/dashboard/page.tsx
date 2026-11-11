@@ -1,4 +1,4 @@
-import { Users, FolderKanban, Eye, Wallet, Globe, Clock, Laptop, Smartphone, ExternalLink, Activity, Compass } from "lucide-react";
+import { Users, FolderKanban, Eye, Wallet, Globe, Clock, Laptop, Smartphone, ExternalLink, Activity, Compass, Mail, Database, ArrowUpRight, ShieldCheck, Server } from "lucide-react";
 import { getProjects, getLeads, getAnalyticsSummary, getTrafficChartData, getRecentVisits, RecentVisit } from "@atpdev/database";
 import { TrafficChart } from "@/components/TrafficChart";
 import { DashboardActions } from "@/components/DashboardActions";
@@ -117,6 +117,97 @@ export default async function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Cloud & Email Quick Access Hub */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* Zoho Mail Card */}
+        <div className="bg-[#262626] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between hover:border-blue-500/40 transition">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <Mail size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white">Correo Corporativo</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Zoho Mail</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-0.5">contacto@atpdev.dev · hello@atpdev.dev</p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/cloud-hub"
+              className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 transition"
+            >
+              <span>Configuración</span>
+              <ArrowUpRight size={14} />
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-800/80">
+            <a
+              href="https://mail.zoho.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 text-center py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5"
+            >
+              <span>Abrir Webmail Zoho</span>
+              <ArrowUpRight size={13} />
+            </a>
+            <a
+              href="https://mailadmin.zoho.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 text-xs font-semibold transition border border-gray-700/60"
+            >
+              Admin Zoho
+            </a>
+          </div>
+        </div>
+
+        {/* Supabase Database Card */}
+        <div className="bg-[#262626] border border-gray-800 rounded-2xl p-5 flex flex-col justify-between hover:border-emerald-500/40 transition">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Database size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white">Base de Datos Cloud</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Supabase</span>
+                </div>
+                <p className="text-xs text-gray-400 font-mono mt-0.5">Ref: yeeupdgjfrkkaurytyrs</p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard/cloud-hub"
+              className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 transition"
+            >
+              <span>Monitoreo</span>
+              <ArrowUpRight size={14} />
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 pt-2 border-t border-gray-800/80">
+            <a
+              href="https://supabase.com/dashboard/project/yeeupdgjfrkkaurytyrs"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 text-center py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5"
+            >
+              <span>Abrir Supabase Studio</span>
+              <ArrowUpRight size={13} />
+            </a>
+            <a
+              href="https://supabase.com/dashboard/project/yeeupdgjfrkkaurytyrs/editor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-200 text-xs font-semibold transition border border-gray-700/60"
+            >
+              Table Editor
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Row: Chart & Leads */}
