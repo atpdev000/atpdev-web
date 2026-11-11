@@ -7,6 +7,21 @@ import os from 'os'
 import dns from 'dns'
 import { findYtDlpBinary } from '@/lib/server/binaries'
 import { getBackendEndpoint } from '@/lib/server/backend-config'
+import { Innertube, UniversalCache, Platform } from 'youtubei.js'
+
+Platform.shim.eval = async (data: any) => {
+  return new Function(data.output)()
+}
+
+let cachedInnertube: Innertube | null = null
+async function getInnertubeInstance(): Promise<Innertube> {
+  if (!cachedInnertube) {
+    cachedInnertube = await Innertube.create({
+      cache: new UniversalCache(false)
+    })
+  }
+  return cachedInnertube
+}
 
 try {
   dns.setDefaultResultOrder('ipv6first')
@@ -107,6 +122,88 @@ function extractVideoId(url: string): string | null {
   } catch {
     const match = url.match(/(?:v=|\/|be\/|shorts\/)([a-zA-Z0-9_-]{11})/)
     return match ? match[1] : null
+  }
+}
+
+async function extractWithYouTubeJS(url: string): Promise<any> {
+  const videoId = extractVideoId(url)
+  if (!videoId) return null
+
+  try {
+    console.log(`⚡ [YouTube.js / InnerTube Engine] Consultando video ID: ${videoId}...`)
+    const yt = await getInnertubeInstance()
+    const info = await yt.getBasicInfo(videoId)
+    if (!info || !info.basic_info) return null
+
+    const basic = info.basic_info
+    const title = basic.title || 'Video de YouTube'
+    const thumbnail = basic.thumbnail?.[0]?.url || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+    const duration = basic.duration || 0
+    const uploader = basic.author || '@youtube'
+    const viewCount = basic.view_count || 0
+
+    const rawCombined = info.streaming_data?.formats || []
+    const rawAdaptive = info.streaming_data?.adaptive_formats || []
+    const allFormats = [...rawCombined, ...rawAdaptive]
+
+    const invidiousHosts = [
+      'https://invidious.projectsegfau.lt',
+      'https://inv.nadeko.net',
+      'https://invidious.nerdvpn.de',
+      'https://yt.chocolatemoo53.com'
+    ]
+
+    const formats = await Promise.all(
+      allFormats.map(async (f: any) => {
+        let streamUrl = f.url || ''
+        if (!streamUrl && f.decipher) {
+          try {
+            streamUrl = await f.decipher(yt.session.player)
+          } catch {}
+        }
+        if (!streamUrl && f.itag) {
+          streamUrl = `${invidiousHosts[0]}/latest_version?id=${videoId}&itag=${f.itag}`
+        }
+
+        const isAudio = f.has_audio && !f.has_video
+        const isVideo = f.has_video
+        const height = f.height || (f.quality_label ? parseInt(f.quality_label.replace('p', '')) : null)
+        const width = f.width || null
+        const resolution = width && height ? `${width}x${height}` : height ? `${height}p` : (isAudio ? 'Audio' : 'HD')
+        const qualityLabel = f.quality_label || (height ? `${height}p` : (isAudio ? (f.audio_quality || 'Audio') : resolution))
+        const ext = f.mime_type?.includes('mp4') ? 'mp4' : f.mime_type?.includes('webm') ? 'webm' : (isAudio ? 'm4a' : 'mp4')
+
+        return {
+          format_id: String(f.itag || ''),
+          url: streamUrl,
+          direct_url: streamUrl,
+          ext,
+          height,
+          width,
+          resolution,
+          format_note: qualityLabel,
+          filesize: f.content_length ? parseInt(f.content_length) : null,
+          vcodec: isVideo ? (f.mime_type?.split('codecs="')?.[1]?.split('"')?.[0] || 'h264') : 'none',
+          acodec: isAudio ? (f.mime_type?.split('codecs="')?.[1]?.split('"')?.[0] || 'aac') : (f.has_audio ? 'aac' : 'none'),
+          fps: f.fps || null
+        }
+      })
+    )
+
+    console.log(`✅ [YouTube.js / InnerTube Engine] Éxito: "${title}" (${formats.length} formatos disponibles)`)
+    return {
+      id: videoId,
+      title,
+      thumbnail,
+      duration,
+      uploader,
+      channel: uploader,
+      view_count: viewCount,
+      formats: formats.filter((f: any) => f.url)
+    }
+  } catch (err: any) {
+    console.warn(`⚠️ [YouTube.js / InnerTube Engine] Falló:`, err.message)
+    return null
   }
 }
 
@@ -289,7 +386,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback 1 a Invidious API resolver de alta velocidad (bypasea 100% bloqueos de IP en datacenters)
+    // Fallback 1 a YouTube.js (InnerTube API Engine - LuanRT)
+    if (!rawInfo) {
+      try {
+        console.log('🔄 [YouTube] Intentando fallback con YouTube.js (InnerTube)...')
+        rawInfo = await extractWithYouTubeJS(cleanedUrl)
+        if (rawInfo) {
+          console.log('🎉 [YouTube] Fallback con YouTube.js exitoso')
+        }
+      } catch (ytjsErr: any) {
+        console.error('❌ [YouTube] YouTube.js fallback falló:', ytjsErr.message)
+      }
+    }
+
+    // Fallback 2 a Invidious API resolver de alta velocidad (bypasea 100% bloqueos de IP en datacenters)
     if (!rawInfo) {
       try {
         console.log('🔄 [YouTube] Intentando fallback con Invidious API...')
@@ -302,7 +412,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback 2 a API externa Python (Render / Railway dinámico desde el CMS)
+    // Fallback 3 a API externa Python (Render / Railway dinámico desde el CMS)
     const backendInfo = getBackendEndpoint()
     const PYTHON_API_URL = backendInfo.url || process.env.PYTHON_API_URL?.replace(/\/$/, '')
     if (!rawInfo && PYTHON_API_URL) {

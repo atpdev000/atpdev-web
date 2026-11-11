@@ -211,7 +211,7 @@
       "google_search_console_token": ""
     },
     "modules": {
-      "youtube_enabled": true,
+      "youtube_enabled": false,
       "tiktok_enabled": true,
       "facebook_enabled": true,
       "instagram_enabled": true,
@@ -282,7 +282,7 @@
       ],
       "notification_email": "achataipepercy30@gmail.com"
     },
-    "updated_at": "2026-11-11T19:01:20.631Z"
+    "updated_at": "2026-11-11T21:29:07.358Z"
   },
   "magic": {
     "id": "magic",
