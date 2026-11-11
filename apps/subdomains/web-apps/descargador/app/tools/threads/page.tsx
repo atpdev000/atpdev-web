@@ -59,11 +59,17 @@ export default function ThreadsToolPage() {
   return (
     <div className="container mx-auto px-4 max-w-5xl py-6">
       <script
+        id="threads-howto-schema"
+        key="threads-howto-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <script
+        id="threads-faq-schema"
+        key="threads-faq-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 

@@ -68,7 +68,10 @@ export default function FAQPage() {
     <div className="container mx-auto px-4 max-w-4xl">
       {/* Schema.org FAQPage para Rich Snippets en Google */}
       <script
+        id="faq-page-schema"
+        key="faq-page-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       {/* Encabezado */}

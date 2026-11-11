@@ -59,11 +59,17 @@ export default function TwitterToolPage() {
   return (
     <div className="container mx-auto px-4 max-w-5xl py-6">
       <script
+        id="twitter-howto-schema"
+        key="twitter-howto-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <script
+        id="twitter-faq-schema"
+        key="twitter-faq-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 

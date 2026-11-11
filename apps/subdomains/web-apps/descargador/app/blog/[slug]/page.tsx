@@ -94,7 +94,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <>
       <script
+        id={`blog-post-schema-${slug}`}
+        key={`blog-post-schema-${slug}`}
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(postSchema) }}
       />
       <BlogPostClient initialPost={post} />

@@ -67,11 +67,17 @@ export default function InstagramToolPage() {
   return (
     <div className="container mx-auto px-4 max-w-5xl py-6">
       <script
+        id="instagram-howto-schema"
+        key="instagram-howto-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <script
+        id="instagram-faq-schema"
+        key="instagram-faq-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 

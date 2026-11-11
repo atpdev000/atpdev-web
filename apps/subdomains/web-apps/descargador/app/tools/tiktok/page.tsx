@@ -36,7 +36,10 @@ export default function TiktokToolPage() {
     return (
         <div className="container mx-auto px-4 max-w-5xl">
             <script
+                id="tiktok-howto-schema"
+                key="tiktok-howto-schema"
                 type="application/ld+json"
+                suppressHydrationWarning
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
             />
             {/* Botón Volver */}

@@ -50,7 +50,7 @@
     <circle cx="40" cy="42" r="18" fill="#0284c7" opacity="0.25"/>
     <text x="40" y="47" text-anchor="middle" font-size="16">💾</text>
     <text x="70" y="38" fill="#f8fafc" font-size="12" font-weight="700" font-family="system-ui, sans-serif">Copia Local</text>
-    <text x="70" y="55" fill="#38bdf8" font-size="10" font-mono font-family="monospace">SSD NVMe / NAS</text>
+    <text x="70" y="55" fill="#38bdf8" font-size="10" font-family="monospace">SSD NVMe / NAS</text>
   </g>
 
   <!-- Center Node: Encrypted Cloud -->
@@ -59,7 +59,7 @@
     <circle cx="40" cy="42" r="18" fill="#7e22ce" opacity="0.25"/>
     <text x="40" y="47" text-anchor="middle" font-size="16">☁️</text>
     <text x="70" y="38" fill="#f8fafc" font-size="12" font-weight="700" font-family="system-ui, sans-serif">Nube Cifrada</text>
-    <text x="70" y="55" fill="#c084fc" font-size="10" font-mono font-family="monospace">Zero-Knowledge</text>
+    <text x="70" y="55" fill="#c084fc" font-size="10" font-family="monospace">Zero-Knowledge</text>
   </g>
 
   <!-- Right Node: Cold Offline -->
@@ -68,7 +68,7 @@
     <circle cx="40" cy="42" r="18" fill="#047857" opacity="0.25"/>
     <text x="40" y="47" text-anchor="middle" font-size="16">🔒</text>
     <text x="70" y="38" fill="#f8fafc" font-size="12" font-weight="700" font-family="system-ui, sans-serif">Cold Storage</text>
-    <text x="70" y="55" fill="#34d399" font-size="10" font-mono font-family="monospace">Air-Gapped 2026</text>
+    <text x="70" y="55" fill="#34d399" font-size="10" font-family="monospace">Air-Gapped 2026</text>
   </g>
 
   <!-- Connecting Curved Glow Lines -->

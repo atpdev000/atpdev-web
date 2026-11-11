@@ -59,11 +59,17 @@ export default function WhatsappToolPage() {
   return (
     <div className="container mx-auto px-4 max-w-5xl py-6">
       <script
+        id="whatsapp-howto-schema"
+        key="whatsapp-howto-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
       <script
+        id="whatsapp-faq-schema"
+        key="whatsapp-faq-schema"
         type="application/ld+json"
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 

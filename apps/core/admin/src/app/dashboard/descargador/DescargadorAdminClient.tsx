@@ -209,10 +209,33 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
     }
   }, [config.theme, activeTab]);
 
+  const saveConfigSafe = async (updates: Partial<SubdomainConfig>): Promise<{ success: boolean; config: SubdomainConfig }> => {
+    try {
+      const res = await saveDescargadorConfigAction(updates);
+      if (res && res.success) return res;
+    } catch (e) {
+      console.warn("Server action stale or failed, falling back to API route:", e);
+    }
+    try {
+      const apiRes = await fetch("/api/descargador/config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates)
+      });
+      if (apiRes.ok) {
+        const data = await apiRes.json();
+        if (data && data.success) return data;
+      }
+    } catch (apiErr) {
+      console.error("API route fallback failed:", apiErr);
+    }
+    return { success: false, config };
+  };
+
   const handleSaveTheme = async () => {
     setSaving(true);
     try {
-      const res = await saveDescargadorConfigAction({ theme: config.theme });
+      const res = await saveConfigSafe({ theme: config.theme });
       if (res.success) {
         setConfig(res.config);
         sendThemeToIframe(res.config.theme);
@@ -366,7 +389,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
     setSaveSuccess(false);
     setSaveError(null);
     try {
-      const res = await saveDescargadorConfigAction(config);
+      const res = await saveConfigSafe(config);
       if (res.success) {
         setConfig(res.config);
         broadcastThemeChange(res.config.theme);
@@ -2960,7 +2983,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
           onSaveTheme={async (newTheme: SubdomainTheme) => {
             const updated = { ...config, theme: newTheme };
             setConfig(updated);
-            const res = await saveDescargadorConfigAction({ theme: newTheme });
+            const res = await saveConfigSafe({ theme: newTheme });
             if (res.success) {
               setConfig(res.config);
               return true;

@@ -1,16 +1,19 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { BlogPost } from '@/types/blog'
 import TableOfContents from '@/components/blog/TableOfContents'
 import RelatedPosts from '@/components/blog/RelatedPosts'
-import { ArrowLeft, Clock, Calendar } from 'lucide-react'
+import { ArrowLeft, Clock, Calendar, Sparkles } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/context'
 import { getLocalizedPost } from '@/lib/content/blog-translations'
 
 export default function BlogPostClient({ initialPost }: { initialPost: BlogPost }) {
   const { t, locale } = useI18n()
   const post = getLocalizedPost(initialPost, locale)
+  const [imageError, setImageError] = useState(false)
 
   // Inyectar IDs en los H2 dinámicamente para que el TOC funcione
   const contentWithIds = post.content.replace(/<h2>(.*?)<\/h2>/g, (match, title) => {
@@ -53,13 +56,25 @@ export default function BlogPostClient({ initialPost }: { initialPost: BlogPost 
           </p>
         </header>
 
-        {post.image && (
-          <div className="mb-10 rounded-3xl overflow-hidden shadow-xl aspect-video bg-slate-100 dark:bg-slate-800">
-            <img
+        {post.image && !imageError ? (
+          <div className="relative mb-10 rounded-3xl overflow-hidden shadow-2xl aspect-video bg-slate-900 border border-slate-200/10">
+            <Image
               src={post.image}
               alt={post.title}
-              className="w-full h-full object-cover"
+              fill
+              priority
+              unoptimized
+              className="object-cover"
+              onError={() => setImageError(true)}
             />
+          </div>
+        ) : (
+          <div className="mb-10 rounded-3xl overflow-hidden shadow-xl aspect-video bg-gradient-to-br from-blue-900/60 via-slate-900 to-indigo-950/80 border border-blue-500/20 p-8 flex flex-col justify-end">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-400 uppercase tracking-widest mb-2">
+              <Sparkles className="w-4 h-4" />
+              {post.category}
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-white">{post.title}</h2>
           </div>
         )}
 

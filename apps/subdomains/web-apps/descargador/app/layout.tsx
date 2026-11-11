@@ -110,7 +110,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Schema.org WebApplication & Organization JSON-LD */}
         <script
+          id="descargador-schema-webapp"
+          key="descargador-schema-webapp"
           type="application/ld+json"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -160,70 +163,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }} />
       </head>
       <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"} suppressHydrationWarning>
-        {/* Google Consent Mode v2 Default Setup */}
-        <Script
-          id="google-consent-mode-v2"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('consent', 'default', {
-                'ad_storage': 'granted',
-                'ad_user_data': 'granted',
-                'ad_personalization': 'granted',
-                'analytics_storage': 'granted'
-              });
-            `
-          }}
-        />
-
-        {/* Anti-Extension Hydration Sanitizer */}
-        <Script
-          id="anti-extension-hydration"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                var badAttrs = ['bis_skin_checked', 'bis_register', 'cz-shortcut-listen', 'fdprocessedid'];
-                function sanitize(el) {
-                  if (!el || el.nodeType !== 1) return;
-                  for (var i = 0; i < badAttrs.length; i++) {
-                    if (el.hasAttribute(badAttrs[i])) el.removeAttribute(badAttrs[i]);
-                  }
-                  var attrs = el.attributes;
-                  if (attrs) {
-                    for (var j = attrs.length - 1; j >= 0; j--) {
-                      var n = attrs[j].name;
-                      if (n.indexOf('__processed_') === 0 || n.indexOf('bis_') === 0) {
-                        el.removeAttribute(n);
-                      }
-                    }
-                  }
-                }
-                if (typeof document !== 'undefined') {
-                  sanitize(document.body);
-                  var all = document.querySelectorAll('*');
-                  for (var k = 0; k < all.length; k++) sanitize(all[k]);
-                  try {
-                    var obs = new MutationObserver(function(muts) {
-                      for (var m = 0; m < muts.length; m++) {
-                        var mut = muts[m];
-                        if (mut.type === 'attributes') sanitize(mut.target);
-                        else if (mut.type === 'childList') {
-                          for (var p = 0; p < mut.addedNodes.length; p++) sanitize(mut.addedNodes[p]);
-                        }
-                      }
-                    });
-                    obs.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
-                  } catch (e) {}
-                }
-              })();
-            `
-          }}
-        />
-
-        {/* Google Consent Mode v2 Default Signals */}
+        {/* Google Consent Mode v2 Default Signals (Privacy & AdSense Compliance) */}
         <Script
           id="google-consent-mode-default"
           strategy="beforeInteractive"
@@ -235,7 +175,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 'ad_storage': 'denied',
                 'ad_user_data': 'denied',
                 'ad_personalization': 'denied',
-                'analytics_storage': 'granted',
+                'analytics_storage': 'denied',
                 'wait_for_update': 500
               });
             `

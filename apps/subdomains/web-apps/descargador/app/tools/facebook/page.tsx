@@ -36,7 +36,10 @@ export default function FacebookToolPage() {
     return (
         <div className="container mx-auto px-4 max-w-5xl">
             <script
+                id="facebook-howto-schema"
+                key="facebook-howto-schema"
                 type="application/ld+json"
+                suppressHydrationWarning
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
             />
             {/* Botón Volver */}
