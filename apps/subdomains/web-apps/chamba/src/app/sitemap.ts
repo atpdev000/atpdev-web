@@ -3,6 +3,46 @@ import { getJobPostings } from '@atpdev/database';
 import { SITE_URL } from '@/lib/siteConfig';
 import { getAllGuias } from '@/data/guias';
 
+// Revalidar el sitemap cada 30 minutos para que las nuevas convocatorias aprobadas entren a Google Search Console sin recompilar
+export const revalidate = 1800;
+
+const REGION_MATCH_MAP: Record<string, string> = {
+  lima: 'lima',
+  callao: 'callao',
+  arequipa: 'arequipa',
+  cusco: 'cusco',
+  'la-libertad': 'la libertad',
+  piura: 'piura',
+  junin: 'junín',
+  puno: 'puno',
+  lambayeque: 'lambayeque',
+  'san-martin': 'san martín',
+  ancash: 'áncash',
+  ica: 'ica',
+  cajamarca: 'cajamarca',
+  loreto: 'loreto',
+  ayacucho: 'ayacucho',
+  huanuco: 'huánuco',
+  tacna: 'tacna',
+  ucayali: 'ucayali',
+  apurimac: 'apurímac',
+  amazonas: 'amazonas',
+  huancavelica: 'huancavelica',
+  moquegua: 'moquegua',
+  pasco: 'pasco',
+  tumbes: 'tumbes',
+  'madre-de-dios': 'madre de dios',
+  remoto: 'remoto',
+};
+
+const CATEGORIA_MATCH_MAP: Record<string, string> = {
+  cas: 'cas',
+  '728': '728',
+  privado: 'privado',
+  practicas: 'prácticas',
+  locacion: 'locación',
+};
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const jobs = await getJobPostings();
   const guias = getAllGuias();
@@ -10,10 +50,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const todayIso = new Date().toISOString().split('T')[0];
 
-  // Google AdSense & Search Central: Solo indexar en el sitemap ofertas VIGENTES con alto valor real
-  // Las ofertas finalizadas se excluyen del sitemap para no diluir el crawl budget con contenido expirado
+  // Google AdSense & Search Central: Solo indexar en el sitemap ofertas VIGENTES (excluyendo Pendientes y Finalizadas)
+  // Evita el error crítico de Search Console: "La URL enviada está marcada como 'noindex'"
   const activeJobs = jobs.filter((job) => {
-    const isExpired = job.status === 'Finalizado' || (job.end_date && job.end_date.trim() < todayIso);
+    if (job.status !== 'Vigente') return false;
+    const isExpired = Boolean(job.end_date && job.end_date.trim() < todayIso);
     return !isExpired;
   });
 
@@ -38,7 +79,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/calculadora-sueldo',
     '/comparador-regimenes',
     '/crear-cv-cas',
-    '/plantillas-anexos',
     '/preguntas-entrevista-cas',
     '/simulador-entrevista-ia',
     '/organizaciones',
@@ -54,26 +94,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route.includes('politica') || route.includes('terminos') ? 0.6 : 0.95,
   }));
 
-  const regionUrls = [
-    'lima', 'callao', 'arequipa', 'cusco', 'la-libertad', 'piura', 'junin', 'puno',
-    'lambayeque', 'san-martin', 'ancash', 'ica', 'cajamarca', 'loreto',
-    'ayacucho', 'huanuco', 'tacna', 'ucayali', 'apurimac', 'amazonas',
-    'huancavelica', 'moquegua', 'pasco', 'tumbes', 'madre-de-dios', 'remoto'
-  ].map((region) => ({
-    url: `${baseUrl}/empleos/en/${region}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 0.85,
-  }));
+  // Solo incluir en sitemap regiones que tengan al menos 1 convocatoria vigente (coherente con robots index de empleos/en/[region])
+  const regionUrls = Object.entries(REGION_MATCH_MAP)
+    .filter(([regionKey, regionName]) =>
+      activeJobs.some((job) => {
+        const jobRegion = (job.region || '').toLowerCase();
+        if (regionKey === 'remoto') {
+          return jobRegion.includes('remoto') || jobRegion.includes('nacional') || jobRegion.includes('teletrabajo');
+        }
+        if (regionKey === 'lima') {
+          return jobRegion.includes('lima') || jobRegion.includes('callao');
+        }
+        return jobRegion.includes(regionName);
+      })
+    )
+    .map(([region]) => ({
+      url: `${baseUrl}/empleos/en/${region}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+    }));
 
-  const categoriaUrls = [
-    'cas', '728', 'privado', 'practicas', 'locacion'
-  ].map((cat) => ({
-    url: `${baseUrl}/convocatorias/${cat}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 0.85,
-  }));
+  // Solo incluir en sitemap categorías con al menos 1 convocatoria vigente (coherente con robots index de convocatorias/[categoria])
+  const categoriaUrls = Object.entries(CATEGORIA_MATCH_MAP)
+    .filter(([, sectorMatch]) =>
+      activeJobs.some((job) => (job.sector_type || '').toLowerCase().includes(sectorMatch))
+    )
+    .map(([cat]) => ({
+      url: `${baseUrl}/convocatorias/${cat}`,
+      lastModified: new Date(),
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+    }));
 
   return [
     {

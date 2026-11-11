@@ -204,3 +204,4 @@ export const ADMIN_INVENTORY: AdminInventoryItem[] = [
     supplier: 'Bodega Pisquera Tradicional de Ica'
   }
 ];
+

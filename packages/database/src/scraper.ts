@@ -17,7 +17,7 @@ import {
 } from './jobs';
 import { PORTAL_JOBS_DATA } from './portalJobsData';
 import { SERVIR_JOBS_DATA } from './servirJobsData';
-import { resolveEntityCanonicalPortal } from './canonicalEntities';
+import { resolveEntityCanonicalPortal, decodeHtmlEntities, cleanEntityDisplayName } from './canonicalEntities';
 
 export type ScrapedJobResult = {
   source: string;
@@ -728,10 +728,9 @@ export function persistCdJobs(jobs: JobPosting[]): void {
   }
 }
 
-const initialDiskCdJobs = loadPersistedCdJobs();
 let cachedCdJobs: { data: JobPosting[]; timestamp: number } = (globalThis as any).__CACHED_CD_JOBS__ || {
-  data: initialDiskCdJobs,
-  timestamp: initialDiskCdJobs.length > 0 ? Date.now() : 0
+  data: [],
+  timestamp: 0
 };
 (globalThis as any).__CACHED_CD_JOBS__ = cachedCdJobs;
 let isRefreshingCd = false;
@@ -1560,18 +1559,20 @@ function parseServirJobsFromHtml(text: string, todayIso: string, pageIndex = 1):
   for (let i = 0; i < sections.length; i++) {
     const sec = sections[i];
     const titleMatch = sec.match(/titulo-vacante[^>]*>[\s\S]*?<label>([\s\S]*?)<\/label>/i);
-    const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+    const rawTitle = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+    const title = decodeHtmlEntities(rawTitle);
 
     const entidadMatch = sec.match(/nombre-entidad[^>]*>[\s\S]*?<span[^>]*>([\s\S]*?)<\/span>/i);
-    const entity_name = entidadMatch ? entidadMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+    const rawEntityName = entidadMatch ? entidadMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+    const entity_name = cleanEntityDisplayName(rawEntityName) || decodeHtmlEntities(rawEntityName);
 
     if (!title || !entity_name) continue;
 
     const ubicacionMatch = sec.match(/Ubicaci(?:ó|o)n:<\/span>\s*(?:&nbsp;|\s)*<span class="detalle-sp">([\s\S]*?)<\/span>/i);
-    const ubicacion = ubicacionMatch ? ubicacionMatch[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : '';
+    const ubicacion = decodeHtmlEntities(ubicacionMatch ? ubicacionMatch[1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim() : '');
 
     const convMatch = sec.match(/N(?:ú|u)mero de Convocatoria:<\/span>\s*(?:&nbsp;|\s)*<span class="detalle-sp">([\s\S]*?)<\/span>/i);
-    const convNro = convMatch ? convMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+    const convNro = decodeHtmlEntities(convMatch ? convMatch[1].replace(/<[^>]+>/g, '').trim() : '');
 
     const vacMatch = sec.match(/Cantidad de Vacantes:<\/span>\s*(?:&nbsp;|\s)*<span class="detalle-sp">([\s\S]*?)<\/span>/i);
     const vacancies_count = vacMatch ? parseInt(vacMatch[1].trim(), 10) || 1 : 1;
@@ -1620,10 +1621,11 @@ function parseServirJobsFromHtml(text: string, todayIso: string, pageIndex = 1):
     else if (/ingenier|civil|arquitect|obras|mantenimiento/i.test(titleLow)) category = 'Ingeniería y Construcción';
 
     const region = extractServirDepartment(ubicacion);
-    const entitySlug = makeSlug(entity_name).slice(0, 25);
-    const titleSlug = makeSlug(title).slice(0, 30);
+    const entitySlug = makeSlug(rawEntityName || entity_name).slice(0, 25);
+    const titleSlug = makeSlug(rawTitle || title).slice(0, 30);
     const slug = `servir-${entitySlug}-${titleSlug}-${pageIndex}-${i}`;
     const uniqueId = `job-servir-p${pageIndex}-${i}-${entitySlug.slice(0, 15)}-${titleSlug.slice(0, 15)}`;
+    const canonicalEntity = resolveEntityCanonicalPortal(entity_name);
 
     jobs.push({
       id: uniqueId,
@@ -1641,20 +1643,31 @@ function parseServirJobsFromHtml(text: string, todayIso: string, pageIndex = 1):
       salary_max: salaryNum > 0 ? salaryNum : undefined,
       salary_text,
       vacancies_count,
-      description: `Convocatoria oficial ${entity_name}: ${title}. Ubicación: ${region}. Régimen: ${sector_type}, con remuneración de ${salary_text}. Bases y postulaciones oficiales registradas en el Sistema de Difusión de Ofertas Laborales de SERVIR (Talento Perú).`,
+      description: `Convocatoria oficial ${entity_name}: ${title}${convNro ? ` (${convNro})` : ''}. Ubicación: ${ubicacion || region}. Régimen: ${sector_type}, con remuneración de ${salary_text}. Bases y postulaciones oficiales registradas en el Sistema de Difusión de Ofertas Laborales de SERVIR (Talento Perú).`,
       requirements: [
-        `Cumplir con el grado de formación académica (${education_level}) requerido en las bases.`,
-        `Acreditar experiencia laboral general y específica según los términos de referencia de la entidad.`,
-        `Presentación de hoja de vida documentada y declaraciones juradas conforme al cronograma oficial.`
+        `Formación académica mínima requerida: ${education_level} en la especialidad del puesto (${title}).`,
+        `Acreditar experiencia laboral general y específica en el sector público o privado conforme al perfil del puesto (${convNro || sector_type}).`,
+        `Presentación de ficha de postulación, hoja de vida documentada y declaraciones juradas dentro del plazo oficial (${start_date} al ${end_date}).`
       ],
       benefits: [
         'Contrato formal según régimen del Estado con cobertura de salud ESSALUD.',
         'Aportes al sistema previsional (ONP / AFP) y beneficios de ley.'
       ],
-      apply_url: resolveEntityCanonicalPortal(entity_name).url,
+      plazas: [
+        {
+          cas_code: convNro || `${sector_type} - Plaza 01`,
+          title,
+          education: `Grado o nivel académico requerido: ${education_level} acreditado según perfil del puesto.`,
+          experience: `Experiencia general y específica acreditada con certificados o constancias de trabajo según bases (${convNro || sector_type}).`,
+          salary: salary_text,
+          vacancies: vacancies_count,
+          bases_url: canonicalEntity.url
+        }
+      ],
+      apply_url: canonicalEntity.url,
       bases_pdf_url: undefined,
-      fuente_url: resolveEntityCanonicalPortal(entity_name).url,
-      official_portal_name: resolveEntityCanonicalPortal(entity_name).portalName,
+      fuente_url: canonicalEntity.url,
+      official_portal_name: canonicalEntity.portalName,
       start_date,
       end_date,
       featured: i < 6,

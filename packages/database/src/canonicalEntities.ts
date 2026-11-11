@@ -34,7 +34,7 @@ export const CANONICAL_ENTITIES: CanonicalEntityInfo[] = [
   {
     name: 'MINISTERIO PÚBLICO - FISCALÍA DE LA NACIÓN',
     shortName: 'FISCALÍA',
-    convocatoriasUrl: 'https://portal.mpfn.gob.pe/convocatorias',
+    convocatoriasUrl: 'https://portal.mpfn.gob.pe/convoca/convocatorias',
     portalName: 'Ministerio Público - Portal de Convocatorias MPFN',
     officialRuc: '20131370301',
     searchPattern: '"ministerio publico" OR "fiscalia de la nacion" OR mpfn'
@@ -729,11 +729,56 @@ export const CANONICAL_ENTITIES: CanonicalEntityInfo[] = [
   }
 ];
 
+export function decodeHtmlEntities(raw?: string): string {
+  if (!raw || typeof raw !== 'string') return '';
+  return raw
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#34;/g, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#039;/g, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#(\d+);/g, (_, dec) => {
+      const code = parseInt(dec, 10);
+      return code > 0 ? String.fromCharCode(code) : _;
+    })
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+      const code = parseInt(hex, 16);
+      return code > 0 ? String.fromCharCode(code) : _;
+    })
+    .replace(/P\uFFFDBLIC/gi, 'PÚBLIC')
+    .replace(/NACI\uFFFDN/gi, 'NACIÓN')
+    .replace(/EDUCACI\uFFFDN/gi, 'EDUCACIÓN')
+    .replace(/DIRECCI\uFFFDN/gi, 'DIRECCIÓN')
+    .replace(/ADMINISTRACI\uFFFDN/gi, 'ADMINISTRACIÓN')
+    .replace(/GESTI\uFFFDN/gi, 'GESTIÓN')
+    .replace(/REGI\uFFFDN/gi, 'REGIÓN')
+    .replace(/PER\uFFFD/gi, 'PERÚ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function cleanEntityDisplayName(raw?: string): string {
+  const decoded = decodeHtmlEntities(raw);
+  if (!decoded) return '';
+  // Limpiar prefijos burocráticos de SERVIR como UNIDAD EJECUTORA: "NOMBRE DE LA ENTIDAD"
+  const ueMatch = decoded.match(/^UNIDAD\s+EJECUTORA(?:\s+N?[°º]?\s*\d+)?\s*:\s*["«']?([^"»']+)["»']?$/i);
+  if (ueMatch && ueMatch[1] && ueMatch[1].trim().length >= 5) {
+    return ueMatch[1].trim();
+  }
+  return decoded.replace(/^["']+|["']+$/g, '').trim();
+}
+
 function cleanEntityMatchText(s: string): string {
-  return (s || '')
+  return cleanEntityDisplayName(s)
     .toUpperCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/["'«»]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
@@ -745,6 +790,74 @@ function matchesCanonicalEntity(normRaw: string, entity: CanonicalEntityInfo): b
   // 1. Coincidencia completa del nombre institucional
   if (norm.includes(entName)) {
     return true;
+  }
+
+  // 1a. Coincidencias amplias para órganos desconcentrados y unidades ejecutoras de entidades matrices
+  if (entShort === 'FISCALIA') {
+    if (
+      norm.includes('MINISTERIO PUBLICO') ||
+      norm.includes('FISCALIA DE LA NACION') ||
+      norm.includes('DISTRITO FISCAL') ||
+      norm.includes('MEDICINA LEGAL') ||
+      /\bMPFN\b/.test(norm)
+    ) {
+      return true;
+    }
+  }
+
+  if (entShort === 'PODER JUDICIAL') {
+    if (
+      norm.includes('PODER JUDICIAL') ||
+      norm.includes('CORTE SUPERIOR DE JUSTICIA') ||
+      norm.includes('CORTE SUPREMA')
+    ) {
+      return true;
+    }
+  }
+
+  if (entShort === 'ESSALUD') {
+    if (
+      norm.includes('ESSALUD') ||
+      norm.includes('SEGURO SOCIAL DE SALUD') ||
+      norm.includes('RED ASISTENCIAL') ||
+      norm.includes('RED PRESTACIONAL')
+    ) {
+      return true;
+    }
+  }
+
+  if (entShort === 'MINSA') {
+    if (
+      norm.includes('MINISTERIO DE SALUD') ||
+      norm.includes('DIRIS ') ||
+      norm.includes('DIRECCION DE REDES INTEGRADAS DE SALUD')
+    ) {
+      return true;
+    }
+  }
+
+  if (entShort === 'MININTER') {
+    if (
+      norm.includes('MINISTERIO DEL INTERIOR') ||
+      norm.includes('POLICIA NACIONAL') ||
+      norm.includes('REGION POLICIAL') ||
+      norm.includes('SANIDAD POLICIAL') ||
+      norm.includes('DIRSAPOL')
+    ) {
+      return true;
+    }
+  }
+
+  if (entShort === 'MINDEF') {
+    if (
+      norm.includes('MINISTERIO DE DEFENSA') ||
+      norm.includes('EJERCITO DEL PERU') ||
+      norm.includes('MARINA DE GUERRA') ||
+      norm.includes('FUERZA AEREA') ||
+      norm.includes('COMANDO CONJUNTO')
+    ) {
+      return true;
+    }
   }
 
   // 1b. Coincidencias específicas por entidad
@@ -903,6 +1016,14 @@ function matchesCanonicalEntity(normRaw: string, entity: CanonicalEntityInfo): b
  * con los parámetros de la entidad para que el usuario caiga en sus resultados directos,
  * eliminando la redirección ciega a la portada general de www.gob.pe/servir.
  */
+const CANONICAL_PORTAL_CACHE = new Map<string, {
+  url: string;
+  portalName: string;
+  isSpecific: boolean;
+  shortName?: string;
+  searchPattern?: string;
+}>();
+
 export function resolveEntityCanonicalPortal(entityName?: string): {
   url: string;
   portalName: string;
@@ -918,11 +1039,28 @@ export function resolveEntityCanonicalPortal(entityName?: string): {
     };
   }
 
-  const norm = cleanEntityMatchText(entityName);
+  const cached = CANONICAL_PORTAL_CACHE.get(entityName);
+  if (cached) return cached;
+
+  const result = resolveEntityCanonicalPortalUncached(entityName);
+  CANONICAL_PORTAL_CACHE.set(entityName, result);
+  return result;
+}
+
+function resolveEntityCanonicalPortalUncached(entityName: string): {
+  url: string;
+  portalName: string;
+  isSpecific: boolean;
+  shortName?: string;
+  searchPattern?: string;
+} {
+
+  const cleanDisplay = cleanEntityDisplayName(entityName);
+  const norm = cleanEntityMatchText(cleanDisplay);
 
   // 1. Buscar coincidencia en el directorio canónico de forma rigurosa y segura
   for (const entity of CANONICAL_ENTITIES) {
-    if (matchesCanonicalEntity(entityName, entity)) {
+    if (matchesCanonicalEntity(cleanDisplay, entity)) {
       return {
         url: entity.convocatoriasUrl,
         portalName: entity.portalName,
@@ -960,13 +1098,12 @@ export function resolveEntityCanonicalPortal(entityName?: string): {
           shortName: `Muni ${muniName.toUpperCase()}`
         };
       }
-      // Para otras municipalidades no confirmadas en gob.pe/muni..., usar la consulta oficial en SERVIR
-      // para erradicar por completo caídas en pantallas de error 404 en Gob.pe
-      const encodedMuni = encodeURIComponent(entityName.slice(0, 40));
+      // Búsqueda directa en el buscador oficial de publicaciones y convocatorias de Gob.pe (funciona 100% con parámetros URL)
+      const encodedMuni = encodeURIComponent(`${cleanDisplay.slice(0, 60)} convocatoria CAS`);
       return {
-        url: `https://app.servir.gob.pe/DifusionOfertasExterno/faces/consultas/ofertas_laborales.xhtml?entidad=${encodedMuni}`,
-        portalName: `Municipalidad de ${muniName.toUpperCase()} - Convocatorias en SERVIR Talento Perú`,
-        isSpecific: false,
+        url: `https://www.gob.pe/busquedas?contenido[]=publicaciones&term=${encodedMuni}`,
+        portalName: `${cleanDisplay} - Convocatorias Oficiales Gob.pe`,
+        isSpecific: true,
         shortName: `Muni ${muniName.toUpperCase()}`
       };
     }
@@ -1006,11 +1143,10 @@ export function resolveEntityCanonicalPortal(entityName?: string): {
     }
 
     // Fallback para UGELs numeradas o que no tienen portal individual en gob.pe:
-    // Búsqueda canónica oficial de publicaciones en Gob.pe
-    const encodedUgel = encodeURIComponent(entityName.slice(0, 40));
+    const encodedUgel = encodeURIComponent(`${cleanDisplay.slice(0, 50)} CAS`);
     return {
-      url: `https://www.gob.pe/busquedas?contenido=publicaciones&term=${encodedUgel}+CAS`,
-      portalName: `${entityName} - Búsqueda Oficial de Convocatorias Gob.pe`,
+      url: `https://www.gob.pe/busquedas?contenido[]=publicaciones&term=${encodedUgel}`,
+      portalName: `${cleanDisplay} - Publicaciones y Convocatorias Gob.pe`,
       isSpecific: true,
       shortName: 'UGEL'
     };
@@ -1048,12 +1184,12 @@ export function resolveEntityCanonicalPortal(entityName?: string): {
     }
   }
 
-  // 3. Fallback inteligente: enlace directo a la consulta filtrada en SERVIR Talento Perú Oficial
-  // (Nunca la portada estática www.gob.pe/servir)
-  const encodedEntity = encodeURIComponent(entityName.slice(0, 40));
+  // 3. Fallback inteligente: búsqueda directa de publicaciones y convocatorias de la entidad en Gob.pe
+  // (Nunca enviar al formulario JSF vacío de app.servir.gob.pe que ignora query params)
+  const encodedEntity = encodeURIComponent(`${cleanDisplay.slice(0, 60)} convocatoria CAS`);
   return {
-    url: `https://app.servir.gob.pe/DifusionOfertasExterno/faces/consultas/ofertas_laborales.xhtml?entidad=${encodedEntity}`,
-    portalName: `${entityName} - Convocatorias en SERVIR Talento Perú`,
-    isSpecific: false
+    url: `https://www.gob.pe/busquedas?contenido[]=publicaciones&term=${encodedEntity}`,
+    portalName: `${cleanDisplay} - Convocatorias Oficiales Gob.pe`,
+    isSpecific: true
   };
 }

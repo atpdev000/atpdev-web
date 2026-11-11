@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calculator, ShieldCheck, DollarSign, Award, Info, ChevronRight, CheckCircle2, AlertTriangle, Sparkles } from 'lucide-react';
+import { Calculator, ShieldCheck, DollarSign, Award, Info, ChevronRight, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export function CalculadoraSueldo() {
   const [sueldoBruto, setSueldoBruto] = useState<number>(4500);

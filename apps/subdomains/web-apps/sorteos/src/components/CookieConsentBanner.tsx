@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Cookie, ShieldCheck } from 'lucide-react';
+import { Cookie, ShieldCheck, Check } from 'lucide-react';
 
 export function CookieConsentBanner() {
   const [show, setShow] = useState(false);
@@ -10,7 +10,16 @@ export function CookieConsentBanner() {
   useEffect(() => {
     try {
       const consent = localStorage.getItem('sorteos_cookie_consent');
-      if (!consent) {
+      if (consent) {
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          (window as any).gtag('consent', 'update', {
+            ad_storage: consent === 'all' ? 'granted' : 'denied',
+            ad_user_data: consent === 'all' ? 'granted' : 'denied',
+            ad_personalization: consent === 'all' ? 'granted' : 'denied',
+            analytics_storage: 'granted',
+          });
+        }
+      } else {
         const timer = setTimeout(() => setShow(true), 1200);
         return () => clearTimeout(timer);
       }
@@ -22,6 +31,14 @@ export function CookieConsentBanner() {
   const handleAccept = (type: 'all' | 'essential') => {
     try {
       localStorage.setItem('sorteos_cookie_consent', type);
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('consent', 'update', {
+          ad_storage: type === 'all' ? 'granted' : 'denied',
+          ad_user_data: type === 'all' ? 'granted' : 'denied',
+          ad_personalization: type === 'all' ? 'granted' : 'denied',
+          analytics_storage: 'granted',
+        });
+      }
       setShow(false);
     } catch {
       setShow(false);
@@ -43,7 +60,7 @@ export function CookieConsentBanner() {
               <ShieldCheck size={13} className="text-pink-600 dark:text-pink-400" />
             </h4>
             <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed">
-              Utilizamos cookies técnicas y de publicidad (Google AdSense) para optimizar la experiencia y mantener las herramientas de sorteo 100% gratuitas. Puedes consultar nuestra{' '}
+              Utilizamos cookies técnicas y de publicidad personalizada (Google AdSense) para optimizar la experiencia y mantener las herramientas de sorteo 100% gratuitas. Puedes consultar nuestra{' '}
               <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 font-semibold hover:underline">
                 Política de Privacidad
               </Link>.
@@ -60,9 +77,10 @@ export function CookieConsentBanner() {
           </button>
           <button
             onClick={() => handleAccept('all')}
-            className="px-4 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-bold shadow-sm transition-colors cursor-pointer"
+            className="px-4 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white text-[11px] font-bold shadow-sm transition-colors cursor-pointer flex items-center gap-1"
           >
-            Aceptar todas
+            <Check size={12} />
+            <span>Aceptar todas</span>
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { blogPosts } from '@/lib/content/blog-posts'
+import { FEATURES } from '@/lib/featureFlags'
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
@@ -15,7 +16,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
         '/tools',
         '/tools/facebook',
         '/tools/tiktok',
-        '/tools/youtube',
+        '/tools/instagram',
+        '/tools/twitter',
+        '/tools/threads',
+        '/tools/whatsapp',
+        ...(FEATURES.YOUTUBE_ENABLED ? ['/tools/youtube'] : []),
         '/legal/privacidad',
         '/legal/terminos',
         '/legal/cookies',

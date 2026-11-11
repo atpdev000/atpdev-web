@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -16,6 +16,7 @@ import { Media } from '@capacitor-community/media';
 import { Dialog } from '@capacitor/dialog';
 import { Toast } from '@capacitor/toast';
 import { useI18n } from '@/lib/i18n/context';
+import { Music, Film } from 'lucide-react';
 import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative, readNativeClipboard } from '@/lib/nativeBridge';
 import { extractUrlFromText } from '@/lib/clipboardDetector';
 
@@ -1542,8 +1543,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             </div>
 
             {/* SECCIÓN DE AUDIO */}
-            <div className="mb-6">
-              <h4 className="text-lg font-bold text-gray-900 mb-4"># Descargar Solo Audio</h4>
+            <div className="mb-6 pt-4 border-t border-slate-200 dark:border-slate-700/60">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+                <Music className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span>Descargar Solo Audio (MP3 / M4A)</span>
+              </h4>
               <div className="flex flex-col items-center">
                 {downloading?.startsWith('audio-') ? (
                   <div className="w-full max-w-md">
@@ -1553,20 +1557,23 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                   <button
                     onClick={handleAudioDownload}
                     disabled={!!downloading}
-                    className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto"
+                    className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-xl font-bold transition-all shadow-md shadow-purple-600/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto cursor-pointer"
                   >
                     <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
-                    Descargar Audio (MP3/M4A)
+                    Descargar Audio de Alta Calidad (MP3/M4A)
                   </button>
                 )}
               </div>
             </div>
 
             {/* PESTAÑAS DE VIDEO */}
-            <div className="mb-4">
-              <h4 className="text-lg font-bold text-gray-900 mb-4">## Descargar Video</h4>
+            <div className="mb-4 pt-4 border-t border-slate-200 dark:border-slate-700/60">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 mb-3 flex items-center gap-2">
+                <Film className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>Descargar Video con Audio</span>
+              </h4>
 
               {/* NAVEGACIÓN DE PESTAÑAS */}
               <div className="flex space-x-2 mb-6 border-b">

@@ -1,2 +1,0 @@
-# Google AdSense ads.txt for chamba pro (atpdev.dev)
-google.com, pub-5414009811868137, DIRECT, f08c47fec0942fa0

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, Scale, Sparkles } from 'lucide-react';
+import { ChevronRight, Scale } from 'lucide-react';
 import { ComparadorRegimenes } from '@/components/ComparadorRegimenes';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
 
@@ -91,7 +91,7 @@ export default function ComparadorPage() {
       {/* Main Header (Centered & Professional) */}
       <div className="space-y-3 text-center max-w-3xl mx-auto pt-2 pb-2">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold shadow-sm">
-          <Sparkles size={14} />
+          <Scale size={14} />
           <span>Matriz Oficial de Derechos Laborales en el Sector Público & Privado</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">

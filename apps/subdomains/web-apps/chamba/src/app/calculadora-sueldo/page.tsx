@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Script from 'next/script';
-import { ChevronRight, Calculator, ShieldCheck, Sparkles, HelpCircle } from 'lucide-react';
+import { ChevronRight, Calculator, ShieldCheck, HelpCircle } from 'lucide-react';
 import { CalculadoraSueldo } from '@/components/CalculadoraSueldo';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
 

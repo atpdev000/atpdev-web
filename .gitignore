@@ -23,6 +23,15 @@ out/
 
 # production
 /build
+build/
+**/build/
+dist/
+**/dist/
+
+# python
+.venv/
+__pycache__/
+*.pyc
 
 # misc
 .DS_Store

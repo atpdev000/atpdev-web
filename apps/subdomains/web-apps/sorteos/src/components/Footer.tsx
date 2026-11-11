@@ -65,6 +65,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-3">
             <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_legal_title')}</p>
             <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
+              <li><Link href="/blog" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Blog y Recursos</Link></li>
               <li><Link href="/quienes-somos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Quiénes Somos</Link></li>
               <li><Link href="/contacto" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Contacto y Soporte</Link></li>
               <li><Link href="/terminos-y-condiciones" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_terms')}</Link></li>

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, HelpCircle, Sparkles, BookOpen, ShieldCheck } from 'lucide-react';
+import { ChevronRight, HelpCircle, BookOpen, ShieldCheck } from 'lucide-react';
 import { PreguntasCasSimulator } from '@/components/PreguntasCasSimulator';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
 import { SITE_URL } from '@/lib/siteConfig';
@@ -91,7 +91,7 @@ export default function PreguntasCasPage() {
       {/* Main Header */}
       <div className="space-y-3 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-semibold">
-          <Sparkles size={14} />
+          <HelpCircle size={14} />
           <span>Balotario Oficial para Evaluación Técnica y Entrevista Personal</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">

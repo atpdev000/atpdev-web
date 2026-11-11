@@ -104,14 +104,9 @@
   }
 
   .main-with-sidebars {
-    margin-left: 16rem;
-    margin-right: 16rem;
-  }
-
-  @media (max-width: 1024px) {
-    .main-with-sidebars {
-      margin-left: 0;
-      margin-right: 0;
-    }
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-width: 64rem;
   }
 }

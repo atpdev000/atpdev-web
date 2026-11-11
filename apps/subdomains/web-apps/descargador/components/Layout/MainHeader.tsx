@@ -53,12 +53,27 @@ export default function MainHeader() {
     } catch (e) { }
   }, [])
 
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      e.preventDefault()
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+  }
+
   return (
     <header className="bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-50 transition-colors duration-200" suppressHydrationWarning>
       <div className="container mx-auto px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-3">
           {/* Logo y Nombre de Marca */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 hover:opacity-90 transition-opacity min-w-0">
+          <Link
+            href="/"
+            onClick={handleLogoClick}
+            className="flex items-center gap-2.5 sm:gap-3 hover:opacity-90 transition-opacity min-w-0 cursor-pointer group"
+            title="Ir al inicio de Descargador Pro"
+          >
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 sm:p-2.5 rounded-xl shadow-md shadow-blue-500/20 shrink-0">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
@@ -90,11 +105,10 @@ export default function MainHeader() {
             </Link>
             <Link
               href="/planes"
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-sm transition-all hover:scale-105 active:scale-95 ${
-                mounted && isPro
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white font-bold text-xs shadow-sm transition-all hover:scale-105 active:scale-95 ${mounted && isPro
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 ring-1 ring-emerald-400/40'
                   : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600'
-              }`}
+                }`}
             >
               <Crown className={`w-3.5 h-3.5 ${mounted && isPro ? 'text-amber-300' : 'text-white'}`} />
               <span>{mounted && isPro ? 'Mi Membresía PRO' : t.nav.plans}</span>
@@ -124,9 +138,8 @@ export default function MainHeader() {
             {/* Planes en móvil */}
             <Link
               href="/planes"
-              className={`lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-white font-bold text-xs shadow-xs ${
-                mounted && isPro ? 'bg-emerald-600 ring-1 ring-emerald-400/50' : 'bg-amber-500'
-              }`}
+              className={`lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-white font-bold text-xs shadow-xs ${mounted && isPro ? 'bg-emerald-600 ring-1 ring-emerald-400/50' : 'bg-amber-500'
+                }`}
             >
               👑 {mounted && isPro ? 'Eres PRO' : 'PRO'}
             </Link>

@@ -33,14 +33,21 @@ export default function BlogPreview() {
                   src={post.image}
                   alt={post.title}
                   fill
+                  unoptimized
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
             )}
             <div className="p-6">
               <div className="flex justify-between items-center mb-3 text-xs">
-                <span className="text-blue-600 dark:text-blue-400 font-semibold">{post.readTime}</span>
-                <span className="text-slate-600 dark:text-slate-300 font-medium">{post.date}</span>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/80 dark:border-blue-800/50">
+                  {post.category}
+                </span>
+                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
+                  <span>{post.readTime}</span>
+                  <span>•</span>
+                  <span>{post.date}</span>
+                </div>
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3 line-clamp-2 leading-snug">
                 {post.title}

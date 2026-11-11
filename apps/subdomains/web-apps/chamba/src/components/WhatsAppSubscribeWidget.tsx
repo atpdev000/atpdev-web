@@ -58,8 +58,8 @@ export default function WhatsAppSubscribeWidget({
           <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
             {widgetTitle}
           </h3>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl">
-            Recibe avisos de convocatorias del Estado con bases oficiales directamente en tu smartphone.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md text-pretty">
+            Recibe avisos de convocatorias del Estado con bases oficiales directamente en tu&nbsp;smartphone.
           </p>
         </div>
 

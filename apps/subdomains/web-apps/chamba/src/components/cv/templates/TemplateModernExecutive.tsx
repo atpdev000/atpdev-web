@@ -24,7 +24,7 @@ export function TemplateModernExecutive({ data }: TemplateProps) {
   return (
     <div className="bg-white text-slate-800 font-sans text-[11px] leading-relaxed max-w-[820px] mx-auto shadow-sm border border-slate-200 print:border-none print:shadow-none print:p-6 print:sm:p-8 print:m-0 print:max-w-none print:w-full print:bg-white print:min-h-0 flex flex-row print:flex-row items-stretch min-h-[1050px]">
       {/* Columna Izquierda (Sidebar con acento azul pizarra corporativo) */}
-      <aside className="w-[33%] print:w-[33%] shrink-0 bg-slate-900 text-slate-100 p-6 sm:p-7 space-y-6 print:p-6 print:space-y-4 print:bg-slate-900 print:text-white border-r-2 border-slate-800 rounded-l-xl print:rounded-l-lg">
+      <aside className="w-[33%] print:w-[33%] shrink-0 bg-slate-900 text-slate-100 p-6 sm:p-7 space-y-6 print:p-6 print:space-y-4 print:bg-slate-900 print:text-white border-r border-slate-800 rounded-l-xl print:rounded-l-lg">
         {/* Foto de Perfil si está presente */}
         <div className="flex flex-col items-center text-center">
           {personal.photoUrl ? (

@@ -154,8 +154,24 @@ export async function generateMetadata({
   params: Promise<{ region: string }>;
 }): Promise<Metadata> {
   const { region } = await params;
-  const regionInfo = REGIONES_MAP[region.toLowerCase()];
+  const regionKey = region.toLowerCase();
+  const regionInfo = REGIONES_MAP[regionKey];
   if (!regionInfo) return {};
+
+  const allJobs = await getJobPostings();
+  const todayIso = new Date().toISOString().split("T")[0];
+  const hasActiveRegionJobs = allJobs.some((job) => {
+    if (job.status !== "Vigente") return false;
+    if (job.end_date && job.end_date < todayIso) return false;
+    const jobRegion = (job.region || "").toLowerCase();
+    if (regionKey === "remoto") {
+      return jobRegion.includes("remoto") || jobRegion.includes("nacional") || jobRegion.includes("teletrabajo");
+    }
+    if (regionKey === "lima") {
+      return jobRegion.includes("lima") || jobRegion.includes("callao");
+    }
+    return jobRegion.includes(regionInfo.name.toLowerCase());
+  });
 
   const title = `Chamba en ${regionInfo.name} 2026 — Ofertas de Trabajo y Convocatorias`;
   const description = `Encuentra chamba y convocatorias de trabajo vigentes en ${regionInfo.name}, Perú. Convocatorias del Estado (CAS 1057, 728) y sector privado con bases oficiales en PDF.`;
@@ -164,6 +180,10 @@ export async function generateMetadata({
   return {
     title,
     description,
+    robots: {
+      index: hasActiveRegionJobs,
+      follow: true,
+    },
     keywords: [
       `chamba en ${regionInfo.name.toLowerCase()}`,
       `trabajo en ${regionInfo.name.toLowerCase()}`,
@@ -233,6 +253,18 @@ export default async function RegionJobsPage({
   });
 
   const totalVacancies = regionJobs.reduce((acc, curr) => acc + (curr.vacancies_count || 1), 0);
+
+  // Convocatorias nacionales/remotas vigentes de respaldo para evitar páginas vacías (Soft 404 / AdSense Zero-Results Policy)
+  const fallbackNationalJobs =
+    regionJobs.length === 0
+      ? allJobs
+          .filter((job) => {
+            if (job.status !== "Vigente") return false;
+            if (job.end_date && job.end_date < todayIso) return false;
+            return true;
+          })
+          .slice(0, 6)
+      : [];
 
   // Structured Data: BreadcrumbList
   const breadcrumbJsonLd = {
@@ -398,17 +430,28 @@ export default async function RegionJobsPage({
             )}
           </>
         ) : (
-          <div className="p-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-center space-y-4 max-w-xl mx-auto my-12">
-            <div className="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
-              <Briefcase size={28} />
+          <div className="space-y-8">
+            <div className="p-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-center space-y-3 max-w-2xl mx-auto">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+                <Briefcase size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
+                Sin convocatorias exclusivas en {regionInfo.name} hoy — Mostrando plazas Nacionales Vigentes
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Mientras las entidades locales de {regionInfo.name} publican nuevas bases, puedes postular desde tu región a estas convocatorias vigentes de alcance nacional y teletrabajo:
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
-              No hay convocatorias activas en {regionInfo.name} en este momento
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Las entidades públicas de esta región renuevan sus plazas periódicamente. Revisa convocatorias a nivel nacional o con modalidad de teletrabajo.
-            </p>
-            <div className="pt-2">
+
+            {fallbackNationalJobs.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {fallbackNationalJobs.map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+            )}
+
+            <div className="text-center pt-2">
               <Link
                 href="/empleos"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs font-display hover:bg-emerald-700 transition-colors shadow-sm"
@@ -421,10 +464,12 @@ export default async function RegionJobsPage({
         )}
       </div>
 
-      {/* AdSense Leaderboard Slot */}
-      <div className="pt-6">
-        <AdBannerSlot type="leaderboard" />
-      </div>
+      {/* AdSense Leaderboard Slot — Solo se muestra cuando hay contenido real en la región (AdSense Policy) */}
+      {regionJobs.length > 0 && (
+        <div className="pt-6">
+          <AdBannerSlot type="leaderboard" />
+        </div>
+      )}
     </div>
   );
 }

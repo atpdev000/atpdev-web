@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_4k" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="gold_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="glow_4k">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg_4k)"/>
+  <circle cx="400" cy="225" r="150" fill="#f59e0b" opacity="0.15" filter="url(#glow_4k)"/>
+
+  <!-- Golden 4K Ultra HD Emblem Center -->
+  <g transform="translate(260, 110)">
+    <rect width="280" height="190" rx="28" fill="#0f172a" stroke="url(#gold_grad)" stroke-width="3" filter="url(#glow_4k)"/>
+    <text x="140" y="95" text-anchor="middle" fill="url(#gold_grad)" font-size="64" font-weight="900" font-family="system-ui, sans-serif">4K UHD</text>
+    <text x="140" y="130" text-anchor="middle" fill="#f8fafc" font-size="14" font-weight="800" font-family="system-ui, sans-serif">3840 x 2160 PÍXELES • 60 FPS</text>
+    <rect x="40" y="145" width="200" height="26" rx="8" fill="#b45309" opacity="0.4"/>
+    <text x="140" y="162" text-anchor="middle" fill="#fef3c7" font-size="11" font-weight="bold">HDR10 • 10-BIT COLOR • HEVC</text>
+  </g>
+
+  <!-- Left: Comparison 1080p -->
+  <g transform="translate(80, 160)">
+    <rect width="140" height="100" rx="16" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/>
+    <text x="70" y="45" text-anchor="middle" fill="#94a3b8" font-size="18" font-weight="bold">1080p</text>
+    <text x="70" y="70" text-anchor="middle" fill="#64748b" font-size="11">2 Millones px</text>
+  </g>
+
+  <!-- Right: 4K Advantage -->
+  <g transform="translate(580, 160)">
+    <rect width="140" height="100" rx="16" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2"/>
+    <text x="70" y="45" text-anchor="middle" fill="#fbbf24" font-size="18" font-weight="bold">4K 2160p</text>
+    <text x="70" y="70" text-anchor="middle" fill="#34d399" font-size="11">8.3 Millones px</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="280" y="30" width="240" height="34" rx="17" fill="#0f172a" stroke="url(#gold_grad)" stroke-width="1.5"/>
+  <text x="400" y="52" text-anchor="middle" fill="#fef3c7" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">👑 ULTRA ALTA DEFINICIÓN 2026</text>
+</svg>

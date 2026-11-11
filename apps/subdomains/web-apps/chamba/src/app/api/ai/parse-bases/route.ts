@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { resolveRealServirAndEntityBases, resolveEntityCanonicalPortal } from '@atpdev/database';
 
 export const dynamic = 'force-dynamic';
 
@@ -125,9 +126,19 @@ export async function POST(req: Request) {
       requirements.push("Presentación de Ficha de Postulante y Declaraciones Juradas según bases.");
     }
 
-    const finalApplyUrl = applyUrl || "https://www.gob.pe/";
-    const finalBasesUrl = pdfUrl || finalApplyUrl;
     const slug = makeSlug(`${entityName}-${title}`);
+    const canonical = resolveEntityCanonicalPortal(entityName);
+    const realResolved = await resolveRealServirAndEntityBases({
+      slug,
+      title,
+      entityName,
+      region,
+      applyUrl,
+      basesPdfUrl: pdfUrl
+    }).catch(() => null);
+
+    const finalApplyUrl = applyUrl || realResolved?.primaryOfficialPageUrl || canonical.url;
+    const finalBasesUrl = pdfUrl || realResolved?.directBasesPdfUrl || finalApplyUrl;
 
     const extractedJob = {
       title,
@@ -151,7 +162,8 @@ export async function POST(req: Request) {
       ],
       apply_url: finalApplyUrl,
       bases_pdf_url: finalBasesUrl,
-      official_portal_name: `${entityName} Portal Oficial`,
+      official_documents: realResolved?.officialDocuments,
+      official_portal_name: realResolved?.primaryOfficialPageName || canonical.portalName,
       start_date: today,
       end_date: endDate,
       featured: true,

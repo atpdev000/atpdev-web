@@ -7,27 +7,18 @@ import {
   Briefcase, 
   FileText, 
   Mail, 
-  Phone, 
-  MapPin, 
-  DollarSign, 
-  Calendar, 
   CheckCircle2, 
   AlertCircle, 
   Send, 
-  Sparkles, 
   ExternalLink,
   ShieldCheck,
-  HelpCircle,
   Clock,
   Check,
   Plus,
   Minus,
   Search,
-  ArrowRight,
   Info,
   X,
-  FileCheck2,
-  BookmarkCheck,
   ChevronRight,
   Zap,
   Globe,
@@ -205,7 +196,7 @@ const FIELD_LABELS: Record<keyof FormErrors, string> = {
 };
 
 export default function PublicarFormClient() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     entity_name: '',
     entity_ruc: '',
     sector_type: 'CAS 1057',
@@ -225,7 +216,7 @@ export default function PublicarFormClient() {
     description: '',
     contact_email: '',
     contact_phone: ''
-  });
+  }));
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -259,16 +250,17 @@ export default function PublicarFormClient() {
   }, []);
 
   // Función de Validación Rigurosa por Campo
-  const validateField = (name: string, value: any): string | undefined => {
+  const validateField = (name: string, value: string | number | undefined): string | undefined => {
+    const strVal = typeof value === 'string' ? value : String(value ?? '');
     switch (name) {
       case 'entity_name':
-        if (!value || !value.trim()) return 'El nombre de la entidad o institución es obligatorio.';
-        if (value.trim().length < 3) return 'Debe ingresar al menos 3 caracteres del nombre institucional.';
+        if (!strVal.trim()) return 'El nombre de la entidad o institución es obligatorio.';
+        if (strVal.trim().length < 3) return 'Debe ingresar al menos 3 caracteres del nombre institucional.';
         return undefined;
 
       case 'entity_ruc':
-        if (!value || !value.trim()) return undefined; // RUC opcional pero si se ingresa debe ser 100% válido
-        const cleanRuc = String(value).replace(/\D/g, '');
+        if (!strVal.trim()) return undefined; // RUC opcional pero si se ingresa debe ser 100% válido
+        const cleanRuc = strVal.replace(/\D/g, '');
         if (cleanRuc.length !== 11) return 'El RUC debe tener exactamente 11 dígitos numéricos.';
         if (!cleanRuc.startsWith('10') && !cleanRuc.startsWith('20') && !cleanRuc.startsWith('15') && !cleanRuc.startsWith('17')) {
           return 'El RUC debe iniciar con 10 o 20 (criterio oficial SUNAT).';
@@ -276,12 +268,12 @@ export default function PublicarFormClient() {
         return undefined;
 
       case 'title':
-        if (!value || !value.trim()) return 'El título del puesto o código de convocatoria es obligatorio.';
-        if (value.trim().length < 5) return 'Ingrese un título descriptivo (mínimo 5 caracteres).';
+        if (!strVal.trim()) return 'El título del puesto o código de convocatoria es obligatorio.';
+        if (strVal.trim().length < 5) return 'Ingrese un título descriptivo (mínimo 5 caracteres).';
         return undefined;
 
       case 'salary_text':
-        if (!value || !value.trim()) return 'Debe indicar la remuneración mensual o especificar "A convenir".';
+        if (!strVal.trim()) return 'Debe indicar la remuneración mensual o especificar "A convenir".';
         return undefined;
 
       case 'vacancies_count':
@@ -289,8 +281,8 @@ export default function PublicarFormClient() {
         return undefined;
 
       case 'apply_url':
-        if (!value || !value.trim()) return 'El enlace al portal oficial de postulación o mesa de partes es obligatorio.';
-        const trimmedUrl = String(value).trim().toLowerCase();
+        if (!strVal.trim()) return 'El enlace al portal oficial de postulación o mesa de partes es obligatorio.';
+        const trimmedUrl = strVal.trim().toLowerCase();
         if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
           return 'El enlace debe iniciar con https:// o http://';
         }
@@ -307,19 +299,19 @@ export default function PublicarFormClient() {
       case 'end_date':
         if (!value) return 'La fecha límite de postulación es obligatoria.';
         const today = new Date().toISOString().split('T')[0];
-        if (value < today) return 'La fecha límite no puede ser anterior al día de hoy.';
+        if (String(value) < today) return 'La fecha límite no puede ser anterior al día de hoy.';
         return undefined;
 
       case 'contact_email':
-        if (value && value.trim()) {
+        if (strVal.trim()) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(value.trim())) return 'Ingrese un correo electrónico válido (ej: rrhh@entidad.gob.pe).';
+          if (!emailRegex.test(strVal.trim())) return 'Ingrese un correo electrónico válido (ej: rrhh@entidad.gob.pe).';
         }
         return undefined;
 
       case 'contact_phone':
-        if (value && value.trim()) {
-          const cleanPhone = String(value).replace(/\D/g, '');
+        if (strVal.trim()) {
+          const cleanPhone = strVal.replace(/\D/g, '');
           if (cleanPhone.length < 7) return 'Ingrese un número de teléfono o celular válido (mínimo 7 dígitos).';
         }
         return undefined;
@@ -472,7 +464,7 @@ export default function PublicarFormClient() {
       ...prev,
       entity_name: item.name,
       entity_ruc: item.ruc,
-      sector_type: item.sector as any,
+      sector_type: item.sector,
       region: item.region,
       category: item.category || prev.category,
       apply_url: prev.apply_url || item.portal,
@@ -656,8 +648,8 @@ export default function PublicarFormClient() {
         jobId: data.jobId,
         slug: data.slug
       });
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Ocurrió un error inesperado al enviar la solicitud.');
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Ocurrió un error inesperado al enviar la solicitud.');
       setShakeTrigger(prev => prev + 1);
     } finally {
       setLoading(false);
@@ -776,7 +768,7 @@ export default function PublicarFormClient() {
         {/* Ecosistema ATPDev Solutions Card */}
         <div className="max-w-lg mx-auto p-4 rounded-2xl bg-gradient-to-r from-emerald-950/40 to-slate-900 border border-emerald-500/20 text-left flex items-start gap-3.5">
           <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0 mt-0.5">
-            <Sparkles size={18} />
+            <ShieldCheck size={18} />
           </div>
           <div className="space-y-1">
             <h4 className="text-xs font-bold text-white font-display flex items-center gap-1.5">
@@ -784,7 +776,7 @@ export default function PublicarFormClient() {
               <span className="text-[10px] text-emerald-400 font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">Oficial</span>
             </h4>
             <p className="text-[11px] text-slate-300 leading-snug">
-              ¿Tu entidad o empresa requiere digitalizar legajos, automatizar postulaciones con IA o desarrollar software a medida?
+              ¿Tu entidad o empresa requiere digitalizar legajos, automatizar convocatorias o desarrollar software a medida?
             </p>
             <a 
               href="https://atpdev.dev" 
@@ -939,8 +931,8 @@ export default function PublicarFormClient() {
         <div className="space-y-2 p-3.5 rounded-2xl bg-slate-950/60 border border-white/5">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-300 font-bold font-display flex items-center gap-1.5">
-              <Sparkles size={13} className="text-amber-400" />
-              <span>Relleno Inteligente 1-Clic para Entidades del Estado:</span>
+              <Zap size={13} className="text-emerald-400" />
+              <span>Relleno Rápido 1-Clic para Entidades del Estado:</span>
             </span>
             <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">Autocompleta Nombre, RUC y Portal Oficial</span>
           </div>
@@ -978,7 +970,7 @@ export default function PublicarFormClient() {
                 </span>
               ) : filteredEntities.length > 0 && showSuggestions ? (
                 <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1">
-                  <Sparkles size={11} />
+                  <Search size={11} />
                   <span>Sugerencias activas</span>
                 </span>
               ) : null}
@@ -1019,7 +1011,7 @@ export default function PublicarFormClient() {
             {showSuggestions && filteredEntities.length > 0 && (
               <div className="absolute z-30 top-full left-0 right-0 mt-1.5 bg-slate-900 border border-emerald-500/40 rounded-2xl p-2 shadow-2xl space-y-1 backdrop-blur-xl">
                 <div className="text-[10px] font-mono uppercase text-slate-400 px-2.5 py-1 flex items-center gap-1 border-b border-white/5 pb-1.5">
-                  <Sparkles size={11} className="text-amber-400" />
+                  <Building2 size={11} className="text-emerald-400" />
                   <span>Entidades coincidentes (Clic para autocompletar RUC y portal):</span>
                 </div>
                 {filteredEntities.map((ent, idx) => (
@@ -1254,7 +1246,7 @@ export default function PublicarFormClient() {
                   onClick={() => handleAutoCaptureLogo()}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold text-xs font-display flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)] shrink-0"
                 >
-                  <Sparkles size={14} />
+                  <ImageIcon size={14} />
                   <span>Capturar Logo HD (1 Clic)</span>
                 </button>
               </div>
@@ -1992,6 +1984,13 @@ export default function PublicarFormClient() {
           </p>
         )}
       </div>
+
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-mono flex items-center gap-2">
+          <AlertCircle size={16} className="text-rose-500 shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
 
       {/* BOTÓN DE ACCIÓN Y GARANTÍA EDITORIAL */}
       <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-sm">

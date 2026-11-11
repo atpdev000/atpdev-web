@@ -17,8 +17,9 @@ import BlogPreview from '@/components/blog/BlogPreview'
 import HeroSection from '@/components/HeroSection'
 import ExpertiseSection from '@/components/ExpertiseSection'
 import AdMobBanner from '@/components/AdMobBanner'
-import EzoicAd from '@/components/EzoicAd'
-import VideoRewardsAds from '@/components/Layout/VideoRewardsAds'
+import AdBannerSlot from '@/components/AdBannerSlot'
+import AdLateralRail from '@/components/AdLateralRail'
+import HowItWorksSteps from '@/components/HowItWorksSteps'
 import { usePlatform } from '@/hooks/usePlatform'
 import TopNav from '@/components/AppLayout/TopNav'
 import AppHeader from '@/components/AppLayout/AppHeader'
@@ -235,168 +236,149 @@ export default function Home() {
 
   // 🌐 MODO WEB
   return (
-    <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200 relative">
       <AnnouncementBar initialText={branding.announcement_text} initialEnabled={branding.announcement_enabled} />
       <SmartClipboardDetector onDetected={handleClipboardDetected} />
       <Header />
 
-      {/* SIDEBARS GLOBALES - FUERA DEL MAIN */}
-      <div className="flex">
-        {/* Sidebar Left */}
-        <aside className="hidden lg:block w-64 fixed left-0 top-20 h-[calc(100vh-5rem)] z-30 p-4">
-          <EzoicAd placeholderId={104} className="h-full" />
-        </aside>
+      {/* Rieles Panorámicos en Pantallas Anchas (Widescreen >= 1440px) */}
+      <AdLateralRail />
 
-        {/* CONTENIDO PRINCIPAL */}
-        <main className="flex-1 container mx-auto px-4 py-8 main-with-sidebars">
-          {/* 1. Hero Section */}
-          <HeroSection onSelectPlatform={setActivePlatform} modules={modules} branding={branding} />
+      {/* CONTENIDO PRINCIPAL CENTRADO Y RESPONSIVE */}
+      <main className="container mx-auto px-4 sm:px-6 py-8 max-w-5xl">
+        {/* 1. Hero Section */}
+        <HeroSection onSelectPlatform={setActivePlatform} modules={modules} branding={branding} />
 
-          {/* 📱 Promoción Oficial App Android APK */}
-          {apkConfig?.enabled && (
-            <div className="max-w-4xl mx-auto mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-blue-950/40 border border-emerald-500/30 shadow-xl shadow-emerald-950/20 backdrop-blur-md relative overflow-hidden">
-              <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
-                <div className="flex items-center gap-4 text-center sm:text-left">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30 shrink-0">
-                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1084-.188.0438-.429-.1442-.5374-.188-.1085-.429-.0439-.5374.1442l-2.0227 3.5033c-1.4827-.6786-3.1384-1.0583-4.9232-1.0583-1.7848 0-3.4405.3797-4.9232 1.0583L5.3032 5.4713c-.1084-.188-.3494-.2527-.5374-.1442-.188.1084-.2526.3494-.1442.5374l1.996 3.4572C3.0645 11.2384 1 14.8329 1 19h22c0-4.1671-2.0645-7.7616-5.1185-9.6786"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                        App Oficial Android
-                      </span>
-                      <span className="text-xs font-semibold text-slate-400">
-                        {apkConfig.version || 'v1.2.0'} • {apkConfig.file_size || '10.8 MB'}
-                      </span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-white">
-                      Descarga {branding.site_title || 'Descargador Pro'} para Android
-                    </h3>
-                    <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-                      {apkConfig.release_notes || 'Descargas ultra rápidas en segundo plano, soporte para estados de WhatsApp y reproductor nativo integrado.'}
-                    </p>
-                  </div>
+        {/* 📱 Promoción Oficial App Android APK */}
+        {apkConfig?.enabled && (
+          <div className="max-w-4xl mx-auto mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-blue-950/40 border border-emerald-500/30 shadow-xl shadow-emerald-950/20 backdrop-blur-md relative overflow-hidden">
+            <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
+              <div className="flex items-center gap-4 text-center sm:text-left">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-600/30 shrink-0">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1084-.188.0438-.429-.1442-.5374-.188-.1085-.429-.0439-.5374.1442l-2.0227 3.5033c-1.4827-.6786-3.1384-1.0583-4.9232-1.0583-1.7848 0-3.4405.3797-4.9232 1.0583L5.3032 5.4713c-.1084-.188-.3494-.2527-.5374-.1442-.188.1084-.2526.3494-.1442.5374l1.996 3.4572C3.0645 11.2384 1 14.8329 1 19h22c0-4.1671-2.0645-7.7616-5.1185-9.6786"/>
+                  </svg>
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+                <div>
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      App Oficial Android
+                    </span>
+                    <span className="text-xs font-semibold text-slate-400">
+                      {apkConfig.version || 'v1.2.0'} • {apkConfig.file_size || '10.8 MB'}
+                    </span>
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white">
+                    Descarga {branding.site_title || 'Descargador Pro'} para Android
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                    {apkConfig.release_notes || 'Descargas ultra rápidas en segundo plano, soporte para estados de WhatsApp y reproductor nativo integrado.'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+                <a
+                  href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
+                  download
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95"
+                >
+                  <svg className="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Descargar APK</span>
+                </a>
+                {apkConfig.playstore_url && (
                   <a
-                    href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
-                    download
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-95"
+                    href={apkConfig.playstore_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-white font-semibold text-xs border border-slate-700 transition-all"
                   >
-                    <svg className="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    <span>Descargar APK</span>
+                    Google Play
                   </a>
-                  {apkConfig.playstore_url && (
-                    <a
-                      href={apkConfig.playstore_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700/80 text-white font-semibold text-xs border border-slate-700 transition-all"
-                    >
-                      Google Play
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Banner Top (Top of Page) */}
-          {modules.adsense_enabled !== false && (
-            <div className="max-w-4xl mx-auto mb-8">
-              <EzoicAd placeholderId={101} />
-            </div>
-          )}
-
-          {/* 2. Herramientas - CON ID PARA SCROLL */}
-          <section id="herramientas" className="max-w-4xl mx-auto mb-16">
-            <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-xl border border-gray-200/80 dark:border-slate-800 p-6 sm:p-8 transition-colors">
-              <div className="text-center mb-8">
-                <h1 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
-                  {t.toolsCard.title}
-                </h1>
-                <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300 max-w-2xl mx-auto mt-2">
-                  {t.toolsCard.subtitle}
-                </p>
-              </div>
-
-              {/* Platform Tabs */}
-              <div className="max-w-4xl mx-auto mb-8">
-                <PlatformTabs activePlatform={activePlatform} onPlatformChange={setActivePlatform} modules={modules} />
-              </div>
-
-              {/* Platform Content + Under Title Ad */}
-              <div className="max-w-4xl mx-auto">
-                {modules.adsense_enabled !== false && (
-                  <div className="mb-6">
-                    <EzoicAd placeholderId={102} />
-                  </div>
                 )}
-                {renderPlatform()}
-              </div>
-
-              {/* Video Rewards - DENTRO DE HERRAMIENTAS */}
-              <div className="max-w-4xl mx-auto mt-8">
-                <VideoRewardsAds position="left" />
-              </div>
-
-              {/* Aviso Legal */}
-              <div className="max-w-4xl mx-auto mt-8 p-4 bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl">
-                <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 text-center">
-                  <strong>{t.toolsCard.legalNoticeTitle}</strong> {t.toolsCard.legalNoticeText}
-                </p>
               </div>
             </div>
-          </section>
-
-          {/* 3. Blog Preview (controlado por módulo) */}
-          {modules.blog_enabled !== false && (
-            <section className="max-w-4xl mx-auto mb-16">
-              <BlogPreview />
-            </section>
-          )}
-
-          {/* Video Rewards - DESPUÉS DEL BLOG */}
-          <div className="max-w-4xl mx-auto mb-16">
-            <VideoRewardsAds position="left" />
           </div>
+        )}
 
-          {/* 5. SEO Content Section */}
-          <section className="mb-16">
-            <SEOContentSection />
-          </section>
-
-          {/* 6. Expertise Section */}
-          <section className="mb-16">
-            <ExpertiseSection />
-          </section>
-
-          {/* 4. Features Section */}
-          <FeaturesSection />
-
-          {/* Video Rewards - ANTES DEL FINAL */}
-          <div className="max-w-4xl mx-auto mt-8">
-            <VideoRewardsAds position="right" />
+        {/* 🏆 Leaderboard de Alto RPM (Above the Fold) */}
+        {modules.adsense_enabled !== false && (
+          <div className="max-w-4xl mx-auto mb-6">
+            <AdBannerSlot type="leaderboard" />
           </div>
+        )}
 
-          {/* Banner Final (Bottom of Page) */}
-          <div className="max-w-4xl mx-auto mt-16">
-            <EzoicAd placeholderId={103} />
+        {/* 2. Herramientas de Descarga */}
+        <section id="herramientas" className="max-w-4xl mx-auto mb-16">
+          <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-xl border border-gray-200/80 dark:border-slate-800 p-6 sm:p-8 transition-colors">
+            <div className="text-center mb-8">
+              <h1 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
+                {t.toolsCard.title}
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300 max-w-2xl mx-auto mt-2">
+                {t.toolsCard.subtitle}
+              </p>
+            </div>
+
+            {/* Platform Tabs */}
+            <div className="max-w-4xl mx-auto mb-8">
+              <PlatformTabs activePlatform={activePlatform} onPlatformChange={setActivePlatform} modules={modules} />
+            </div>
+
+            {/* Platform Content + In-Feed Ad */}
+            <div className="max-w-4xl mx-auto">
+              {renderPlatform()}
+
+              {modules.adsense_enabled !== false && activePlatform !== 'youtube' && (
+                <div className="my-6">
+                  <AdBannerSlot type="in-feed" />
+                </div>
+              )}
+            </div>
+
+            {/* Aviso Legal */}
+            <div className="max-w-4xl mx-auto mt-8 p-4 bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-2xl">
+              <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-300 text-center">
+                <strong>{t.toolsCard.legalNoticeTitle}</strong> {t.toolsCard.legalNoticeText}
+              </p>
+            </div>
           </div>
-        </main>
+        </section>
 
-        {/* Sidebar Right */}
-        <aside className="hidden lg:block w-64 fixed right-0 top-20 h-[calc(100vh-5rem)] z-30 p-4">
-          <EzoicAd placeholderId={105} className="h-full" />
-        </aside>
-      </div>
+        {/* 3. Guía Paso a Paso */}
+        <HowItWorksSteps />
 
-      <Footer />
+        {/* 4. Blog Preview */}
+        {modules.blog_enabled !== false && (
+          <section className="max-w-4xl mx-auto mb-16">
+            <BlogPreview />
+          </section>
+        )}
+
+        {/* 5. SEO Content Section */}
+        <section className="mb-16">
+          <SEOContentSection />
+        </section>
+
+        {/* 6. Expertise Section */}
+        <section className="mb-16">
+          <ExpertiseSection />
+        </section>
+
+        {/* 7. Features Section */}
+        <FeaturesSection />
+
+        {/* 8. Billboard Final (Pre-Footer) */}
+        {modules.adsense_enabled !== false && (
+          <div className="max-w-4xl mx-auto my-12">
+            <AdBannerSlot type="billboard" />
+          </div>
+        )}
+      </main>
+
+      <Footer modules={modules} />
     </div>
   )
 }

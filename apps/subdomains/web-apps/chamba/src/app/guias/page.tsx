@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BookOpen, Clock, Calendar, ArrowRight, ShieldCheck, Sparkles, CheckCircle2, ChevronRight, FileText, Search } from 'lucide-react';
+import { BookOpen, Clock, Calendar, ArrowRight, ShieldCheck, CheckCircle2, ChevronRight, FileText, Search } from 'lucide-react';
 import { getAllGuias } from '@/data/guias';
 import { SITE_URL } from '@/lib/siteConfig';
 
@@ -70,7 +70,7 @@ export default function GuiasIndexPage() {
       {/* Hero Header */}
       <section className="relative overflow-hidden pt-12 pb-16 border-b border-slate-200 dark:border-white/10 bg-white/60 dark:bg-transparent">
         <div className="absolute inset-0 bg-radial-at-c from-emerald-500/10 via-transparent to-transparent pointer-events-none" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-mono mb-6" aria-label="Breadcrumb">
@@ -81,12 +81,12 @@ export default function GuiasIndexPage() {
 
           <div className="max-w-3xl space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-semibold">
-              <Sparkles size={13} />
+              <BookOpen size={13} />
               <span>Centro de Conocimiento y Empleo Público</span>
             </div>
-            
+
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-display tracking-tight text-slate-900 dark:text-white leading-tight">
-              Guías Oficiales para <span className="bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">Trabajar en el Estado</span>
+              Guías Oficiales para <span className="text-emerald-700 dark:text-emerald-400">Trabajar en el Estado</span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-sans">

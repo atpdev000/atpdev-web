@@ -24,7 +24,8 @@ import {
   Sun,
   Moon,
   UtensilsCrossed,
-  QrCode
+  QrCode,
+  ScanLine
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -151,6 +152,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           icon: <QrCode size={17} />, 
           href: "/dashboard/lectorqr",
           badge: "3010"
+        },
+        { 
+          label: "DNI Scanner Pro", 
+          icon: <ScanLine size={17} />, 
+          href: "/dashboard/dni",
+          badge: "3012"
         },
       ]
     },

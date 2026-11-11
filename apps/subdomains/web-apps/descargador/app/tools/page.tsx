@@ -1,6 +1,6 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, Zap, Shield, Layers } from 'lucide-react'
 import { FEATURES } from '@/lib/featureFlags'
@@ -11,9 +11,37 @@ import TiktokDownloader from '@/components/platforms/TiktokDownloader'
 import InstagramDownloader from '@/components/platforms/InstagramDownloader'
 import ThreadsDownloader from '@/components/platforms/ThreadsDownloader'
 import TwitterDownloader from '@/components/platforms/TwitterDownloader'
+import WhatsappStatusDownloader from '@/components/platforms/WhatsappStatusDownloader'
 
 export default function ToolsPage() {
   const [activePlatform, setActivePlatform] = useState<Platform>('facebook')
+  const [modules, setModules] = useState<Record<string, boolean>>({
+    youtube_enabled: false,
+    tiktok_enabled: true,
+    facebook_enabled: true,
+    instagram_enabled: true,
+    twitter_enabled: true,
+    threads_enabled: true,
+    whatsapp_enabled: true,
+  })
+
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.modules) setModules(data.modules)
+      })
+      .catch(() => {})
+
+    try {
+      const channel = new BroadcastChannel('descargador_theme_channel')
+      channel.onmessage = (event) => {
+        if (event.data?.modules) setModules(event.data.modules)
+        if (event.data?.payload?.modules) setModules(event.data.payload.modules)
+      }
+      return () => channel.close()
+    } catch (e) {}
+  }, [])
 
   const renderPlatform = () => {
     switch (activePlatform) {
@@ -29,6 +57,8 @@ export default function ToolsPage() {
         return <ThreadsDownloader />
       case 'twitter':
         return <TwitterDownloader />
+      case 'whatsapp':
+        return <WhatsappStatusDownloader />
       default:
         return <FacebookDownloader />
     }
@@ -57,7 +87,7 @@ export default function ToolsPage() {
           Descargador Multimedia Pro
         </h1>
         <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
-          Descarga videos de Facebook, TikTok, YouTube, Instagram, Threads y Twitter en HD y extrae audio en MP3 de forma rápida, segura y 100% gratuita.
+          Descarga videos de Facebook, TikTok, Instagram, Threads y Twitter en HD y extrae audio en MP3 de forma rápida, segura y 100% gratuita.
         </p>
       </div>
 
@@ -80,14 +110,39 @@ export default function ToolsPage() {
       {/* Descargador principal */}
       <div className="bg-white dark:bg-slate-900/90 rounded-3xl shadow-xl p-5 sm:p-8 mb-12 border border-slate-200 dark:border-slate-800">
         <div className="max-w-4xl mx-auto">
-          <PlatformTabs activePlatform={activePlatform} onPlatformChange={setActivePlatform} />
+          <PlatformTabs activePlatform={activePlatform} onPlatformChange={setActivePlatform} modules={modules} />
           <div className="mt-8">
             {renderPlatform()}
           </div>
-          <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-wrap justify-center gap-4 text-xs font-semibold">
-            <Link href="/tools/facebook" className="text-blue-600 dark:text-blue-400 hover:underline">Guía Facebook HD →</Link>
-            <Link href="/tools/tiktok" className="text-pink-600 dark:text-pink-400 hover:underline">Guía TikTok Sin Logo →</Link>
-            {FEATURES.YOUTUBE_ENABLED && <Link href="/tools/youtube" className="text-red-600 dark:text-red-400 hover:underline">Guía YouTube 4K →</Link>}
+          <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center mb-4">
+              Herramientas y Guías Especializadas por Red Social
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 text-xs font-semibold">
+              <Link href="/tools/facebook" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                Facebook HD & Reels →
+              </Link>
+              <Link href="/tools/tiktok" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                TikTok Sin Marca →
+              </Link>
+              <Link href="/tools/instagram" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                Instagram Reels & Video →
+              </Link>
+              <Link href="/tools/twitter" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                Twitter / X Video & GIF →
+              </Link>
+              <Link href="/tools/threads" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                Meta Threads Video →
+              </Link>
+              <Link href="/tools/whatsapp" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                WhatsApp Estados →
+              </Link>
+              {modules.youtube_enabled && (
+                <Link href="/tools/youtube" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
+                  YouTube 4K & MP3 →
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>

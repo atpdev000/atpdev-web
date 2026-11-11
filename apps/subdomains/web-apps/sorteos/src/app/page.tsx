@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { 
   Sparkles, Gift, ShieldCheck, ArrowRight, 
   ListOrdered, Disc, Dices, CircleDollarSign, 
-  Hash, Users2, Zap, Check, HelpCircle
+  Hash, Users2, Zap, Check, HelpCircle, BookOpen, Clock
 } from 'lucide-react';
 import { InstagramIcon, FacebookIcon, YoutubeIcon } from '@/components/SocialIcons';
 import { HomeHashVerifier } from '@/components/HomeHashVerifier';
 import { PricingSection } from '@/components/PricingSection';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
+import { BLOG_POSTS } from '@/lib/blog-data';
 
 export default function HomePage() {
   const { t } = useLanguage();
@@ -287,6 +288,67 @@ export default function HomePage() {
               {t('home_step3_desc')}
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ─── BLOG GUIDES PREVIEW SECTION ───────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-center sm:text-left">
+            <span className="text-xs font-bold text-pink-600 dark:text-purple-400 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
+              <BookOpen className="w-4 h-4" />
+              <span>Nuestras Guías y Tutoriales</span>
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 dark:text-white">
+              Aprende a Crear Sorteos Transparentes y Legales
+            </h2>
+          </div>
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-pink-600 dark:text-purple-400 hover:underline"
+          >
+            <span>Ver todas las guías ({BLOG_POSTS.length})</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {BLOG_POSTS.slice(0, 3).map((post) => (
+            <div
+              key={post.id}
+              className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 hover:border-pink-500/40 dark:hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md group"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-mono text-slate-500 dark:text-zinc-500">
+                  <span className="text-pink-600 dark:text-purple-400 font-bold px-2 py-0.5 rounded-md bg-pink-50 dark:bg-pink-500/10 text-[11px]">
+                    {post.category}
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px]"><Clock className="w-3 h-3" /> {post.readTime}</span>
+                </div>
+
+                <Link href={`/blog/${post.slug}`}>
+                  <h3 className="text-base sm:text-lg font-bold font-display text-slate-900 dark:text-white group-hover:text-pink-600 dark:hover:text-purple-400 transition-colors leading-snug line-clamp-2">
+                    {post.title}
+                  </h3>
+                </Link>
+
+                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed line-clamp-3">
+                  {post.excerpt}
+                </p>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400 text-[11px]">{post.date}</span>
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="text-pink-600 dark:text-purple-400 group-hover:translate-x-1 font-bold flex items-center gap-1 transition-all"
+                >
+                  <span>Leer guía</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

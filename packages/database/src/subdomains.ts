@@ -42,6 +42,9 @@ export interface SubdomainSEO {
   google_analytics_id?: string;
   microsoft_clarity_id?: string;
   google_search_console_token?: string;
+  google_indexing_enabled?: boolean;
+  google_indexing_client_email?: string;
+  google_indexing_private_key?: string;
 }
 
 export interface SubdomainModules {
@@ -80,6 +83,7 @@ export interface SubdomainMonetization {
   adsense_client_id?: string;
   adsense_slot_header?: string;
   adsense_slot_incontent?: string;
+  adsense_slot_sidebar?: string;
   adsense_slot_footer?: string;
   ezoic_enabled?: boolean;
   ezoic_verification_code?: string;
@@ -215,7 +219,18 @@ export const DEFAULT_CHAMBA_CONFIG: SubdomainConfig = {
       'convocatorias cas 2026',
       'servir convocatorias'
     ],
-    canonical_url: 'https://atpdev.dev'
+    canonical_url: 'https://empleos.atpdev.dev',
+    google_analytics_id: '',
+    microsoft_clarity_id: '',
+    google_search_console_token: ''
+  },
+  monetization: {
+    adsense_enabled: true,
+    adsense_client_id: 'ca-pub-5414009811868137',
+    adsense_slot_header: '',
+    adsense_slot_incontent: '',
+    adsense_slot_sidebar: '',
+    adsense_slot_footer: ''
   },
   modules: {
     scraper_enabled: true,
@@ -381,30 +396,30 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
   },
   branding: {
     site_title: 'descargador pro',
-    site_tagline: 'Descarga Videos y Audios de YouTube, TikTok y Facebook en Alta Calidad',
+    site_tagline: 'Descarga Videos y Audios de Facebook, TikTok e Instagram en Alta Calidad',
     hero_badge: 'Motor Ultra Rápido • Sin Marcas de Agua • 1080p/4K',
     hero_title_prefix: 'Descarga videos y audios gratis con',
     hero_title_highlight: 'Descargador Pro',
-    hero_description: 'La herramienta más potente para descargar contenido multimedia de YouTube, TikTok, Facebook e Instagram en MP4 o MP3 al instante.',
+    hero_description: 'La herramienta más potente para descargar contenido multimedia de Facebook HD, TikTok sin marca de agua, Instagram y Twitter en MP4 o MP3 al instante.',
     logo_url: '/icon.png',
     favicon_url: '/favicon.ico',
     announcement_text: '⚡ Descargas ilimitadas en máxima calidad sin marcas de agua.',
     announcement_enabled: true
   },
   seo: {
-    meta_title: 'Descargador Pro — Descargar Videos de YouTube, TikTok y Facebook Gratis',
-    meta_description: 'Descarga videos y música en MP4 y MP3 de YouTube, TikTok sin marca de agua y Facebook en alta definición gratis y rápido.',
+    meta_title: 'Descargador Pro — Descargar Videos de Facebook HD, TikTok Sin Marca de Agua e Instagram Gratis',
+    meta_description: 'Descarga videos y música en MP4 y MP3 de TikTok sin marca de agua, Facebook en HD e Instagram en alta definición gratis y rápido.',
     keywords: [
-      'descargar videos youtube',
       'descargar tiktok sin marca de agua',
-      'descargar video facebook',
+      'descargar video facebook hd',
+      'descargar reels instagram',
       'convertidor mp3',
       'bajar videos online'
     ],
     canonical_url: 'https://descargador.atpdev.dev'
   },
   modules: {
-    youtube_enabled: true,
+    youtube_enabled: false,
     tiktok_enabled: true,
     facebook_enabled: true,
     instagram_enabled: true,
@@ -550,11 +565,76 @@ export const DEFAULT_MAGIC_CONFIG: SubdomainConfig = {
   updated_at: new Date().toISOString()
 };
 
+export const DEFAULT_DNI_CONFIG: SubdomainConfig = {
+  id: 'dni',
+  name: 'DNI Master Scanner Pro',
+  slug: 'dni',
+  subdomain: 'dni',
+  full_domain: 'dni.atpdev.dev',
+  devPort: 3012,
+  category: 'Escáner de Documentos & DNI a PDF',
+  status: 'active',
+  theme: {
+    accent_color: '#0284c7',
+    accent_name: 'blue',
+    theme_mode: 'dark',
+    radius_style: 'rounded-2xl',
+    radius_scale: 'medium',
+    seed_color: '#0284c7',
+    color_theme: 'vibrant',
+    primary_color: '#0284c7',
+    secondary_color: '#38bdf8',
+    tertiary_color: '#10b981',
+    neutral_color: '#090d16',
+    font_headline: 'Inter',
+    font_body: 'Inter',
+    font_label: 'Inter'
+  },
+  branding: {
+    site_title: 'DNI Master Scanner Pro',
+    site_tagline: 'Escáner Inteligente de DNI a PDF con Eliminación Total de Fondo',
+    hero_badge: 'Escala 1:1 Oficial • Formato A4 • Recorte Cuadrilátero HD',
+    hero_title_prefix: 'Escanea tu DNI y elimina el fondo al 100% con',
+    hero_title_highlight: 'DNI Master',
+    hero_description: 'Transforma fotos de tu DNI tomadas con el celular en un documento A4 oficial listo para trámites, sin sombras, con bordes redondeados y escala real.',
+    logo_url: '/logo.svg',
+    favicon_url: '/logo.svg',
+    announcement_text: '✨ Nuevo motor de homografía y realce CamScanner activo.',
+    announcement_enabled: true
+  },
+  seo: {
+    meta_title: 'DNI Master Scanner Pro — Escanear DNI a PDF Formato A4',
+    meta_description: 'Escanea ambas caras de tu DNI, elimina el fondo automáticamente con perspectiva inteligente y genera un PDF A4 oficial para imprimir o enviar.',
+    keywords: [
+      'escanear dni a pdf',
+      'dni formato a4',
+      'quitar fondo dni',
+      'dni peru pdf',
+      'scanner dni digital',
+      'copia dni imprimir'
+    ],
+    canonical_url: 'https://dni.atpdev.dev'
+  },
+  modules: {
+    pdf_export_enabled: true,
+    word_export_enabled: true,
+    adsense_enabled: true,
+    filters_enabled: true
+  },
+  contact: {
+    email: 'contacto@atpdev.dev',
+    whatsapp: '+51987654321',
+    support_url: 'https://atpdev.dev/contacto'
+  },
+  updated_at: new Date().toISOString()
+};
+
 let inMemoryConfigs: Record<string, SubdomainConfig> = {
   chamba: { ...DEFAULT_CHAMBA_CONFIG },
   sorteos: { ...DEFAULT_SORTEOS_CONFIG },
   descargador: { ...DEFAULT_DESCARGADOR_CONFIG },
-  magic: { ...DEFAULT_MAGIC_CONFIG }
+  magic: { ...DEFAULT_MAGIC_CONFIG },
+  dni: { ...DEFAULT_DNI_CONFIG }
 };
 
 export function listSubdomains(): SubdomainConfig[] {

@@ -1,11 +1,52 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FEATURES } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
 
-export default function Footer() {
+const CURRENT_YEAR = 2026;
+
+interface FooterProps {
+  modules?: Record<string, boolean>
+}
+
+export default function Footer({ modules }: FooterProps) {
   const { t } = useI18n()
+  const [isYoutubeActive, setIsYoutubeActive] = useState<boolean>(
+    modules && typeof modules.youtube_enabled === 'boolean'
+      ? modules.youtube_enabled
+      : false
+  )
+
+  useEffect(() => {
+    if (modules && typeof modules.youtube_enabled === 'boolean') {
+      setIsYoutubeActive(modules.youtube_enabled)
+      return
+    }
+
+    fetch('/api/theme')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.modules?.youtube_enabled !== undefined) {
+          setIsYoutubeActive(data.modules.youtube_enabled)
+        }
+      })
+      .catch(() => {})
+
+    try {
+      const channel = new BroadcastChannel('descargador_theme_channel')
+      channel.onmessage = (event) => {
+        if (event.data?.modules?.youtube_enabled !== undefined) {
+          setIsYoutubeActive(event.data.modules.youtube_enabled)
+        }
+        if (event.data?.payload?.modules?.youtube_enabled !== undefined) {
+          setIsYoutubeActive(event.data.payload.modules.youtube_enabled)
+        }
+      }
+      return () => channel.close()
+    } catch (e) {}
+  }, [modules])
 
   const scrollToTools = () => {
     if (typeof window !== 'undefined') {
@@ -37,10 +78,15 @@ export default function Footer() {
               {t.footer.linksTitle}
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link href="/tools/facebook" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video Facebook</Link></li>
-              <li><Link href="/tools/tiktok" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video TikTok</Link></li>
-              {FEATURES.YOUTUBE_ENABLED && <li><Link href="/tools/youtube" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video YouTube</Link></li>}
-              <li><Link href="/tools" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Herramientas Pro</Link></li>
+              <li><Link href="/tools/facebook" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video Facebook HD</Link></li>
+              <li><Link href="/tools/tiktok" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">TikTok Sin Marca</Link></li>
+              <li><Link href="/tools/instagram" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Instagram Reels & Video</Link></li>
+              <li><Link href="/tools/twitter" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Twitter / X & GIFs</Link></li>
+              <li><Link href="/tools/threads" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Meta Threads</Link></li>
+              <li><Link href="/tools/whatsapp" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Estados de WhatsApp</Link></li>
+              {isYoutubeActive && (
+                <li><Link href="/tools/youtube" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video YouTube 4K</Link></li>
+              )}
             </ul>
           </div>
 
@@ -72,7 +118,7 @@ export default function Footer() {
 
         <div className="border-t border-slate-200 dark:border-slate-800/80 pt-6 text-center text-xs text-slate-500 dark:text-slate-400">
           <p>
-            &copy; {new Date().getFullYear()} Descargador Pro. {t.footer.rights}
+            &copy; {CURRENT_YEAR} Descargador Pro. {t.footer.rights}
           </p>
           <p className="mt-1 text-[11px] opacity-75">
             Facebook, TikTok, Instagram, Twitter / 𝕏, Threads — Marcas registradas de sus respectivos propietarios.

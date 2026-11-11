@@ -7,7 +7,7 @@ import { RegionesGrid } from "@/components/RegionesGrid";
 import WhatsAppSubscribeWidget from "@/components/WhatsAppSubscribeWidget";
 import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { AdLateralRail } from "@/components/AdLateralRail";
-import { ShieldCheck, Sparkles, Building2, MapPin, ArrowRight, CheckCircle2, Calculator, HelpCircle, FileText, Bot, FileSpreadsheet, Scale, ChevronDown, BookOpen, Clock } from "lucide-react";
+import { ShieldCheck, Building2, MapPin, ArrowRight, CheckCircle2, Calculator, HelpCircle, FileText, UserCheck, FileSpreadsheet, Scale, ChevronDown, BookOpen, Clock } from "lucide-react";
 import { SITE_URL } from "@/lib/siteConfig";
 import { getAllGuias } from "@/data/guias";
 
@@ -119,7 +119,7 @@ export default async function HomePage() {
                 <span className="w-9 h-9 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 flex items-center justify-center font-bold text-xs">
                   CAS
                 </span>
-                <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
+                <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800">
                   Estado
                 </span>
               </div>
@@ -127,7 +127,7 @@ export default async function HomePage() {
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
                   D.L. 1057 (CAS)
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">Convocatorias del Estado y Gobiernos Regionales</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 text-pretty">Convocatorias del Estado y Gobiernos&nbsp;Regionales</p>
               </div>
             </Link>
 
@@ -139,7 +139,7 @@ export default async function HomePage() {
                 <span className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">
                   728
                 </span>
-                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
+                <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
                   Planilla
                 </span>
               </div>
@@ -147,7 +147,7 @@ export default async function HomePage() {
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                   D.L. 728 (Planilla)
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">Estabilidad laboral y beneficios completos de ley</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 text-pretty">Estabilidad laboral con beneficios de&nbsp;ley</p>
               </div>
             </Link>
 
@@ -159,7 +159,7 @@ export default async function HomePage() {
                 <span className="w-9 h-9 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 flex items-center justify-center font-bold text-xs">
                   PRIV
                 </span>
-                <span className="text-[10px] text-blue-700 dark:text-blue-400 font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
+                <span className="text-xs text-blue-700 dark:text-blue-400 font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
                   Corporativo
                 </span>
               </div>
@@ -167,7 +167,7 @@ export default async function HomePage() {
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   Sector Privado
                 </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">Banca, telecomunicaciones e industrias verificadas</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 text-pretty">Banca, telecomunicaciones e industrias&nbsp;verificadas</p>
               </div>
             </Link>
 
@@ -179,7 +179,7 @@ export default async function HomePage() {
                 <span className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center">
                   <MapPin size={18} />
                 </span>
-                <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                   Capital
                 </span>
               </div>
@@ -257,20 +257,22 @@ export default async function HomePage() {
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           <Link
             href="/calculadora-sueldo"
-            className="p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all space-y-3.5 group shadow-xs"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-teal-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex flex-col justify-between group shadow-xs"
           >
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center font-bold">
-              <Calculator size={22} />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                Calculadora de Sueldo Neto
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-teal-500/10 dark:bg-teal-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/30 flex items-center justify-center font-bold shrink-0 shadow-xs shadow-teal-500/10 group-hover:scale-105 transition-transform duration-200">
+                  <Calculator size={22} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                  Calculadora de Sueldo Neto
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed text-pretty">
                 Calcula tu salario líquido y aportes obligatorios de AFP, ONP y 5ta categoría en CAS 1057 y 728.
               </p>
             </div>
-            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1 pt-4">
               <span>Calcular salario</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -278,20 +280,22 @@ export default async function HomePage() {
 
           <Link
             href="/preguntas-entrevista-cas"
-            className="p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all space-y-3.5 group shadow-xs"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-amber-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex flex-col justify-between group shadow-xs"
           >
-            <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center justify-center font-bold">
-              <HelpCircle size={22} />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                Examen & Preguntas CAS
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold shrink-0 shadow-xs shadow-amber-500/10 group-hover:scale-105 transition-transform duration-200">
+                  <HelpCircle size={22} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                  Examen & Preguntas CAS
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed text-pretty">
                 Balotarios interactivos basados en Ley 27444, Contrataciones del Estado y Ética Pública.
               </p>
             </div>
-            <div className="text-xs text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
+            <div className="text-xs text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1 pt-4">
               <span>Practicar examen</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -299,41 +303,45 @@ export default async function HomePage() {
 
           <Link
             href="/simulador-entrevista-ia"
-            className="p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all space-y-3.5 group shadow-xs"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-sky-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex flex-col justify-between group shadow-xs"
           >
-            <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center font-bold">
-              <Bot size={22} />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                Simulador de Entrevista Laboral
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
-                Entrena tus respuestas ante jurados evaluadores de ministerios, SUNAT, Poder Judicial y gobiernos locales.
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-sky-500/10 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 flex items-center justify-center font-bold shrink-0 shadow-xs shadow-sky-500/10 group-hover:scale-105 transition-transform duration-200">
+                  <UserCheck size={22} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                  Simulador de Entrevista Técnica
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed text-pretty">
+                Entrena tus respuestas ante jurados evaluadores de ministerios, SUNAT, Poder Judicial y gobiernos regionales.
               </p>
             </div>
-            <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1">
-              <span>Iniciar simulación</span>
+            <div className="text-xs text-sky-600 dark:text-sky-400 font-semibold flex items-center gap-1 pt-4">
+              <span>Iniciar simulación técnica</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
           </Link>
 
           <Link
             href="/crear-cv-cas"
-            className="p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all space-y-3.5 group shadow-xs"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex flex-col justify-between group shadow-xs"
           >
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center font-bold">
-              <FileSpreadsheet size={22} />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                Generador CV Formato SERVIR
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 flex items-center justify-center font-bold shrink-0 shadow-xs shadow-blue-500/10 group-hover:scale-105 transition-transform duration-200">
+                  <FileSpreadsheet size={22} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  Generador CV Formato SERVIR
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed text-pretty">
                 Genera tu Ficha Resumen de Hoja de Vida estandarizada para postulaciones públicas en PDF y Word.
               </p>
             </div>
-            <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+            <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1 pt-4">
               <span>Crear CV oficial</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -341,20 +349,22 @@ export default async function HomePage() {
 
           <Link
             href="/comparador-regimenes"
-            className="p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all space-y-3.5 group shadow-xs"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-orange-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex flex-col justify-between group shadow-xs"
           >
-            <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center justify-center font-bold">
-              <Scale size={22} />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                Comparador de Regímenes
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-orange-500/10 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 border border-orange-500/30 flex items-center justify-center font-bold shrink-0 shadow-xs shadow-orange-500/10 group-hover:scale-105 transition-transform duration-200">
+                  <Scale size={22} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                  Comparador de Regímenes
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed text-pretty">
                 Compara lado a lado derechos de CTS, Gratificación y Vacaciones entre CAS, D.L. 728 y 276.
               </p>
             </div>
-            <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold flex items-center gap-1">
+            <div className="text-xs text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-1 pt-4">
               <span>Ver comparativa</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -362,20 +372,22 @@ export default async function HomePage() {
 
           <Link
             href="/plantillas-anexos"
-            className="p-5 sm:p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-teal-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all space-y-3.5 group shadow-xs"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 hover:border-rose-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all flex flex-col justify-between group shadow-xs"
           >
-            <div className="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800 flex items-center justify-center font-bold">
-              <FileText size={22} />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
-                Plantillas & Anexos CAS
-              </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-rose-500/10 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center justify-center font-bold shrink-0 shadow-xs shadow-rose-500/10 group-hover:scale-105 transition-transform duration-200">
+                  <FileText size={22} />
+                </div>
+                <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
+                  Plantillas & Anexos CAS
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed text-pretty">
                 Descarga formatos editables de Declaraciones Juradas, Anexo de No Impedimento y Bonificaciones.
               </p>
             </div>
-            <div className="text-xs text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1">
+            <div className="text-xs text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1 pt-4">
               <span>Descargar formatos</span>
               <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -495,8 +507,8 @@ export default async function HomePage() {
                 <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span>¿Dónde encontrar convocatorias de trabajo y empleo formal en el Estado?</span>
               </h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-6">
-                En chamba pro reunimos diariamente las convocatorias públicas vigentes reguladas por la Autoridad Nacional del Servicio Civil (SERVIR), Ministerios, Municipalidades y Gobiernos Regionales, así como vacantes de empresas privadas verificadas, con enlaces directos a las bases oficiales en PDF.
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-6 text-pretty">
+                En chamba pro reunimos diariamente las convocatorias públicas vigentes reguladas por la Autoridad Nacional del Servicio Civil (SERVIR), Ministerios, Municipalidades y Gobiernos Regionales, así como vacantes de empresas privadas&nbsp;verificadas, con enlaces directos a las bases oficiales en PDF.
               </p>
             </div>
 
@@ -505,8 +517,8 @@ export default async function HomePage() {
                 <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span>¿Cuál es la diferencia entre un contrato CAS 1057 y D.L. 728?</span>
               </h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-6">
-                El régimen CAS (D.L. 1057) es el contrato más extendido en el Estado con aguinaldos fijos en julio/diciembre. El régimen 728 es el de la actividad privada con gratificaciones completas (1 sueldo en julio y diciembre) y depósito de CTS. Puedes compararlos al detalle en nuestro <Link href="/comparador-regimenes" className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">Comparador de Regímenes Laborales</Link>.
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-6 text-pretty">
+                El régimen CAS (D.L. 1057) es el contrato más extendido en el Estado con aguinaldos fijos en julio/diciembre. El régimen 728 es el de la actividad privada con gratificaciones completas (1 sueldo en julio y diciembre) y depósito de CTS. Puedes compararlos al detalle en nuestro <Link href="/comparador-regimenes" className="text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">Comparador de Regímenes&nbsp;Laborales</Link>.
               </p>
             </div>
 
@@ -515,7 +527,7 @@ export default async function HomePage() {
                 <CheckCircle2 size={18} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <span>¿Es gratuito postular a los empleos mostrados en chamba pro?</span>
               </h3>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-6">
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pl-6 text-pretty">
                 Sí, el acceso y la postulación son 100% gratuitos y sin cobros sorpresa. Chamba Pro no cobra por consultar bases oficiales ni exige registros obligatorios; te conectamos directamente al portal institucional de la entidad (SUNAT, MINEDU, Poder Judicial, etc.).
               </p>
             </div>

@@ -99,6 +99,13 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (typeof window !== 'undefined' && (window.location.pathname === '/' || window.location.pathname === '')) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // Cerrar dropdowns al hacer click afuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -206,7 +213,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16 sm:h-18">
           
           {/* Logo Brand Sorteos Pro */}
-          <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-600 to-rose-500 p-0.5 shadow-md shadow-pink-500/20 group-hover:scale-105 transition-transform flex items-center justify-center text-white">
               <Gift className="w-5 h-5" />
             </div>

@@ -10,6 +10,9 @@ const nextConfig = {
     PYTHON_BACKEND_URL: process.env.PYTHON_BACKEND_URL,
     NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL,
   },
+  experimental: {
+    cpus: 4,
+  },
   serverExternalPackages: ['yt-dlp-wrap', 'fluent-ffmpeg', 'ffmpeg-static'],
   async headers() {
     return [
@@ -32,6 +35,9 @@ const nextConfig = {
     ]
   },
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',

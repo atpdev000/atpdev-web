@@ -92,6 +92,15 @@ export async function generateMetadata({
   const catInfo = CATEGORIAS_MAP[categoria.toLowerCase()];
   if (!catInfo) return {};
 
+  const allJobs = await getJobPostings();
+  const todayIso = new Date().toISOString().split("T")[0];
+  const hasMatchedJobs = allJobs.some((job) => {
+    if (job.status !== "Vigente") return false;
+    if (job.end_date && job.end_date < todayIso) return false;
+    const sector = (job.sector_type || "").toLowerCase();
+    return sector.includes(catInfo.sector_match.toLowerCase());
+  });
+
   const title = `Convocatorias ${catInfo.name} 2026 — Empleos y Trabajo en Perú`;
   const description = `Consulta convocatorias vigentes de ${catInfo.name} en el Estado Peruano y sector privado. Bases oficiales en PDF, requisitos, cronograma y salarios.`;
   const canonicalUrl = `${SITE_URL}/convocatorias/${categoria}`;
@@ -99,6 +108,10 @@ export async function generateMetadata({
   return {
     title,
     description,
+    robots: {
+      index: hasMatchedJobs,
+      follow: true,
+    },
     keywords: [
       `convocatorias ${catInfo.name.toLowerCase()} 2026`,
       `trabajo ${catInfo.name.toLowerCase()}`,
@@ -160,6 +173,17 @@ export default async function ConvocatoriaCategoriaPage({
   });
 
   const totalVacancies = matchedJobs.reduce((acc, curr) => acc + (curr.vacancies_count || 1), 0);
+
+  const fallbackActiveJobs =
+    matchedJobs.length === 0
+      ? allJobs
+          .filter((job) => {
+            if (job.status !== "Vigente") return false;
+            if (job.end_date && job.end_date < todayIso) return false;
+            return true;
+          })
+          .slice(0, 6)
+      : [];
 
   // Structured Data: BreadcrumbList
   const breadcrumbJsonLd = {
@@ -340,17 +364,28 @@ export default async function ConvocatoriaCategoriaPage({
             )}
           </>
         ) : (
-          <div className="p-10 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-center space-y-4 max-w-xl mx-auto my-12">
-            <div className="w-14 h-14 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
-              <Briefcase size={28} />
+          <div className="space-y-8">
+            <div className="p-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm text-center space-y-3 max-w-2xl mx-auto">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+                <Briefcase size={24} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
+                Sin convocatorias activas de {catInfo.name} hoy — Mostrando otras plazas vigentes
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                Mientras las instituciones actualizan sus bases en esta modalidad, revisa estas convocatorias vigentes en otros regímenes laborales:
+              </p>
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white font-display">
-              No hay convocatorias activas de {catInfo.name} en este momento
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Las entidades públicas renuevan sus ofertas constantemente. Revisa otras modalidades o explora todas las vacantes vigentes.
-            </p>
-            <div className="pt-2">
+
+            {fallbackActiveJobs.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {fallbackActiveJobs.map((job) => (
+                  <JobCard key={job.id} job={job} />
+                ))}
+              </div>
+            )}
+
+            <div className="text-center pt-2">
               <Link
                 href="/empleos"
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs font-display hover:bg-emerald-700 transition-colors shadow-sm"
@@ -363,10 +398,12 @@ export default async function ConvocatoriaCategoriaPage({
         )}
       </div>
 
-      {/* AdSense Leaderboard Slot */}
-      <div className="pt-6">
-        <AdBannerSlot type="leaderboard" />
-      </div>
+      {/* AdSense Leaderboard Slot — Solo se renderiza cuando hay convocatorias del régimen (AdSense Policy) */}
+      {matchedJobs.length > 0 && (
+        <div className="pt-6">
+          <AdBannerSlot type="leaderboard" />
+        </div>
+      )}
     </div>
   );
 }

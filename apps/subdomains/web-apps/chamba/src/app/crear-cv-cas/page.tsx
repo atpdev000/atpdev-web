@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { 
   ChevronRight, Landmark, Briefcase, FileCheck, ShieldCheck, 
-  HelpCircle, ArrowRight, Award, CheckCircle2, Sparkles, FileText, Lock
+  HelpCircle, ArrowRight, Award, CheckCircle2, FileText, Lock
 } from 'lucide-react';
 import { CvCasGenerator } from '@/components/CvCasGenerator';
 import { AdBannerSlot } from '@/components/AdBannerSlot';

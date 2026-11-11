@@ -757,11 +757,10 @@ html.light button[class*="bg-slate-900"]:hover {
   color: #0f172a !important;
 }
 
-/* Title Neon Glow in Light Mode (High Contrast text gradient) */
+/* Title Solid High Contrast in Light Mode */
 html.light .title-neon-glow {
-  background: linear-gradient(135deg, var(--accent-emerald, #059669) 0%, color-mix(in srgb, var(--accent-emerald, #059669) 70%, #0284c7) 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  color: var(--accent-emerald, #047857) !important;
+  font-weight: 800;
 }
 
 html.light .glass-card-hover:hover {
@@ -981,9 +980,8 @@ html.light footer a:hover {
 }
 
 .title-neon-glow {
-  background: linear-gradient(135deg, #ffffff 0%, var(--accent-emerald, #34d399) 45%, #38bdf8 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+  color: var(--accent-emerald, #34d399) !important;
+  font-weight: 800;
 }
 
 /* ============================================================

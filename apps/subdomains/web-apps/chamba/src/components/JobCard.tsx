@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { JobPosting, isCompetitorUrl } from "@atpdev/database";
-import { ShieldCheck, MapPin, Users, GraduationCap, ArrowRight, FileText } from "lucide-react";
+import { JobPosting, isCompetitorUrl, cleanEntityDisplayName, decodeHtmlEntities } from "@atpdev/database";
+import { MapPin, Users, GraduationCap, ArrowRight, FileText } from "lucide-react";
 import { EntityLogo } from "@/components/EntityLogo";
 import { JobCountdownClock } from "@/components/JobCountdownClock";
 
@@ -9,6 +9,9 @@ interface JobCardProps {
 }
 
 export function JobCard({ job }: JobCardProps) {
+  const cleanEntity = cleanEntityDisplayName(job.entity_name) || decodeHtmlEntities(job.entity_name) || job.entity_name;
+  const cleanTitle = decodeHtmlEntities(job.title) || job.title;
+
   const rawBases = (job.bases_pdf_url && job.bases_pdf_url.startsWith('http') && !isCompetitorUrl(job.bases_pdf_url))
     ? job.bases_pdf_url
     : job.plazas?.find(p => p.bases_url && p.bases_url.startsWith('http') && !isCompetitorUrl(p.bases_url) && (
@@ -25,36 +28,31 @@ export function JobCard({ job }: JobCardProps) {
     )
   );
 
+  const basesHref = isDirectBases && rawBases
+    ? rawBases
+    : `/api/bases-doc/${encodeURIComponent(job.slug)}`;
+
   return (
     <div className="p-5 sm:p-6 rounded-xl flex flex-col justify-between gap-5 relative group overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 transition-all bg-white dark:bg-slate-900 shadow-sm hover:shadow-md">
       {/* Top Banner & Entity Header */}
       <Link
         href={`/empleos/${job.slug}`}
         className="block group/entity"
-        aria-label={`Convocatoria de empleo ${job.title} en ${job.entity_name}`}
-        title={`Convocatoria de empleo ${job.title} en ${job.entity_name}`}
+        aria-label={`Convocatoria de empleo ${cleanTitle} en ${cleanEntity}`}
+        title={`Convocatoria de empleo ${cleanTitle} en ${cleanEntity}`}
       >
         <div className="rounded-xl p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 group-hover/entity:border-emerald-500/40 transition-all">
-          <EntityLogo entityName={job.entity_name} logoUrl={job.entity_logo} size="banner" />
+          <EntityLogo entityName={cleanEntity} logoUrl={job.entity_logo} size="banner" />
         </div>
         <div className="flex items-center justify-between gap-2 mt-2.5 px-0.5">
           <span className="block text-xs font-display font-bold text-slate-800 dark:text-slate-200 group-hover/entity:text-emerald-600 dark:group-hover/entity:text-emerald-400 transition-colors truncate">
-            {job.entity_name}
+            {cleanEntity}
           </span>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            {isDirectBases ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 px-2 py-0.5 rounded-md shadow-sm" title="Bases oficiales en PDF disponibles">
-                <FileText size={10} className="text-emerald-600 dark:text-emerald-400" />
-                <span>PDF Bases</span>
-              </span>
-            ) : (
-              job.entity_verified && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 px-1.5 py-0.5 rounded" title="RUC y entidad oficial verificada">
-                  <ShieldCheck size={11} />
-                  <span>Verificado</span>
-                </span>
-              )
-            )}
+            <span className="inline-flex items-center gap-1 text-xs font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 px-2.5 py-0.5 rounded-md shadow-sm" title="Bases oficiales y perfil del puesto disponibles">
+              <FileText size={11} className="text-emerald-600 dark:text-emerald-400" />
+              <span>PDF Bases</span>
+            </span>
           </div>
         </div>
       </Link>
@@ -69,7 +67,7 @@ export function JobCard({ job }: JobCardProps) {
 
           {/* Regime Pill */}
           <div className="flex items-center gap-2">
-            <span className={`text-[10px] font-mono font-black px-2.5 py-0.5 rounded-full border flex-shrink-0 shadow-sm ${
+            <span className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-full border flex-shrink-0 shadow-sm ${
               job.sector_type === 'CAS 1057' 
                 ? 'bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/40' 
                 : job.sector_type === 'D.L. 728' 
@@ -85,10 +83,10 @@ export function JobCard({ job }: JobCardProps) {
         <Link
           href={`/empleos/${job.slug}`}
           className="block group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors"
-          aria-label={`Ver convocatoria para ${job.title}`}
+          aria-label={`Ver convocatoria para ${cleanTitle}`}
         >
           <h3 className="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white leading-snug line-clamp-2 group-hover:translate-x-0.5 transition-transform group-hover:text-emerald-600 dark:group-hover:text-emerald-300">
-            {job.title}
+            {cleanTitle}
           </h3>
         </Link>
 
@@ -120,22 +118,20 @@ export function JobCard({ job }: JobCardProps) {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          {isDirectBases && rawBases && (
-            <a
-              href={rawBases}
-              target="_blank"
-              rel="nofollow noopener noreferrer"
-              className="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-emerald-950/40 text-slate-700 hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300 font-bold font-mono text-xs transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-700 hover:border-emerald-400/50 shadow-xs"
-              title="Abrir o descargar documento oficial de bases"
-            >
-              <FileText size={12} className="text-emerald-600 dark:text-emerald-400" />
-              <span className="hidden sm:inline">Bases</span>
-            </a>
-          )}
+          <a
+            href={basesHref}
+            target="_blank"
+            rel="nofollow noopener noreferrer"
+            className="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-emerald-950/40 text-slate-700 hover:text-emerald-700 dark:text-slate-300 dark:hover:text-emerald-300 font-bold font-mono text-xs transition-all flex items-center gap-1 border border-slate-200 dark:border-slate-700 hover:border-emerald-400/50 shadow-xs"
+            title="Abrir o descargar documento oficial de bases"
+          >
+            <FileText size={12} className="text-emerald-600 dark:text-emerald-400" />
+            <span className="hidden sm:inline">Bases</span>
+          </a>
           <Link
             href={`/empleos/${job.slug}`}
             className="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition-colors flex items-center justify-center gap-1.5 group/btn cursor-pointer shadow-xs"
-            aria-label={`Ver detalles, bases y requisitos de ${job.title}`}
+            aria-label={`Ver detalles, bases y requisitos de ${cleanTitle}`}
           >
             <span>Ver Convocatoria</span>
             <ArrowRight size={13} className="group-hover/btn:translate-x-0.5 transition-transform" />

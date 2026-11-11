@@ -22,8 +22,15 @@ function escapeXml(unsafe?: string | null): string {
 export async function GET() {
   const jobs = await getJobPostings();
   const baseUrl = SITE_URL;
+  const todayIso = new Date().toISOString().split('T')[0];
 
-  const itemsXml = jobs
+  const activeJobs = jobs.filter((job) => {
+    if (job.status !== 'Vigente') return false;
+    if (job.end_date && job.end_date.trim() < todayIso) return false;
+    return true;
+  });
+
+  const itemsXml = activeJobs
     .slice(0, 100)
     .map((job) => {
       const pubDate = new Date(job.created_at || Date.now()).toUTCString();

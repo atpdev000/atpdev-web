@@ -21,6 +21,9 @@ const nextConfig = {
     return config;
   },
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
@@ -65,7 +68,9 @@ const nextConfig = {
       { source: '/entidades', destination: '/organizaciones', permanent: true },
       { source: '/publicar-oferta', destination: '/publicar-empleo', permanent: true },
       { source: '/publicar', destination: '/publicar-empleo', permanent: true },
-      { source: '/buscador', destination: '/empleos', permanent: true }
+      { source: '/buscador', destination: '/empleos', permanent: true },
+      { source: '/blog', destination: '/guias', permanent: true },
+      { source: '/blog/:slug', destination: '/guias/:slug', permanent: true }
     ];
   }
 };

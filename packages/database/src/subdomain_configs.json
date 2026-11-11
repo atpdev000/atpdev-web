@@ -185,23 +185,23 @@
     },
     "branding": {
       "site_title": "Descargador Pro",
-      "site_tagline": "Descarga Videos y Audios de YouTube, TikTok y Facebook en Alta Calidad",
+      "site_tagline": "Descarga Videos y Audios de Facebook, TikTok e Instagram en Alta Calidad",
       "hero_badge": "Motor Ultra Rápido • Sin Marcas de Agua • 1080p/4K",
       "hero_title_prefix": "Descarga videos y audios gratis con",
       "hero_title_highlight": "Descargador Pro",
-      "hero_description": "La herramienta más potente para descargar contenido multimedia de YouTube, TikTok, Facebook e Instagram en MP4 o MP3 al instante.",
+      "hero_description": "La herramienta más potente para descargar contenido multimedia de Facebook HD, TikTok sin marca de agua, Instagram y Twitter en MP4 o MP3 al instante.",
       "logo_url": "/icon.png",
       "favicon_url": "/favicon.ico",
       "announcement_text": "⚡ Descargas ilimitadas en máxima calidad sin marcas de agua.",
       "announcement_enabled": false
     },
     "seo": {
-      "meta_title": "Descargador Pro — Descargar Videos de YouTube, TikTok y Facebook Gratis",
-      "meta_description": "Descarga videos y música en MP4 y MP3 de YouTube, TikTok sin marca de agua y Facebook en alta definición gratis y rápido.",
+      "meta_title": "Descargador Pro — Descargar Videos de Facebook HD, TikTok Sin Marca de Agua e Instagram Gratis",
+      "meta_description": "Descarga videos y música en MP4 y MP3 de TikTok sin marca de agua, Facebook en HD e Instagram en alta definición gratis y rápido.",
       "keywords": [
-        "descargar videos youtube",
         "descargar tiktok sin marca de agua",
-        "descargar video facebook",
+        "descargar video facebook hd",
+        "descargar reels instagram",
         "convertidor mp3",
         "bajar videos online"
       ],
@@ -282,7 +282,7 @@
       ],
       "notification_email": "achataipepercy30@gmail.com"
     },
-    "updated_at": "2026-11-08T15:19:34.966Z"
+    "updated_at": "2026-11-11T19:01:20.631Z"
   },
   "magic": {
     "id": "magic",

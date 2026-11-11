@@ -12,9 +12,10 @@ export default function robots(): MetadataRoute.Robots {
           'Mediapartners-Google',
           'AdsBot-Google',
           'AdsBot-Google-Mobile',
+          'Screaming Frog SEO Spider',
         ],
-        allow: '/',
-        disallow: ['/api/', '/admin/'],
+        allow: ['/', '/api/bases-doc/'],
+        disallow: ['/api/ai/', '/api/admin/', '/admin/'],
       },
       {
         userAgent: [
@@ -30,8 +31,8 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: '*',
-        allow: '/',
-        disallow: ['/api/', '/admin/'],
+        allow: ['/', '/api/bases-doc/'],
+        disallow: ['/api/ai/', '/api/admin/', '/admin/'],
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,

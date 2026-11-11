@@ -1,24 +1,24 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, Bot, Sparkles } from 'lucide-react';
+import { ChevronRight, UserCheck, ShieldCheck } from 'lucide-react';
 import { AiInterviewSimulator } from '@/components/AiInterviewSimulator';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
 import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
-  title: 'Simulador de Entrevista de Trabajo con IA Perú 2026',
-  description: 'Entrena tu entrevista personal y evaluación técnica CAS con Inteligencia Artificial para SUNAT, MINEDU, BCRP, EsSalud y el Poder Judicial.',
+  title: 'Simulador de Entrevista Técnica y Examen Oral CAS 2026',
+  description: 'Entrena tu entrevista personal y evaluación técnica CAS con balotarios oficiales para SUNAT, MINEDU, BCRP, EsSalud y el Poder Judicial.',
   alternates: {
     canonical: `${SITE_URL}/simulador-entrevista-ia`,
   },
   openGraph: {
-    title: 'Simulador de Entrevista de Trabajo con IA Perú 2026 | chamba pro',
-    description: 'Entrena tu entrevista personal y evaluación técnica CAS con Inteligencia Artificial.',
+    title: 'Simulador de Entrevista Técnica y Examen Oral CAS 2026 | chamba pro',
+    description: 'Entrena tu entrevista personal y evaluación técnica CAS con balotarios oficiales.',
     url: `${SITE_URL}/simulador-entrevista-ia`,
     type: 'website',
   },
   keywords: [
-    'simulador entrevista cas ia',
+    'simulador entrevista cas',
     'entrevista personal cas preguntas y respuestas',
     'evaluacion tecnica sunat minedu',
     'entrevista de trabajo estado peru',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 const appSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "Simulador de Entrevista Laboral con IA para el Estado Peruano",
+  "name": "Simulador de Entrevista Técnica y Examen Oral para el Estado Peruano",
   "operatingSystem": "All",
   "applicationCategory": "EducationalApplication",
   "offers": {
@@ -45,10 +45,10 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "¿Cómo evalúa el simulador de entrevista con IA de Chamba Pro?",
+      "name": "¿Cómo evalúa el simulador de entrevista de Chamba Pro?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "El simulador evalúa competencias blandas, coherencia comunicativa, ética pública y dominio técnico según los estándares de evaluación de SERVIR y el marco de contrataciones del Estado Peruano."
+        "text": "El simulador evalúa competencias técnicas, coherencia comunicativa, ética pública y dominio normativo según los estándares de evaluación de SERVIR y el marco de contrataciones del Estado Peruano."
       }
     },
     {
@@ -75,7 +75,7 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       "position": 2,
-      "name": "Simulador de Entrevista IA",
+      "name": "Simulador de Entrevista Técnica",
       "item": `${SITE_URL}/simulador-entrevista-ia`,
     },
   ],
@@ -101,20 +101,20 @@ export default function AiInterviewPage() {
         <nav className="flex items-center gap-2 text-xs font-mono text-slate-400">
           <Link href="/" className="hover:text-emerald-400 transition-colors">Inicio</Link>
           <ChevronRight size={12} />
-          <span className="text-slate-200 font-semibold">Simulador de Entrevista IA</span>
+          <span className="text-slate-200 font-semibold">Simulador de Entrevista Técnica</span>
         </nav>
 
       {/* Main Header (Centered & Professional) */}
       <div className="space-y-3 text-center max-w-3xl mx-auto pt-2 pb-2">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold shadow-sm">
-          <Sparkles size={14} />
-          <span>Exclusivo Chamba Pro — IA Entrenada con Parámetros SERVIR & PCM</span>
+          <ShieldCheck size={14} />
+          <span>Evaluación Técnica con Parámetros SERVIR, PCM & Ley 27444</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black font-display text-white tracking-tight">
-          Simulador de Entrevista de Trabajo con IA
+          Simulador de Entrevista Técnica y Examen Oral CAS
         </h1>
         <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          Practica tus respuestas en tiempo real ante el Comité Virtual y obtén retroalimentación técnica inmediata para asegurar tu vacante en el Estado.
+          Practica tus respuestas ante el jurado evaluador y obtén un dictamen técnico con balotarios oficiales para asegurar tu plaza en el Estado.
         </p>
       </div>
 

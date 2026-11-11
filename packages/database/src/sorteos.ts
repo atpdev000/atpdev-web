@@ -89,11 +89,10 @@ export interface SorteosDatabaseState {
 
 function getSafeNodeModules() {
   try {
-    if (typeof process === 'undefined' || !process.versions?.node) {
+    if (typeof process === 'undefined' || !process.versions?.node || typeof eval === 'undefined') {
       return { fs: null, path: null };
     }
-    const nodeReq = typeof require !== 'undefined' ? require : null;
-    if (!nodeReq) return { fs: null, path: null };
+    const nodeReq = eval('require');
     return {
       fs: nodeReq('fs'),
       path: nodeReq('path')

@@ -44,9 +44,9 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: '/icon.svg', sizes: 'any' }],
       },
       {
-        name: 'Simulador Entrevista IA',
-        short_name: 'Simulador IA',
-        description: 'Simular entrevista laboral con inteligencia artificial',
+        name: 'Simulador Entrevista Técnica CAS',
+        short_name: 'Simulador CAS',
+        description: 'Simular entrevista técnica y examen oral ante jurados de selección',
         url: '/simulador-entrevista-ia',
         icons: [{ src: '/icon.svg', sizes: 'any' }],
       },

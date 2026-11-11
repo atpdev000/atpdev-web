@@ -2,17 +2,42 @@ import { notFound } from 'next/navigation'
 import { blogPosts } from '@/lib/content/blog-posts'
 import BlogPostClient from '@/components/blog/BlogPostClient'
 
-// ✅ GENERAR PARAMS COMO PROMISE
+const legacySlugMap: Record<string, string> = {
+  'mega-guia-post-7': 'derechos-autor-digitales-guia-2026',
+  'mega-guia-post-9': 'solucion-problemas-descarga-video',
+  'mega-guia-post-10': 'streaming-vs-descarga-local',
+  'mega-guia-post-12': 'comparativa-codecs-av1-hevc-h264',
+  'mega-guia-post-13': 'gestion-colecciones-multimedia',
+  'post-14': 'editar-reels-capcut-profesional-2026',
+  'futuro-descarga-videos-tendencias-2026-2030': 'ciberseguridad-descargas-guia-seguridad-2026',
+  'guia-meta-facebook-ads-negocios-2026': 'estrategias-monetizacion-tiktok-2026-guia-completa',
+  'futuro-video-corto-2026': 'tiktok-sin-marca-de-agua',
+  'post-21': 'estrategias-monetizacion-tiktok-2026-guia-completa',
+  'post-22': 'ciberseguridad-descargas-guia-seguridad-2026',
+  'post-23': 'guia-audio-mp3-hd',
+}
+
+function resolvePost(slug: string) {
+  const direct = blogPosts.find(p => p.slug === slug)
+  if (direct) return direct
+  const targetSlug = legacySlugMap[slug]
+  if (targetSlug) {
+    return blogPosts.find(p => p.slug === targetSlug)
+  }
+  return undefined
+}
+
+// ✅ GENERAR PARAMS COMO PROMISE (Directos + Aliases heredados)
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }))
+  const directSlugs = blogPosts.map((post) => ({ slug: post.slug }))
+  const legacySlugs = Object.keys(legacySlugMap).map((slug) => ({ slug }))
+  return [...directSlugs, ...legacySlugs]
 }
 
 // ✅ METADATA
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = blogPosts.find(p => p.slug === slug)
+  const post = resolvePost(slug)
 
   if (!post) {
     return {
@@ -34,7 +59,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 // ✅ COMPONENTE PRINCIPAL CON PARAMS COMO PROMISE
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = blogPosts.find(p => p.slug === slug)
+  const post = resolvePost(slug)
 
   if (!post) {
     notFound()

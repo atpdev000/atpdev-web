@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DNI Master - Scanner Digital HD</title>
+  <script>
+    // OpenCV Non-Blocking Multi-CDN Loader
+    window.cvLoadError = false;
+    window.cvLoadSuccess = false;
+
+    const cvSources = [
+      'https://docs.opencv.org/4.11.0/opencv.js',
+      'https://cdn.jsdelivr.net/npm/@techstark/opencv-js@4.10.0-release.1/dist/opencv.js'
+    ];
+
+    let currentIndex = 0;
+
+    function loadOpenCV() {
+      if (currentIndex >= cvSources.length) {
+        console.warn('ℹ️ OpenCV external CDN not loaded. Using built-in ultra-fast Pure-JS Homography Engine.');
+        window.cvLoadError = true;
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = cvSources[currentIndex];
+
+      script.onload = () => {
+        console.log('✅ OpenCV loaded successfully from:', cvSources[currentIndex]);
+        window.cvLoadSuccess = true;
+      };
+
+      script.onerror = () => {
+        currentIndex++;
+        loadOpenCV();
+      };
+
+      document.head.appendChild(script);
+    }
+
+    loadOpenCV();
+  </script>
+</head>
+
+<body class="bg-[#090d16] text-white">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Building2, Search, Briefcase, Users, ShieldCheck, ExternalLink, Sparkles, Filter, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Building2, Search, Briefcase, Users, ShieldCheck, ExternalLink, Filter, CheckCircle2, ChevronRight } from 'lucide-react';
 import { getOrganizations, OrganizationItem, OrganizationCategory } from '@atpdev/database';
 import OrganizationsClient from './OrganizationsClient';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
@@ -64,7 +64,7 @@ export default async function OrganizacionesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 pb-20 selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-white pb-20 selection:bg-emerald-500 selection:text-white">
       {/* Structured Data Scripts */}
       <script
         type="application/ld+json"

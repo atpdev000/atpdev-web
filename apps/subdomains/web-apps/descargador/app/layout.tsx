@@ -7,6 +7,7 @@ import AdManager from '@/components/AdManager'
 import ServerWarmup from '@/components/ServerWarmup'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
 import DescargadorThemeListener from '@/components/DescargadorThemeListener'
+import CookieConsentBanner from '@/components/CookieConsentBanner'
 import { I18nProvider } from '@/lib/i18n/context'
 import { getSubdomainConfig } from '@atpdev/database'
 
@@ -21,8 +22,8 @@ export const viewport: Viewport = {
 export function generateMetadata(): Metadata {
   const config = getSubdomainConfig('descargador')
   const siteUrl = config?.seo?.canonical_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
-  const title = config?.seo?.meta_title || 'Descargador Pro - Descargar Videos de Facebook HD, TikTok Sin Marca de Agua y YouTube ✅ Gratis'
-  const description = config?.seo?.meta_description || '🚀 La herramienta más rápida para descargar videos de Facebook en HD y TikTok sin marca de agua. Descargador Pro: 100% gratis, seguro y en alta calidad. MP4 y MP3.'
+  const title = config?.seo?.meta_title || 'Descargador Pro - Descargar Videos de Facebook HD, TikTok Sin Marca de Agua e Instagram ✅ Gratis'
+  const description = config?.seo?.meta_description || '🚀 La herramienta más rápida para descargar videos de Facebook en HD, TikTok sin marca de agua e Instagram. Descargador Pro: 100% gratis, seguro y en alta calidad. MP4 y MP3.'
   const keywords = Array.isArray(config?.seo?.keywords) && config.seo.keywords.length > 0
     ? config.seo.keywords.join(', ')
     : 'descargar videos tiktok sin marca de agua, facebook downloader hd, descargar videos facebook, tiktok downloader no watermark, descargar videos de tiktok gratis, bajar videos de facebook, convertir video a mp3, descargar mp4 gratis, bajar videos online, downloader online'
@@ -107,24 +108,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.clarity.ms" />
 
-        {/* Google Consent Mode v2 Default Signals */}
-        <script
-          id="google-consent-mode-default"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('consent', 'default', {
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'analytics_storage': 'granted',
-                'wait_for_update': 500
-              });
-            `
-          }}
-        />
-
         {/* Schema.org WebApplication & Organization JSON-LD */}
         <script
           type="application/ld+json"
@@ -137,7 +120,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               applicationCategory: "MultimediaApplication",
               operatingSystem: "All (Web, Android, iOS, Windows, macOS)",
               url: siteUrl,
-              description: config?.seo?.meta_description || "Descarga videos y audios gratis de YouTube, TikTok sin marca de agua y Facebook en máxima calidad.",
+              description: config?.seo?.meta_description || "Descarga videos y audios gratis de TikTok sin marca de agua, Facebook e Instagram en máxima calidad.",
               offers: {
                 "@type": "Offer",
                 price: "0",
@@ -167,25 +150,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             `
           }} />
         )}
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            (function() {
-              try {
-                var saved = localStorage.getItem('descargador_theme');
-                var doc = document.documentElement;
-                if (saved === 'light') {
-                  doc.classList.remove('dark');
-                  doc.classList.add('light');
-                  doc.setAttribute('data-theme', 'light');
-                } else if (saved === 'dark') {
-                  doc.classList.remove('light');
-                  doc.classList.add('dark');
-                  doc.setAttribute('data-theme', 'dark');
-                }
-              } catch(e) {}
-            })();
-          `
-        }} />
         <style dangerouslySetInnerHTML={{
           __html: `
             :root {
@@ -195,7 +159,131 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `
         }} />
       </head>
-      <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"}>
+      <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"} suppressHydrationWarning>
+        {/* Google Consent Mode v2 Default Setup */}
+        <Script
+          id="google-consent-mode-v2"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted',
+                'analytics_storage': 'granted'
+              });
+            `
+          }}
+        />
+
+        {/* Anti-Extension Hydration Sanitizer */}
+        <Script
+          id="anti-extension-hydration"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var badAttrs = ['bis_skin_checked', 'bis_register', 'cz-shortcut-listen', 'fdprocessedid'];
+                function sanitize(el) {
+                  if (!el || el.nodeType !== 1) return;
+                  for (var i = 0; i < badAttrs.length; i++) {
+                    if (el.hasAttribute(badAttrs[i])) el.removeAttribute(badAttrs[i]);
+                  }
+                  var attrs = el.attributes;
+                  if (attrs) {
+                    for (var j = attrs.length - 1; j >= 0; j--) {
+                      var n = attrs[j].name;
+                      if (n.indexOf('__processed_') === 0 || n.indexOf('bis_') === 0) {
+                        el.removeAttribute(n);
+                      }
+                    }
+                  }
+                }
+                if (typeof document !== 'undefined') {
+                  sanitize(document.body);
+                  var all = document.querySelectorAll('*');
+                  for (var k = 0; k < all.length; k++) sanitize(all[k]);
+                  try {
+                    var obs = new MutationObserver(function(muts) {
+                      for (var m = 0; m < muts.length; m++) {
+                        var mut = muts[m];
+                        if (mut.type === 'attributes') sanitize(mut.target);
+                        else if (mut.type === 'childList') {
+                          for (var p = 0; p < mut.addedNodes.length; p++) sanitize(mut.addedNodes[p]);
+                        }
+                      }
+                    });
+                    obs.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+                  } catch (e) {}
+                }
+              })();
+            `
+          }}
+        />
+
+        {/* Google Consent Mode v2 Default Signals */}
+        <Script
+          id="google-consent-mode-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'granted',
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+
+        {/* Theme Initializer */}
+        <Script
+          id="descargador-theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var saved = localStorage.getItem('descargador_theme');
+                  var doc = document.documentElement;
+                  if (saved === 'light') {
+                    doc.classList.remove('dark');
+                    doc.classList.add('light');
+                    doc.setAttribute('data-theme', 'light');
+                  } else if (saved === 'dark') {
+                    doc.classList.remove('light');
+                    doc.classList.add('dark');
+                    doc.setAttribute('data-theme', 'dark');
+                  }
+                } catch(e) {}
+              })();
+            `
+          }}
+        />
+
+        {/* Descargador Ads Config */}
+        <Script
+          id="descargador-ads-config"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `window.__DESCARGADOR_ADS_CONFIG__ = ${JSON.stringify({
+              enabled: config?.monetization?.adsense_enabled !== false,
+              clientId: config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137',
+              slots: {
+                leaderboard: config?.monetization?.adsense_slot_header || process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER || '4095225502',
+                'in-feed': config?.monetization?.adsense_slot_incontent || process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT || '9155980495',
+                sidebar: config?.monetization?.adsense_slot_sidebar || process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || '4095225502',
+                billboard: config?.monetization?.adsense_slot_footer || process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER || '4095225502',
+              }
+            })};`
+          }}
+        />
         <DescargadorThemeListener />
         <I18nProvider>
           {/* Google Analytics & Google Tag (GA4 / GTM) */}
@@ -245,9 +333,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* Google AdSense Oficial cargado dinámicamente desde el CMS Admin */}
           {config?.monetization?.adsense_enabled !== false && config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_client_id && (
-            <Script
-              id="google-adsense-sdk"
-              strategy="afterInteractive"
+            <script
+              async
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.monetization.adsense_client_id}`}
               crossOrigin="anonymous"
             />
@@ -285,6 +372,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ServerWarmup />
           <AnalyticsTracker />
           {children}
+          <CookieConsentBanner />
         </I18nProvider>
       </body>
     </html>

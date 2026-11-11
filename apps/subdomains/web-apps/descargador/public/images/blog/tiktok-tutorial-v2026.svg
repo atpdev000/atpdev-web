@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_tt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050505"/>
+      <stop offset="50%" stop-color="#0a0a14"/>
+      <stop offset="100%" stop-color="#14081c"/>
+    </linearGradient>
+    <linearGradient id="tt_cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+    <linearGradient id="tt_magenta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff0844"/>
+      <stop offset="100%" stop-color="#ff4e50"/>
+    </linearGradient>
+    <filter id="glow_tt">
+      <feGaussianBlur stdDeviation="15" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg_tt)"/>
+
+  <!-- Glitch Auras -->
+  <circle cx="250" cy="225" r="120" fill="#00f2fe" opacity="0.18" filter="url(#glow_tt)"/>
+  <circle cx="550" cy="225" r="120" fill="#ff0844" opacity="0.18" filter="url(#glow_tt)"/>
+
+  <!-- Left: TikTok Icon Glitch -->
+  <g transform="translate(130, 110)">
+    <!-- Cyan Shadow -->
+    <path d="M100 40c8 12 22 20 38 22v32c-15-1-29-7-40-16v65c0 42-34 76-76 76S-54 185-54 143s34-76 76-76c8 0 16 1 23 4v34c-7-3-15-5-23-5-24 0-43 19-43 43s19 43 43 43 43-19 43-43V40h32z" fill="#00f2fe" opacity="0.75" transform="translate(-8, -4)"/>
+    <!-- Magenta Shadow -->
+    <path d="M100 40c8 12 22 20 38 22v32c-15-1-29-7-40-16v65c0 42-34 76-76 76S-54 185-54 143s34-76 76-76c8 0 16 1 23 4v34c-7-3-15-5-23-5-24 0-43 19-43 43s19 43 43 43 43-19 43-43V40h32z" fill="#ff0844" opacity="0.75" transform="translate(8, 4)"/>
+    <!-- White Main Note -->
+    <path d="M100 40c8 12 22 20 38 22v32c-15-1-29-7-40-16v65c0 42-34 76-76 76S-54 185-54 143s34-76 76-76c8 0 16 1 23 4v34c-7-3-15-5-23-5-24 0-43 19-43 43s19 43 43 43 43-19 43-43V40h32z" fill="#ffffff"/>
+  </g>
+
+  <!-- Right: Comparison Box (Watermark vs Clean) -->
+  <g transform="translate(380, 95)">
+    <!-- Card Before (Watermarked) -->
+    <rect x="0" y="0" width="150" height="230" rx="16" fill="#18181b" stroke="#71717a" stroke-width="1.2" opacity="0.7"/>
+    <rect x="15" y="20" width="120" height="150" rx="10" fill="#27272a"/>
+    <rect x="25" y="30" width="60" height="18" rx="4" fill="#ef4444" opacity="0.4"/>
+    <text x="55" y="43" text-anchor="middle" fill="#fca5a5" font-size="9" font-family="monospace">LOGO @USER</text>
+    <line x1="20" y1="20" x2="130" y2="170" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+    <rect x="25" y="185" width="100" height="26" rx="8" fill="#ef4444" opacity="0.2"/>
+    <text x="75" y="202" text-anchor="middle" fill="#f87171" font-size="10" font-weight="bold" font-family="system-ui">CON MARCA</text>
+
+    <!-- Arrow -->
+    <text x="175" y="125" text-anchor="middle" fill="#a1a1aa" font-size="24">➔</text>
+
+    <!-- Card After (CLEAN NO WATERMARK) -->
+    <rect x="200" y="0" width="160" height="230" rx="18" fill="#111827" stroke="#10b981" stroke-width="2" filter="url(#glow_tt)"/>
+    <rect x="215" y="20" width="130" height="150" rx="10" fill="#1e293b"/>
+    <circle cx="280" cy="85" r="22" fill="#10b981" opacity="0.3"/>
+    <text x="280" y="93" text-anchor="middle" font-size="20">✨</text>
+    <text x="280" y="130" text-anchor="middle" fill="#34d399" font-size="11" font-weight="900" font-family="system-ui">1080x1920 HD</text>
+    <rect x="215" y="185" width="130" height="28" rx="8" fill="#059669"/>
+    <text x="280" y="204" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="900" font-family="system-ui">SIN MARCA 100%</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="280" y="30" width="240" height="34" rx="17" fill="#09090b" stroke="#00f2fe" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#a5f3fc" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">🎵 TIKTOK CLEAN HD • SIN LOGOS</text>
+</svg>

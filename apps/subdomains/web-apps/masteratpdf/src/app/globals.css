@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/*
+ * MasterAtPDF — design tokens
+ * Flow inspired by iLovePDF: light canvas, white working surfaces,
+ * one strong action color, and a color per tool for recognition.
+ */
+:root {
+  --canvas: #f3f4f8;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --line: #e4e6ee;
+  --line-strong: #cfd3df;
+  --ink: #1d2030;
+  --ink-2: #4b5063;
+  --muted: #868b9e;
+
+  --brand: #e5322d;
+  --brand-hover: #c92521;
+  --brand-soft: #fdeceb;
+
+  --ok: #1f9d55;
+  --ok-soft: #e8f6ee;
+  --warn: #b7791f;
+  --warn-soft: #fdf6e7;
+  --danger: #d6332e;
+  --danger-soft: #fdeceb;
+
+  --shadow-card: 0 1px 2px rgb(20 24 40 / 0.06), 0 2px 8px rgb(20 24 40 / 0.04);
+  --shadow-lift: 0 6px 20px -6px rgb(20 24 40 / 0.18);
+  --shadow-cta: 0 10px 24px -8px rgb(229 50 45 / 0.55);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #0f1118;
+    --surface: #171a24;
+    --surface-2: #1d212d;
+    --line: #2a2f3d;
+    --line-strong: #3a4052;
+    --ink: #f1f2f6;
+    --ink-2: #b8bccb;
+    --muted: #7f8598;
+
+    --brand: #ef4540;
+    --brand-hover: #e5322d;
+    --brand-soft: rgb(239 69 64 / 0.14);
+
+    --ok: #3ccf7f;
+    --ok-soft: rgb(60 207 127 / 0.12);
+    --warn: #e5b450;
+    --warn-soft: rgb(229 180 80 / 0.12);
+    --danger: #ff6b66;
+    --danger-soft: rgb(255 107 102 / 0.12);
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-lift: 0 10px 28px -8px rgb(0 0 0 / 0.6);
+    --shadow-cta: 0 10px 26px -8px rgb(239 69 64 / 0.5);
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-lift: var(--shadow-lift);
+  --shadow-cta: var(--shadow-cta);
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 9999px;
+  border: 2px solid var(--canvas);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+*:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* One purposeful entrance for state changes (upload → workspace → done) */
+@keyframes stageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stage {
+  animation: stageIn 0.28s ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out both;
+}
+
+/* Indeterminate progress for server-side conversions */
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+
+.progress-indeterminate {
+  width: 40%;
+  animation: indeterminate 1.3s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* docx-preview pages inside the Word → PDF workspace */
+.docx-preview-wrapper section.docx-preview-content {
+  margin: 0 auto 16px auto !important;
+  box-shadow: var(--shadow-card);
+}

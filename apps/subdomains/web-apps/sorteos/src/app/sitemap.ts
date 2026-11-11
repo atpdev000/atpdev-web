@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/siteConfig';
+import { BLOG_POSTS } from '@/lib/blog-data';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = SITE_URL;
@@ -23,17 +24,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/verificar', priority: 0.9, freq: 'daily' as const },
     { path: '/sorteos/extension-install', priority: 0.85, freq: 'weekly' as const },
     { path: '/planes', priority: 0.85, freq: 'weekly' as const },
-    { path: '/blog', priority: 0.85, freq: 'daily' as const },
+    { path: '/blog', priority: 0.9, freq: 'daily' as const },
     { path: '/quienes-somos', priority: 0.8, freq: 'monthly' as const },
     { path: '/contacto', priority: 0.8, freq: 'monthly' as const },
     { path: '/terminos-y-condiciones', priority: 0.5, freq: 'monthly' as const },
     { path: '/politica-de-privacidad', priority: 0.5, freq: 'monthly' as const },
   ];
 
-  return routes.map((r) => ({
+  const staticEntries: MetadataRoute.Sitemap = routes.map((r) => ({
     url: `${baseUrl}${r.path}`,
     lastModified: new Date(),
     changeFrequency: r.freq,
     priority: r.priority,
   }));
+
+  const blogEntries: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
+    url: `${baseUrl}/blog/${post.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.85,
+  }));
+
+  return [...staticEntries, ...blogEntries];
 }

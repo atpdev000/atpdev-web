@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, Phone, MapPin, Globe, Sparkles, Terminal, BookOpen, Briefcase, Award } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, UserCheck, Terminal, BookOpen, Briefcase, Award } from 'lucide-react';
 import { CvData } from '../types';
 
 function LinkedinIcon({ size = 12, className = "" }: { size?: number; className?: string }) {
@@ -90,7 +90,7 @@ export function TemplateTechCreative({ data }: TemplateProps) {
       {profileSummary && (
         <section className="space-y-1 cv-avoid-break">
           <div className="flex items-center gap-1.5 text-xs font-bold font-display uppercase tracking-wider text-slate-900">
-            <Sparkles size={14} className="text-emerald-500" />
+            <UserCheck size={14} className="text-emerald-500" />
             <span>Perfil Profesional & Visión</span>
           </div>
           <p className="text-[10.5px] text-slate-700 leading-relaxed text-justify bg-slate-50 p-3 rounded-xl border border-slate-100">

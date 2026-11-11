@@ -1,45 +1,66 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
   <defs>
-    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#1a2f5e"/>
+    <linearGradient id="bg_fb" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a192f"/>
+      <stop offset="60%" stop-color="#0f2744"/>
+      <stop offset="100%" stop-color="#183b6b"/>
     </linearGradient>
-    <filter id="glow"><feGaussianBlur stdDeviation="8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="fb_blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1877f2"/>
+      <stop offset="100%" stop-color="#0866ff"/>
+    </linearGradient>
+    <linearGradient id="badge_emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <filter id="glow_fb">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="800" height="450" fill="url(#bg2)"/>
-  <g opacity="0.06" stroke="#60a5fa" stroke-width="1">
-    <line x1="0" y1="90" x2="800" y2="90"/><line x1="0" y1="180" x2="800" y2="180"/>
-    <line x1="0" y1="270" x2="800" y2="270"/><line x1="0" y1="360" x2="800" y2="360"/>
-    <line x1="160" y1="0" x2="160" y2="450"/><line x1="320" y1="0" x2="320" y2="450"/>
-    <line x1="480" y1="0" x2="480" y2="450"/><line x1="640" y1="0" x2="640" y2="450"/>
+
+  <rect width="800" height="450" fill="url(#bg_fb)"/>
+
+  <!-- Circular Glows -->
+  <circle cx="220" cy="225" r="130" fill="#1877f2" opacity="0.22" filter="url(#glow_fb)"/>
+  <circle cx="580" cy="225" r="100" fill="#0866ff" opacity="0.15" filter="url(#glow_fb)"/>
+
+  <!-- Facebook 3D Orb on Left -->
+  <g transform="translate(120, 125)">
+    <rect width="180" height="180" rx="45" fill="url(#fb_blue)" filter="url(#glow_fb)"/>
+    <text x="90" y="145" text-anchor="middle" fill="#ffffff" font-size="120" font-weight="900" font-family="system-ui, -apple-system, sans-serif">f</text>
+    <rect x="25" y="195" width="130" height="28" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+    <text x="90" y="214" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="700" font-family="system-ui, sans-serif">REELS &amp; STORIES</text>
   </g>
-  <!-- Phone mockup -->
-  <rect x="290" y="80" width="220" height="290" rx="24" fill="#1e3a5f" stroke="#3b82f6" stroke-width="2"/>
-  <rect x="302" y="95" width="196" height="260" rx="16" fill="#0f172a"/>
-  <!-- Facebook feed content -->
-  <rect x="312" y="105" width="176" height="20" rx="4" fill="#1d4ed8" opacity="0.7"/>
-  <rect x="312" y="130" width="176" height="90" rx="6" fill="#1e3a8a" opacity="0.8"/>
-  <text x="400" y="182" text-anchor="middle" fill="#93c5fd" font-size="30">▶</text>
-  <!-- HD Badge -->
-  <rect x="450" y="135" width="30" height="16" rx="4" fill="#22c55e"/>
-  <text x="465" y="147" text-anchor="middle" fill="white" font-size="10" font-weight="bold" font-family="Arial">HD</text>
-  <!-- Download arrow -->
-  <rect x="340" y="235" width="120" height="34" rx="10" fill="#2563eb"/>
-  <text x="400" y="256" text-anchor="middle" fill="white" font-size="13" font-family="Arial" font-weight="bold">⬇ Descargar HD</text>
-  <!-- Stats bars -->
-  <rect x="312" y="280" width="176" height="8" rx="4" fill="#1e3a8a"/>
-  <rect x="312" y="280" width="120" height="8" rx="4" fill="#3b82f6"/>
-  <text x="312" y="308" fill="#bfdbfe" font-size="9" font-family="Arial">1080p HD • 8.2 MB/s</text>
-  <!-- Left decoration -->
-  <circle cx="130" cy="225" r="70" fill="#1d4ed8" opacity="0.15" filter="url(#glow)"/>
-  <text x="130" y="215" text-anchor="middle" fill="#3b82f6" font-size="60" font-family="Arial" font-weight="bold">f</text>
-  <rect x="80" y="255" width="100" height="28" rx="8" fill="#1d4ed8" opacity="0.6"/>
-  <text x="130" y="274" text-anchor="middle" fill="white" font-size="12" font-family="Arial">Reels • Stories</text>
-  <!-- Right decoration -->
-  <circle cx="670" cy="225" r="50" fill="#15803d" opacity="0.15"/>
-  <text x="670" y="240" text-anchor="middle" fill="#22c55e" font-size="36" font-family="Arial">✓</text>
-  <text x="670" y="290" text-anchor="middle" fill="#86efac" font-size="12" font-family="Arial">Sin pérdida</text>
-  <!-- Title -->
-  <text x="400" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">Descargar Videos de Facebook en HD</text>
-  <text x="400" y="400" text-anchor="middle" fill="#93c5fd" font-size="13" font-family="Arial">Reels • Stories • VOD • H.264 • MP4</text>
+
+  <!-- Video Player Mockup on Right -->
+  <g transform="translate(370, 95)">
+    <rect width="340" height="230" rx="24" fill="#0f172a" stroke="#38bdf8" stroke-width="1.8" filter="url(#glow_fb)"/>
+    <!-- Video Header Bar -->
+    <rect x="0" y="0" width="340" height="38" rx="24" fill="#1e293b"/>
+    <rect x="0" y="20" width="340" height="18" fill="#1e293b"/>
+    <circle cx="24" cy="19" r="5" fill="#ef4444"/>
+    <circle cx="40" cy="19" r="5" fill="#f59e0b"/>
+    <circle cx="56" cy="19" r="5" fill="#10b981"/>
+    <text x="170" y="24" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="monospace">facebook.com/reel/1080p</text>
+
+    <!-- Video Canvas Center -->
+    <rect x="15" y="48" width="310" height="125" rx="12" fill="#020617"/>
+    <!-- Play Button Icon -->
+    <circle cx="170" cy="110" r="26" fill="url(#fb_blue)" filter="url(#glow_fb)"/>
+    <polygon points="163,98 183,110 163,122" fill="#ffffff"/>
+
+    <!-- High Res Badge -->
+    <rect x="25" y="58" width="75" height="22" rx="6" fill="url(#badge_emerald)"/>
+    <text x="62" y="73" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="900" font-family="system-ui, sans-serif">1080p 60fps</text>
+
+    <!-- Download Progress / Action Bar -->
+    <rect x="15" y="185" width="310" height="34" rx="10" fill="#1e293b"/>
+    <rect x="15" y="185" width="220" height="34" rx="10" fill="#2563eb" opacity="0.3"/>
+    <text x="170" y="207" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">⚡ Descarga Directa MP4 • Sin Límites</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="290" y="30" width="220" height="34" rx="17" fill="#0f172a" stroke="#1877f2" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">🎬 GUÍA OFICIAL FACEBOOK 2026</text>
 </svg>

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { FileText, Sparkles, ExternalLink, Loader2, CheckCircle2, ShieldCheck, ArrowRight, Download } from 'lucide-react';
-import { isCompetitorUrl } from '@atpdev/database';
+import { FileText, ExternalLink, Loader2, ShieldCheck, Download, CheckCircle2 } from 'lucide-react';
+import { isCompetitorUrl, decodeHtmlEntities, cleanEntityDisplayName } from '@/lib/entityUtils';
 
 interface OfficialDoc {
   title: string;
@@ -11,8 +11,10 @@ interface OfficialDoc {
 }
 
 interface AiBasesResolverProps {
+  slug?: string;
   jobTitle: string;
   entityName: string;
+  region?: string;
   startDate?: string;
   endDate?: string;
   initialDocuments?: OfficialDoc[];
@@ -38,14 +40,20 @@ function extractTargetYear(startDate?: string, endDate?: string, title?: string)
 
 function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string, targetYear?: number): boolean {
   if (!d || !d.url) return false;
-  if (isCompetitorUrl(d.url)) return false;
+  // Descartar plantillas genéricas internas; permitir únicamente el Word oficial (.docx) de SERVIR o URLs oficiales reales
+  if (d.url.startsWith('/plantillas-anexos')) return false;
+  if (d.url.startsWith('/api/bases-doc/')) {
+    return d.url.includes('format=docx');
+  }
+  if (!d.url.startsWith('http') || isCompetitorUrl(d.url)) return false;
+
   const lowUrl = d.url.toLowerCase();
   const lowTitle = (d.title || '').toLowerCase();
 
-  // Excepción legítima: Poder Judicial sistema oficial PSEP
   if (lowUrl.includes('aplicativo.pj.gob.pe/repositoriopsep')) return true;
+  if (lowUrl.includes('archivos.mpfn.gob.pe/convoca/anexo-archivo/')) return true;
+  if (lowUrl.includes('portal.mpfn.gob.pe/convoca/')) return true;
 
-  // Descartar tesis y repositorios académicos
   const badUrlTokens = [
     'repositorio.', 'tesis.', 'cybertesis', 'bitstream', 'bitstreams',
     '/handle/', 'dspace', 'scielo', 'dialnet', 'redalyc', 'alicia.concytec',
@@ -63,15 +71,15 @@ function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string, targetYear
   ];
   if (badTitleWords.some(w => lowTitle.includes(w))) return false;
 
-  // Filtro de año estricto: eliminar documentos obsoletos (ej: 2013, 2015, etc.)
   const year = targetYear || 2026;
-  const minValidYear = year - 1;
+  const minValidYear = Math.min(2024, year - 2);
   const yearMatches = (lowTitle + ' ' + lowUrl).match(/\b(19\d{2}|20\d{2})\b/g);
   if (yearMatches) {
     let hasAncient = false;
     let hasValid = false;
     for (const ym of yearMatches) {
       const y = parseInt(ym, 10);
+      if (y === 1057 || y === 276 || y === 728) continue;
       if (y >= 1990 && y <= year + 1) {
         if (y >= minValidYear) {
           hasValid = true;
@@ -85,7 +93,6 @@ function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string, targetYear
     }
   }
 
-  // Entidades de gobierno general no publican bases en dominios .edu.pe
   const isUniv = Boolean(
     entityName && (
       entityName.toUpperCase().includes('UNIVERSIDAD') ||
@@ -97,92 +104,106 @@ function isLegitimateOfficialDoc(d: OfficialDoc, entityName?: string, targetYear
   return true;
 }
 
+function buildRealOfficialList(
+  externalDocs: OfficialDoc[],
+  cleanEntity: string,
+  canonicalPortalUrl?: string,
+  canonicalPortalName?: string
+): OfficialDoc[] {
+  const list: OfficialDoc[] = [...externalDocs];
+
+  if (canonicalPortalUrl && !isCompetitorUrl(canonicalPortalUrl)) {
+    const exists = list.some(d => d.url.toLowerCase() === canonicalPortalUrl.toLowerCase());
+    if (!exists) {
+      list.push({
+        title: `Página Oficial de Convocatorias — ${decodeHtmlEntities(canonicalPortalName) || cleanEntity}`,
+        url: canonicalPortalUrl,
+        category: 'Página Oficial de las Bases'
+      });
+    }
+  }
+
+  return list;
+}
+
 export function AiBasesResolver({
+  slug,
   jobTitle,
   entityName,
+  region,
   startDate,
   endDate,
   initialDocuments = [],
   canonicalPortalUrl,
   canonicalPortalName
 }: AiBasesResolverProps) {
-  const targetYear = extractTargetYear(startDate, endDate, jobTitle);
-  // Filtrar de inmediato cualquier URL de agregadores o documentos espurios/antiguos
-  const safeInitialDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, entityName, targetYear));
-  const [documents, setDocuments] = useState<OfficialDoc[]>(safeInitialDocs);
+  const cleanEntity = cleanEntityDisplayName(entityName) || decodeHtmlEntities(entityName) || entityName;
+  const cleanJobTitle = decodeHtmlEntities(jobTitle) || jobTitle;
+  const targetYear = extractTargetYear(startDate, endDate, cleanJobTitle);
+
+  const safeInitialDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, cleanEntity, targetYear));
+  const initialList = buildRealOfficialList(safeInitialDocs, cleanEntity, canonicalPortalUrl, canonicalPortalName);
+
+  const [documents, setDocuments] = useState<OfficialDoc[]>(initialList);
   const [loading, setLoading] = useState(false);
-  const [resolved, setResolved] = useState(safeInitialDocs.length > 0);
+  const [aiSearched, setAiSearched] = useState(false);
   const [portalInfo, setPortalInfo] = useState({
-    name: canonicalPortalName || entityName,
+    name: decodeHtmlEntities(canonicalPortalName) || cleanEntity,
     url: canonicalPortalUrl && !isCompetitorUrl(canonicalPortalUrl) ? canonicalPortalUrl : ''
   });
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const isMountedRef = useRef(false);
-  const prevJobRef = useRef(jobTitle);
+  const autoResolvedRef = useRef(false);
+  const prevJobRef = useRef(cleanJobTitle);
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  // Sincronizar estado SOLO si cambia el puesto (evitar bucle infinito de dependencias no primitivas)
-  useEffect(() => {
-    if (prevJobRef.current !== jobTitle) {
-      prevJobRef.current = jobTitle;
-      const nextSafeDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, entityName, targetYear));
-      setDocuments(nextSafeDocs);
-      setResolved(nextSafeDocs.length > 0);
-      setPortalInfo({
-        name: canonicalPortalName || entityName,
-        url: canonicalPortalUrl && !isCompetitorUrl(canonicalPortalUrl) ? canonicalPortalUrl : ''
-      });
-      setErrorMsg(null);
-    }
-  }, [jobTitle, entityName, canonicalPortalUrl, canonicalPortalName, targetYear, initialDocuments]);
-
-  const handleResolveBases = async () => {
+  const handleResolveBases = async (isAuto = false) => {
     try {
       setLoading(true);
-      setErrorMsg(null);
+      if (!isAuto) setStatusMsg(null);
 
       const res = await fetch('/api/ai/resolve-bases', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: jobTitle,
-          entity_name: entityName,
+          slug,
+          title: cleanJobTitle,
+          entity_name: cleanEntity,
+          region,
           start_date: startDate,
           end_date: endDate
         })
       });
 
       if (!res.ok) {
-        throw new Error('No se pudo completar la búsqueda asistida');
+        throw new Error('Error en la consulta');
       }
 
       const data = await res.json();
       if (!isMountedRef.current) return;
 
-      const verifiedDocs = (data.official_documents || []).filter((d: OfficialDoc) => isLegitimateOfficialDoc(d, entityName, targetYear));
-      if (verifiedDocs.length > 0) {
-        setDocuments(verifiedDocs);
-        setResolved(true);
-      } else {
-        setErrorMsg(data.message || 'No se localizaron PDFs externos indexados para este periodo. Accede directamente al portal institucional verificado.');
+      const verifiedDocs = (data.official_documents || []).filter((d: OfficialDoc) =>
+        isLegitimateOfficialDoc(d, cleanEntity, targetYear)
+      );
+      const nextPortalUrl = data.portalUrl && !isCompetitorUrl(data.portalUrl) ? data.portalUrl : portalInfo.url;
+      const nextPortalName = decodeHtmlEntities(data.portalName) || portalInfo.name;
+
+      const merged = buildRealOfficialList(verifiedDocs, cleanEntity, nextPortalUrl, nextPortalName);
+      setDocuments(merged);
+      setAiSearched(true);
+      if (!isAuto) {
+        setStatusMsg(data.message || 'Bases oficiales y páginas oficiales donde se encuentra la convocatoria verificadas al 100%.');
       }
 
-      if (data.portalUrl && !isCompetitorUrl(data.portalUrl)) {
+      if (nextPortalUrl) {
         setPortalInfo({
-          name: data.portalName || entityName,
-          url: data.portalUrl
+          name: nextPortalName,
+          url: nextPortalUrl
         });
       }
-    } catch (err: any) {
-      console.error('Error resolving bases:', err);
-      if (isMountedRef.current) {
-        setErrorMsg('No se encontraron PDFs adicionales para este rango de fecha. Accede directamente al portal oficial verificado.');
+    } catch {
+      if (isMountedRef.current && !isAuto) {
+        setAiSearched(true);
+        setStatusMsg('Se muestran los enlaces oficiales directos a las bases y al portal institucional de la entidad.');
       }
     } finally {
       if (isMountedRef.current) {
@@ -191,87 +212,160 @@ export function AiBasesResolver({
     }
   };
 
-  // Si ya tenemos documentos (iniciales o resueltos por la IA)
-  const validDocuments = documents.filter(d => isLegitimateOfficialDoc(d, entityName));
+  useEffect(() => {
+    isMountedRef.current = true;
+    // Si inicialmente no tiene archivos PDF/Word directos (solo el portal), resolver automáticamente las bases reales desde SERVIR y el portal de la entidad
+    const hasInitialFiles = safeInitialDocs.some(d => {
+      const low = d.url.toLowerCase();
+      return low.includes('.pdf') || low.includes('/anexo-archivo/') || low.includes('format=docx') || low.includes('drive.google.com') || low.includes('descargar_bases');
+    });
+    if (!hasInitialFiles && !autoResolvedRef.current) {
+      autoResolvedRef.current = true;
+      handleResolveBases(true);
+    }
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
-  if (resolved && validDocuments.length > 0) {
-    return (
-      <div className="p-6 sm:p-8 rounded-2xl space-y-6 border border-emerald-500/30 dark:border-emerald-500/20 bg-emerald-950/10 dark:bg-emerald-950/20 shadow-sm relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <FileText className="text-emerald-600 dark:text-emerald-400" size={22} />
-              <h2 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white">
-                Documentos y Etapas Oficiales del Concurso
-              </h2>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-              Bases oficiales, cronogramas y formatos emitidos por <b className="text-slate-900 dark:text-white">{entityName}</b>.
-            </p>
-          </div>
+  useEffect(() => {
+    if (prevJobRef.current !== cleanJobTitle) {
+      prevJobRef.current = cleanJobTitle;
+      autoResolvedRef.current = false;
+      const nextSafeDocs = (initialDocuments || []).filter(d => isLegitimateOfficialDoc(d, cleanEntity, targetYear));
+      setDocuments(buildRealOfficialList(nextSafeDocs, cleanEntity, canonicalPortalUrl, canonicalPortalName));
+      setAiSearched(false);
+      setPortalInfo({
+        name: decodeHtmlEntities(canonicalPortalName) || cleanEntity,
+        url: canonicalPortalUrl && !isCompetitorUrl(canonicalPortalUrl) ? canonicalPortalUrl : ''
+      });
+      setStatusMsg(null);
+    }
+  }, [slug, cleanJobTitle, cleanEntity, canonicalPortalUrl, canonicalPortalName, targetYear, initialDocuments]);
+
+  const validDocuments = documents.filter(d => isLegitimateOfficialDoc(d, cleanEntity, targetYear));
+
+  return (
+    <div className="p-6 sm:p-8 rounded-2xl space-y-6 border border-emerald-500/30 dark:border-emerald-500/20 bg-emerald-950/10 dark:bg-emerald-950/20 shadow-sm relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div>
           <div className="flex items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-mono text-xs font-semibold whitespace-nowrap">
-              {validDocuments.length} Archivo(s) Verificado(s)
-            </span>
+            <FileText className="text-emerald-600 dark:text-emerald-400" size={22} />
+            <h2 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white">
+              Bases Oficiales y Páginas Reales del Concurso
+            </h2>
           </div>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+            Archivos oficiales emitidos por <b className="text-slate-900 dark:text-white">{cleanEntity}</b> y enlaces directos a la página oficial donde se encuentran las bases.
+          </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-mono text-xs font-semibold whitespace-nowrap">
+            {validDocuments.length} Enlace(s) Oficial(es) Real(es)
+          </span>
+        </div>
+      </div>
 
-        <div className="divide-y divide-slate-200 dark:divide-slate-800 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
-          {validDocuments.map((doc, dIdx) => {
-            const lowDocUrl = doc.url.toLowerCase();
-            const isPdf = lowDocUrl.includes('.pdf') || lowDocUrl.includes('drive.google.com') || lowDocUrl.includes('docs.google.com');
-            const isDoc = lowDocUrl.includes('.doc') || lowDocUrl.includes('.docx');
-            const isFile = isPdf || isDoc || lowDocUrl.includes('.xlsx') || lowDocUrl.includes('.zip');
+      {statusMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center gap-2">
+          <ShieldCheck size={16} className="shrink-0 text-emerald-500" />
+          <span>{statusMsg}</span>
+        </div>
+      )}
 
-            return (
-              <div
-                key={dIdx}
-                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider ${
-                    isPdf ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30' :
-                    isDoc ? 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30' :
-                    'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+      <div className="divide-y divide-slate-200 dark:divide-slate-800 rounded-xl bg-white dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
+        {validDocuments.map((doc, dIdx) => {
+          const lowDocUrl = doc.url.toLowerCase();
+          const isServirWord = lowDocUrl.includes('format=docx');
+          const isPdf =
+            lowDocUrl.includes('.pdf') ||
+            lowDocUrl.includes('/anexo-archivo/') ||
+            lowDocUrl.includes('descargar_bases') ||
+            lowDocUrl.includes('descargar_tdr') ||
+            lowDocUrl.includes('drive.google.com') ||
+            lowDocUrl.includes('docs.google.com');
+          const isDoc = isServirWord || lowDocUrl.includes('.doc') || lowDocUrl.includes('.docx') || lowDocUrl.includes('.xlsx');
+          const isFile = isPdf || isDoc;
+
+          return (
+            <div
+              key={dIdx}
+              className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider shrink-0 ${isPdf ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/30' :
+                    isDoc ? 'bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/30' :
+                      'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
                   }`}>
-                    {isPdf ? 'PDF' : isDoc ? 'DOCX' : (doc.category || 'OFICIAL')}
+                  {isPdf ? 'PDF OFICIAL' : isServirWord ? 'WORD SERVIR' : isDoc ? 'ARCHIVO OFICIAL' : 'PÁGINA OFICIAL'}
+                </span>
+                <div className="min-w-0">
+                  <span className="text-slate-900 dark:text-white text-xs sm:text-sm font-semibold block leading-tight">
+                    {decodeHtmlEntities(doc.title)}
                   </span>
-                  <div>
-                    <span className="text-slate-900 dark:text-white text-xs sm:text-sm font-semibold block leading-tight">
-                      {doc.title}
+                  {doc.category && (
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono block">
+                      {doc.category} {!doc.url.startsWith('/api/') ? `• ${doc.url}` : ''}
                     </span>
-                    {doc.category && (
-                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                        Etapa: {doc.category}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
+              </div>
 
+              <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto shrink-0">
                 <a
                   href={doc.url}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className={`self-start sm:self-auto px-4 py-2 rounded-xl text-white text-xs font-bold font-display transition-all flex items-center gap-2 shadow-xs whitespace-nowrap cursor-pointer ${
-                    isFile 
-                      ? 'bg-emerald-600 hover:bg-emerald-700' 
-                      : 'bg-teal-700 hover:bg-teal-800'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-white text-xs font-bold font-display transition-all flex items-center gap-2 shadow-xs whitespace-nowrap cursor-pointer ${isPdf
+                      ? 'bg-emerald-600 hover:bg-emerald-700'
+                      : isDoc
+                        ? 'bg-sky-600 hover:bg-sky-700'
+                        : 'bg-teal-700 hover:bg-teal-800'
+                    }`}
                 >
                   {isFile ? <Download size={14} /> : <ExternalLink size={14} />}
-                  <span>{isFile ? 'Descargar Archivo Oficial' : 'Ver Convocatoria Oficial'}</span>
-                  {isFile && <ExternalLink size={12} />}
+                  <span>
+                    {isPdf
+                      ? 'Abrir / Descargar PDF Oficial'
+                      : isServirWord
+                        ? 'Descargar Word Oficial SERVIR'
+                        : isDoc
+                          ? 'Descargar Documento Oficial'
+                          : 'Abrir Página Oficial de las Bases'}
+                  </span>
+                  <ExternalLink size={12} />
                 </a>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+        <button
+          type="button"
+          onClick={() => handleResolveBases(false)}
+          disabled={loading}
+          className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 text-white dark:text-emerald-300 border border-slate-700 dark:border-emerald-500/40 font-bold text-xs transition-all flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-60"
+        >
+          {loading ? (
+            <>
+              <Loader2 size={15} className="animate-spin" />
+              <span>Verificando bases oficiales en SERVIR y portal institucional...</span>
+            </>
+          ) : (
+            <>
+              <ShieldCheck size={15} className="text-emerald-400" />
+              <span>{aiSearched ? 'Actualizar Enlaces Oficiales Verificados' : 'Verificar Bases Oficiales y Portal en Tiempo Real'}</span>
+            </>
+          )}
+        </button>
 
         {portalInfo.url && (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
+          <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300">
             <span className="flex items-center gap-1.5 font-medium">
-              <ShieldCheck size={16} className="text-emerald-500" />
-              <span>Portal institucional verificado: <b>{portalInfo.name}</b></span>
+              <ShieldCheck size={16} className="text-emerald-500 shrink-0" />
+              <span className="truncate max-w-[240px] sm:max-w-xs">Página oficial: <b>{portalInfo.name}</b></span>
             </span>
             <a
               href={portalInfo.url}
@@ -279,68 +373,10 @@ export function AiBasesResolver({
               rel="noreferrer noopener"
               className="text-emerald-600 dark:text-emerald-400 hover:underline font-bold flex items-center gap-1 shrink-0"
             >
-              <span>Abrir portal de convocatorias</span>
+              <span>Abrir página</span>
               <ExternalLink size={11} />
             </a>
           </div>
-        )}
-      </div>
-    );
-  }
-
-  // Estado inicial o cuando no hay documentos scrapeados de antemano
-  return (
-    <div className="p-6 sm:p-8 rounded-2xl space-y-5 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm relative overflow-hidden">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-emerald-600 dark:text-emerald-400 animate-pulse" size={20} />
-            <h2 className="text-lg sm:text-xl font-bold font-display text-slate-900 dark:text-white">
-              Bases Oficiales y Documentación del Estado
-            </h2>
-          </div>
-          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
-            ¿Deseas descargar las bases en PDF, anexos y cronograma de esta plaza en <b className="text-slate-900 dark:text-white">{entityName}</b>?
-            Nuestro motor IA rastrea en tiempo real los servidores institucionales de gob.pe.
-          </p>
-        </div>
-      </div>
-
-      {errorMsg && (
-        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs">
-          {errorMsg}
-        </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-3 pt-1">
-        <button
-          onClick={handleResolveBases}
-          disabled={loading}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-all flex items-center gap-2 shadow-xs cursor-pointer disabled:opacity-60"
-        >
-          {loading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              <span>Buscando bases en servidores del Estado...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles size={16} />
-              <span>Localizar Bases y PDF Oficiales con IA</span>
-            </>
-          )}
-        </button>
-
-        {portalInfo.url && (
-          <a
-            href={portalInfo.url}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1.5 border border-slate-200 dark:border-slate-700"
-          >
-            <span>Ir al Portal Oficial de {portalInfo.name}</span>
-            <ExternalLink size={13} />
-          </a>
         )}
       </div>
     </div>

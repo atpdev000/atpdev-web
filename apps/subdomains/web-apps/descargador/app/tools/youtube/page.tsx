@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { FEATURES } from '@/lib/featureFlags'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
+import { getSubdomainConfig } from '@atpdev/database'
 
 export const metadata: Metadata = {
     title: 'Descargar Videos de YouTube en HD y MP3 | Descargador Pro',
@@ -11,7 +12,15 @@ export const metadata: Metadata = {
 }
 
 export default function YoutubeToolPage() {
-    if (!FEATURES.YOUTUBE_ENABLED) {
+    let isEnabled = false
+    try {
+        const config = getSubdomainConfig('descargador')
+        isEnabled = config?.modules?.youtube_enabled ?? FEATURES.YOUTUBE_ENABLED
+    } catch {
+        isEnabled = FEATURES.YOUTUBE_ENABLED
+    }
+
+    if (!isEnabled) {
         redirect('/')
     }
 

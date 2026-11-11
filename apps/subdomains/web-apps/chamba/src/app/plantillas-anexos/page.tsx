@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, Sparkles } from 'lucide-react';
+import { ChevronRight, FileText } from 'lucide-react';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
 import PlantillasClient, { PlantillaItem } from './PlantillasClient';
 import { SITE_URL } from '@/lib/siteConfig';
@@ -183,7 +183,7 @@ export default function PlantillasAnexosPage() {
       {/* Main Header (Centered & Professional) */}
       <div className="space-y-3 text-center max-w-3xl mx-auto pt-2 pb-2">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/40 text-amber-800 dark:text-amber-400 text-xs font-mono font-bold shadow-sm">
-          <Sparkles size={14} />
+          <FileText size={14} />
           <span>Formatos Gratuitos Listos para Copiar y Descargar</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-black font-display text-slate-900 dark:text-white tracking-tight">

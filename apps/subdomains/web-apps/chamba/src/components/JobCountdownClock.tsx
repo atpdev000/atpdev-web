@@ -61,9 +61,11 @@ export function JobCountdownClock({
     return { totalMs: diff, days, hours, minutes, isExpired: false };
   };
 
+  const [mounted, setMounted] = useState(false);
   const [timeLeft, setTimeLeft] = useState(calculateRemaining);
 
   useEffect(() => {
+    setMounted(true);
     let isMounted = true;
     const timer = setInterval(() => {
       if (isMounted) {
@@ -79,6 +81,64 @@ export function JobCountdownClock({
 
   const { days, hours, minutes, isExpired } = timeLeft;
   const isConcluded = isExpired || status === 'Finalizado' || status === 'Concluida';
+
+  // Fallback estático idéntico entre SSR y primera fase de hidratación del cliente (Cero hydration mismatch)
+  if (!mounted) {
+    if (size === "sm") {
+      return (
+        <div
+          suppressHydrationWarning
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] font-bold bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+          title={`Fecha de cierre: ${endDate}`}
+        >
+          <Clock size={13} className="text-emerald-400" />
+          <span suppressHydrationWarning>{endDate || "Vigente"}</span>
+        </div>
+      );
+    }
+
+    if (size === "md") {
+      return (
+        <div
+          suppressHydrationWarning
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-mono text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+          title={`Cierre de postulaciones: ${endDate}`}
+        >
+          <Clock size={14} className="text-emerald-400" />
+          <div className="flex items-center gap-1.5" suppressHydrationWarning>
+            <span className="font-extrabold">Cierre</span>
+            <span className="opacity-40">•</span>
+            <span suppressHydrationWarning>{endDate}</span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        suppressHydrationWarning
+        className="p-5 rounded-2xl border bg-emerald-500/10 border-emerald-500/30 space-y-3 relative overflow-hidden"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-white/5">
+              <Clock size={20} className="text-emerald-400" />
+            </div>
+            <div>
+              <h4 className="font-display font-black text-sm uppercase tracking-wider text-emerald-400">
+                Convocatoria Vigente
+              </h4>
+              <p className="text-xs text-slate-400">Tiempo suficiente para postular</p>
+            </div>
+          </div>
+          <div className="text-right font-mono text-xs text-slate-400">
+            <span className="block text-[10px] uppercase text-slate-500">Cierre Oficial</span>
+            <span className="font-bold text-slate-200">{endDate}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Semáforo de color y estado según requerimiento:
   // 1. Azul: Si ya venció
@@ -148,6 +208,7 @@ export function JobCountdownClock({
   if (size === "sm") {
     return (
       <div
+        suppressHydrationWarning
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-[11px] font-bold ${
           theme.badgeBg
         } ${theme.badgeBorder} ${theme.badgeText} ${
@@ -156,7 +217,7 @@ export function JobCountdownClock({
         title={`Fecha de cierre: ${endDate}`}
       >
         <IconComponent size={13} className={theme.iconColor} />
-        <span>
+        <span suppressHydrationWarning>
           {isConcluded
             ? "Concluida"
             : days === 0
@@ -171,6 +232,7 @@ export function JobCountdownClock({
   if (size === "md") {
     return (
       <div
+        suppressHydrationWarning
         className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border font-mono text-xs ${
           theme.badgeBg
         } ${theme.badgeBorder} ${theme.badgeText} ${
@@ -179,15 +241,15 @@ export function JobCountdownClock({
         title={`Cierre de postulaciones: ${endDate}`}
       >
         <IconComponent size={14} className={theme.iconColor} />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" suppressHydrationWarning>
           <span className="font-extrabold">{theme.label}</span>
           <span className="opacity-40">•</span>
           {isConcluded ? (
-            <span>Convocatoria finalizada</span>
+            <span suppressHydrationWarning>Convocatoria finalizada</span>
           ) : days === 0 ? (
-            <span className="font-extrabold">{hours}h {minutes}m restantes</span>
+            <span className="font-extrabold" suppressHydrationWarning>{hours}h {minutes}m restantes</span>
           ) : (
-            <span>{days} {days === 1 ? "día" : "días"} restantes</span>
+            <span suppressHydrationWarning>{days} {days === 1 ? "día" : "días"} restantes</span>
           )}
         </div>
       </div>
@@ -197,6 +259,7 @@ export function JobCountdownClock({
   // Tamaño Grande (Destacado en la vista de detalle /empleos/[slug])
   return (
     <div
+      suppressHydrationWarning
       className={`p-5 rounded-2xl border ${theme.badgeBg} ${
         theme.badgeBorder
       } space-y-3 relative overflow-hidden ${
@@ -230,23 +293,23 @@ export function JobCountdownClock({
 
       {/* Reloj con dígitos segmentados estilo panel tech */}
       {!isConcluded ? (
-        <div className="grid grid-cols-3 gap-2 pt-1 font-mono">
-          <div className="bg-black/30 border border-white/5 rounded-xl p-2.5 text-center">
-            <span className={`block text-2xl font-black ${theme.badgeText}`}>
+        <div className="grid grid-cols-3 gap-2 pt-1 font-mono" suppressHydrationWarning>
+          <div className="bg-black/30 border border-white/5 rounded-xl p-2.5 text-center" suppressHydrationWarning>
+            <span className={`block text-2xl font-black ${theme.badgeText}`} suppressHydrationWarning>
               {String(days).padStart(2, "0")}
             </span>
             <span className="text-[10px] text-slate-400 uppercase font-semibold">Días</span>
           </div>
 
-          <div className="bg-black/30 border border-white/5 rounded-xl p-2.5 text-center">
-            <span className={`block text-2xl font-black ${theme.badgeText}`}>
+          <div className="bg-black/30 border border-white/5 rounded-xl p-2.5 text-center" suppressHydrationWarning>
+            <span className={`block text-2xl font-black ${theme.badgeText}`} suppressHydrationWarning>
               {String(hours).padStart(2, "0")}
             </span>
             <span className="text-[10px] text-slate-400 uppercase font-semibold">Horas</span>
           </div>
 
-          <div className="bg-black/30 border border-white/5 rounded-xl p-2.5 text-center">
-            <span className={`block text-2xl font-black ${theme.badgeText}`}>
+          <div className="bg-black/30 border border-white/5 rounded-xl p-2.5 text-center" suppressHydrationWarning>
+            <span className={`block text-2xl font-black ${theme.badgeText}`} suppressHydrationWarning>
               {String(minutes).padStart(2, "0")}
             </span>
             <span className="text-[10px] text-slate-400 uppercase font-semibold">Minutos</span>

@@ -6,13 +6,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
 };
-import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Outfit, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import Script from "next/script";
 import { 
-  Briefcase, ShieldCheck, Search, PlusCircle, Globe, Award, 
-  Calculator, FileText, HelpCircle, Bot, FileSpreadsheet, Scale,
-  Mail, ExternalLink, Lock, Building2, Compass, BookOpen, Sparkles
+  ShieldCheck, PlusCircle, Scale,
+  Mail, Lock, Building2, BookOpen, FileCheck2
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
@@ -22,13 +21,13 @@ import { getSubdomainConfig } from "@atpdev/database";
 import { SITE_URL } from "@/lib/siteConfig";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-space",
   display: "swap",
 });
 
-const inter = Inter({
+const publicSans = Public_Sans({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
@@ -41,93 +40,115 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "chamba pro — Convocatorias de Trabajo y Empleos Perú 2026",
-    template: "%s | chamba pro",
-  },
-  description:
-    "Convocatorias de trabajo y chamba en Perú 2026: plazas CAS 1057, 728 y sector privado. Bases oficiales, requisitos y salarios en portales del Estado.",
-  keywords: [
-    "chamba",
-    "chamba peru",
-    "empleos",
-    "empleos peru",
-    "trabajo",
-    "trabajo peru",
-    "bolsa de trabajo",
-    "convocatorias de trabajo",
-    "convocatorias de trabajo 2026",
-    "trabajo en el estado",
-    "convocatorias cas 2026",
-    "portal de empleo peru",
-    "servir convocatorias",
-    "sunat empleos",
-    "minedu convocatorias",
-    "essalud convocatorias",
-    "empleos lima",
-    "trabajo lima",
-    "trabajo remoto peru",
-    "ofertas laborales peru",
-    "chamba pro"
-  ],
-  alternates: {
-    canonical: SITE_URL,
-    types: {
-      "application/rss+xml": `${SITE_URL}/rss.xml`,
+export async function generateMetadata(): Promise<Metadata> {
+  const config = getSubdomainConfig("chamba");
+  const defaultTitle =
+    config.seo?.meta_title ||
+    "chamba pro — Convocatorias de Trabajo y Empleos Perú 2026";
+  const defaultDescription =
+    config.seo?.meta_description ||
+    "Convocatorias de trabajo y chamba en Perú 2026: plazas CAS 1057, 728 y sector privado. Bases oficiales, requisitos y salarios en portales del Estado.";
+  const customKeywords = Array.isArray(config.seo?.keywords) && config.seo.keywords.length > 0
+    ? config.seo.keywords
+    : [];
+  const rawAdsense = config.monetization?.adsense_client_id?.trim();
+  const validAdsense =
+    rawAdsense && !rawAdsense.includes("0000000000")
+      ? rawAdsense.startsWith("ca-")
+        ? rawAdsense
+        : `ca-${rawAdsense}`
+      : process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-5414009811868137";
+  const gscToken =
+    config.seo?.google_search_console_token ||
+    process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: defaultTitle,
+      template: "%s | chamba pro",
     },
-  },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
+    description: defaultDescription,
+    keywords: [
+      ...new Set([
+        ...customKeywords,
+        "chamba",
+        "chamba peru",
+        "empleos",
+        "empleos peru",
+        "trabajo",
+        "trabajo peru",
+        "bolsa de trabajo",
+        "convocatorias de trabajo",
+        "convocatorias de trabajo 2026",
+        "trabajo en el estado",
+        "convocatorias cas 2026",
+        "portal de empleo peru",
+        "servir convocatorias",
+        "sunat empleos",
+        "minedu convocatorias",
+        "essalud convocatorias",
+        "empleos lima",
+        "trabajo lima",
+        "trabajo remoto peru",
+        "ofertas laborales peru",
+        "chamba pro",
+      ]),
     ],
-    shortcut: "/icon.svg",
-    apple: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-    ],
-  },
-  openGraph: {
-    title: "chamba pro — Convocatorias de Trabajo y Empleos Perú 2026",
-    description: "Convocatorias de trabajo y chamba en Perú 2026: plazas CAS 1057, 728 y sector privado. Bases oficiales, requisitos y salarios en portales del Estado.",
-    url: SITE_URL,
-    siteName: "chamba pro",
-    locale: "es_PE",
-    type: "website",
-    images: [
-      {
-        url: `${SITE_URL}/opengraph-image`,
-        width: 1200,
-        height: 630,
-        alt: "chamba pro — Convocatorias de Trabajo, Empleos y Chamba en Perú",
+    alternates: {
+      types: {
+        "application/rss+xml": `${SITE_URL}/rss.xml`,
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "chamba pro — Convocatorias de Trabajo y Empleos Perú 2026",
-    description: "Convocatorias de trabajo y chamba en Perú 2026: plazas CAS 1057, 728 y sector privado. Bases oficiales, requisitos y salarios en portales del Estado.",
-    images: [`${SITE_URL}/opengraph-image`],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    },
+    icons: {
+      icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+      shortcut: "/icon.svg",
+      apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    },
+    openGraph: {
+      title: defaultTitle,
+      description: defaultDescription,
+      url: SITE_URL,
+      siteName: "chamba pro",
+      locale: "es_PE",
+      type: "website",
+      images: [
+        {
+          url: `${SITE_URL}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: "chamba pro — Convocatorias de Trabajo, Empleos y Chamba en Perú",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: defaultTitle,
+      description: defaultDescription,
+      images: [`${SITE_URL}/opengraph-image`],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
-    other: {
-      "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "",
-      "google-adsense-account": "ca-pub-5414009811868137",
+    verification: {
+      ...(gscToken ? { google: gscToken } : {}),
+      other: {
+        ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+          ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+          : {}),
+        "google-adsense-account": validAdsense,
+      },
     },
-  },
-};
+  };
+}
 
 export default function RootLayout({
   children,
@@ -135,19 +156,60 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const config = getSubdomainConfig("chamba");
-  const theme = config.theme || ({} as any);
-  const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-5414009811868137";
-  const gaId = config.seo?.google_analytics_id || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "GTM-KGJN7SDL";
+  const theme = config.theme || ({} as Record<string, string | undefined>);
+  const adsenseEnabled =
+    config.modules?.adsense_enabled !== false &&
+    config.monetization?.adsense_enabled !== false;
+  const rawDbAdsense = config.monetization?.adsense_client_id?.trim();
+  const validDbAdsense =
+    rawDbAdsense && !rawDbAdsense.includes("0000000000")
+      ? rawDbAdsense.startsWith("ca-")
+        ? rawDbAdsense
+        : `ca-${rawDbAdsense}`
+      : "";
+  const adsenseId =
+    validDbAdsense ||
+    process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ||
+    "ca-pub-5414009811868137";
+  const adSlotsConfig = {
+    enabled: adsenseEnabled,
+    clientId: adsenseId,
+    slots: {
+      leaderboard:
+        config.monetization?.adsense_slot_header ||
+        process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER ||
+        "",
+      "in-feed":
+        config.monetization?.adsense_slot_incontent ||
+        process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT ||
+        "",
+      sidebar:
+        config.monetization?.adsense_slot_sidebar ||
+        process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR ||
+        "",
+      billboard:
+        config.monetization?.adsense_slot_footer ||
+        process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER ||
+        "",
+    },
+  };
+  const gaId =
+    config.seo?.google_analytics_id ||
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+    "GTM-KGJN7SDL";
   const clarityId = config.seo?.microsoft_clarity_id || "zak4lzyye9";
   const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
   const accentHex = theme.accent_color || theme.primary_color || "#10b981";
-  const glowStyle = theme.glow_style || "spotlight-border";
   const neonThickness = theme.neon_thickness || "4px";
   const neonGlow = neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px";
   const radiusScale = theme.radius_scale === 'none' ? '0px' : theme.radius_scale === 'small' ? '0.375rem' : theme.radius_scale === 'medium' ? '1rem' : '9999px';
 
   return (
-    <html lang="es" className={`${theme.theme_mode === 'light' ? 'light' : 'dark'} ${spaceGrotesk.variable} ${inter.variable} ${ibmPlexMono.variable}`}>
+    <html
+      lang="es"
+      suppressHydrationWarning
+      className={`${theme.theme_mode === 'light' ? 'light' : 'dark'} ${outfit.variable} ${publicSans.variable} ${ibmPlexMono.variable}`}
+    >
       <head>
         {/* Core Web Vitals Resource Hints */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -188,71 +250,7 @@ export default function RootLayout({
             />
           );
         })()}
-        {/* Google Consent Mode v2 Default Signals (AdSense & GA4 Compliance) */}
-        <script
-          id="google-consent-mode-default"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('consent', 'default', {
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'analytics_storage': 'granted',
-                'wait_for_update': 500
-              });
-            `
-          }}
-        />
 
-        {/* Google Analytics 4 (GA4) & Google Tag (GTM) */}
-        {gaId && (
-          <>
-            <Script
-              async
-              src={
-                gaId.startsWith('GTM-')
-                  ? `https://www.googletagmanager.com/gtm.js?id=${gaId}`
-                  : `https://www.googletagmanager.com/gtag/js?id=${gaId}`
-              }
-              strategy="afterInteractive"
-            />
-            <Script id="google-tags-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                ${gaId.startsWith('G-') ? `gtag('config', '${gaId}', { page_path: window.location.pathname });` : ''}
-                ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ''}
-              `}
-            </Script>
-          </>
-        )}
-        {/* Microsoft Clarity Behavioral Analytics */}
-        {clarityId && (
-          <Script
-            id="microsoft-clarity-init"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function(c,l,a,r,i,t,y){
-                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-                })(window, document, "clarity", "script", "${clarityId}");
-              `
-            }}
-          />
-        )}
-        {/* Google AdSense Script Inyección Oficial */}
-        {adsenseId && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
-            crossOrigin="anonymous"
-          />
-        )}
         {/* Google Sitelinks Searchbox & WebSite Schema */}
         <script
           type="application/ld+json"
@@ -276,29 +274,217 @@ export default function RootLayout({
             }),
           }}
         />
-        {/* Organization Schema (E-E-A-T & Google Knowledge Graph) */}
+        {/* Organization & Google Business Profile Schema (E-E-A-T, Local SEO & Knowledge Graph) */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "Organization",
-              name: "chamba pro",
+              "@type": ["Organization", "EmploymentAgency"],
+              name: "chamba pro — Convocatorias de Trabajo y Empleos en Perú",
+              alternateName: ["Chamba Pro Perú", "ATP DEV Empleos"],
               legalName: "ATP DEV",
               url: SITE_URL,
               logo: `${SITE_URL}/icon.svg`,
+              image: `${SITE_URL}/opengraph-image`,
+              description: "Plataforma oficial de difusión de convocatorias CAS 1057, D.L. 728, D.L. 276, Ley 30057 y empleos en el Perú con descarga directa de bases oficiales en PDF y enlaces institucionales verificados.",
+              areaServed: {
+                "@type": "Country",
+                name: "Perú",
+                sameAs: "https://es.wikipedia.org/wiki/Per%C3%BA"
+              },
+              address: {
+                "@type": "PostalAddress",
+                addressLocality: "Lima",
+                addressRegion: "Lima",
+                addressCountry: "PE",
+              },
               sameAs: ["https://atpdev.dev"],
+              knowsAbout: [
+                "Convocatorias CAS 1057",
+                "Bases Oficiales de Convocatorias en PDF",
+                "SERVIR Talento Perú",
+                "Empleos en el Estado Peruano",
+                "Convocatorias D.L. 728 y D.L. 276",
+                "Prácticas Preprofesionales y Profesionales en el Estado"
+              ],
+              hasOfferCatalog: {
+                "@type": "OfferCatalog",
+                name: "Servicios de Empleo y Convocatorias Oficiales en Perú",
+                itemListElement: [
+                  {
+                    "@type": "Offer",
+                    itemOffered: {
+                      "@type": "Service",
+                      name: "Buscador de Convocatorias CAS 1057, 728 y 276 con Bases Oficiales en PDF",
+                      url: `${SITE_URL}/empleos`
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    itemOffered: {
+                      "@type": "Service",
+                      name: "Directorio de Portales Oficiales de Entidades del Estado Peruano",
+                      url: `${SITE_URL}/organizaciones`
+                    }
+                  },
+                  {
+                    "@type": "Offer",
+                    itemOffered: {
+                      "@type": "Service",
+                      name: "Publicación Gratuita de Ofertas de Empleo y Convocatorias",
+                      url: `${SITE_URL}/publicar-empleo`
+                    }
+                  }
+                ]
+              },
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer support",
                 email: "contacto@atpdev.dev",
+                areaServed: "PE",
                 availableLanguage: ["Spanish"],
               },
             }),
           }}
         />
       </head>
-      <body className="bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-600 selection:text-white transition-colors">
+      <body 
+        suppressHydrationWarning={true}
+        className="bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-white antialiased selection:bg-emerald-600 selection:text-white transition-colors"
+      >
+        {/* Anti-Extension Hydration Sanitizer: elimina atributos inyectados por extensiones del navegador (Bitdefender, UrbanVPN, LastPass, etc.) antes de la hidratación de React */}
+        <Script
+          id="anti-extension-hydration"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                var badAttrs = ['bis_skin_checked', 'bis_register', 'cz-shortcut-listen', 'fdprocessedid'];
+                function sanitize(el) {
+                  if (!el || el.nodeType !== 1) return;
+                  for (var i = 0; i < badAttrs.length; i++) {
+                    if (el.hasAttribute(badAttrs[i])) el.removeAttribute(badAttrs[i]);
+                  }
+                  var attrs = el.attributes;
+                  if (attrs) {
+                    for (var j = attrs.length - 1; j >= 0; j--) {
+                      var n = attrs[j].name;
+                      if (n.indexOf('__processed_') === 0 || n.indexOf('bis_') === 0) {
+                        el.removeAttribute(n);
+                      }
+                    }
+                  }
+                }
+                if (typeof document !== 'undefined') {
+                  sanitize(document.body);
+                  var all = document.querySelectorAll('*');
+                  for (var k = 0; k < all.length; k++) sanitize(all[k]);
+                  try {
+                    var obs = new MutationObserver(function(muts) {
+                      for (var m = 0; m < muts.length; m++) {
+                        var mut = muts[m];
+                        if (mut.type === 'attributes') sanitize(mut.target);
+                        else if (mut.type === 'childList') {
+                          for (var p = 0; p < mut.addedNodes.length; p++) sanitize(mut.addedNodes[p]);
+                        }
+                      }
+                    });
+                    obs.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+                  } catch (e) {}
+                }
+              })();
+            `
+          }}
+        />
+        {/* Google Consent Mode v2 Default Signals (AdSense & GA4 Compliance) */}
+        <Script
+          id="google-consent-mode-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'granted',
+                'wait_for_update': 500
+              });
+            `
+          }}
+        />
+
+        {/* Google Analytics 4 (GA4) & Google Tag (GTM) */}
+        {gaId && (
+          <>
+            <Script
+              id="google-tags-loader"
+              src={
+                gaId.startsWith('GTM-')
+                  ? `https://www.googletagmanager.com/gtm.js?id=${gaId}`
+                  : `https://www.googletagmanager.com/gtag/js?id=${gaId}`
+              }
+              strategy="afterInteractive"
+            />
+            <Script id="google-tags-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                ${gaId.startsWith('G-') ? `gtag('config', '${gaId}', { page_path: window.location.pathname });` : ''}
+                ${googleAdsId ? `gtag('config', '${googleAdsId}');` : ''}
+              `}
+            </Script>
+          </>
+        )}
+
+        {/* Microsoft Clarity Behavioral Analytics */}
+        {clarityId && (
+          <Script
+            id="microsoft-clarity-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${clarityId}");
+              `
+            }}
+          />
+        )}
+
+        {/* Google AdSense Configuration */}
+        <Script
+          id="chamba-ads-config"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `window.__CHAMBA_ADS_CONFIG__ = ${JSON.stringify(adSlotsConfig)};`,
+          }}
+        />
+        {adsenseEnabled && adsenseId && (
+          <Script
+            id="google-adsense-loader"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
+                    var s = document.createElement('script');
+                    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}';
+                    s.async = true;
+                    s.crossOrigin = 'anonymous';
+                    document.head.appendChild(s);
+                  }
+                })();
+              `
+            }}
+          />
+        )}
+
         <ChambaThemeListener />
         <AnalyticsTracker />
         <div className="min-h-screen flex flex-col">
@@ -331,7 +517,7 @@ export default function RootLayout({
               {/* Col 1: Brand & Transparencia */}
               <div className="space-y-4 md:col-span-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center font-bold font-display shadow-sm">
+                  <div suppressHydrationWarning className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center font-bold font-display shadow-sm">
                     ch
                   </div>
                   <div>
@@ -365,8 +551,8 @@ export default function RootLayout({
                   </li>
                   <li>
                     <Link href="/match-cv" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                      <Sparkles size={12} className="text-emerald-600 dark:text-emerald-400" />
-                      <span>Recomendador de CV con IA</span>
+                      <FileCheck2 size={12} className="text-emerald-600 dark:text-emerald-400" />
+                      <span>Evaluador Curricular de Convocatorias</span>
                     </Link>
                   </li>
                   <li>
@@ -381,7 +567,7 @@ export default function RootLayout({
                   </li>
                   <li>
                     <Link href="/simulador-entrevista-ia" className="py-1 px-1.5 inline-block hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                      Simulador de Entrevista con IA
+                      Simulador de Entrevista Técnica CAS
                     </Link>
                   </li>
                   <li>
@@ -518,12 +704,12 @@ export default function RootLayout({
             </div>
 
             {/* Bottom Bar: Disclaimer Legal No Gubernamental */}
-            <div className="border-t border-slate-200 dark:border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-600 dark:text-slate-400 font-medium text-center md:text-left">
+            <div className="border-t border-slate-200 dark:border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-400 font-medium text-center md:text-left">
               <p>
                 © {new Date().getFullYear()} <strong>chamba pro</strong> — Desarrollado por <a href="https://atpdev.dev" target="_blank" className="text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 font-semibold">ATP DEV</a>. Todos los derechos reservados.
               </p>
-              <p className="max-w-xl text-[10px] leading-relaxed">
-                <strong>Aviso Legal:</strong> Chamba Pro es un agregador privado e independiente de ofertas de empleo. No somos una entidad gubernamental ni representamos a SERVIR. Toda postulación se realiza de forma gratuita y directa en los portales oficiales de cada institución. Cumplimiento de la Ley N° 29733.
+              <p className="max-w-md text-xs leading-relaxed text-pretty">
+                <strong>Aviso Legal:</strong> Chamba Pro es un agregador privado e independiente de ofertas de empleo. No somos una entidad gubernamental ni representamos a SERVIR. Toda postulación se realiza de forma gratuita y directa en los portales oficiales de cada institución. Cumplimiento de la Ley&nbsp;N°&nbsp;29733.
               </p>
             </div>
           </div>

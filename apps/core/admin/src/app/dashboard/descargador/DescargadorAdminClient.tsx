@@ -112,6 +112,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
   const [activeTab, setActiveTab] = useState<'modules' | 'monetization' | 'payments' | 'apk' | 'branding' | 'seo' | 'contact' | 'backend' | 'theme'>('modules');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // APK Management State
   const [syncingApk, setSyncingApk] = useState(false);
@@ -363,6 +364,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
   const handleSave = async () => {
     setSaving(true);
     setSaveSuccess(false);
+    setSaveError(null);
     try {
       const res = await saveDescargadorConfigAction(config);
       if (res.success) {
@@ -378,8 +380,14 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Error al guardar en Descargador:", err);
+      const isStale = err?.message?.includes("unexpected response") || err?.message?.includes("fetch");
+      if (isStale) {
+        setSaveError("La conexión se actualizó tras reiniciar el servidor. Por favor presiona F5 para recargar y sincronizar.");
+      } else {
+        setSaveError(err?.message || "Error al guardar la configuración.");
+      }
     } finally {
       setSaving(false);
     }
@@ -460,6 +468,21 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
           <div className="mt-4 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-2 animate-fade-in">
             <CheckCircle2 className="w-4 h-4" />
             Configuración actualizada con éxito en todo el monorepo y la base de datos.
+          </div>
+        )}
+
+        {saveError && (
+          <div className="mt-4 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm flex items-center justify-between gap-2 animate-fade-in">
+            <div className="flex items-center gap-2">
+              <XCircle className="w-4 h-4 shrink-0" />
+              <span>{saveError}</span>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-white text-xs font-bold transition shrink-0 cursor-pointer"
+            >
+              Recargar Página (F5)
+            </button>
           </div>
         )}
       </div>

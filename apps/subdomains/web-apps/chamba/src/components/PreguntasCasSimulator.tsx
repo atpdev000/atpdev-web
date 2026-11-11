@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HelpCircle, CheckCircle2, ChevronRight, BookOpen, Sparkles, Award, RotateCcw } from 'lucide-react';
+import { CheckCircle2, BookOpen } from 'lucide-react';
 
 export interface PreguntaCas {
   id: string;
@@ -128,7 +128,6 @@ export function PreguntasCasSimulator() {
         {filtered.map((item, idx) => {
           const userAns = userAnswers[item.id];
           const isRevealed = showAnswers[item.id];
-          const isCorrect = userAns === item.correctIdx;
 
           return (
             <div

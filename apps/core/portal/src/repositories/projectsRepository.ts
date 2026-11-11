@@ -48,6 +48,29 @@ const projectsMock: Project[] = [
     status: "Beta",
     demoLink: "https://atpdev.dev"
   },
+  {
+    id: 5,
+    title: "DNI Master Scanner Pro",
+    description: "Escáner inteligente de DNI a PDF en formato A4 con eliminación de fondo, homografía y realce CamScanner.",
+    category: "Android",
+    image: "https://images.unsplash.com/photo-1562240020-ce31ccb0fa7d?q=80&w=800&auto=format&fit=crop",
+    stack: ["React", "Capacitor", "Canvas HD", "jsPDF"],
+    metrics: "Escala 1:1 Oficial",
+    status: "En producción",
+    demoLink: "https://dni.atpdev.dev",
+    playStore: "https://play.google.com/store"
+  },
+  {
+    id: 6,
+    title: "MasterAtPDF Pro",
+    description: "Suite integral de herramientas PDF con procesamiento client-side de alta velocidad (unir, dividir, organizar, rotar, comprimir) y microservicio de conversión Word de alta fidelidad.",
+    category: "Web",
+    image: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?q=80&w=800&auto=format&fit=crop",
+    stack: ["Next.js", "pdf-lib", "pdfjs-dist", "FastAPI", "Python"],
+    metrics: "100% Client/API Pro",
+    status: "En producción",
+    demoLink: "https://pdf.atpdev.dev",
+  },
 ];
 
 export async function getAllProjects(): Promise<Project[]> {

@@ -14,7 +14,7 @@ export async function GET() {
 - [Calculadora de Sueldo Neto CAS](${SITE_URL}/calculadora-sueldo)
 - [Comparador de Regímenes Laborales CAS vs 728 vs 276](${SITE_URL}/comparador-regimenes)
 - [Generador de CV Formato SERVIR](${SITE_URL}/crear-cv-cas)
-- [Simulador de Entrevistas Asistido por IA](${SITE_URL}/simulador-entrevista-ia)
+- [Simulador de Entrevista Técnica y Examen Oral CAS](${SITE_URL}/simulador-entrevista-ia)
 - [Plantillas y Anexos Oficiales SERVIR](${SITE_URL}/plantillas-anexos)
 - [Preguntas Frecuentes de Examen y Entrevista CAS](${SITE_URL}/preguntas-entrevista-cas)
 

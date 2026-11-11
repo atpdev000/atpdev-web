@@ -91,7 +91,7 @@ export default async function Image() {
             Buscador de Convocatorias CAS 1057, 728 y Sector Privado
           </div>
           <div style={{ fontSize: '24px', color: '#94a3b8', lineHeight: 1.4 }}>
-            Derivación directa a fuentes oficiales del Estado con verificación RUC. Herramientas gratuitas: Calculadora de Sueldo Neto CAS, Generador CV SERVIR y Simulador IA.
+            Derivación directa a fuentes oficiales del Estado con verificación RUC. Herramientas gratuitas: Calculadora de Sueldo Neto CAS, Generador CV SERVIR y Simulador de Entrevista Técnica.
           </div>
         </div>
 
@@ -134,7 +134,7 @@ export default async function Image() {
               fontWeight: 600,
             }}
           >
-            🤖 Simulador de Entrevista IA
+            🎯 Simulador de Entrevista CAS
           </div>
         </div>
       </div>

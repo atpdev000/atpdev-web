@@ -55,10 +55,27 @@ export default function Header() {
     } catch (e) {}
   }, [])
 
-  const scrollToTools = () => {
-    document.getElementById('herramientas')?.scrollIntoView({
-      behavior: 'smooth'
-    })
+  const handleLogoClick = (e: React.MouseEvent) => {
+    if (typeof window !== 'undefined' && window.location.pathname === '/') {
+      e.preventDefault()
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }
+  }
+
+  const scrollToTools = (e?: React.MouseEvent) => {
+    if (typeof window !== 'undefined') {
+      if (window.location.pathname === '/') {
+        e?.preventDefault()
+        document.getElementById('herramientas')?.scrollIntoView({
+          behavior: 'smooth'
+        })
+      } else {
+        window.location.href = '/#herramientas'
+      }
+    }
   }
 
   return (
@@ -67,8 +84,13 @@ export default function Header() {
         <div className="container mx-auto px-4 py-3.5">
           <div className="flex items-center justify-between">
             {/* Logo y nombre con enlace a Home */}
-            <Link href="/" className="flex items-center space-x-3 hover:opacity-85 transition-opacity">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2.5 rounded-xl shadow-md shadow-blue-500/20">
+            <Link 
+              href="/" 
+              onClick={handleLogoClick}
+              className="flex items-center space-x-3 hover:opacity-85 transition-opacity cursor-pointer group"
+              title="Ir al inicio de Descargador Pro"
+            >
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2.5 rounded-xl shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
                 <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                 </svg>
@@ -85,7 +107,11 @@ export default function Header() {
 
             {/* Navegación Desktop */}
             <nav className="hidden lg:flex items-center space-x-6 text-sm font-medium" suppressHydrationWarning>
-              <Link href="/" className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link 
+                href="/" 
+                onClick={handleLogoClick}
+                className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+              >
                 {t.nav.home}
               </Link>
               <Link href="/blog" className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -129,19 +155,6 @@ export default function Header() {
 
             {/* Controles de Idioma, Tema, Historial y Contacto */}
             <div className="flex items-center space-x-2 sm:space-x-2.5">
-              {/* Badges en pantallas medianas */}
-              <div className="hidden xl:flex items-center space-x-2 text-xs font-semibold">
-                <span className="bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 px-2.5 py-1 rounded-full">
-                  {t.nav.freeBadge}
-                </span>
-                <span className="bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 px-2.5 py-1 rounded-full">
-                  {t.nav.fastBadge}
-                </span>
-                <span className="bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60 px-2.5 py-1 rounded-full">
-                  {t.nav.secureBadge}
-                </span>
-              </div>
-
               {/* Selector de Idiomas */}
               <LanguageSelector />
 

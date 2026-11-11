@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
-  Sparkles, Upload, FileText, CheckCircle2, AlertCircle, ArrowRight, 
-  MapPin, Building2, ExternalLink, Loader2, RefreshCw, Briefcase, 
-  GraduationCap, Clock, Filter, ShieldCheck, ChevronRight
+  Upload, FileText, CheckCircle2, AlertCircle, 
+  MapPin, ExternalLink, Loader2, Briefcase, 
+  GraduationCap, Clock, Filter, ShieldCheck, FileCheck2
 } from 'lucide-react';
 import { EntityLogo } from '@/components/EntityLogo';
+import { AdBannerSlot } from '@/components/AdBannerSlot';
 
 interface MatchedItem {
   job: {
@@ -65,54 +66,51 @@ export default function MatchCvPage() {
   const [preferredRegion, setPreferredRegion] = useState('');
   const [preferredSector, setPreferredSector] = useState('');
   const [loading, setLoading] = useState(false);
+  const [extractingFile, setExtractingFile] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [recommendations, setRecommendations] = useState<MatchedItem[]>([]);
   const [scoreFilter, setScoreFilter] = useState<'all' | 'high' | 'medium'>('all');
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.name.endsWith('.txt')) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
-        setCvText(text || '');
-      };
-      reader.readAsText(file);
-    } else {
-      // For PDF / Word files, extract plain text strings via FileReader
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const buffer = event.target?.result as ArrayBuffer;
-        if (buffer) {
-          const uint8 = new Uint8Array(buffer);
-          let rawString = '';
-          // Extract printable ASCII/UTF-8 strings from binary buffer
-          for (let i = 0; i < uint8.length; i++) {
-            const charCode = uint8[i];
-            if ((charCode >= 32 && charCode <= 126) || charCode === 10 || charCode === 13) {
-              rawString += String.fromCharCode(charCode);
-            } else if (charCode > 127) {
-              rawString += ' ';
-            }
-          }
-          // Clean up formatting
-          const cleanedText = rawString
-            .replace(/[\\\/\{\}\[\]\<\>\(\)]/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
+    setErrorMsg(null);
+    setExtractingFile(true);
 
-          if (cleanedText.length > 50) {
-            setCvText(cleanedText.slice(0, 4000));
-          } else {
-            setErrorMsg(`Archivo "${file.name}" cargado. Si el texto no aparece completo, por favor copia y pega el contenido de tu CV en el recuadro inferior.`);
-          }
-        }
-      };
-      reader.readAsArrayBuffer(file);
+    try {
+      if (file.name.toLowerCase().endsWith('.txt')) {
+        const text = await file.text();
+        setCvText(text.trim());
+        return;
+      }
+
+      // Enviar archivo a la API de extracción inteligente (PDF / DOCX)
+      const formPayload = new FormData();
+      formPayload.append('file', file);
+
+      const res = await fetch('/api/ai/extract-cv-text', {
+        method: 'POST',
+        body: formPayload,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'No se pudo extraer el texto del archivo.');
+      }
+
+      setCvText(data.text || '');
+    } catch (err: unknown) {
+      console.error('Error al procesar archivo:', err);
+      const msg = err instanceof Error ? err.message : 'Error al procesar el archivo.';
+      setErrorMsg(`${msg} Puedes copiar y pegar el texto de tu CV directamente.`);
+    } finally {
+      setExtractingFile(false);
+      // Reset input value so user can re-upload if needed
+      e.target.value = '';
     }
   };
 
@@ -144,9 +142,10 @@ export default function MatchCvPage() {
 
       setProfile(data.candidateProfile);
       setRecommendations(data.recommendations || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error matching CV:', err);
-      setErrorMsg(err.message || 'No se pudo conectar con el motor de recomendación.');
+      const message = err instanceof Error ? err.message : 'No se pudo conectar con el motor de recomendación.';
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
@@ -162,22 +161,21 @@ export default function MatchCvPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 pb-28 sm:pb-12">
       {/* Hero Header */}
       <div className="text-center space-y-4 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold tracking-wide">
-          <Sparkles size={14} className="animate-pulse" />
-          <span>RECOMENDADOR DE CONVOCATORIAS CON IA</span>
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-bold tracking-wide">
+          <FileCheck2 size={14} />
+          <span>SISTEMA DE EVALUACIÓN Y COMPATIBILIDAD CURRICULAR</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-extrabold font-display text-slate-900 dark:text-white tracking-tight leading-tight">
-          Encuentra la convocatoria perfecta para tu CV
+          Coteja tu perfil profesional con convocatorias oficiales
         </h1>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Sube tu Curriculum Vitae o pega tu resumen profesional. Nuestro motor de Inteligencia Artificial 
-          evalúa tu nivel académico, especialidad y años de experiencia para recomendarte las convocatorias 
-          del Estado (CAS 1057, 728, 276) y sector privado con mayor compatibilidad real.
+        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-[68ch] mx-auto text-pretty">
+          Sube tu Curriculum Vitae o pega tu trayectoria laboral. Nuestro sistema de análisis técnico y cotejo curricular
+          evalúa tu nivel académico, colegiatura y experiencia comprobada frente a los Términos de Referencia (TDR) de cada convocatoria vigente en el Estado (CAS 1057, 728, 276) y sector privado.
         </p>
       </div>
 
-      {/* Input Section Card */}
-      <div className="p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md space-y-6">
+      {/* Input Section */}
+      <div className="space-y-6 max-w-4xl mx-auto">
         {/* Quick Preload Profiles */}
         <div className="space-y-2">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block font-mono">
@@ -198,106 +196,128 @@ export default function MatchCvPage() {
         </div>
 
         {/* Drag & Drop File Upload Area */}
-        <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 rounded-2xl p-6 sm:p-8 text-center transition-all bg-slate-50/50 dark:bg-slate-950/40">
+        <div className="relative border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-400 rounded-3xl p-8 sm:p-10 text-center transition-all bg-white dark:bg-slate-900 shadow-xs">
           <input
             type="file"
             accept=".pdf,.doc,.docx,.txt"
             onChange={handleFileUpload}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-              <Upload size={24} />
-            </div>
-            <p className="text-sm font-bold text-slate-900 dark:text-white">
-              Haz clic o arrastra aquí tu CV (PDF, Word o TXT)
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Extracción confidencial. No almacenamos datos sensibles. Conforme a la Ley N° 29733, nuestros{' '}
-              <Link href="/terminos-y-condiciones" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
-                Términos
-              </Link>{' '}
-              y{' '}
-              <Link href="/politica-de-privacidad" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
-                Privacidad
-              </Link>.
-            </p>
+          <div className="flex flex-col items-center justify-center space-y-2 pointer-events-none">
+            {extractingFile ? (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                  <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-display">
+                  Extrayendo texto del documento (PDF / Word)...
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                  Convirtiendo páginas y procesando contenido limpio...
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                  <Upload size={24} />
+                </div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  Haz clic o arrastra aquí tu CV (PDF, Word o TXT)
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Extracción confidencial. No almacenamos datos sensibles. Conforme a la Ley N° 29733, nuestros{' '}
+                  <Link href="/terminos-y-condiciones" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline pointer-events-auto">
+                    Términos
+                  </Link>{' '}
+                  y{' '}
+                  <Link href="/politica-de-privacidad" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline pointer-events-auto">
+                    Privacidad
+                  </Link>.
+                </p>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Text Area */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block font-mono">
-            O pega directamente el texto de tu CV o perfil profesional:
-          </label>
-          <textarea
-            rows={5}
-            value={cvText}
-            onChange={(e) => setCvText(e.target.value)}
-            placeholder="Ejemplo: Bachiller en Contabilidad con 3 años de experiencia en gestión pública, manejo de SIAF y presupuesto en Lima..."
-            className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-sans leading-relaxed"
-          />
-        </div>
-
-        {/* Optional Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-mono">
-              Región de Preferencia (Opcional)
+        {/* Form and Filters Card */}
+        <div className="p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs space-y-6">
+          {/* Text Area */}
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block font-mono">
+              O pega directamente el texto de tu CV o perfil profesional:
             </label>
-            <input
-              type="text"
-              value={preferredRegion}
-              onChange={(e) => setPreferredRegion(e.target.value)}
-              placeholder="Ej: Lima, Arequipa, Cusco, Remoto..."
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+            <textarea
+              rows={5}
+              value={cvText}
+              onChange={(e) => setCvText(e.target.value)}
+              placeholder="Ejemplo: Bachiller en Contabilidad con 3 años de experiencia en gestión pública, manejo de SIAF y presupuesto en Lima..."
+              className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-sans leading-relaxed"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-mono">
-              Régimen Laboral Preferido (Opcional)
-            </label>
-            <select
-              value={preferredSector}
-              onChange={(e) => setPreferredSector(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
-            >
-              <option value="">Cualquier Régimen (Todos)</option>
-              <option value="CAS 1057">CAS 1057 (Estado)</option>
-              <option value="D.L. 728">D.L. 728 (Planilla Estatal)</option>
-              <option value="D.L. 276">D.L. 276 (Carrera Pública)</option>
-              <option value="Locación / FAG">Locación de Servicios / FAG</option>
-              <option value="Privado">Sector Privado</option>
-            </select>
+          {/* Optional Filters */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-mono">
+                Región de Preferencia (Opcional)
+              </label>
+              <input
+                type="text"
+                value={preferredRegion}
+                onChange={(e) => setPreferredRegion(e.target.value)}
+                placeholder="Ej: Lima, Arequipa, Cusco, Remoto..."
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 font-mono">
+                Régimen Laboral Preferido (Opcional)
+              </label>
+              <select
+                value={preferredSector}
+                onChange={(e) => setPreferredSector(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
+              >
+                <option value="">Cualquier Régimen (Todos)</option>
+                <option value="CAS 1057">CAS 1057 (Estado)</option>
+                <option value="D.L. 728">D.L. 728 (Planilla Estatal)</option>
+                <option value="D.L. 276">D.L. 276 (Carrera Pública)</option>
+                <option value="Locación / FAG">Locación de Servicios / FAG</option>
+                <option value="Privado">Sector Privado</option>
+              </select>
+            </div>
           </div>
+
+          {errorMsg && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {/* Action Button */}
+          <button
+            onClick={handleAnalyze}
+            disabled={loading || !cvText.trim()}
+            className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm sm:text-base font-display transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                <span>Analizando perfil y evaluando convocatorias...</span>
+              </>
+            ) : (
+              <>
+                <FileCheck2 size={18} />
+                <span>Cotejar Compatibilidad con Convocatorias Vigentes</span>
+              </>
+            )}
+          </button>
         </div>
 
-        {errorMsg && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-center gap-2">
-            <AlertCircle size={16} className="shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        {/* Action Button */}
-        <button
-          onClick={handleAnalyze}
-          disabled={loading || !cvText.trim()}
-          className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm sm:text-base font-display transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
-        >
-          {loading ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              <span>Analizando perfil y evaluando convocatorias...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles size={18} />
-              <span>Calcular Compatibilidad y Recomendar Convocatorias</span>
-            </>
-          )}
-        </button>
+        {/* AdSlot Leaderboard */}
+        <AdBannerSlot type="leaderboard" className="my-4" />
       </div>
 
       {/* Results Section */}
@@ -308,7 +328,7 @@ export default function MatchCvPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/20 pb-4">
               <div>
                 <span className="text-[11px] font-mono uppercase text-emerald-600 dark:text-emerald-400 font-bold block">
-                  Diagnóstico IA de Perfil
+                  Diagnóstico Curricular de Perfil
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white">
                   Resumen de tu Perfil Profesional Detectado
@@ -409,7 +429,7 @@ export default function MatchCvPage() {
           <div className="space-y-4">
             {filteredRecommendations.length === 0 ? (
               <div className="p-8 text-center rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-500">
-                No hay convocatorias que coincidan con este filtro específico. Intenta seleccionando "Todas".
+                No hay convocatorias que coincidan con este filtro específico. Intenta seleccionando &ldquo;Todas&rdquo;.
               </div>
             ) : (
               filteredRecommendations.map((item, idx) => {
@@ -527,6 +547,9 @@ export default function MatchCvPage() {
           </div>
         </div>
       )}
+
+      {/* Bottom Horizontal Ad Slot */}
+      <AdBannerSlot type="billboard" className="mt-8" />
     </div>
   );
 }

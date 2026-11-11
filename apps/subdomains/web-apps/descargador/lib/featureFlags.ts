@@ -3,11 +3,11 @@ import { Capacitor } from '@capacitor/core'
 export const FEATURES = {
     /**
      * Enable YouTube platform support
-     * - Web/APK builds: true
+     * - Web / AdSense Compliance: false on web by default to ensure 100% Google AdSense approval
      * - Play Store builds: false (compliance with YouTube ToS)
-     * - Ezoic Compliance: false on web, true on native
+     * - Native / explicitly enabled APK: true via NEXT_PUBLIC_ENABLE_YOUTUBE=true
      */
-    YOUTUBE_ENABLED: process.env.NEXT_PUBLIC_ENABLE_YOUTUBE !== 'false' && process.env.NEXT_PUBLIC_APP_VERSION !== 'playstore',
+    YOUTUBE_ENABLED: process.env.NEXT_PUBLIC_ENABLE_YOUTUBE === 'true' && process.env.NEXT_PUBLIC_APP_VERSION !== 'playstore',
 
     /**
      * Current app version identifier

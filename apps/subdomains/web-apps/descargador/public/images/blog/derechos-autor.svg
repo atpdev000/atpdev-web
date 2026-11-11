@@ -1,35 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
   <defs>
-    <linearGradient id="bg8" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1a0d00"/>
-      <stop offset="100%" style="stop-color:#0f172a"/>
+    <linearGradient id="bg_cpr" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c1222"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
     </linearGradient>
+    <filter id="glow_cpr">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="800" height="450" fill="url(#bg8)"/>
-  <!-- Shield with copyright symbol -->
-  <path d="M400,80 L520,130 L520,240 C520,310 400,370 400,370 C400,370 280,310 280,240 L280,130 Z" fill="#1a0d00" stroke="#f59e0b" stroke-width="2.5" opacity="0.9"/>
-  <text x="400" y="245" text-anchor="middle" fill="#f59e0b" font-size="80">©</text>
-  <!-- Rights list -->
-  <rect x="55" y="100" width="175" height="220" rx="14" fill="#1c0800" opacity="0.9" stroke="#f59e0b" stroke-width="1"/>
-  <text x="142" y="130" text-anchor="middle" fill="#fde68a" font-size="13" font-weight="bold" font-family="Arial">Tus Derechos</text>
-  <rect x="70" y="145" width="145" height="1" fill="#f59e0b" opacity="0.3"/>
-  <text x="85" y="170" fill="#fcd34d" font-size="11" font-family="Arial">📄 Reproducción</text>
-  <text x="85" y="192" fill="#fcd34d" font-size="11" font-family="Arial">📤 Distribución</text>
-  <text x="85" y="214" fill="#fcd34d" font-size="11" font-family="Arial">📡 Difusión</text>
-  <text x="85" y="236" fill="#fcd34d" font-size="11" font-family="Arial">✂️ Obras derivadas</text>
-  <text x="85" y="258" fill="#fcd34d" font-size="11" font-family="Arial">⏰ 70 años</text>
-  <!-- Fair Use box -->
-  <rect x="570" y="100" width="175" height="220" rx="14" fill="#0c1a00" opacity="0.9" stroke="#22c55e" stroke-width="1"/>
-  <text x="657" y="130" text-anchor="middle" fill="#86efac" font-size="13" font-weight="bold" font-family="Arial">Fair Use ✓</text>
-  <rect x="585" y="145" width="145" height="1" fill="#22c55e" opacity="0.3"/>
-  <text x="600" y="170" fill="#4ade80" font-size="11" font-family="Arial">🎓 Educación</text>
-  <text x="600" y="192" fill="#4ade80" font-size="11" font-family="Arial">🎭 Parodia</text>
-  <text x="600" y="214" fill="#4ade80" font-size="11" font-family="Arial">🔎 Crítica</text>
-  <text x="600" y="236" fill="#4ade80" font-size="11" font-family="Arial">📰 Noticias</text>
-  <text x="600" y="258" fill="#4ade80" font-size="11" font-family="Arial">🔬 Investigación</text>
-  <!-- Bottom warning -->
-  <rect x="200" y="380" width="400" height="40" rx="10" fill="#7c2d12" opacity="0.8"/>
-  <text x="400" y="405" text-anchor="middle" fill="#fed7aa" font-size="12" font-family="Arial" font-weight="bold">⚠️ Descarga responsablemente • Da crédito siempre</text>
-  <!-- Title -->
-  <text x="400" y="55" text-anchor="middle" fill="white" font-size="24" font-weight="bold" font-family="Arial">Derechos de Autor para Creadores</text>
+
+  <rect width="800" height="450" fill="url(#bg_cpr)"/>
+  <circle cx="400" cy="225" r="130" fill="#6366f1" opacity="0.16" filter="url(#glow_cpr)"/>
+
+  <!-- Center Balance Scales of Justice &amp; Fair Use -->
+  <g transform="translate(300, 100)">
+    <!-- Shield Container -->
+    <rect width="200" height="230" rx="28" fill="#1e293b" stroke="#818cf8" stroke-width="2" filter="url(#glow_cpr)"/>
+    <circle cx="100" cy="80" r="45" fill="#4f46e5" opacity="0.25"/>
+    <!-- Copyright Circle Icon -->
+    <circle cx="100" cy="80" r="32" fill="none" stroke="#a5b4fc" stroke-width="3"/>
+    <text x="100" y="93" text-anchor="middle" fill="#ffffff" font-size="38" font-weight="900" font-family="system-ui">©</text>
+    
+    <text x="100" y="150" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900" font-family="system-ui">FAIR USE</text>
+    <text x="100" y="170" text-anchor="middle" fill="#818cf8" font-size="11" font-weight="700" font-family="system-ui">Uso Legítimo &amp; DMCA</text>
+    <rect x="30" y="185" width="140" height="24" rx="8" fill="#4338ca"/>
+    <text x="100" y="201" text-anchor="middle" fill="#e0e7ff" font-size="10" font-weight="bold">EDUCACIÓN • CRÍTICA</text>
+  </g>
+
+  <!-- Left: Pillars of Protection -->
+  <g transform="translate(80, 140)">
+    <rect width="180" height="150" rx="16" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
+    <text x="25" y="35" fill="#38bdf8" font-size="12" font-weight="bold">🛡️ 4 Factores Legales</text>
+    <text x="25" y="65" fill="#cbd5e1" font-size="10">1. Fin Transformativo</text>
+    <text x="25" y="90" fill="#cbd5e1" font-size="10">2. Naturaleza de la Obra</text>
+    <text x="25" y="115" fill="#cbd5e1" font-size="10">3. Cantidad Usada</text>
+    <text x="25" y="140" fill="#cbd5e1" font-size="10">4. Impacto en Mercado</text>
+  </g>
+
+  <!-- Right: Best Practices -->
+  <g transform="translate(540, 140)">
+    <rect width="180" height="150" rx="16" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+    <text x="25" y="35" fill="#34d399" font-size="12" font-weight="bold">✅ Buenas Prácticas</text>
+    <text x="25" y="65" fill="#cbd5e1" font-size="10">• Atribución visible</text>
+    <text x="25" y="90" fill="#cbd5e1" font-size="10">• Aportar análisis crítico</text>
+    <text x="25" y="115" fill="#cbd5e1" font-size="10">• Licencias Creative Comm</text>
+    <text x="25" y="140" fill="#cbd5e1" font-size="10">• Cero lucro desleal</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="260" y="30" width="280" height="34" rx="17" fill="#0f172a" stroke="#818cf8" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#c7d2fe" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">⚖️ PROPIEDAD INTELECTUAL DIGITAL</text>
 </svg>

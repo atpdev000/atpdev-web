@@ -281,7 +281,7 @@ export default async function GuiaDetailPage({ params }: PageProps) {
           </h1>
 
           {/* Summary */}
-          <p className="mt-4 text-base sm:text-lg text-slate-700 dark:text-slate-300 leading-relaxed font-sans border-l-4 border-emerald-500 pl-4 py-2 italic bg-emerald-50/50 dark:bg-white/[0.02] rounded-r-xl">
+          <p className="mt-4 text-base sm:text-lg text-slate-700 dark:text-slate-200 leading-relaxed font-sans p-4 rounded-xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20">
             {guia.summary}
           </p>
 

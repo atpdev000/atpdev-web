@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { Menu, X, Search, Award, Calculator, FileText, HelpCircle, ShieldCheck, PlusCircle, Briefcase, Bot, FileSpreadsheet, Scale, Lock, FileCheck2, Mail, Building2, BookOpen, Sparkles } from 'lucide-react';
+import { Menu, X, Search, Award, Calculator, FileText, HelpCircle, ShieldCheck, PlusCircle, Briefcase, UserCheck, FileSpreadsheet, Scale, Lock, FileCheck2, Mail, Building2, BookOpen } from 'lucide-react';
 import { ChambaThemeToggle } from './ChambaThemeToggle';
 
 export function MobileNavMenu() {
@@ -64,118 +64,147 @@ export function MobileNavMenu() {
             <Link
               href="/empleos"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
             >
-              <Search size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Buscar Convocatorias</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <Search size={18} />
+              </div>
+              <span className="font-semibold">Buscar Convocatorias</span>
             </Link>
 
             <Link
               href="/match-cv"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item-highlight flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-300 dark:hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors"
+              className="drawer-nav-item-highlight flex items-center gap-3 p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-300 dark:hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors"
             >
-              <Sparkles size={18} className="text-emerald-600 dark:text-emerald-400 animate-pulse" />
-              <span className="font-bold">Recomendador CV (IA)</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-xs">
+                <FileCheck2 size={18} />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold">Evaluador Curricular</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-200/80 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-700">Oficial</span>
+              </div>
             </Link>
 
             <Link
               href="/guias"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item-highlight flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-300 dark:hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors"
+              className="drawer-nav-item-highlight flex items-center gap-3 p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-300 dark:hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors"
             >
-              <BookOpen size={18} className="text-emerald-600 dark:text-emerald-400" />
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                <BookOpen size={18} />
+              </div>
               <span className="font-bold">Guías Laborales CAS</span>
             </Link>
 
             <Link
               href="/organizaciones"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-cyan-500/30 text-slate-800 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
             >
-              <Building2 size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Entidades del Estado</span>
+              <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                <Building2 size={18} />
+              </div>
+              <span className="font-semibold">Entidades del Estado</span>
             </Link>
 
             <Link
               href="/publicar-empleo"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item-highlight flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-300 dark:hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors"
+              className="drawer-nav-item-highlight flex items-center gap-3 p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-300 dark:hover:border-emerald-500/40 text-emerald-800 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-200 transition-colors"
             >
-              <PlusCircle size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Publicar Convocatoria</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <PlusCircle size={18} />
+              </div>
+              <span className="font-semibold">Publicar Convocatoria</span>
             </Link>
 
             <Link
               href="/empleos?regimen=CAS"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 hover:border-amber-500/30 text-amber-900 dark:text-amber-300 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 hover:border-amber-500/30 text-amber-900 dark:text-amber-300 transition-colors"
             >
-              <Award size={18} className="text-amber-600 dark:text-amber-400" />
-              <span>Convocatorias CAS</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/25 flex items-center justify-center shrink-0">
+                <Award size={18} />
+              </div>
+              <span className="font-semibold">Convocatorias CAS</span>
             </Link>
 
             <Link
               href="/calculadora-sueldo"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-teal-500/30 text-slate-800 dark:text-slate-200 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
             >
-              <Calculator size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Calculadora de Sueldo</span>
+              <div className="w-9 h-9 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 flex items-center justify-center shrink-0">
+                <Calculator size={18} />
+              </div>
+              <span className="font-semibold">Calculadora de Sueldo</span>
             </Link>
 
             <Link
               href="/plantillas-anexos"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-cyan-500/30 text-slate-800 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-rose-500/30 text-slate-800 dark:text-slate-200 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
             >
-              <FileText size={18} className="text-cyan-600 dark:text-cyan-400" />
-              <span>Plantillas y Anexos</span>
+              <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center justify-center shrink-0">
+                <FileText size={18} />
+              </div>
+              <span className="font-semibold">Plantillas y Anexos</span>
             </Link>
 
             <Link
               href="/preguntas-entrevista-cas"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-amber-500/30 text-slate-800 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-amber-500/30 text-slate-800 dark:text-slate-200 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
             >
-              <HelpCircle size={18} className="text-amber-600 dark:text-amber-400" />
-              <span>Preguntas Entrevista CAS</span>
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                <HelpCircle size={18} />
+              </div>
+              <span className="font-semibold">Preguntas Entrevista CAS</span>
             </Link>
 
             <Link
               href="/simulador-entrevista-ia"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-sky-500/30 text-slate-800 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 transition-colors"
             >
-              <Bot size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Simulador Entrevista IA</span>
+              <div className="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 flex items-center justify-center shrink-0">
+                <UserCheck size={18} />
+              </div>
+              <span className="font-semibold">Simulador Entrevista Técnica</span>
             </Link>
 
             <Link
               href="/crear-cv-cas"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-blue-500/30 text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
-              <FileSpreadsheet size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Generador CV CAS Servir</span>
+              <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <FileSpreadsheet size={18} />
+              </div>
+              <span className="font-semibold">Generador CV CAS Servir</span>
             </Link>
 
             <Link
               href="/comparador-regimenes"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-cyan-500/30 text-slate-800 dark:text-slate-200 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-orange-500/30 text-slate-800 dark:text-slate-200 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
             >
-              <Scale size={18} className="text-cyan-600 dark:text-cyan-400" />
-              <span>Comparador de Regímenes</span>
+              <div className="w-9 h-9 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 flex items-center justify-center shrink-0">
+                <Scale size={18} />
+              </div>
+              <span className="font-semibold">Comparador de Regímenes</span>
             </Link>
 
             <Link
               href="/quienes-somos"
               onClick={() => setIsOpen(false)}
-              className="drawer-nav-item flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              className="drawer-nav-item flex items-center gap-3 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-white/5 hover:border-emerald-500/30 text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
             >
-              <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Quiénes Somos</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <ShieldCheck size={18} />
+              </div>
+              <span className="font-semibold">Quiénes Somos</span>
             </Link>
 
             {/* Legal & Compliance Links */}

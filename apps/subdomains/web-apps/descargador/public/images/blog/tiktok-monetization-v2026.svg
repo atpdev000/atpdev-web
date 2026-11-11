@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_mon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#052e16"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+    <filter id="glow_mon">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg_mon)"/>
+  <circle cx="400" cy="225" r="140" fill="#10b981" opacity="0.2" filter="url(#glow_mon)"/>
+
+  <!-- Money Dollar Growth Orb Center -->
+  <g transform="translate(300, 110)">
+    <rect width="200" height="200" rx="35" fill="#064e3b" stroke="#34d399" stroke-width="2.5" filter="url(#glow_mon)"/>
+    <circle cx="100" cy="75" r="40" fill="#059669"/>
+    <text x="100" y="88" text-anchor="middle" fill="#ffffff" font-size="42" font-weight="900">$</text>
+    <text x="100" y="145" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900">MONETIZACIÓN</text>
+    <text x="100" y="165" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="bold">Programa Creadores 2026</text>
+  </g>
+
+  <!-- Left: Revenue Stream 1 -->
+  <g transform="translate(80, 150)">
+    <rect width="180" height="120" rx="16" fill="#064e3b" stroke="#059669" stroke-width="1.2"/>
+    <text x="25" y="35" fill="#34d399" font-size="12" font-weight="bold">🤝 Acuerdos UGC</text>
+    <text x="25" y="65" fill="#cbd5e1" font-size="10">• $300 - $1500 por video</text>
+    <text x="25" y="90" fill="#cbd5e1" font-size="10">• Marcas directas</text>
+  </g>
+
+  <!-- Right: Revenue Stream 2 -->
+  <g transform="translate(540, 150)">
+    <rect width="180" height="120" rx="16" fill="#064e3b" stroke="#059669" stroke-width="1.2"/>
+    <text x="25" y="35" fill="#34d399" font-size="12" font-weight="bold">📦 Productos Digitales</text>
+    <text x="25" y="65" fill="#cbd5e1" font-size="10">• Cursos &amp; Plantillas</text>
+    <text x="25" y="90" fill="#cbd5e1" font-size="10">• 90% margen neto</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="260" y="30" width="280" height="34" rx="17" fill="#064e3b" stroke="#34d399" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#a7f3d0" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">💰 ESTRATEGIAS DE INGRESOS 2026</text>
+</svg>

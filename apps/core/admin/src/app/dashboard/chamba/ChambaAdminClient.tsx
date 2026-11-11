@@ -27,7 +27,9 @@ import {
   approveJobRequestAction,
   fetchAdminJobsAction,
   updateJobLogoAction,
-  updateChambaConfigAction
+  updateChambaConfigAction,
+  pingGoogleIndexingManualAction,
+  resolveOfficialBasesAdminAction
 } from './actions';
 
 // ==========================================
@@ -361,12 +363,13 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
       const res = await updateChambaConfigAction({
         branding: siteConfig.branding,
         seo: siteConfig.seo,
+        monetization: siteConfig.monetization,
         modules: siteConfig.modules,
         contact: siteConfig.contact
       });
       if (res.success) {
         setSiteConfig(res.config);
-        setConfigSuccessMsg('¡Configuración, textos y módulos de Chamba Pro guardados con éxito!');
+        setConfigSuccessMsg('¡Configuración SEO, Google AdSense, Search Console y módulos de Chamba Pro guardados con éxito!');
         setTimeout(() => setConfigSuccessMsg(null), 5000);
       } else {
         alert('No se pudo guardar la configuración.');
@@ -390,6 +393,11 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
   const [lastApprovedJob, setLastApprovedJob] = useState<{ id: string; title: string; slug: string } | null>(null);
   const [editingJob, setEditingJob] = useState<(Omit<JobPosting, 'requirements'> & { requirements?: string | string[] }) | null>(null);
   const [isEditingSaving, setIsEditingSaving] = useState(false);
+  const [isResolvingRealBases, setIsResolvingRealBases] = useState(false);
+  const [realBasesStatusMsg, setRealBasesStatusMsg] = useState<string | null>(null);
+  const [manualIndexUrl, setManualIndexUrl] = useState('https://empleos.atpdev.dev/empleos');
+  const [isPingingIndex, setIsPingingIndex] = useState(false);
+  const [indexPingResult, setIndexPingResult] = useState<string | null>(null);
 
   // Logo Modes for Create and Edit Forms
   const [newLogoMode, setNewLogoMode] = useState<'upload' | 'web' | 'url'>('upload');
@@ -2427,6 +2435,57 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
                   </div>
 
                   <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-slate-300 font-semibold flex items-center gap-1.5">
+                      <span>Token Google Search Console</span>
+                      <span className="text-[10px] text-emerald-400 font-normal">(meta verification)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej. gsc-verification-token..."
+                      value={siteConfig.seo.google_search_console_token || ''}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        seo: { ...siteConfig.seo, google_search_console_token: e.target.value }
+                      })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-mono text-slate-300 font-semibold flex items-center gap-1.5">
+                      <span>ID Google Analytics 4 / GTM</span>
+                      <span className="text-[10px] text-cyan-400 font-normal">(G-XXXX o GTM-XXXX)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="G-XXXXXXXXXX o GTM-KGJN7SDL"
+                      value={siteConfig.seo.google_analytics_id || ''}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        seo: { ...siteConfig.seo, google_analytics_id: e.target.value }
+                      })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-xs font-mono text-slate-300 font-semibold flex items-center gap-1.5">
+                      <span>ID Microsoft Clarity (Mapas de Calor)</span>
+                      <span className="text-[10px] text-amber-400 font-normal">(Ej. zak4lzyye9)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="zak4lzyye9"
+                      value={siteConfig.seo.microsoft_clarity_id || ''}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        seo: { ...siteConfig.seo, microsoft_clarity_id: e.target.value }
+                      })}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
                     <label className="text-xs font-mono text-slate-300 font-semibold">
                       Correo de Contacto de Chamba Pro
                     </label>
@@ -2617,42 +2676,350 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
         </form>
       )}
 
-      {/* TAB 4: GOOGLE ADSENSE & MONETIZATION */}
+      {/* TAB 4: GOOGLE ADSENSE, SEARCH CONSOLE & MONETIZATION */}
       {activeTab === 'ads' && (
-        <div className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
-          <div className="border-b border-slate-800 pb-4">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <DollarSign className="text-emerald-400" size={18} />
-              <span>Configuración de Google AdSense & Monetización</span>
-            </h3>
-            <p className="text-xs text-slate-400 mt-1">
-              Guía de cumplimiento con Google Publisher Policies y control de slots publicitarios.
-            </p>
+        <form onSubmit={handleSaveSettings} className="p-6 sm:p-8 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <div>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <DollarSign className="text-emerald-400" size={18} />
+                <span>Google AdSense, Search Console & Monetización</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Control en tiempo real de tu Publisher ID, bloques de anuncios (`AdBannerSlot`), `ads.txt` y verificación de Google Search Console.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={isSavingConfig}
+              className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-display flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+            >
+              {isSavingConfig ? <RefreshCw className="animate-spin" size={14} /> : <Check size={14} />}
+              <span>{isSavingConfig ? 'Guardando...' : 'Guardar Cambios AdSense & SEO'}</span>
+            </button>
+          </div>
+
+          {configSuccessMsg && (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold flex items-center gap-2.5">
+              <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+              <span>{configSuccessMsg}</span>
+            </div>
+          )}
+
+          {/* Switch Maestro y Publisher ID */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <div>
+                  <span className="text-xs font-bold text-white block">Estado Maestro de Google AdSense</span>
+                  <span className="text-[11px] text-slate-400">Habilita o pausa la inyección de scripts y bloques publicitarios en todo el portal.</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(siteConfig.modules?.adsense_enabled ?? true)}
+                    onChange={(e) => {
+                      const enabled = e.target.checked;
+                      setSiteConfig({
+                        ...siteConfig,
+                        modules: { ...siteConfig.modules, adsense_enabled: enabled },
+                        monetization: { ...(siteConfig.monetization || {}), adsense_enabled: enabled }
+                      });
+                    }}
+                    className="sr-only"
+                  />
+                  <div className={`w-11 h-6 rounded-full transition-colors duration-200 flex items-center p-0.5 ${siteConfig.modules?.adsense_enabled !== false ? 'bg-emerald-500' : 'bg-slate-800 border border-slate-700'}`}>
+                    <div className={`w-5 h-5 rounded-full bg-white transition-transform duration-200 shadow ${siteConfig.modules?.adsense_enabled !== false ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </div>
+                </label>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono text-slate-300 font-semibold">
+                  Google AdSense Publisher ID (ca-pub-XXXXXXXXXXXX)
+                </label>
+                <input
+                  type="text"
+                  placeholder="ca-pub-5414009811868137"
+                  value={siteConfig.monetization?.adsense_client_id || 'ca-pub-5414009811868137'}
+                  onChange={(e) =>
+                    setSiteConfig({
+                      ...siteConfig,
+                      monetization: {
+                        ...(siteConfig.monetization || {}),
+                        adsense_client_id: e.target.value,
+                      },
+                    })
+                  }
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Se sincroniza automáticamente con la etiqueta meta <code className="text-slate-300">google-adsense-account</code> y con <code className="text-slate-300">/ads.txt</code>.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 pt-2">
+                <label className="text-xs font-mono text-slate-300 font-semibold">
+                  Token de Verificación Google Search Console
+                </label>
+                <input
+                  type="text"
+                  placeholder="Pega aquí el código content de google-site-verification"
+                  value={siteConfig.seo.google_search_console_token || ''}
+                  onChange={(e) =>
+                    setSiteConfig({
+                      ...siteConfig,
+                      seo: { ...siteConfig.seo, google_search_console_token: e.target.value },
+                    })
+                  }
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            {/* Slots Publicitarios */}
+            <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+              <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <SlidersHorizontal size={15} /> IDs de Bloques de Anuncios (Ad Units / Slots)
+              </span>
+              <p className="text-[11px] text-slate-400">
+                Si usas solo <strong>Auto Ads (Anuncios Automáticos)</strong>, puedes dejar estos campos en blanco para evitar espacios vacíos. Si creaste bloques manuales en AdSense, coloca sus números de `data-ad-slot` aquí:
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-mono text-slate-300">Slot Leaderboard (Superior)</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. 1234567890"
+                    value={siteConfig.monetization?.adsense_slot_header || ''}
+                    onChange={(e) =>
+                      setSiteConfig({
+                        ...siteConfig,
+                        monetization: {
+                          ...(siteConfig.monetization || {}),
+                          adsense_slot_header: e.target.value.replace(/\D/g, ''),
+                        },
+                      })
+                    }
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-mono text-slate-300">Slot In-Feed (Entre Empleos)</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. 2345678901"
+                    value={siteConfig.monetization?.adsense_slot_incontent || ''}
+                    onChange={(e) =>
+                      setSiteConfig({
+                        ...siteConfig,
+                        monetization: {
+                          ...(siteConfig.monetization || {}),
+                          adsense_slot_incontent: e.target.value.replace(/\D/g, ''),
+                        },
+                      })
+                    }
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-mono text-slate-300">Slot Sidebar / Lateral (600px)</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. 3456789012"
+                    value={siteConfig.monetization?.adsense_slot_sidebar || ''}
+                    onChange={(e) =>
+                      setSiteConfig({
+                        ...siteConfig,
+                        monetization: {
+                          ...(siteConfig.monetization || {}),
+                          adsense_slot_sidebar: e.target.value.replace(/\D/g, ''),
+                        },
+                      })
+                    }
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-mono text-slate-300">Slot Billboard (Inferior)</label>
+                  <input
+                    type="text"
+                    placeholder="Ej. 4567890123"
+                    value={siteConfig.monetization?.adsense_slot_footer || ''}
+                    onChange={(e) =>
+                      setSiteConfig({
+                        ...siteConfig,
+                        monetization: {
+                          ...(siteConfig.monetization || {}),
+                          adsense_slot_footer: e.target.value.replace(/\D/g, ''),
+                        },
+                      })
+                    }
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
               <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 size={16} /> Estado del archivo ads.txt
+                <CheckCircle2 size={16} /> Vista Previa Dinámica de /ads.txt
               </span>
               <p className="text-xs text-slate-300 leading-relaxed">
-                El endpoint <code className="text-emerald-400 bg-slate-900 px-1.5 py-0.5 rounded">empleos.atpdev.dev/ads.txt</code> se encuentra activo y listo para ser rastreado por el robot de Google AdSense.
+                El endpoint <a href="https://empleos.atpdev.dev/ads.txt" target="_blank" rel="noopener noreferrer" className="text-emerald-400 bg-slate-900 px-1.5 py-0.5 rounded underline">empleos.atpdev.dev/ads.txt</a> sirve automáticamente tu Publisher ID real:
               </p>
-              <div className="p-3 rounded-lg bg-slate-900 font-mono text-[11px] text-slate-400 border border-slate-800">
-                google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+              <div className="p-3 rounded-lg bg-slate-900 font-mono text-[11px] text-emerald-300 border border-slate-800">
+                google.com, {(siteConfig.monetization?.adsense_client_id || 'pub-5414009811868137').trim().replace(/^ca-/, '')}, DIRECT, f08c47fec0942fa0
               </div>
             </div>
 
             <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
               <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
-                <ShieldCheck size={16} /> Optimización Core Web Vitals (CLS = 0)
+                <ShieldCheck size={16} /> Endpoints SEO & Google Search Console
               </span>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Todos los slots de anuncios (`AdBannerSlot`) cuentan con dimensiones mínimas pre-reservadas (Leaderboard, Sidebar y In-Feed) para evitar saltos de pantalla que afecten el posicionamiento SEO.
+                Rutas listas para enviar en Google Search Console (con protección anti-Soft 404, Consent Mode v2 y notificación automática IndexNow al aprobar convocatorias):
               </p>
+              <div className="flex flex-wrap gap-2 pt-1 font-mono text-[11px]">
+                <a href="https://empleos.atpdev.dev/sitemap.xml" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-cyan-400 hover:border-cyan-500/50">/sitemap.xml</a>
+                <a href="https://empleos.atpdev.dev/rss.xml" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-cyan-400 hover:border-cyan-500/50">/rss.xml</a>
+                <a href="https://empleos.atpdev.dev/robots.txt" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-cyan-400 hover:border-cyan-500/50">/robots.txt</a>
+                <a href="https://empleos.atpdev.dev/llms.txt" target="_blank" rel="noopener noreferrer" className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-cyan-400 hover:border-cyan-500/50">/llms.txt</a>
+              </div>
             </div>
           </div>
-        </div>
+
+          {/* Google for Jobs — Indexing API Instantánea (URL_UPDATED / URL_DELETED) */}
+          <div className="p-5 rounded-xl bg-slate-950 border border-emerald-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div>
+                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                  <Zap size={16} /> Google for Jobs — Indexing API Instantánea (URL_UPDATED / URL_DELETED)
+                </span>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Conecta tu Cuenta de Servicio (Service Account JSON) de Google Cloud con permisos de Propietario en Search Console para indexar nuevas convocatorias en menos de 5 minutos.
+                </p>
+              </div>
+              <label className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[11px] font-mono font-bold cursor-pointer shrink-0 flex items-center gap-1.5">
+                <Upload size={13} />
+                <span>Cargar JSON de Service Account</span>
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                      try {
+                        const parsed = JSON.parse(String(ev.target?.result || '{}'));
+                        if (parsed.client_email && parsed.private_key) {
+                          setSiteConfig({
+                            ...siteConfig,
+                            seo: {
+                              ...siteConfig.seo,
+                              google_indexing_enabled: true,
+                              google_indexing_client_email: parsed.client_email,
+                              google_indexing_private_key: parsed.private_key,
+                            },
+                          });
+                          setIndexPingResult(`✅ JSON cargado (${parsed.client_email}). Haz clic en "Guardar Cambios AdSense & SEO" arriba para persistirlo.`);
+                        } else {
+                          alert('El archivo JSON no contiene client_email o private_key de Google Cloud.');
+                        }
+                      } catch {
+                        alert('Archivo JSON inválido.');
+                      }
+                    };
+                    reader.readAsText(file);
+                  }}
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono text-slate-300">Service Account Email (`client_email`)</label>
+                <input
+                  type="text"
+                  placeholder="indexing-bot@tu-proyecto.iam.gserviceaccount.com"
+                  value={siteConfig.seo.google_indexing_client_email || ''}
+                  onChange={(e) =>
+                    setSiteConfig({
+                      ...siteConfig,
+                      seo: { ...siteConfig.seo, google_indexing_client_email: e.target.value },
+                    })
+                  }
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono text-slate-300">Private Key (`-----BEGIN PRIVATE KEY-----`)</label>
+                <input
+                  type="password"
+                  placeholder="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQE..."
+                  value={siteConfig.seo.google_indexing_private_key || ''}
+                  onChange={(e) =>
+                    setSiteConfig({
+                      ...siteConfig,
+                      seo: { ...siteConfig.seo, google_indexing_private_key: e.target.value },
+                    })
+                  }
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+            </div>
+
+            {/* Probador Manual de Indexación Instantánea */}
+            <div className="pt-2 border-t border-slate-800/80 space-y-2">
+              <label className="text-[11px] font-mono text-slate-300 block">
+                Notificar URL manualmente a Google Indexing API + IndexNow:
+              </label>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  value={manualIndexUrl}
+                  onChange={(e) => setManualIndexUrl(e.target.value)}
+                  placeholder="https://empleos.atpdev.dev/empleos/..."
+                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white font-mono focus:outline-none focus:border-emerald-500"
+                />
+                <button
+                  type="button"
+                  disabled={isPingingIndex}
+                  onClick={async () => {
+                    setIsPingingIndex(true);
+                    setIndexPingResult(null);
+                    try {
+                      const res = await pingGoogleIndexingManualAction(manualIndexUrl, 'URL_UPDATED');
+                      setIndexPingResult(res.message);
+                    } catch (err: any) {
+                      setIndexPingResult(`Error: ${err?.message || 'Fallo al notificar'}`);
+                    } finally {
+                      setIsPingingIndex(false);
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold font-display cursor-pointer flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-50"
+                >
+                  {isPingingIndex ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                  <span>Indexar URL Ahora</span>
+                </button>
+              </div>
+              {indexPingResult && (
+                <p className="text-[11px] font-mono text-emerald-300 bg-slate-900/90 border border-slate-800 px-3 py-2 rounded-lg">
+                  {indexPingResult}
+                </p>
+              )}
+            </div>
+          </div>
+        </form>
       )}
 
       {/* MODAL DE EDICIÓN PROFESIONAL DE CONVOCATORIA */}
@@ -3050,9 +3417,56 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
 
               {/* SECCIÓN 4: ENLACES, CALENDARIO Y CONTACTO */}
               <div className="space-y-3">
-                <h4 className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
-                  <span>04.</span> Enlaces Oficiales, Calendario & Contacto
-                </h4>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h4 className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>04.</span> Enlaces Oficiales, Calendario & Contacto
+                  </h4>
+                  <button
+                    type="button"
+                    disabled={isResolvingRealBases}
+                    onClick={async () => {
+                      if (!editingJob) return;
+                      setIsResolvingRealBases(true);
+                      setRealBasesStatusMsg(null);
+                      try {
+                        const res = await resolveOfficialBasesAdminAction({
+                          slug: editingJob.slug,
+                          title: editingJob.title,
+                          entityName: editingJob.entity_name,
+                          region: editingJob.region,
+                          salaryText: editingJob.salary_text,
+                          vacanciesCount: editingJob.vacancies_count,
+                          endDate: editingJob.end_date,
+                          existingBasesPdfUrl: editingJob.bases_pdf_url,
+                          existingApplyUrl: editingJob.apply_url
+                        });
+                        if (res.ok) {
+                          setEditingJob({
+                            ...editingJob,
+                            apply_url: res.applyUrl || editingJob.apply_url,
+                            bases_pdf_url: res.basesPdfUrl || editingJob.bases_pdf_url,
+                            official_documents: res.officialDocuments || editingJob.official_documents,
+                            requirements: res.requirements?.length ? res.requirements.join('\n') : editingJob.requirements
+                          });
+                        }
+                        setRealBasesStatusMsg(res.message);
+                      } catch {
+                        setRealBasesStatusMsg('Error al conectar con el motor Scrapling.');
+                      } finally {
+                        setIsResolvingRealBases(false);
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isResolvingRealBases ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />}
+                    <span>{isResolvingRealBases ? 'Extrayendo con Scrapling...' : 'Extraer Bases y Portal Oficial 100% Real (Scrapling)'}</span>
+                  </button>
+                </div>
+                {realBasesStatusMsg && (
+                  <div className="p-2.5 rounded-xl bg-emerald-950/60 border border-emerald-500/30 text-[11px] font-mono text-emerald-300">
+                    {realBasesStatusMsg}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Enlace Postulación */}
                   <div className="space-y-1.5">

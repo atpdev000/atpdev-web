@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { 
-  User, GraduationCap, Briefcase, BookOpen, Sparkles, Plus, Trash2, 
+  User, GraduationCap, Briefcase, BookOpen, Award, Plus, Trash2, 
   Upload, X, Languages, AlertCircle, CheckCircle2, ArrowLeft, ArrowRight,
   Check, FileText, ChevronRight
 } from 'lucide-react';
@@ -17,7 +17,7 @@ type SectionId = 'personal' | 'profile' | 'education' | 'experience' | 'courses'
 
 const SECTIONS: { id: SectionId; label: string; icon: React.ElementType }[] = [
   { id: 'personal', label: '1. Personal', icon: User },
-  { id: 'profile', label: '2. Perfil', icon: Sparkles },
+  { id: 'profile', label: '2. Perfil', icon: FileText },
   { id: 'education', label: '3. Educación', icon: GraduationCap },
   { id: 'experience', label: '4. Experiencia', icon: Briefcase },
   { id: 'courses', label: '5. Cursos', icon: BookOpen },
@@ -678,7 +678,7 @@ export function CvForm({ data, onChange }: Props) {
         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-wrap gap-2">
             <h3 className="text-sm font-bold font-display text-slate-900 dark:text-white flex items-center gap-2">
-              <Sparkles size={16} className="text-emerald-600 dark:text-emerald-400" />
+              <FileText size={16} className="text-emerald-600 dark:text-emerald-400" />
               <span>Resumen Profesional / Perfil Ejecutivo</span>
             </h3>
             <div className="flex items-center gap-2">
@@ -1306,7 +1306,7 @@ export function CvForm({ data, onChange }: Props) {
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 flex-wrap gap-2">
               <div>
                 <h3 className="text-sm font-bold font-display text-slate-900 dark:text-white flex items-center gap-2">
-                  <Sparkles size={16} className="text-emerald-600 dark:text-emerald-400" />
+                  <Award size={16} className="text-emerald-600 dark:text-emerald-400" />
                   <span>Competencias & Habilidades Clave ({data.skills.length})</span>
                 </h3>
                 <p className="text-[11px] text-slate-400 mt-0.5">

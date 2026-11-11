@@ -366,7 +366,7 @@ El método STAR es la técnica avalada internacionalmente para responder pregunt
       }
     ],
     relatedTools: [
-      { label: 'Simulador de Entrevistas con Inteligencia Artificial', href: '/simulador-entrevista-ia', description: 'Practica tu entrevista en tiempo real y recibe feedback sobre tus respuestas.' },
+      { label: 'Simulador de Entrevista Técnica CAS', href: '/simulador-entrevista-ia', description: 'Practica tu entrevista en tiempo real y recibe feedback sobre tus respuestas.' },
       { label: 'Preguntas Frecuentes de Entrevistas CAS', href: '/preguntas-entrevista-cas', description: 'Banco de más de 50 preguntas frecuentes organizadas por especialidad.' }
     ]
   },

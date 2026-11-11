@@ -16,7 +16,6 @@ export async function fetchDescargadorConfigAction(): Promise<SubdomainConfig> {
 export async function saveDescargadorConfigAction(updates: Partial<SubdomainConfig>): Promise<{ success: boolean; config: SubdomainConfig }> {
   try {
     const res = saveSubdomainConfig('descargador', updates);
-    revalidatePath('/dashboard/descargador');
     return res;
   } catch (err: any) {
     console.error('Error saving descargador config:', err);

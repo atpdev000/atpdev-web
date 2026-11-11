@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_cap" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09090b"/>
+      <stop offset="100%" stop-color="#18181b"/>
+    </linearGradient>
+    <filter id="glow_cap">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg_cap)"/>
+
+  <!-- Timeline Interface Center -->
+  <g transform="translate(100, 100)">
+    <rect width="600" height="230" rx="22" fill="#18181b" stroke="#3f3f46" stroke-width="1.5"/>
+    <!-- Video Preview Box -->
+    <rect x="20" y="20" width="130" height="190" rx="12" fill="#09090b" stroke="#ec4899" stroke-width="1.5"/>
+    <text x="85" y="115" text-anchor="middle" font-size="28">📱</text>
+    <text x="85" y="145" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="bold">REEL 9:16</text>
+
+    <!-- Tracks &amp; Timeline on Right -->
+    <!-- Track 1: Video -->
+    <rect x="170" y="25" width="410" height="38" rx="8" fill="#2563eb" opacity="0.6"/>
+    <text x="185" y="48" fill="#ffffff" font-size="11" font-weight="bold">Video_Clip_Sin_Marca.mp4 [1080p]</text>
+
+    <!-- Track 2: Subtitles / Effects -->
+    <rect x="170" y="70" width="280" height="38" rx="8" fill="#ec4899" opacity="0.6"/>
+    <text x="185" y="93" fill="#ffffff" font-size="11" font-weight="bold">Subtítulos Karaoke Dinámicos</text>
+
+    <!-- Track 3: Audio / SFX -->
+    <rect x="170" y="115" width="410" height="38" rx="8" fill="#10b981" opacity="0.6"/>
+    <text x="185" y="138" fill="#ffffff" font-size="11" font-weight="bold">Musica_Viral_320k.mp3 + Whoosh SFX</text>
+
+    <!-- Speed Curve Icon -->
+    <rect x="170" y="165" width="410" height="40" rx="8" fill="#27272a"/>
+    <path d="M190 195 Q 280 170, 360 195 T 550 175" stroke="#f59e0b" stroke-width="2.5" fill="none"/>
+    <text x="480" y="185" fill="#fbbf24" font-size="10" font-weight="bold">Speed Curve: Ramping</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="260" y="30" width="280" height="34" rx="17" fill="#09090b" stroke="#ec4899" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#fbcfe8" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">🎬 EDICIÓN PRO: CAPCUT &amp; PREMIERE</text>
+</svg>

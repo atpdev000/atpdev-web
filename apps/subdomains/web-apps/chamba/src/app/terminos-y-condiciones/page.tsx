@@ -7,7 +7,6 @@ import {
   ArrowLeft, 
   ExternalLink, 
   HelpCircle,
-  Bot,
   Building2,
   Lock,
   FileCheck2,
@@ -108,35 +107,35 @@ export default function TerminosCondicionesPage() {
               <span>2. Política de Gratuidad Total y Alerta Anti-Estafas</span>
             </h2>
             <p>
-              El acceso a Chamba Pro, la consulta de puestos laborales, la descarga de bases oficiales y el uso de nuestras herramientas (Calculadora de Sueldo, Generador de CV, Simulador IA, Matcher de Perfiles) es <strong>100% gratuito</strong> para el postulante.
+              El acceso a Chamba Pro, la consulta de puestos laborales, la descarga de bases oficiales y el uso de nuestras herramientas (Calculadora de Sueldo, Generador de CV, Simulador de Entrevista Técnica, Evaluador Curricular de Perfiles) es <strong>100% gratuito</strong> para el postulante.
             </p>
             <p>
               <strong>Advertencia al postulante:</strong> Ninguna institución pública del Estado Peruano cobra dinero por postular a un puesto de trabajo ni por &quot;asegurar una vacante&quot;. Si alguien te solicita pagos para tramitar tu postulación, estás frente a un intento de estafa. Chamba Pro promueve activamente la meritocracia, la transparencia y la honestidad en el empleo público y privado.
             </p>
           </section>
 
-          {/* Section 3: Uso de Inteligencia Artificial y Descargo Tecnológico */}
+          {/* Section 3: Uso de Algoritmos Automatizados y Descargo Tecnológico */}
           <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl space-y-4 border border-slate-200 dark:border-slate-800 shadow-sm">
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 font-display">
-              <Bot className="text-emerald-600 dark:text-emerald-400" size={18} />
-              <span>3. Descargo sobre el Uso de Inteligencia Artificial (AI Disclaimer)</span>
+              <ShieldCheck className="text-emerald-600 dark:text-emerald-400" size={18} />
+              <span>3. Descargo sobre Algoritmos Automatizados y Análisis Tecnológico</span>
             </h2>
             <p>
-              Chamba Pro integra modelos de Inteligencia Artificial para enriquecer la experiencia de usuario a través de funcionalidades como:
+              Chamba Pro integra sistemas avanzados de procesamiento computacional y análisis automatizado de datos públicos para optimizar la experiencia de búsqueda laboral a través de:
             </p>
             <ul className="space-y-2 list-disc list-inside text-slate-600 dark:text-slate-300">
               <li>
-                <strong>Resolutor y Localizador de Bases Oficiales (AI Bases Resolver):</strong> Rastrea y sugiere enlaces directos a documentos PDF y portales de transparencia institucional. Los resultados son generados mediante algoritmos probabilísticos. <em>El postulante tiene la obligación inexcusable de verificar que las bases correspondan a la convocatoria vigente y a la entidad convocante antes de presentar su expediente</em>.
+                <strong>Resolutor y Localizador Automatizado de Bases Oficiales:</strong> Rastrea y sugiere enlaces directos a documentos oficiales en PDF y portales de transparencia institucional. <em>El postulante tiene la responsabilidad de verificar que las bases correspondan a la convocatoria vigente y a la entidad convocante antes de presentar su expediente</em>.
               </li>
               <li>
-                <strong>Matcher y Diagnóstico de CV CAS:</strong> Analiza compatibilidades semánticas entre el currículum del postulante y el perfil del puesto publicado. Dicha evaluación es puramente referencial, pedagógica y no influye en las comisiones evaluadoras oficiales.
+                <strong>Evaluador y Diagnóstico Curricular de Perfil:</strong> Analiza correspondencias técnicas entre el currículum del postulante y los requisitos mínimos exigidos en los Términos de Referencia (TDR). Dicho cotejo es referencial, de orientación pedagógica y no sustituye la evaluación oficial de las comisiones del Estado.
               </li>
               <li>
-                <strong>Simulador de Entrevistas con IA:</strong> Entrena al postulante frente a posibles preguntas de conocimiento, ética y función pública. No garantiza la aprobación del examen ni representa preguntas exactas del concurso.
+                <strong>Simulador Técnico de Entrevistas CAS:</strong> Proporciona entrenamiento con preguntas modelo de balotarios de la función pública, ética y contrataciones con el Estado.
               </li>
             </ul>
             <p className="text-xs text-slate-500 italic">
-              Chamba Pro no asume responsabilidad civil, contractual o extracontractual por decisiones de postulación basadas exclusivamente en recomendaciones o clasificaciones generadas por IA.
+              Chamba Pro no asume responsabilidad civil, contractual o extracontractual por decisiones de postulación basadas exclusivamente en recomendaciones o clasificaciones técnicas automatizadas.
             </p>
           </section>
 

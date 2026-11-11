@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Printer, Copy, Check, Download, Upload, RotateCcw, Trash2, 
-  Sparkles, Eye, ZoomIn, ZoomOut, Maximize2, ShieldCheck, FileText, Info, ArrowRight, X
+  FileSpreadsheet, Eye, ZoomIn, ZoomOut, Maximize2, ShieldCheck, FileText, Info, ArrowRight, X
 } from 'lucide-react';
 import { CvData, CvTemplateId } from './cv/types';
 import { SAMPLE_CV_DATA } from './cv/sampleData';
@@ -232,7 +232,7 @@ export function CvCasGenerator() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 flex items-center justify-center font-bold shadow-sm shrink-0">
-              <Sparkles size={20} className="stroke-[2.5]" />
+              <FileSpreadsheet size={20} className="stroke-[2.5]" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -265,7 +265,7 @@ export function CvCasGenerator() {
               className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-emerald-300 font-bold text-xs transition-all border border-emerald-500/40 flex items-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.02] active:scale-98"
               title="Cargar modelo de ejemplo con datos completos para ver el diseño terminado"
             >
-              <Sparkles size={14} className="text-emerald-400 animate-pulse" />
+              <Eye size={14} className="text-emerald-400" />
               <span>Ver Ejemplo Llenado</span>
             </button>
 
@@ -523,7 +523,7 @@ export function CvCasGenerator() {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-slate-900 to-slate-900 border border-emerald-500/30 text-xs text-slate-200 print:hidden shadow-lg">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
-              <Sparkles size={20} />
+              <FileText size={20} />
             </div>
             <div>
               <p className="font-bold text-white text-sm">¿Tu formulario está en blanco?</p>
@@ -537,7 +537,7 @@ export function CvCasGenerator() {
             onClick={handleLoadFilledExample}
             className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all flex items-center gap-2 cursor-pointer shrink-0 shadow-lg shadow-emerald-500/25 hover:scale-105"
           >
-            <Sparkles size={15} />
+            <Eye size={15} />
             <span>Ver Ejemplo Llenado</span>
           </button>
         </div>

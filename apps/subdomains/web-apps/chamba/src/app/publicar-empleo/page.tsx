@@ -1,17 +1,17 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { 
-  Building2, 
-  Send, 
-  ShieldCheck, 
-  Clock, 
-  Users, 
-  HelpCircle, 
-  CheckCircle2, 
-  MessageSquare, 
-  Mail, 
-  FileCheck2, 
-  Sparkles 
+import {
+  Building2,
+  Send,
+  ShieldCheck,
+  Clock,
+  Users,
+  HelpCircle,
+  CheckCircle2,
+  MessageSquare,
+  Mail,
+  FileCheck2,
+  Sparkles
 } from 'lucide-react';
 import PublicarFormClient from './PublicarFormClient';
 import { AdBannerSlot } from '@/components/AdBannerSlot';
@@ -54,7 +54,7 @@ export default function PublicarEmpleoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 pb-20 selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#070a12] text-slate-900 dark:text-white pb-20 selection:bg-emerald-500 selection:text-white">
       {/* JSON-LD Schema */}
       <script
         type="application/ld+json"
@@ -82,7 +82,7 @@ export default function PublicarEmpleoPage() {
             </h1>
 
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
-              Difunde formalmente tus procesos de selección CAS 1057, D.L. 728, D.L. 276, Locación de Servicios y convocatorias privadas. 
+              Difunde formalmente tus procesos de selección CAS 1057, D.L. 728, D.L. 276, Locación de Servicios y convocatorias privadas.
               Conectamos a tu institución con profesionales y técnicos a nivel nacional con postulación directa a tu portal o mesa de partes.
             </p>
           </div>

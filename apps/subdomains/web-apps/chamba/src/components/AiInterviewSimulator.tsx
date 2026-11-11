@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bot, Sparkles, CheckCircle2, AlertTriangle, XCircle, Building2, RotateCcw, ArrowRight } from 'lucide-react';
+import { UserCheck, Loader2, CheckCircle2, AlertTriangle, XCircle, Building2, RotateCcw, ArrowRight } from 'lucide-react';
 
 interface QuestionTemplate {
   entity: string;
@@ -207,7 +207,7 @@ export function AiInterviewSimulator() {
       <div className="space-y-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-mono font-semibold border border-slate-200 dark:border-slate-700 mb-2.5">
-            <Bot size={15} className="text-emerald-600 dark:text-emerald-400" />
+            <UserCheck size={15} className="text-emerald-600 dark:text-emerald-400" />
             <span>Herramienta de Preparación Técnica para Postulantes</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white tracking-tight">
@@ -323,12 +323,12 @@ export function AiInterviewSimulator() {
           >
             {isAnalyzing ? (
               <>
-                <Sparkles size={20} className="animate-spin text-white" />
+                <Loader2 size={20} className="animate-spin text-white" />
                 <span>Analizando respuesta con criterios de selección del Estado...</span>
               </>
             ) : (
               <>
-                <Bot size={20} />
+                <UserCheck size={20} />
                 <span>Evaluar Respuesta y Simular Dictamen del Jurado</span>
                 <ArrowRight size={18} />
               </>

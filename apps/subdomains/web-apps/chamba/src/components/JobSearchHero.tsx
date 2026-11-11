@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, MapPin, Building2, Briefcase, Award, TrendingUp, ShieldCheck, Sparkles, ArrowRight } from "lucide-react";
+import { Search, MapPin, Building2, TrendingUp, ShieldCheck, FileCheck2, ArrowRight } from "lucide-react";
 import type { SubdomainBranding } from "@atpdev/database";
 
 interface JobSearchHeroProps {
@@ -13,7 +13,7 @@ interface JobSearchHeroProps {
   accentColor?: string;
 }
 
-export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor = "#10b981" }: JobSearchHeroProps) {
+export function JobSearchHero({ totalJobs, totalVacancies, branding }: JobSearchHeroProps) {
   const [query, setQuery] = useState("");
   const [region, setRegion] = useState("");
   const router = useRouter();
@@ -62,7 +62,7 @@ export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor
               </>
             )}
           </h1>
-          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed font-normal text-pretty">
             {branding?.hero_description || (
               <>
                 Convocatorias del Estado (<strong className="font-semibold text-slate-900 dark:text-white">CAS 1057, D.L. 728, 276</strong>) y vacantes del sector privado en las 25 regiones. Acceso libre a bases oficiales en PDF y postulación directa sin intermediarios.
@@ -171,16 +171,16 @@ export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor
           ))}
         </div>
 
-        {/* Call to action: Recomendador de Convocatorias con IA */}
+        {/* Call to action: Evaluador de Convocatorias Oficiales */}
         <div className="pt-1">
           <Link
             href="/match-cv"
             className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-semibold transition-all hover:scale-[1.02] shadow-xs group"
           >
-            <Sparkles size={16} className="text-emerald-500 animate-pulse shrink-0" />
-            <span>¿Tienes tu CV listo? Descubre a qué convocatorias puedes postular con IA</span>
+            <FileCheck2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>¿Buscas postular sobre seguro? Coteja tu CV con los requisitos de las bases oficiales</span>
             <span className="font-bold underline flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform text-emerald-800 dark:text-emerald-200">
-              Subir mi CV <ArrowRight size={13} />
+              Cotejar mi CV <ArrowRight size={13} />
             </span>
           </Link>
         </div>
@@ -188,25 +188,37 @@ export function JobSearchHero({ totalJobs, totalVacancies, branding, accentColor
         {/* Real Live Statistics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-6 border-t border-slate-200 dark:border-slate-800">
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-              {totalJobs.toLocaleString()}
+            <div
+              suppressHydrationWarning
+              className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white"
+            >
+              {totalJobs.toLocaleString('es-PE')}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Convocatorias Vigentes</p>
           </div>
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
-              {totalVacancies.toLocaleString()}
+            <div
+              suppressHydrationWarning
+              className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400"
+            >
+              {totalVacancies.toLocaleString('es-PE')}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Plazas Disponibles</p>
           </div>
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
+            <div 
+              suppressHydrationWarning
+              className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white"
+            >
               25
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Regiones del País</p>
           </div>
           <div className="p-3.5 sm:p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center shadow-xs">
-            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            <div 
+              suppressHydrationWarning
+              className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400"
+            >
               100%
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Gratuito y Oficial</p>

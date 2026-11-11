@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg_sol" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <filter id="glow_sol">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bg_sol)"/>
+  <circle cx="400" cy="225" r="130" fill="#38bdf8" opacity="0.14" filter="url(#glow_sol)"/>
+
+  <!-- Wrench &amp; Screwdriver Diagnostic Icon -->
+  <g transform="translate(320, 110)">
+    <rect width="160" height="160" rx="35" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5" filter="url(#glow_sol)"/>
+    <text x="80" y="105" text-anchor="middle" font-size="60">🛠️</text>
+  </g>
+
+  <!-- Left: Problem Tag -->
+  <g transform="translate(80, 160)">
+    <rect width="200" height="85" rx="16" fill="#1e293b" stroke="#ef4444" stroke-width="1.5"/>
+    <circle cx="35" cy="42" r="16" fill="#ef4444" opacity="0.2"/>
+    <text x="35" y="47" text-anchor="middle" font-size="14">⚠️</text>
+    <text x="65" y="37" fill="#fca5a5" font-size="11" font-weight="bold">Error de Enlace</text>
+    <text x="65" y="55" fill="#cbd5e1" font-size="9">Cuentas privadas o caídas</text>
+  </g>
+
+  <!-- Right: Solution Tag -->
+  <g transform="translate(520, 160)">
+    <rect width="200" height="85" rx="16" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+    <circle cx="35" cy="42" r="16" fill="#10b981" opacity="0.2"/>
+    <text x="35" y="47" text-anchor="middle" font-size="14">✅</text>
+    <text x="65" y="37" fill="#86efac" font-size="11" font-weight="bold">Solución Instantánea</text>
+    <text x="65" y="55" fill="#cbd5e1" font-size="9">Copia URL pública y limpia</text>
+  </g>
+
+  <!-- Bottom Tip Bar -->
+  <rect x="250" y="300" width="300" height="35" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+  <text x="400" y="322" text-anchor="middle" fill="#93c5fd" font-size="11" font-weight="bold">DIAGNÓSTICO PASO A PASO EN 30s</text>
+
+  <!-- Top Badge -->
+  <rect x="260" y="30" width="280" height="34" rx="17" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#bae6fd" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">🔧 GUÍA DE SOLUCIÓN DE PROBLEMAS</text>
+</svg>

@@ -1,38 +1,44 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0f172a"/>
-      <stop offset="100%" style="stop-color:#1a2f1a"/>
+    <linearGradient id="bg_vs" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
     </linearGradient>
+    <filter id="glow_vs">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
-  <rect width="800" height="450" fill="url(#bg)"/>
-  <!-- VS divider -->
-  <line x1="400" y1="60" x2="400" y2="420" stroke="#374151" stroke-width="2" stroke-dasharray="8,6"/>
-  <circle cx="400" cy="225" r="30" fill="#1f2937" stroke="#374151" stroke-width="2"/>
-  <text x="400" y="231" text-anchor="middle" fill="white" font-size="14" font-weight="bold" font-family="Arial">VS</text>
-  <!-- Streaming side (left) - RED -->
-  <text x="200" y="90" text-anchor="middle" fill="#ef4444" font-size="20" font-weight="bold" font-family="Arial">📡 Streaming</text>
-  <rect x="70" y="110" width="270" height="65" rx="10" fill="#1f0000" opacity="0.8" stroke="#ef4444" stroke-width="1"/>
-  <text x="205" y="138" text-anchor="middle" fill="#fca5a5" font-size="12" font-family="Arial">⚡ Acceso inmediato</text>
-  <text x="205" y="158" text-anchor="middle" fill="#9ca3af" font-size="11" font-family="Arial">Depende de la conexión</text>
-  <rect x="70" y="185" width="270" height="65" rx="10" fill="#1f0000" opacity="0.8" stroke="#ef4444" stroke-width="1"/>
-  <text x="205" y="213" text-anchor="middle" fill="#fca5a5" font-size="12" font-family="Arial">💧 Buffering posible</text>
-  <text x="205" y="233" text-anchor="middle" fill="#9ca3af" font-size="11" font-family="Arial">Calidad variable por red</text>
-  <rect x="70" y="260" width="270" height="65" rx="10" fill="#1f0000" opacity="0.8" stroke="#ef4444" stroke-width="1"/>
-  <text x="205" y="288" text-anchor="middle" fill="#fca5a5" font-size="12" font-family="Arial">☁️ Depende de 3rd party</text>
-  <text x="205" y="308" text-anchor="middle" fill="#9ca3af" font-size="11" font-family="Arial">Video puede desaparecer</text>
-  <!-- Download side (right) - GREEN -->
-  <text x="600" y="90" text-anchor="middle" fill="#22c55e" font-size="20" font-weight="bold" font-family="Arial">⬇️ Descarga</text>
-  <rect x="460" y="110" width="270" height="65" rx="10" fill="#0c1a0c" opacity="0.8" stroke="#22c55e" stroke-width="1"/>
-  <text x="595" y="138" text-anchor="middle" fill="#86efac" font-size="12" font-family="Arial">✈️ Offline sin límites</text>
-  <text x="595" y="158" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Arial">Sin necesitar internet</text>
-  <rect x="460" y="185" width="270" height="65" rx="10" fill="#0c1a0c" opacity="0.8" stroke="#22c55e" stroke-width="1"/>
-  <text x="595" y="213" text-anchor="middle" fill="#86efac" font-size="12" font-family="Arial">🎯 Calidad consistente</text>
-  <text x="595" y="233" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Arial">Sin buffering jamás</text>
-  <rect x="460" y="260" width="270" height="65" rx="10" fill="#0c1a0c" opacity="0.8" stroke="#22c55e" stroke-width="1"/>
-  <text x="595" y="288" text-anchor="middle" fill="#86efac" font-size="12" font-family="Arial">🔒 Tuyo para siempre</text>
-  <text x="595" y="308" text-anchor="middle" fill="#4ade80" font-size="11" font-family="Arial">Control total local</text>
-  <!-- Title -->
-  <text x="400" y="50" text-anchor="middle" fill="white" font-size="22" font-weight="bold" font-family="Arial">Descargar vs Streaming: La Elección Inteligente</text>
-  <text x="400" y="400" text-anchor="middle" fill="#6b7280" font-size="12" font-family="Arial">FTY Downloader Pro — Soberanía Digital</text>
+
+  <rect width="800" height="450" fill="url(#bg_vs)"/>
+
+  <!-- Left: Streaming Cloud with Question/Buffer -->
+  <g transform="translate(100, 110)">
+    <rect width="250" height="200" rx="24" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="125" y="45" text-anchor="middle" font-size="34">📡</text>
+    <text x="125" y="80" text-anchor="middle" fill="#f59e0b" font-size="18" font-weight="900">STREAMING</text>
+    <text x="125" y="115" text-anchor="middle" fill="#fca5a5" font-size="11">• Dependencia de conexión</text>
+    <text x="125" y="140" text-anchor="middle" fill="#fca5a5" font-size="11">• Borrado repentino de series</text>
+    <text x="125" y="165" text-anchor="middle" fill="#fca5a5" font-size="11">• Cuotas mensuales ($500/año)</text>
+  </g>
+
+  <!-- VS Emblem Center -->
+  <g transform="translate(370, 180)">
+    <circle cx="30" cy="30" r="28" fill="#ef4444" filter="url(#glow_vs)"/>
+    <text x="30" y="38" text-anchor="middle" fill="#ffffff" font-size="16" font-weight="900">VS</text>
+  </g>
+
+  <!-- Right: Local Master Download -->
+  <g transform="translate(450, 110)">
+    <rect width="250" height="200" rx="24" fill="#1e293b" stroke="#10b981" stroke-width="2" filter="url(#glow_vs)"/>
+    <text x="125" y="45" text-anchor="middle" font-size="34">💾</text>
+    <text x="125" y="80" text-anchor="middle" fill="#10b981" font-size="18" font-weight="900">DESCARGA LOCAL</text>
+    <text x="125" y="115" text-anchor="middle" fill="#86efac" font-size="11">• Disponible para siempre</text>
+    <text x="125" y="140" text-anchor="middle" fill="#86efac" font-size="11">• Cero consumo de datos móviles</text>
+    <text x="125" y="165" text-anchor="middle" fill="#86efac" font-size="11">• Privacidad total &amp; 1080p real</text>
+  </g>
+
+  <!-- Top Badge -->
+  <rect x="250" y="30" width="300" height="34" rx="17" fill="#0f172a" stroke="#10b981" stroke-width="1.2"/>
+  <text x="400" y="52" text-anchor="middle" fill="#86efac" font-size="12" font-weight="bold" font-family="system-ui, sans-serif">⚔️ STREAMING vs ARCHIVO PERMANENTE</text>
 </svg>
