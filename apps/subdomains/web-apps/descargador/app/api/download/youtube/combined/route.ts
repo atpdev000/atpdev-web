@@ -7,7 +7,7 @@ import os from 'os'
 import https from 'https'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
-import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
+import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs } from '@/lib/server/binaries'
 
 async function downloadStreamToDisk(
   sourceUrl: string,
@@ -95,14 +95,14 @@ async function downloadStreamToDisk(
 }
 
 async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android'): Promise<any> {
-  const nodeBin = process.execPath || 'node'
-  const cookieArgs = getCookiesArg()
+  const cookieArgs = getYoutubeCookiesArgs()
+  const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
 
   return new Promise((resolve, reject) => {
     const args = [
       '--socket-timeout', '15',
       '--dump-json',
-      '--js-runtimes', `node:${nodeBin}`,
+      ...jsRuntimeArgs,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
@@ -160,38 +160,6 @@ async function extractMetadata(url: string, binPath: string, playerClient = 'vis
 }
 
 export const maxDuration = 300 // 5 minutos máximo para descargas grandes
-
-function getCookiesArg(): string[] {
-  const candidatePaths = [
-    path.join(process.cwd(), 'cookies.txt'),
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'cookies.txt'),
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'cookies.txt'),
-    path.join(process.cwd(), 'bin', 'cookies.txt')
-  ]
-
-  for (const cp of candidatePaths) {
-    try {
-      if (fs.existsSync(cp)) {
-        return ['--cookies', cp]
-      }
-    } catch {}
-  }
-
-  const envCookies = process.env.YOUTUBE_COOKIES || process.env.YT_COOKIES
-  if (envCookies) {
-    try {
-      const cookieFile = path.join(os.tmpdir(), 'yt_cookies.txt')
-      const isBase64 = envCookies.startsWith('data:') || (/^[A-Za-z0-9+/=]+$/.test(envCookies.trim()) && envCookies.length > 100)
-      const content = isBase64
-        ? Buffer.from(envCookies.trim(), 'base64').toString('utf-8')
-        : envCookies
-      fs.writeFileSync(cookieFile, content, 'utf-8')
-      return ['--cookies', cookieFile]
-    } catch {}
-  }
-
-  return []
-}
 
 function cleanUrl(inputUrl: string): string {
   try {
@@ -313,12 +281,12 @@ export async function POST(request: NextRequest) {
       }
 
       const tempOutputPattern = `${tempFileBase}.%(ext)s`
-      const nodeBin = process.execPath || 'node'
-      const cookieArgs = getCookiesArg()
+      const cookieArgs = getYoutubeCookiesArgs()
+      const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
       const ytArgs: string[] = [
         ...ffmpegArgs,
         '--socket-timeout', '20',
-        '--js-runtimes', `node:${nodeBin}`,
+        ...jsRuntimeArgs,
         '--newline',
         '--no-playlist',
         '--no-warnings',
@@ -723,12 +691,12 @@ export async function POST(request: NextRequest) {
       }
 
       const tempOutputPattern = `${tempFileBase}.%(ext)s`
-      const nodeBin = process.execPath || 'node'
-      const cookieArgs = getCookiesArg()
+      const cookieArgs = getYoutubeCookiesArgs()
+      const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
       const ytArgs: string[] = [
         ...ffmpegArgs,
         '--socket-timeout', '15',
-        '--js-runtimes', `node:${nodeBin}`,
+        ...jsRuntimeArgs,
         '--newline',
         '--no-playlist',
         '--no-warnings',

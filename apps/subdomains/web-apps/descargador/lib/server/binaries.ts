@@ -271,3 +271,61 @@ export function getSafeContentDisposition(filename: string, dispositionType: 'at
   return `${dispositionType}; filename="${asciiFallback}"; filename*=UTF-8''${utf8Encoded}`
 }
 
+/**
+ * Devuelve los argumentos de runtime JS para yt-dlp (prioriza Deno si existe, sino Node).
+ */
+export function getYtDlpJsRuntimeArgs(): string[] {
+  const denoBins = ['/usr/local/bin/deno', '/root/.deno/bin/deno']
+  for (const db of denoBins) {
+    try {
+      if (fs.existsSync(db)) {
+        return ['--js-runtimes', `deno:${db}`]
+      }
+    } catch {}
+  }
+  const nodeBin = process.execPath || 'node'
+  return ['--js-runtimes', `node:${nodeBin}`]
+}
+
+/**
+ * Localiza cookies.txt (incluyendo el archivo compartido del backend Python en Hetzner)
+ * o la variable YOUTUBE_COOKIES, copiándolo a un archivo temporal para evitar que yt-dlp
+ * sobrescriba o corrompa el archivo maestro de cookies.
+ */
+export function getYoutubeCookiesArgs(): string[] {
+  const candidatePaths = [
+    process.env.YOUTUBE_COOKIES_FILE || '',
+    '/opt/backend-freedownloaderpro/app/cookies/cookies.txt',
+    path.join(process.cwd(), 'cookies.txt'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'cookies.txt'),
+    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'cookies.txt'),
+    path.join(process.cwd(), 'bin', 'cookies.txt')
+  ].filter(Boolean)
+
+  for (const cp of candidatePaths) {
+    try {
+      if (fs.existsSync(cp) && fs.statSync(cp).size > 100) {
+        const roCopy = path.join(os.tmpdir(), 'yt_cookies_ro.txt')
+        fs.copyFileSync(cp, roCopy)
+        return ['--cookies', roCopy]
+      }
+    } catch {}
+  }
+
+  const envCookies = process.env.YOUTUBE_COOKIES || process.env.YT_COOKIES
+  if (envCookies) {
+    try {
+      const cookieFile = path.join(os.tmpdir(), 'yt_cookies_env.txt')
+      const isBase64 = envCookies.startsWith('data:') || (/^[A-Za-z0-9+/=]+$/.test(envCookies.trim()) && envCookies.length > 100)
+      const content = isBase64
+        ? Buffer.from(envCookies.trim(), 'base64').toString('utf-8')
+        : envCookies
+      fs.writeFileSync(cookieFile, content, 'utf-8')
+      return ['--cookies', cookieFile]
+    } catch {}
+  }
+
+  return []
+}
+
+

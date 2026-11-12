@@ -5,7 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import os from 'os'
 import dns from 'dns'
-import { findYtDlpBinary } from '@/lib/server/binaries'
+import { findYtDlpBinary, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs } from '@/lib/server/binaries'
 import { getBackendEndpoint } from '@/lib/server/backend-config'
 import { Innertube, UniversalCache, Platform } from 'youtubei.js'
 
@@ -28,44 +28,6 @@ try {
 } catch {}
 
 export const maxDuration = 60
-
-function getCookiesArg(): string[] {
-  // 1. Archivo físico cookies.txt en el proyecto o bin
-  const candidatePaths = [
-    path.join(process.cwd(), 'cookies.txt'),
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'bin', 'cookies.txt'),
-    path.join(process.cwd(), 'apps', 'subdomains', 'web-apps', 'descargador', 'cookies.txt'),
-    path.join(process.cwd(), 'bin', 'cookies.txt')
-  ]
-
-  for (const cp of candidatePaths) {
-    try {
-      if (fs.existsSync(cp)) {
-        console.log(`🍪 [YouTube] Usando archivo de cookies local: ${cp}`)
-        return ['--cookies', cp]
-      }
-    } catch {}
-  }
-
-  // 2. Variable de entorno YOUTUBE_COOKIES o YT_COOKIES (texto Netscape o Base64)
-  const envCookies = process.env.YOUTUBE_COOKIES || process.env.YT_COOKIES
-  if (envCookies) {
-    try {
-      const cookieFile = path.join(os.tmpdir(), 'yt_cookies.txt')
-      const isBase64 = envCookies.startsWith('data:') || (/^[A-Za-z0-9+/=]+$/.test(envCookies.trim()) && envCookies.length > 100)
-      const content = isBase64
-        ? Buffer.from(envCookies.trim(), 'base64').toString('utf-8')
-        : envCookies
-      fs.writeFileSync(cookieFile, content, 'utf-8')
-      console.log('🍪 [YouTube] Cookies cargadas desde variable de entorno')
-      return ['--cookies', cookieFile]
-    } catch (e: any) {
-      console.warn('⚠️ [YouTube] Error cargando cookies desde variable:', e.message)
-    }
-  }
-
-  return []
-}
 
 function formatBytes(bytes: number): string {
   if (!bytes || isNaN(bytes)) return 'Auto'
@@ -146,13 +108,6 @@ async function extractWithYouTubeJS(url: string): Promise<any> {
     const rawAdaptive = info.streaming_data?.adaptive_formats || []
     const allFormats = [...rawCombined, ...rawAdaptive]
 
-    const invidiousHosts = [
-      'https://invidious.projectsegfau.lt',
-      'https://inv.nadeko.net',
-      'https://invidious.nerdvpn.de',
-      'https://yt.chocolatemoo53.com'
-    ]
-
     const formats = await Promise.all(
       allFormats.map(async (f: any) => {
         let streamUrl = f.url || ''
@@ -160,9 +115,6 @@ async function extractWithYouTubeJS(url: string): Promise<any> {
           try {
             streamUrl = await f.decipher(yt.session.player)
           } catch {}
-        }
-        if (!streamUrl && f.itag) {
-          streamUrl = `${invidiousHosts[0]}/latest_version?id=${videoId}&itag=${f.itag}`
         }
 
         const isAudio = f.has_audio && !f.has_video
@@ -190,7 +142,13 @@ async function extractWithYouTubeJS(url: string): Promise<any> {
       })
     )
 
-    console.log(`✅ [YouTube.js / InnerTube Engine] Éxito: "${title}" (${formats.length} formatos disponibles)`)
+    const validFormats = formats.filter((f: any) => !!f.url)
+    if (validFormats.length === 0) {
+      console.warn(`⚠️ [YouTube.js / InnerTube Engine] "${title}" sin formatos extraíbles; continuando al siguiente respaldo`)
+      return null
+    }
+
+    console.log(`✅ [YouTube.js / InnerTube Engine] Éxito: "${title}" (${validFormats.length} formatos disponibles)`)
     return {
       id: videoId,
       title,
@@ -199,7 +157,7 @@ async function extractWithYouTubeJS(url: string): Promise<any> {
       uploader,
       channel: uploader,
       view_count: viewCount,
-      formats: formats.filter((f: any) => f.url)
+      formats: validFormats
     }
   } catch (err: any) {
     console.warn(`⚠️ [YouTube.js / InnerTube Engine] Falló:`, err.message)
@@ -281,14 +239,14 @@ async function extractWithInvidious(url: string): Promise<any> {
 }
 
 async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android'): Promise<any> {
-  const nodeBin = process.execPath || 'node'
-  const cookieArgs = getCookiesArg()
+  const cookieArgs = getYoutubeCookiesArgs()
+  const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
 
   return new Promise((resolve, reject) => {
     const args = [
       '--socket-timeout', '15',
       '--dump-json',
-      '--js-runtimes', `node:${nodeBin}`,
+      ...jsRuntimeArgs,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
@@ -427,6 +385,11 @@ export async function POST(request: NextRequest) {
         if (extRes.ok) {
           const extData = await extRes.json()
           return NextResponse.json(extData)
+        } else {
+          const errPayload = await extRes.json().catch(() => ({}))
+          const errDetail = errPayload?.detail || errPayload?.message || `HTTP ${extRes.status}`
+          console.warn(`⚠️ [YouTube] API externa (${backendInfo.provider}) devolvió ${extRes.status}:`, errDetail)
+          extractionError = new Error(errDetail)
         }
       } catch (extErr: any) {
         console.error('❌ [YouTube] Fallback externo primario falló:', extErr.message)
