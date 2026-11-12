@@ -419,7 +419,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
   const handleCheckHealth = async (targetUrl?: string) => {
     setCheckingHealth(true);
     const backendConfig = config.backend || {};
-    const urlToTest = targetUrl || backendConfig.active_url || backendConfig.render_url || 'https://snapnosh-backend.onrender.com';
+    const urlToTest = targetUrl || backendConfig.active_url || backendConfig.custom_url || 'http://127.0.0.1:8000';
     try {
       const res = await checkBackendHealthAction(urlToTest, 10000);
       setHealthResult({
@@ -460,7 +460,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               Descargador Pro
             </h1>
             <p className="text-slate-400 max-w-2xl text-sm md:text-base">
-              Administración centralizada de la plataforma de descargas multimedia. Controla módulos de video/audio, SEO, branding y el motor backend en Railway.
+              Administración centralizada de la plataforma de descargas multimedia. Controla módulos de video/audio, SEO, branding y el motor backend en Hetzner VPS / Render / Railway.
             </p>
           </div>
 
@@ -605,7 +605,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
           }`}
         >
           <Server className="w-4 h-4" />
-          Motor Backend (Render / Railway)
+          Motor Backend (Hetzner / VPS)
         </button>
 
         <button
@@ -1950,19 +1950,19 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 </div>
                 <div>
                   <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    Motor Backend Python (Render & Railway)
+                    Motor Backend Python (Hetzner / Render / Railway)
                     <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
-                      (config.backend?.provider || 'render') === 'render'
+                      config.backend?.provider === 'render'
                         ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
                         : (config.backend?.provider === 'railway')
                         ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
                         : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
                     }`}>
-                      {(config.backend?.provider || 'render') === 'render' ? '🟣 Render Activo' : (config.backend?.provider === 'railway' ? '🚂 Railway Activo' : '🖥️ VPS Custom')}
+                      {config.backend?.provider === 'render' ? '🟣 Render Activo' : (config.backend?.provider === 'railway' ? '🚂 Railway Activo' : '🖥️ Hetzner VPS Activo')}
                     </span>
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Configuración centralizada del motor FastAPI + yt-dlp. Alterna dinámicamente entre Render y Railway sin tocar código.
+                    Configuración centralizada del motor FastAPI + yt-dlp. Usa el servidor Hetzner local (127.0.0.1:8000) o alterna dinámicamente a Render/Railway.
                   </p>
                 </div>
               </div>
@@ -2103,15 +2103,16 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 </div>
               </div>
 
-              {/* Opción 3: Servidor VPS Propio */}
+              {/* Opción 3: Servidor VPS Propio / Hetzner */}
               <div
                 onClick={() => {
-                  const customUrl = config.backend?.custom_url || '';
+                  const customUrl = config.backend?.custom_url || 'http://127.0.0.1:8000';
                   setConfig({
                     ...config,
                     backend: {
                       ...(config.backend || {}),
                       provider: 'custom',
+                      custom_url: customUrl,
                       active_url: customUrl
                     }
                   });
@@ -2128,8 +2129,8 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                       🖥️
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-white">VPS / Custom</h3>
-                      <span className="text-[10px] text-amber-400 font-semibold">Servidor Propio</span>
+                      <h3 className="text-sm font-bold text-white">Hetzner VPS (Local)</h3>
+                      <span className="text-[10px] text-amber-400 font-semibold">Servidor Propio 24/7</span>
                     </div>
                   </div>
                   <input
@@ -2141,18 +2142,17 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                   />
                 </div>
                 <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                  Conexión a un VPS propio (DigitalOcean, Hetzner, AWS o servidor local) ejecutando la imagen Docker de FastAPI.
+                  Motor FastAPI + yt-dlp + FFmpeg corriendo localmente en el mismo VPS Hetzner (baja latencia, sin cold starts).
                 </p>
                 <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
                   <span className="font-mono text-amber-300 truncate max-w-[200px]">
-                    {config.backend?.custom_url || 'Sin URL asignada'}
+                    {config.backend?.custom_url || 'http://127.0.0.1:8000'}
                   </span>
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (config.backend?.custom_url) handleCheckHealth(config.backend.custom_url);
-                      else alert('Por favor ingresa primero la URL del servidor VPS.');
+                      handleCheckHealth(config.backend?.custom_url || 'http://127.0.0.1:8000');
                     }}
                     className="text-amber-400 hover:underline font-semibold"
                   >
@@ -2275,11 +2275,30 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
 
               {/* URL VPS Custom */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">URL de Servidor VPS Propio / Custom</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-300">URL de Servidor VPS Hetzner / Custom</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const localUrl = 'http://127.0.0.1:8000';
+                      setConfig(prev => ({
+                        ...prev,
+                        backend: {
+                          ...(prev.backend || {}),
+                          custom_url: localUrl,
+                          active_url: prev.backend?.provider === 'custom' ? localUrl : prev.backend?.active_url
+                        }
+                      }));
+                    }}
+                    className="text-[11px] text-amber-400 hover:underline font-semibold"
+                  >
+                    Usar Hetzner Local
+                  </button>
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    value={config.backend?.custom_url || ''}
+                    value={config.backend?.custom_url ?? 'http://127.0.0.1:8000'}
                     onChange={(e) => {
                       const val = e.target.value;
                       setConfig(prev => ({
@@ -2291,15 +2310,12 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                         }
                       }));
                     }}
-                    placeholder="http://123.45.67.89:8000 o https://api.midominio.com"
+                    placeholder="http://127.0.0.1:8000"
                     className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono focus:border-amber-500 outline-none"
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      if (config.backend?.custom_url) handleCheckHealth(config.backend.custom_url);
-                      else alert('Por favor escribe la URL de tu VPS antes de probar.');
-                    }}
+                    onClick={() => handleCheckHealth(config.backend?.custom_url || 'http://127.0.0.1:8000')}
                     disabled={checkingHealth}
                     className="px-3 py-2.5 rounded-xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition"
                   >
@@ -2379,7 +2395,15 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => handleCheckHealth(config.backend?.custom_url || 'http://127.0.0.1:8000')}
+                  disabled={checkingHealth}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition disabled:opacity-50"
+                >
+                  Probar Hetzner
+                </button>
                 <button
                   type="button"
                   onClick={() => handleCheckHealth(config.backend?.render_url || 'https://snapnosh-backend.onrender.com')}
@@ -2419,7 +2443,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                     )}
                     <div>
                       <span className="text-xs font-mono text-slate-300 font-bold block">
-                        {healthResult.targetUrl || config.backend?.active_url || 'https://snapnosh-backend.onrender.com'}
+                        {healthResult.targetUrl || config.backend?.active_url || 'http://127.0.0.1:8000'}
                       </span>
                       <span className="text-[11px] text-slate-400">
                         {healthResult.statusText}

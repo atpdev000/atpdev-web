@@ -453,12 +453,12 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     admob_interstitial_id: 'ca-app-pub-5414009811868137/5647382910'
   },
   backend: {
-    provider: 'render',
+    provider: 'custom',
     render_url: 'https://snapnosh-backend.onrender.com',
     railway_url: 'https://backend-freedownloaderpro.up.railway.app',
-    custom_url: '',
-    active_url: 'https://snapnosh-backend.onrender.com',
-    auto_fallback_enabled: true,
+    custom_url: 'http://127.0.0.1:8000',
+    active_url: 'http://127.0.0.1:8000',
+    auto_fallback_enabled: false,
     timeout_seconds: 30
   },
   payments: {
