@@ -13,6 +13,7 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [contactInfo, setContactInfo] = useState({
     email: 'contacto@atpdev.dev',
     whatsapp: '+51 987 654 321',
@@ -36,14 +37,29 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitError(null)
 
-    // Simular envío
-    await new Promise(resolve => setTimeout(resolve, 800))
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
 
-    console.log('Formulario enviado:', formData)
-    setSubmitted(true)
-    setFormData({ name: '', email: '', subject: 'soporte', message: '' })
-    setIsSubmitting(false)
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Ocurrió un error al enviar el mensaje.')
+      }
+
+      setSubmitted(true)
+      setFormData({ name: '', email: '', subject: 'soporte', message: '' })
+    } catch (err: any) {
+      console.error('Error al enviar formulario:', err)
+      setSubmitError(err?.message || 'No se pudo conectar con el servidor. Por favor intenta de nuevo.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -245,6 +261,12 @@ export default function ContactPage() {
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400 resize-none"
                 />
               </div>
+
+              {submitError && (
+                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-semibold">
+                  {submitError}
+                </div>
+              )}
 
               <button
                 type="submit"
