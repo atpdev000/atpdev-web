@@ -86,7 +86,7 @@ export function generateMetadata(): Metadata {
       apple: [{ url: '/icons/icon-192.png', sizes: '180x180', type: 'image/png' }]
     },
     verification: {
-      google: config?.seo?.google_search_console_token || undefined
+      google: config?.seo?.google_search_console_token || process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'google6484540a375ccb54'
     }
   }
 }
