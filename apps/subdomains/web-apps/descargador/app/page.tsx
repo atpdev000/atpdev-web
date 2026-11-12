@@ -49,7 +49,7 @@ export default function Home() {
 
   // 🧩 Módulos y Branding controlados desde CMS Admin
   const [modules, setModules] = useState<Record<string, boolean>>({
-    youtube_enabled: true,
+    youtube_enabled: FEATURES.YOUTUBE_ENABLED,
     tiktok_enabled: true,
     facebook_enabled: true,
     instagram_enabled: true,
@@ -75,7 +75,7 @@ export default function Home() {
     hero_badge: 'Motor Ultra Rápido • Sin Marcas de Agua • 1080p/4K',
     hero_title_prefix: 'Descarga videos y audios gratis con',
     hero_title_highlight: 'Descargador Pro',
-    hero_description: 'La herramienta más potente para descargar contenido multimedia de YouTube, TikTok, Facebook e Instagram en MP4 o MP3 al instante.',
+    hero_description: 'La herramienta más potente para descargar contenido multimedia de Facebook HD, TikTok sin marca de agua, Instagram y Twitter en MP4 o MP3 al instante.',
     announcement_enabled: false
   })
   const [apkConfig, setApkConfig] = useState<{

@@ -812,7 +812,7 @@ export default function PlanesPage() {
                 <span>¿Por qué las resoluciones 1080p y 4K requieren el Plan Premium?</span>
               </h4>
               <p className="text-xs text-slate-600 dark:text-slate-400 pl-6 leading-relaxed">
-                YouTube entrega el video en 1080p y 4K separado del audio. Nuestros servidores de alta velocidad unen ambas pistas con FFmpeg en tiempo real para que tu MP4 se reproduzca sin fallas en cualquier dispositivo.
+                Las plataformas sociales suelen entregar el video en 1080p y 4K separado del audio. Nuestros servidores de alta velocidad unen ambas pistas con FFmpeg en tiempo real para que tu MP4 se reproduzca sin fallas en cualquier dispositivo.
               </p>
             </div>
             <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-1">

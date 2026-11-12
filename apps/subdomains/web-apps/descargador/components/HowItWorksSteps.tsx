@@ -8,7 +8,7 @@ export function HowItWorksSteps() {
     {
       number: '01',
       title: 'Copia el enlace del video',
-      desc: 'Encuentra el video en Facebook, TikTok, Instagram, Twitter/X o YouTube y copia el enlace oficial desde el botón "Compartir".',
+      desc: 'Encuentra el video en Facebook, TikTok, Instagram, Twitter/X o Threads y copia el enlace oficial desde el botón "Compartir".',
       icon: Copy,
       color: 'from-blue-500 to-cyan-500',
       badge: 'Paso 1'
