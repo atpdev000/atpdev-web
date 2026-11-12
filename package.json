@@ -47,6 +47,7 @@
     "turbo": "^2.10.9"
   },
   "optionalDependencies": {
+    "@tailwindcss/oxide-linux-arm64-gnu": "^4.0.0",
     "@tailwindcss/oxide-linux-x64-gnu": "^4.0.0",
     "@tailwindcss/oxide-linux-x64-musl": "^4.0.0"
   }
