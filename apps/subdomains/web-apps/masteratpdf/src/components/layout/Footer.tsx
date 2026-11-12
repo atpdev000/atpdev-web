@@ -88,13 +88,18 @@ export const Footer = () => {
                             Conversión
                         </h3>
                         <ul className="space-y-2 text-xs">
-                            {convertTools.slice(0, 5).map(t => (
+                            {convertTools.map(t => (
                                 <li key={t.id}>
                                     <Link 
                                         href={t.href} 
-                                        className="text-ink-2 hover:text-brand transition-colors"
+                                        className="text-ink-2 hover:text-brand transition-colors flex items-center gap-1.5"
                                     >
-                                        {t.name}
+                                        <span>{t.name}</span>
+                                        {t.isNew && (
+                                            <span className="text-[9px] px-1 py-0.2 rounded bg-pink-100 text-pink-700 font-bold">
+                                                NUEVO
+                                            </span>
+                                        )}
                                     </Link>
                                 </li>
                             ))}
@@ -111,9 +116,14 @@ export const Footer = () => {
                                 <li key={t.id}>
                                     <Link 
                                         href={t.href} 
-                                        className="text-ink-2 hover:text-brand transition-colors"
+                                        className="text-ink-2 hover:text-brand transition-colors flex items-center gap-1.5"
                                     >
-                                        {t.name}
+                                        <span>{t.name}</span>
+                                        {t.isNew && (
+                                            <span className="text-[9px] px-1 py-0.2 rounded bg-pink-100 text-pink-700 font-bold">
+                                                NUEVO
+                                            </span>
+                                        )}
                                     </Link>
                                 </li>
                             ))}

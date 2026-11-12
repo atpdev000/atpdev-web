@@ -718,7 +718,7 @@ export default function SorteosAdminClient({
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-violet-500/10 text-violet-400 text-xs font-mono font-bold border border-violet-500/30">
             <ShieldCheck size={13} />
-            <span>SORTEOS PRO CMS — SORTEOS.ATPDEV.PE • PUERTO 3006</span>
+            <span>SORTEOS PRO CMS — SORTEOS.ATPDEV.DEV • PUERTO 3006</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-3">
             Centro de Control Global de Sorteos & Certificaciones
@@ -1818,7 +1818,7 @@ export default function SorteosAdminClient({
                 </div>
                 <div>
                   <h2 className="text-xs font-bold text-white uppercase tracking-widest">Theme Studio Pro</h2>
-                  <p className="text-[10px] text-slate-400 font-mono">Subdominio: sorteos.atpdev.pe (:3006)</p>
+                  <p className="text-[10px] text-slate-400 font-mono">Subdominio: sorteos.atpdev.dev (:3006)</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -2273,7 +2273,7 @@ export default function SorteosAdminClient({
             <div className="p-3 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white text-xs font-bold font-mono">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Live Preview: <strong className="text-violet-400">sorteos.atpdev.pe (:3006)</strong></span>
+                <span>Live Preview: <strong className="text-violet-400">sorteos.atpdev.dev (:3006)</strong></span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center p-0.5 rounded-xl bg-slate-900 border border-slate-800">

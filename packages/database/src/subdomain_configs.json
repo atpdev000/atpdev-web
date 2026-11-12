@@ -83,7 +83,7 @@
     "name": "Sorteos Pro",
     "slug": "sorteos",
     "subdomain": "sorteos",
-    "full_domain": "sorteos.atpdev.pe",
+    "full_domain": "sorteos.atpdev.dev",
     "devPort": 3006,
     "category": "Sorteos & Promociones SaaS Multi-Red",
     "status": "active",
@@ -130,7 +130,7 @@
         "sorteo certificado",
         "sorteos online"
       ],
-      "canonical_url": "https://sorteos.atpdev.pe",
+      "canonical_url": "https://sorteos.atpdev.dev",
       "google_analytics_id": "GTM-KGJN7SDL",
       "microsoft_clarity_id": "zak4lzyye9",
       "google_search_console_token": ""
@@ -148,9 +148,9 @@
       "superadmin_enabled": true
     },
     "contact": {
-      "email": "soporte@atpdev.pe",
+      "email": "contacto@atpdev.dev",
       "whatsapp": "+51987654321",
-      "support_url": "https://sorteos.atpdev.pe/planes"
+      "support_url": "https://sorteos.atpdev.dev/planes"
     },
     "updated_at": "2026-10-03T17:04:06.545Z"
   },

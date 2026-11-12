@@ -299,7 +299,7 @@ export const DEFAULT_SORTEOS_CONFIG: SubdomainConfig = {
   name: 'Sorteos Pro',
   slug: 'sorteos',
   subdomain: 'sorteos',
-  full_domain: 'sorteos.atpdev.pe',
+  full_domain: 'sorteos.atpdev.dev',
   devPort: 3006,
   category: 'Sorteos & Promociones SaaS Multi-Red',
   status: 'active',
@@ -346,7 +346,7 @@ export const DEFAULT_SORTEOS_CONFIG: SubdomainConfig = {
       'sorteo certificado',
       'sorteos online'
     ],
-    canonical_url: 'https://sorteos.atpdev.pe'
+    canonical_url: 'https://sorteos.atpdev.dev'
   },
   modules: {
     instagram_giveaways_enabled: true,
@@ -358,9 +358,9 @@ export const DEFAULT_SORTEOS_CONFIG: SubdomainConfig = {
     superadmin_enabled: true
   },
   contact: {
-    email: 'soporte@atpdev.pe',
+    email: 'contacto@atpdev.dev',
     whatsapp: '+51987654321',
-    support_url: 'https://sorteos.atpdev.pe/planes'
+    support_url: 'https://sorteos.atpdev.dev/planes'
   },
   updated_at: new Date().toISOString()
 };
