@@ -330,10 +330,10 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
   const selectedCategory = selectedLead ? getLeadCategory(selectedLead) : null;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] -mx-4 sm:mx-0 space-y-4">
+    <div className="flex flex-col h-[calc(100vh-140px)] -mx-4 sm:mx-0 space-y-4" suppressHydrationWarning>
       
       {/* Metrics Header */}
-      <div className="bg-[#262626] border border-gray-800 rounded-2xl p-5 shrink-0 flex flex-col md:flex-row items-center justify-between gap-5">
+      <div className="bg-[#262626] border border-gray-800 rounded-2xl p-5 shrink-0 flex flex-col md:flex-row items-center justify-between gap-5" suppressHydrationWarning>
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             Centro de Leads & Mensajes de Atención
@@ -360,9 +360,9 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
       </div>
 
       {/* FILTER TABS BY ORIGIN (PÁGINA O SUBDOMINIO) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#1e2029] border border-gray-800/80 p-3 rounded-2xl shrink-0">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#1e2029] border border-gray-800/80 p-3 rounded-2xl shrink-0" suppressHydrationWarning>
         {/* Origin Badges - Plataformas & Subdominios */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent" suppressHydrationWarning>
           <button
             onClick={() => setSelectedOrigin("all")}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
@@ -495,8 +495,8 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
                         <span>{origin.name}</span>
                       </span>
 
-                      <span className="text-[10px] text-gray-500 whitespace-nowrap font-mono">
-                        {new Date(lead.created_at || "").toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })}
+                      <span className="text-[10px] text-gray-500 whitespace-nowrap font-mono" suppressHydrationWarning>
+                        {lead.created_at ? new Date(lead.created_at).toLocaleDateString('es-PE', { day: 'numeric', month: 'short' }) : ''}
                       </span>
                     </div>
 
@@ -651,10 +651,10 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
                       <p className="font-semibold text-gray-200 text-sm">
                         De: <strong className="text-white">{selectedLead.name}</strong> ({selectedLead.email})
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Recibido el {new Date(selectedLead.created_at || "").toLocaleString('es-PE', { 
+                      <p className="text-xs text-gray-500 mt-0.5" suppressHydrationWarning>
+                        Recibido el {selectedLead.created_at ? new Date(selectedLead.created_at).toLocaleString('es-PE', { 
                           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit'
-                        })}
+                        }) : ''}
                       </p>
                     </div>
                   </div>
