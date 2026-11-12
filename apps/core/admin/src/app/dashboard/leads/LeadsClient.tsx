@@ -25,26 +25,43 @@ import {
   Filter,
   Tag,
   ExternalLink,
-  Layers
+  Layers,
+  UtensilsCrossed,
+  QrCode,
+  ScanLine,
+  FileText
 } from "lucide-react";
 import { updateLeadStatus } from "./actions";
 import { generateAiReply, sendEmailReply, getSenderEmail } from "./email-actions";
 import { Lead } from "@atpdev/database";
 
 export interface LeadOriginInfo {
-  key: "all" | "descargador" | "chamba" | "sorteos" | "portal" | "other";
+  key: string;
   name: string;
   subdomain: string;
   color: string;
   badgeClass: string;
   pillClass: string;
-  icon: typeof Download;
+  icon: any;
 }
+
+export const PLATFORMS_CATALOG = [
+  { key: "descargador", name: "Descargador Pro", icon: Download, activeClass: "bg-purple-600 text-white shadow-sm shadow-purple-600/30", idleClass: "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20" },
+  { key: "chamba", name: "Chamba Pro", icon: Briefcase, activeClass: "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30", idleClass: "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20" },
+  { key: "sorteos", name: "Sorteos Pro", icon: Gift, activeClass: "bg-pink-600 text-white shadow-sm shadow-pink-600/30", idleClass: "bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 border border-pink-500/20" },
+  { key: "magic", name: "Interactivo Magic", icon: Sparkles, activeClass: "bg-fuchsia-600 text-white shadow-sm shadow-fuchsia-600/30", idleClass: "bg-fuchsia-500/10 text-fuchsia-400 hover:bg-fuchsia-500/20 border border-fuchsia-500/20" },
+  { key: "perusabor", name: "Perú Sabor Pro", icon: UtensilsCrossed, activeClass: "bg-amber-600 text-white shadow-sm shadow-amber-600/30", idleClass: "bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20" },
+  { key: "lectorqr", name: "Lector QR Pro", icon: QrCode, activeClass: "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30", idleClass: "bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/20" },
+  { key: "dni", name: "DNI Scanner Pro", icon: ScanLine, activeClass: "bg-cyan-600 text-white shadow-sm shadow-cyan-600/30", idleClass: "bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 border border-cyan-500/20" },
+  { key: "masteratpdf", name: "MasterATPDF Pro", icon: FileText, activeClass: "bg-rose-600 text-white shadow-sm shadow-rose-600/30", idleClass: "bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20" },
+  { key: "portal", name: "Portal Principal", icon: Globe, activeClass: "bg-blue-600 text-white shadow-sm shadow-blue-600/30", idleClass: "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20" },
+];
 
 export function getLeadOrigin(lead: Lead): LeadOriginInfo {
   const company = (lead.company || "").toLowerCase();
   const msg = (lead.message || "").toLowerCase();
 
+  // 1. Descargador Pro
   if (company.includes("descargador") || msg.includes("descargador") || msg.includes("download")) {
     return {
       key: "descargador",
@@ -57,6 +74,7 @@ export function getLeadOrigin(lead: Lead): LeadOriginInfo {
     };
   }
 
+  // 2. Chamba Pro
   if (company.includes("chamba") || msg.includes("chamba") || msg.includes("convocatoria") || msg.includes("cas ")) {
     return {
       key: "chamba",
@@ -69,6 +87,7 @@ export function getLeadOrigin(lead: Lead): LeadOriginInfo {
     };
   }
 
+  // 3. Sorteos Pro
   if (company.includes("sorteo") || msg.includes("sorteo") || msg.includes("giveaway") || msg.includes("ruleta")) {
     return {
       key: "sorteos",
@@ -81,7 +100,73 @@ export function getLeadOrigin(lead: Lead): LeadOriginInfo {
     };
   }
 
-  if (company.includes("portafolio") || company.includes("portal") || !lead.company || company === "directo") {
+  // 4. Interactivo Magic
+  if (company.includes("magic") || company.includes("interactivo") || msg.includes("interactivo magic")) {
+    return {
+      key: "magic",
+      name: "Interactivo Magic",
+      subdomain: "magic.atpdev.dev",
+      color: "fuchsia",
+      badgeClass: "bg-fuchsia-500/15 text-fuchsia-400 border-fuchsia-500/30",
+      pillClass: "text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-500/30",
+      icon: Sparkles,
+    };
+  }
+
+  // 5. Perú Sabor Pro
+  if (company.includes("perusabor") || company.includes("sabor") || msg.includes("peru sabor") || msg.includes("receta")) {
+    return {
+      key: "perusabor",
+      name: "Perú Sabor Pro",
+      subdomain: "perusabor.atpdev.dev",
+      color: "amber",
+      badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+      pillClass: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+      icon: UtensilsCrossed,
+    };
+  }
+
+  // 6. Lector QR Pro
+  if (company.includes("lectorqr") || company.includes("qr") || msg.includes("lector qr") || msg.includes("codigo qr")) {
+    return {
+      key: "lectorqr",
+      name: "Lector QR Pro",
+      subdomain: "lectorqr.atpdev.dev",
+      color: "indigo",
+      badgeClass: "bg-indigo-500/15 text-indigo-400 border-indigo-500/30",
+      pillClass: "text-indigo-300 bg-indigo-500/10 border-indigo-500/30",
+      icon: QrCode,
+    };
+  }
+
+  // 7. DNI Scanner Pro
+  if (company.includes("dni") || msg.includes("dni scanner") || msg.includes("reniec")) {
+    return {
+      key: "dni",
+      name: "DNI Scanner Pro",
+      subdomain: "dni.atpdev.dev",
+      color: "cyan",
+      badgeClass: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+      pillClass: "text-cyan-300 bg-cyan-500/10 border-cyan-500/30",
+      icon: ScanLine,
+    };
+  }
+
+  // 8. MasterATPDF Pro
+  if (company.includes("pdf") || company.includes("masteratpdf") || msg.includes("masteratpdf")) {
+    return {
+      key: "masteratpdf",
+      name: "MasterATPDF Pro",
+      subdomain: "masteratpdf.atpdev.dev",
+      color: "rose",
+      badgeClass: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+      pillClass: "text-rose-300 bg-rose-500/10 border-rose-500/30",
+      icon: FileText,
+    };
+  }
+
+  // 9. Portal Principal
+  if (company.includes("portafolio") || company.includes("portal") || !lead.company || company === "directo" || company === "desde portafolio") {
     return {
       key: "portal",
       name: "Portal Principal",
@@ -93,13 +178,16 @@ export function getLeadOrigin(lead: Lead): LeadOriginInfo {
     };
   }
 
+  // 10. Fallback Dinámico para cualquier nuevo subdominio creado en el futuro
+  const cleanName = (lead.company || "").replace(/\(.*?\)/g, "").trim() || "Web Externa";
+  const slug = cleanName.toLowerCase().replace(/[^a-z0-9]/g, "");
   return {
-    key: "other",
-    name: lead.company || "Web Externa",
-    subdomain: "atpdev.dev",
-    color: "gray",
-    badgeClass: "bg-slate-500/15 text-slate-300 border-slate-500/30",
-    pillClass: "text-slate-300 bg-slate-500/10 border-slate-500/30",
+    key: slug || "other",
+    name: cleanName,
+    subdomain: `${slug || "app"}.atpdev.dev`,
+    color: "teal",
+    badgeClass: "bg-teal-500/15 text-teal-300 border-teal-500/30",
+    pillClass: "text-teal-300 bg-teal-500/10 border-teal-500/30",
     icon: Tag,
   };
 }
@@ -145,12 +233,11 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
   const originCounts = useMemo(() => {
     const counts: Record<string, number> = {
       all: initialLeads.length,
-      descargador: 0,
-      chamba: 0,
-      sorteos: 0,
-      portal: 0,
       other: 0,
     };
+    PLATFORMS_CATALOG.forEach(p => {
+      counts[p.key] = 0;
+    });
     initialLeads.forEach(lead => {
       const orig = getLeadOrigin(lead);
       counts[orig.key] = (counts[orig.key] || 0) + 1;
@@ -274,8 +361,8 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
 
       {/* FILTER TABS BY ORIGIN (PÁGINA O SUBDOMINIO) */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[#1e2029] border border-gray-800/80 p-3 rounded-2xl shrink-0">
-        {/* Origin Badges */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+        {/* Origin Badges - Plataformas & Subdominios */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 sm:pb-0 scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
           <button
             onClick={() => setSelectedOrigin("all")}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
@@ -291,65 +378,28 @@ export default function LeadsClient({ initialLeads }: { initialLeads: Lead[] }) 
             </span>
           </button>
 
-          <button
-            onClick={() => setSelectedOrigin("descargador")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-              selectedOrigin === "descargador"
-                ? "bg-purple-600 text-white shadow-sm shadow-purple-600/30"
-                : "bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20"
-            }`}
-          >
-            <Download size={13} />
-            <span>Descargador Pro</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono">
-              {originCounts.descargador}
-            </span>
-          </button>
+          {PLATFORMS_CATALOG.map((platform) => {
+            const Icon = platform.icon;
+            const count = originCounts[platform.key] || 0;
+            const isSelected = selectedOrigin === platform.key;
 
-          <button
-            onClick={() => setSelectedOrigin("chamba")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-              selectedOrigin === "chamba"
-                ? "bg-emerald-600 text-white shadow-sm shadow-emerald-600/30"
-                : "bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20"
-            }`}
-          >
-            <Briefcase size={13} />
-            <span>Chamba Pro</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono">
-              {originCounts.chamba}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setSelectedOrigin("sorteos")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-              selectedOrigin === "sorteos"
-                ? "bg-pink-600 text-white shadow-sm shadow-pink-600/30"
-                : "bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 border border-pink-500/20"
-            }`}
-          >
-            <Gift size={13} />
-            <span>Sorteos Pro</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono">
-              {originCounts.sorteos}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setSelectedOrigin("portal")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-              selectedOrigin === "portal"
-                ? "bg-blue-600 text-white shadow-sm shadow-blue-600/30"
-                : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20"
-            }`}
-          >
-            <Globe size={13} />
-            <span>Portal Principal</span>
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono">
-              {originCounts.portal}
-            </span>
-          </button>
+            return (
+              <button
+                key={platform.key}
+                onClick={() => setSelectedOrigin(platform.key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                  isSelected ? platform.activeClass : platform.idleClass
+                }`}
+                title={`Filtrar mensajes de ${platform.name}`}
+              >
+                <Icon size={13} />
+                <span>{platform.name}</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/25 font-mono">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Search & Status Quick Controls */}

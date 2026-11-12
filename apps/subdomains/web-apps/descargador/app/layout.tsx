@@ -108,35 +108,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.clarity.ms" />
 
-        {/* Schema.org WebApplication & Organization JSON-LD */}
-        <script
-          id="descargador-schema-webapp"
-          key="descargador-schema-webapp"
-          type="application/ld+json"
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebApplication",
-              name: config?.branding?.site_title || "Descargador Pro",
-              alternateName: "Descargador de Videos HD y Música MP3 Gratis",
-              applicationCategory: "MultimediaApplication",
-              operatingSystem: "All (Web, Android, iOS, Windows, macOS)",
-              url: siteUrl,
-              description: config?.seo?.meta_description || "Descarga videos y audios gratis de TikTok sin marca de agua, Facebook e Instagram en máxima calidad.",
-              offers: {
-                "@type": "Offer",
-                price: "0",
-                priceCurrency: "USD"
-              },
-              creator: {
-                "@type": "Organization",
-                name: "ATP DEV",
-                url: "https://atpdev.dev"
-              }
-            })
-          }}
-        />
         {customBg && (
           <style dangerouslySetInnerHTML={{
             __html: `
@@ -163,6 +134,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         }} />
       </head>
       <body className={`${inter.className} transition-colors duration-200 antialiased`} data-has-custom-bg={customBg ? "true" : "false"} suppressHydrationWarning>
+        {/* Schema.org WebApplication & Organization JSON-LD (Ubicado en body para evitar mismatch de hidratación en React 19 / Turbopack) */}
+        <script
+          id="descargador-schema-webapp"
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: config?.branding?.site_title || "Descargador Pro",
+              alternateName: "Descargador de Videos HD y Música MP3 Gratis",
+              applicationCategory: "MultimediaApplication",
+              operatingSystem: "All (Web, Android, iOS, Windows, macOS)",
+              url: siteUrl,
+              description: config?.seo?.meta_description || "Descarga videos y audios gratis de TikTok sin marca de agua, Facebook e Instagram en máxima calidad.",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD"
+              },
+              creator: {
+                "@type": "Organization",
+                name: "ATP DEV",
+                url: "https://atpdev.dev"
+              }
+            })
+          }}
+        />
         {/* Google Consent Mode v2 Default Signals (Privacy & AdSense Compliance) */}
         <Script
           id="google-consent-mode-default"
