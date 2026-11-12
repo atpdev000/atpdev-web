@@ -4,7 +4,7 @@
   "packageManager": "npm@11.6.1",
   "workspaces": [
     "apps/core/*",
-    "apps/subdomains/*/*",
+    "apps/subdomains/web-apps/*",
     "packages/*"
   ],
   "scripts": {
@@ -20,6 +20,8 @@
     "build:lectorqr": "npm run build --workspace=apps/subdomains/web-apps/lectorqr",
     "build:dni": "npm run build --workspace=apps/subdomains/web-apps/dni-scanner",
     "build:masteratpdf": "npm run build --workspace=apps/subdomains/web-apps/masteratpdf",
+    "build:almaniq": "npm --prefix apps/subdomains/platforms/almaniq run build",
+    "build:codehistory": "npm --prefix apps/subdomains/platforms/codehistory run build",
     "dev": "turbo run dev --continue=always",
     "dev:portal": "npm run dev --workspace=apps/core/portal -- -p 3000",
     "dev:admin": "npm run dev --workspace=apps/core/admin",
