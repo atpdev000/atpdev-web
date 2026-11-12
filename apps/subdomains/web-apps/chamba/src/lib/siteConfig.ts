@@ -1,11 +1,11 @@
 /**
  * Configuración central de dominio y URLs para Chamba Pro
- * Apunta por defecto a https://empleos.atpdev.dev para consistencia canónica y rastreo de Google AdSense.
+ * Apunta por defecto a https://chamba.atpdev.dev para consistencia canónica y rastreo de Google AdSense.
  */
 
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://empleos.atpdev.dev')
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 'https://chamba.atpdev.dev')
 ).replace(/\/$/, '');
 
 export const SITE_NAME = 'chamba pro';

@@ -19,6 +19,9 @@ export const metadata: Metadata = {
     'atp dev'
   ],
   authors: [{ name: 'ATP DEV Perú' }],
+  other: {
+    'google-adsense-account': 'ca-pub-5414009811868137',
+  },
   metadataBase: new URL('https://lectorqr.atpdev.dev'),
   alternates: {
     canonical: 'https://lectorqr.atpdev.dev',

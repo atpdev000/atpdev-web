@@ -9,7 +9,7 @@ export async function GET() {
   const rawId = validDbId || ADSENSE_PUB_ID || ADSENSE_CLIENT_ID || 'pub-5414009811868137';
   const cleanPubId = rawId.trim().replace(/^ca-/, '');
 
-  const adsTxtContent = `# Google AdSense ads.txt for chamba pro (empleos.atpdev.dev)
+  const adsTxtContent = `# Google AdSense ads.txt for chamba pro (chamba.atpdev.dev)
 google.com, ${cleanPubId}, DIRECT, f08c47fec0942fa0
 `;
 

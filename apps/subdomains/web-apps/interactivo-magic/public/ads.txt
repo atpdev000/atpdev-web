@@ -1,6 +1,1 @@
-# Ezoic ads.txt
-# Insert ezoic.com, [Ezoic Account ID], DIRECT entries here
-# Example: ezoic.com, 12345, DIRECT, f08c47fec0942fa0
-
-# Adsterra ads.txt (if applicable)
-# adsterra.com, [Account ID], DIRECT
+google.com, pub-5414009811868137, DIRECT, f08c47fec0942fa0

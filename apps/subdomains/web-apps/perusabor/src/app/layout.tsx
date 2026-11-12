@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon.svg',
   },
+  other: {
+    'google-adsense-account': 'ca-pub-5414009811868137',
+  },
 };
 
 export default function RootLayout({
@@ -30,6 +33,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5414009811868137"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="bg-[#faf9f6] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 min-h-screen flex flex-col antialiased selection:bg-red-500 selection:text-white">
         <Navbar />
         <main className="flex-1">{children}</main>
