@@ -289064,10 +289064,10 @@
       "Contratación según régimen laboral con todos los beneficios de ley.",
       "Aportes al seguro de salud ESSALUD y régimen previsional."
     ],
-    "apply_url": "https://www.gob.pe/institucion/sutran/colecciones/204-convocatorias-de-trabajo",
+    "apply_url": "https://www.sutran.gob.pe/wp-content/uploads/2025/05/pop_up25.jpg",
     "bases_pdf_url": "https://www.gob.pe/institucion/sutran/colecciones/204-convocatorias-de-trabajo",
-    "fuente_url": "https://www.gob.pe/institucion/sutran/colecciones/204-convocatorias-de-trabajo",
-    "scrape_source_url": "https://www.gob.pe/institucion/sutran/colecciones/204-convocatorias-de-trabajo",
+    "fuente_url": "https://www.sutran.gob.pe/wp-content/uploads/2025/05/pop_up25.jpg",
+    "scrape_source_url": "https://www.sutran.gob.pe/wp-content/uploads/2025/05/pop_up25.jpg",
     "official_portal_name": "SUTRAN - Portal Convocatorias",
     "start_date": "2026-11-12",
     "end_date": "2026-11-21",
@@ -289075,7 +289075,84 @@
     "views_count": 1920,
     "clicks_count": 510,
     "status": "Vigente",
-    "created_at": "2026-11-12T00:10:57.907Z"
+    "created_at": "2026-11-12T00:10:57.907Z",
+    "plazas": [
+      {
+        "cas_code": "CAS N° 252-2026",
+        "title": "ANALISTA PROGRAMADOR DE SISTEMAS I",
+        "education": "Título profesional universitario en la carrera de Ingeniería de Sistemas, Ingeniería de Computación y Sistemas o Ingeniería de Software.",
+        "experience": "Acreditar experiencia laboral requerida según bases oficiales.",
+        "salary": "S/. 3500",
+        "vacancies": 1,
+        "bases_url": "https://www.sutran.gob.pe/cuadro-convocatorias-cas.html"
+      },
+      {
+        "cas_code": "CAS N° 253-2026",
+        "title": "PROGRAMADOR F",
+        "education": "Título profesional universitario en la carrera de Ingeniería de Sistemas, Ingeniería de Computación y Sistemas, Ingeniería de Software o carrera de ingeniería afín.",
+        "experience": "Acreditar experiencia laboral requerida según bases oficiales.",
+        "salary": "S/. 3500",
+        "vacancies": 1,
+        "bases_url": "https://www.sutran.gob.pe/cuadro-convocatorias-cas.html"
+      },
+      {
+        "cas_code": "CAS N° 254-2026",
+        "title": "PROGRAMADOR",
+        "education": "Título profesional técnico en la carrera de Sistemas, Computación y Sistemas, Software o carreras técnicas afines.",
+        "experience": "Acreditar experiencia laboral requerida según bases oficiales.",
+        "salary": "S/. 3500",
+        "vacancies": 1,
+        "bases_url": "https://www.sutran.gob.pe/cuadro-convocatorias-cas.html"
+      }
+    ],
+    "official_documents": [
+      {
+        "title": "enlace - ANALISTA PROGRAMADOR DE SISTEMAS I",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSd21aQn9aA-qHblnVxIuv0OsjaYTI-Y0WR5Jfr0rbhDkJ51IA/viewform?usp=header",
+        "category": "Bases"
+      },
+      {
+        "title": "Sigue AQUÍ los comunicados de las convocatorias de SUTRAN - ANALISTA PROGRAMADOR DE SISTEMAS I",
+        "url": "https://www.sutran.gob.pe/cuadro-convocatorias-cas.html",
+        "category": "Bases"
+      },
+      {
+        "title": "Bases(Convocatoria completa y cronograma) - ANALISTA PROGRAMADOR DE SISTEMAS I",
+        "url": "https://www2.sutran.gob.pe/portal/images/convocatoriascas/CAS_252-2026_-_BASES_-_ANALISTA_PROGRAMADOR_DE_SISTEMAS_I_-_OTI.pdf",
+        "category": "Bases"
+      },
+      {
+        "title": "enlace - PROGRAMADOR",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLScgB0O97gyA6ucXM7CKnL2CKtohRKGyu3_Nu0s0vn0XfbIW4A/viewform?usp=header",
+        "category": "Bases"
+      },
+      {
+        "title": "Bases(Convocatoria completa y cronograma) - PROGRAMADOR",
+        "url": "https://www2.sutran.gob.pe/portal/images/convocatoriascas/CAS_254-2026_-_BASES_-_PROGRAMADOR_-_OTI.pdf",
+        "category": "Bases"
+      },
+      {
+        "title": "enlace - PROGRAMADOR F",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLScvTT4zXQ74DfkflYVsXC_lINMCmjhHcgWofRbg5-o2DLaYeQ/viewform?usp=header",
+        "category": "Bases"
+      },
+      {
+        "title": "Bases(Convocatoria completa y cronograma) - PROGRAMADOR F",
+        "url": "https://www2.sutran.gob.pe/portal/images/convocatoriascas/CAS_253-2026_-_BASES_-_PROGRAMADOR_F_-_OTI.pdf",
+        "category": "Bases"
+      },
+      {
+        "title": "Página Oficial donde se encuentran las Bases — SUTRAN",
+        "url": "https://www.sutran.gob.pe/wp-content/uploads/2025/05/pop_up25.jpg",
+        "category": "Página Oficial de las Bases"
+      },
+      {
+        "title": "Portal Institucional de Convocatorias — SUTRAN - Convocatorias de Trabajo",
+        "url": "https://www.gob.pe/institucion/sutran/colecciones/204-convocatorias-de-trabajo",
+        "category": "Portal Oficial"
+      }
+    ],
+    "resultados_url": "https://www.sutran.gob.pe/cuadro-convocatorias-cas.html"
   },
   {
     "id": "job-cd-91036",

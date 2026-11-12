@@ -10,11 +10,35 @@ import { SITE_NAME, CONTACT_EMAIL } from '@/lib/siteConfig';
 
 export default function ContactoPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', email: '', subject: 'Soporte General', message: '' });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!form.name || !form.email || !form.message) return;
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Ocurrió un error al enviar el mensaje.');
+      }
+
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error('Error al enviar mensaje Sorteos Pro:', err);
+      setErrorMessage(err?.message || 'Error de conexión. Inténtalo de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -148,12 +172,19 @@ export default function ContactoPage() {
               />
             </div>
 
+            {errorMessage && (
+              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-semibold">
+                {errorMessage}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer"
+              disabled={isSubmitting}
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-pink-600 hover:bg-pink-700 text-white font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
-              <span>Enviar Mensaje</span>
+              <span>{isSubmitting ? "Enviando mensaje..." : "Enviar Mensaje"}</span>
             </button>
           </form>
         )}

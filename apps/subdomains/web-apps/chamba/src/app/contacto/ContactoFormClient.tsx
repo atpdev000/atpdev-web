@@ -5,6 +5,8 @@ import { MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 
 export default function ContactoFormClient() {
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,10 +14,31 @@ export default function ContactoFormClient() {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) return;
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Error al enviar el mensaje.');
+      }
+
+      setSubmitted(true);
+    } catch (err: any) {
+      console.error('Error al enviar consulta:', err);
+      setErrorMessage(err?.message || 'Error de conexión. Inténtalo de nuevo.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -95,12 +118,19 @@ export default function ContactoFormClient() {
             />
           </div>
 
+          {errorMessage && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs font-semibold">
+              {errorMessage}
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-slate-950 font-bold text-xs font-display transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+            disabled={isSubmitting}
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-slate-950 font-bold text-xs font-display transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             <Send size={14} />
-            <span>Enviar Consulta al Equipo Editorial</span>
+            <span>{isSubmitting ? "Enviando consulta..." : "Enviar Consulta al Equipo Editorial"}</span>
           </button>
         </form>
       )}
