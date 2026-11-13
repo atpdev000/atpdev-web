@@ -11,7 +11,7 @@ export async function generateMetadata({
   const { lang = "es", slug } = await params;
   const projects = await getProjects();
   const project = projects.find((p) => p.slug === slug);
-  if (!project) return {};
+  if (!project || project.status === "Privado") return {};
 
   const BASE_URL = "https://www.atpdev.dev";
   const path = `/apps/${slug}/terms`;
@@ -38,7 +38,7 @@ export default async function DynamicAppTermsPage({
   const projects = await getProjects();
   const project = projects.find((p) => p.slug === slug);
 
-  if (!project) return notFound();
+  if (!project || project.status === "Privado") return notFound();
 
   let legalConfig = {
     has_privacy: true,
