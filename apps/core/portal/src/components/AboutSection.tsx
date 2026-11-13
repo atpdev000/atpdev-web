@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Code2, Smartphone, Database, BrainCircuit, GraduationCap, Award, Server, ExternalLink } from "lucide-react";
 import { Skill, SiteConfig } from "@atpdev/database";
@@ -14,13 +15,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   server:     <Server size={16} />,
 };
 
-// Mapeo de color_key → clases Tailwind
-const COLOR_MAP: Record<string, { text: string; bg: string; border: string }> = {
-  blue:   { text: "text-blue-400",   bg: "bg-blue-400/10",   border: "border-blue-500/20"   },
-  green:  { text: "text-green-400",  bg: "bg-green-400/10",  border: "border-green-500/20"  },
-  purple: { text: "text-purple-400", bg: "bg-purple-400/10", border: "border-purple-500/20" },
-  rose:   { text: "text-rose-400",   bg: "bg-rose-400/10",   border: "border-rose-500/20"   },
-  amber:  { text: "text-amber-400",  bg: "bg-amber-400/10",  border: "border-amber-500/20"  },
+// Mapeo de color_key → tokens con alto contraste en modo claro y oscuro
+const COLOR_MAP: Record<string, { colorVar: string }> = {
+  blue:   { colorVar: "var(--badge-blue-text)"   },
+  green:  { colorVar: "var(--badge-green-text)"  },
+  purple: { colorVar: "var(--badge-purple-text)" },
+  rose:   { colorVar: "var(--badge-rose-text)"   },
+  amber:  { colorVar: "var(--badge-amber-text)"  },
 };
 
 import { translateClient } from "@/utils/translate";
@@ -98,7 +99,7 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
           <h2 className="text-3xl md:text-5xl font-black mb-4 transition-colors" style={{ color: 'var(--text-color)' }}>
             {ui.title1} <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--primary), var(--tertiary))' }}>{ui.title2}</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-lg transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+          <p className="max-w-2xl mx-auto text-lg transition-colors" style={{ color: 'var(--text-muted)' }}>
             {displaySubtitle}
           </p>
         </motion.div>
@@ -116,9 +117,12 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
             <div className="flex items-center gap-4 mb-6">
               {avatarUrl && !avatarFailed && (
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border shrink-0 shadow-md" style={{ borderColor: 'var(--primary)', backgroundColor: 'var(--pill-bg)' }}>
-                  <img
+                  <Image
                     src={avatarUrl}
                     alt={displayName}
+                    width={64}
+                    height={64}
+                    unoptimized={avatarUrl.startsWith('data:')}
                     className="w-full h-full object-cover"
                     onError={() => setAvatarFailed(true)}
                   />
@@ -126,29 +130,29 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
               )}
               <h3 className="text-2xl font-bold transition-colors" style={{ color: 'var(--text-color)' }}>{displayName}</h3>
             </div>
-            <p className="leading-relaxed mb-6 transition-colors whitespace-pre-line" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+            <p className="leading-relaxed mb-6 transition-colors whitespace-pre-line" style={{ color: 'var(--text-muted)' }}>
               {displayBioLong}
             </p>
 
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border shadow-sm" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--primary)' }}>
-                  <GraduationCap style={{ color: 'var(--primary)' }} size={20} />
+                  <GraduationCap style={{ color: 'var(--accent-text)' }} size={20} />
                 </div>
                 <div>
                   <h4 className="font-semibold transition-colors" style={{ color: 'var(--text-color)' }}>{ui.card2Title}</h4>
-                  <p className="text-sm whitespace-pre-line transition-colors" style={{ color: 'var(--text-color)', opacity: 0.7 }}>{ui.card2Desc}</p>
+                  <p className="text-sm whitespace-pre-line transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.card2Desc}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border shadow-sm" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--tertiary)' }}>
-                  <Award style={{ color: 'var(--tertiary)' }} size={20} />
+                  <Award style={{ color: 'var(--tertiary-text)' }} size={20} />
                 </div>
                 <div>
                   <h4 className="font-semibold transition-colors" style={{ color: 'var(--text-color)' }}>{ui.card3Title}</h4>
-                  <p className="text-sm mt-1 transition-colors" style={{ color: 'var(--text-color)', opacity: 0.7 }}>
+                  <p className="text-sm mt-1 transition-colors" style={{ color: 'var(--text-muted)' }}>
                     {credlyUrl ? (
-                      <a href={credlyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline underline-offset-2" style={{ color: 'var(--primary)' }}>
+                      <a href={credlyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline underline-offset-2" style={{ color: 'var(--accent-text)' }}>
                         CCNAv7 <ExternalLink size={12} />
                       </a>
                     ) : "CCNAv7"}
@@ -177,10 +181,10 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
                     style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className={`${colors.text} p-2 rounded-lg border shadow-sm`} style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--glass-border)' }}>
+                      <div className="p-2 rounded-lg border shadow-sm" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--glass-border)', color: colors.colorVar }}>
                         {icon}
                       </div>
-                      <h4 className={`${colors.text} font-bold`}>{skill.category}</h4>
+                      <h4 className="font-bold" style={{ color: colors.colorVar }}>{skill.category}</h4>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {skill.items.map((item, i) => (

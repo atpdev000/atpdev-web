@@ -1,13 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Send, CheckCircle2, AlertCircle, Mail, Phone } from "lucide-react";
 import { createLead } from "@/app/actions/contact";
 import { SiteConfig } from "@atpdev/database";
 import { SOCIAL_ICON_MAP } from "./SocialIcons";
 import { motion, AnimatePresence } from "framer-motion";
-import PhoneInput from "react-phone-number-input";
-import "react-phone-number-input/style.css";
 import MagneticEffect from "./MagneticEffect";
+
+const LazyPhoneInput = dynamic(() => import("./LazyPhoneInput"), { ssr: false });
 
 // Map of social network keys to icon and label metadata
 export const SOCIAL_PLATFORMS = [
@@ -34,6 +35,7 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [formErrors, setFormErrors] = useState<{name?: string, email?: string, message?: string}>({});
   const [phoneValue, setPhoneValue] = useState<string | undefined>();
+  const [phoneWidgetActive, setPhoneWidgetActive] = useState(false);
   
   const [ui, setUi] = useState({
     title1: "¿Tienes un proyecto",
@@ -119,18 +121,18 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
             <h2 className="text-4xl md:text-5xl font-black mb-6 leading-tight transition-colors" style={{ color: 'var(--text-color)' }}>
               {ui.title1} <br/> <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--primary), var(--tertiary))' }}>{ui.title2}</span>
             </h2>
-            <p className="text-lg mb-10 max-w-md leading-relaxed transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+            <p className="text-lg mb-10 max-w-md leading-relaxed transition-colors" style={{ color: 'var(--text-muted)' }}>
               {ui.subtitle}
             </p>
             
             <div className="space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center border shrink-0" style={{ backgroundColor: 'rgba(0,82,255,0.1)', borderColor: 'var(--primary)' }}>
-                  <Mail style={{ color: 'var(--primary)' }} size={24} />
+                  <Mail style={{ color: 'var(--accent-text)' }} size={24} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider transition-colors" style={{ color: 'var(--text-color)', opacity: 0.6 }}>{ui.emailLabel}</p>
-                  <a href={`mailto:${config?.email || 'contacto@atpdev.dev'}`} className="text-lg font-medium transition-colors hover:opacity-80" style={{ color: 'var(--primary)' }}>
+                  <p className="text-sm font-semibold uppercase tracking-wider transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.emailLabel}</p>
+                  <a href={`mailto:${config?.email || 'contacto@atpdev.dev'}`} className="text-lg font-medium transition-colors hover:opacity-80" style={{ color: 'var(--accent-text)' }}>
                     {config?.email || 'contacto@atpdev.dev'}
                   </a>
                 </div>
@@ -138,10 +140,10 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
               
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 shrink-0">
-                  <Phone className="text-emerald-400" size={24} />
+                  <Phone style={{ color: 'var(--badge-green-text)' }} size={24} />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider transition-colors" style={{ color: 'var(--text-color)', opacity: 0.6 }}>{ui.phoneLabel}</p>
+                  <p className="text-sm font-semibold uppercase tracking-wider transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.phoneLabel}</p>
                   <a href={`https://wa.me/${(config?.phone || '+51987006572').replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" className="text-lg font-medium transition-colors hover:opacity-80" style={{ color: 'var(--text-color)' }}>
                     {config?.phone || '+51 987 006 572'}
                   </a>
@@ -152,7 +154,7 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
             {/* Redes Sociales Dinámicas */}
             {activeSocials.length > 0 && (
               <div className="mt-12">
-                <p className="text-gray-500 text-sm font-semibold uppercase tracking-wider mb-4">{ui.socialLabel}</p>
+                <p className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: 'var(--text-muted)' }}>{ui.socialLabel}</p>
                 <div className="flex flex-wrap gap-2">
                   {activeSocials.map(social => {
                     const urlKey = `${social.key}_url` as keyof SiteConfig;
@@ -256,16 +258,29 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
                 </AnimatePresence>
               </div>
               <div className="mb-6 relative phone-input-wrapper">
-                <label htmlFor="contact-phone" className="block text-sm font-medium mb-2 transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>{ui.formPhone}</label>
-                <PhoneInput
-                  id="contact-phone"
-                  international
-                  defaultCountry="PE"
-                  value={phoneValue}
-                  onChange={setPhoneValue}
-                  className="w-full border border-transparent focus-within:border-blue-500 rounded-xl px-4 py-3 transition-all focus-within:shadow-[0_0_15px_var(--primary)]"
-                  style={{ backgroundColor: 'var(--pill-bg)', color: 'var(--text-color)' }}
-                />
+                <label htmlFor="contact-phone" className="block text-sm font-medium mb-2 transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.formPhone}</label>
+                {phoneWidgetActive ? (
+                  <LazyPhoneInput
+                    id="contact-phone"
+                    value={phoneValue}
+                    onChange={setPhoneValue}
+                    className="w-full border border-transparent focus-within:border-blue-500 rounded-xl px-4 py-3 transition-all focus-within:shadow-[0_0_15px_var(--primary)]"
+                    style={{ backgroundColor: 'var(--pill-bg)', color: 'var(--text-color)' }}
+                  />
+                ) : (
+                  <input
+                    id="contact-phone"
+                    type="tel"
+                    name="phone"
+                    value={phoneValue || ""}
+                    onFocus={() => setPhoneWidgetActive(true)}
+                    onClick={() => setPhoneWidgetActive(true)}
+                    onChange={(e) => setPhoneValue(e.target.value)}
+                    placeholder="+51 987 006 572"
+                    className="w-full border border-transparent focus:border-blue-500 rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all focus:shadow-[0_0_15px_var(--primary)]"
+                    style={{ backgroundColor: 'var(--pill-bg)', color: 'var(--text-color)' }}
+                  />
+                )}
                 <style dangerouslySetInnerHTML={{__html: `
                   .phone-input-wrapper .PhoneInputInput {
                     background: transparent;

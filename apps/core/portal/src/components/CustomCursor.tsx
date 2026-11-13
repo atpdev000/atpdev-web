@@ -20,19 +20,25 @@ function BubblesEffect({ cursorX, cursorY }: { cursorX: MotionValue<number>, cur
       canvas.height = window.innerHeight;
     };
     setSize();
-    window.addEventListener('resize', setSize);
+    window.addEventListener('resize', setSize, { passive: true });
     
-    let particles: { x: number, y: number, size: number, vx: number, vy: number, life: number, maxLife: number }[] = [];
-    let animationId: number;
+    // Read CSS token outside the animation loop to avoid per-frame forced style recalculations
+    let primaryColor = getComputedStyle(document.body).getPropertyValue('--primary').trim() || '#3b82f6';
+    const onThemeMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'UPDATE_THEME_PREVIEW') {
+        primaryColor = getComputedStyle(document.body).getPropertyValue('--primary').trim() || primaryColor;
+      }
+    };
+    window.addEventListener('message', onThemeMessage);
+
+    const particles: { x: number, y: number, size: number, vx: number, vy: number, life: number, maxLife: number }[] = [];
+    let animationId: number | null = null;
     let lastX = cursorX.get();
     let lastY = cursorY.get();
 
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const spawnIfMoved = () => {
       const currentX = cursorX.get();
       const currentY = cursorY.get();
-      
-      // Spawn particles if mouse moved
       const dist = Math.hypot(currentX - lastX, currentY - lastY);
       if (dist > 5 && Math.random() > 0.3) {
         particles.push({
@@ -40,17 +46,19 @@ function BubblesEffect({ cursorX, cursorY }: { cursorX: MotionValue<number>, cur
           y: currentY,
           size: Math.random() * 4 + 2,
           vx: (Math.random() - 0.5) * 2,
-          vy: (Math.random() - 0.5) * 2 - 1, // tend to float up
+          vy: (Math.random() - 0.5) * 2 - 1,
           life: 1,
           maxLife: Math.random() * 30 + 30
         });
         lastX = currentX;
         lastY = currentY;
       }
-      
-      // Get primary color from body
-      const primaryColor = getComputedStyle(document.body).getPropertyValue('--primary').trim() || '#3b82f6';
-      
+    };
+
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      spawnIfMoved();
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx;
@@ -63,12 +71,10 @@ function BubblesEffect({ cursorX, cursorY }: { cursorX: MotionValue<number>, cur
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         
-        // Convert hex/rgb to rgba for canvas
         ctx.fillStyle = primaryColor;
         ctx.globalAlpha = opacity;
         ctx.fill();
         
-        // Outline
         ctx.strokeStyle = '#ffffff';
         ctx.globalAlpha = opacity * 0.5;
         ctx.lineWidth = 0.5;
@@ -79,15 +85,25 @@ function BubblesEffect({ cursorX, cursorY }: { cursorX: MotionValue<number>, cur
         }
       }
       
-      ctx.globalAlpha = 1; // reset
-      animationId = requestAnimationFrame(render);
+      ctx.globalAlpha = 1;
+      if (particles.length > 0) {
+        animationId = requestAnimationFrame(render);
+      } else {
+        animationId = null;
+      }
     };
-    
-    render();
+
+    const unsubX = cursorX.on("change", () => {
+      if (animationId === null) {
+        animationId = requestAnimationFrame(render);
+      }
+    });
     
     return () => {
-      cancelAnimationFrame(animationId);
+      if (animationId !== null) cancelAnimationFrame(animationId);
+      unsubX();
       window.removeEventListener('resize', setSize);
+      window.removeEventListener('message', onThemeMessage);
     };
   }, [cursorX, cursorY]);
   
@@ -138,8 +154,12 @@ export default function CustomCursor({ glowStyle: initialGlowStyle }: { glowStyl
   const cursorYSpring3 = useSpring(cursorY, { damping: 15, stiffness: 100, mass: 1 });
 
   useEffect(() => {
-    // Check if explicitly turned off, if so don't show the custom cursor
-    if (style === 'off') {
+    // Skip custom cursor on touch/coarse-pointer devices or reduced motion preferences
+    const isTouchOrReduced =
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(hover: none)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (style === 'off' || isTouchOrReduced) {
       document.body.style.cursor = 'auto';
       return;
     }

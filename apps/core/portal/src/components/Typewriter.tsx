@@ -41,9 +41,9 @@ export default function Typewriter({ words }: TypewriterProps) {
   }, [currentWord, isDeleting, loopNum, typingSpeed, words]);
 
   return (
-    <span className="text-blue-500 font-bold">
+    <span className="font-bold" style={{ color: 'var(--accent-text)' }}>
       {currentWord}
-      <span className="ml-1 border-r-2 border-blue-500 animate-[pulse_1s_infinite]"></span>
+      <span className="ml-1 border-r-2 border-current animate-[pulse_1s_infinite]"></span>
     </span>
   );
 }

@@ -74,13 +74,13 @@ export default function AIModelsSection({ projects, ui, aiModels, enableGlow = t
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-6 text-sm font-bold" style={{ borderColor: 'var(--tertiary)', backgroundColor: 'rgba(156,39,176,0.1)', color: 'var(--tertiary)' }}>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-6 text-sm font-bold" style={{ borderColor: 'var(--tertiary)', backgroundColor: 'rgba(156,39,176,0.1)', color: 'var(--tertiary-text)' }}>
             <BrainCircuit size={16} /> AI Integrations
           </div>
           <h2 className="text-3xl md:text-5xl font-black mb-4 transition-colors" style={{ color: 'var(--text-color)' }}>
             {ui.aiTitle1} <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--primary), var(--tertiary))' }}>{ui.aiTitle2}</span>
           </h2>
-          <p className="max-w-2xl mx-auto text-lg transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+          <p className="max-w-2xl mx-auto text-lg transition-colors" style={{ color: 'var(--text-muted)' }}>
             {ui.aiDesc}
           </p>
         </motion.div>
@@ -97,28 +97,28 @@ export default function AIModelsSection({ projects, ui, aiModels, enableGlow = t
               style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(30px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
             >
               <div className="flex items-center justify-between mb-6">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center border" style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'var(--primary)', color: 'var(--primary)' }}>
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center border" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--primary)', color: 'var(--accent-text)' }}>
                   {ICONS_MAP[model.icon_name || "Cpu"]}
                 </div>
                 {model.usedIn.length > 0 && (
-                  <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full border border-emerald-500/20 text-emerald-400 bg-emerald-500/10">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> {ui.aiActive}
+                  <span className="flex items-center gap-1 text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10" style={{ color: 'var(--badge-green-text)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span> {ui.aiActive}
                   </span>
                 )}
               </div>
               
               <h3 className="text-xl font-bold mb-2 transition-colors" style={{ color: 'var(--text-color)' }}>{model.name}</h3>
-              <p className="text-xs mb-4 transition-colors" style={{ color: 'var(--text-color)', opacity: 0.6 }}>{model.provider}</p>
-              <p className="text-sm leading-relaxed mb-6 transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+              <p className="text-xs mb-4 transition-colors" style={{ color: 'var(--text-muted)' }}>{model.provider}</p>
+              <p className="text-sm leading-relaxed mb-6 transition-colors" style={{ color: 'var(--text-muted)' }}>
                 {model.description}
               </p>
 
               <div className="space-y-3 mt-auto">
-                <div className="text-xs font-bold uppercase tracking-widest mb-2 transition-colors" style={{ color: 'var(--text-color)', opacity: 0.5 }}>{ui.aiCaps}</div>
+                <div className="text-xs font-bold uppercase tracking-widest mb-2 transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.aiCaps}</div>
                 <div className="flex flex-wrap gap-2">
                   {model.capabilities.slice(0, 3).map(cap => (
                     <span key={cap} className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-lg border shadow-sm transition-colors" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--glass-border)', color: 'var(--text-color)' }}>
-                      <CheckCircle2 size={10} style={{ color: 'var(--tertiary)' }} /> {cap}
+                      <CheckCircle2 size={10} style={{ color: 'var(--tertiary-text)' }} /> {cap}
                     </span>
                   ))}
                 </div>

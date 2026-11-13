@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Hanken_Grotesk, Inter, Fira_Code, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import CookieBanner from "@/components/CookieBanner";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
@@ -8,6 +9,41 @@ import { getSiteConfig, translateText } from "@atpdev/database";
 import { Providers } from "@/components/providers";
 import CustomCursor from "@/components/CustomCursor";
 import "../globals.css";
+
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-hanken",
+  display: "swap",
+});
+
+const interFont = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-fira-code",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
+const BUILTIN_FONT_MAP: Record<string, string> = {
+  "Hanken Grotesk": "var(--font-hanken), 'Hanken Grotesk', sans-serif",
+  "Inter": "var(--font-inter), 'Inter', sans-serif",
+  "Fira Code": "var(--font-fira-code), 'Fira Code', monospace",
+  "JetBrains Mono": "var(--font-jetbrains-mono), 'JetBrains Mono', monospace",
+};
 
 const BASE_URL = "https://www.atpdev.dev";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
@@ -168,17 +204,41 @@ export default async function RootLayout({
 
   const radiusValue = getRadiusValue(config?.radius_scale || "medium");
 
-  // Crear URL de Google Fonts dinámicamente
+  // Mapear fuentes integradas con next/font/google (cero render-blocking / cero CLS)
   const fonts = Array.from(new Set([fontHeadline, fontBody, fontLabel]));
-  const googleFontsUrl = `https://fonts.googleapis.com/css2?${fonts.map(f => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800`).join('&')}&display=swap`;
+  const customFonts = fonts.filter(f => !BUILTIN_FONT_MAP[f]);
+  const googleFontsUrl = customFonts.length > 0
+    ? `https://fonts.googleapis.com/css2?${customFonts.map(f => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800`).join('&')}&display=swap`
+    : null;
+
+  const resolveFontFamily = (name: string, fallback: string) =>
+    BUILTIN_FONT_MAP[name] || `'${name}', ${fallback}`;
+
+  const schemaImage =
+    config?.avatar_url && !config.avatar_url.startsWith('data:')
+      ? config.avatar_url
+      : OG_IMAGE;
+
+  const clarityId =
+    (config as any)?.microsoft_clarity_id ||
+    process.env.NEXT_PUBLIC_CLARITY_ID ||
+    "zak4lzyye9";
 
   return (
-    <html lang={lang} className="scroll-smooth" suppressHydrationWarning>
+    <html
+      lang={lang}
+      className={`scroll-smooth ${hankenGrotesk.variable} ${interFont.variable} ${firaCode.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href={googleFontsUrl} rel="stylesheet" />
+        {googleFontsUrl && (
+          <>
+            <link rel="preconnect" href="https://fonts.googleapis.com" />
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+            <link href={googleFontsUrl} rel="stylesheet" />
+          </>
+        )}
         
         {/* Google AdSense moved to AdSenseInjector component */}
 
@@ -195,7 +255,7 @@ export default async function RootLayout({
                   "name": config?.full_name || "Percy Acha Taipe",
                   "alternateName": "ATP Dev",
                   "url": BASE_URL,
-                  "image": config?.avatar_url || OG_IMAGE,
+                  "image": schemaImage,
                   "jobTitle": await translateText("Fullstack & Android Developer", lang),
                   "sameAs": [
                     config?.github_url,
@@ -223,21 +283,30 @@ export default async function RootLayout({
               --tertiary: ${tertiary};
               --neutral: ${neutral};
               --radius-scale: ${radiusValue};
-              --font-heading: '${fontHeadline}', sans-serif;
-              --font-body: '${fontBody}', sans-serif;
-              --font-label: '${fontLabel}', monospace;
+              --font-heading: ${resolveFontFamily(fontHeadline, 'sans-serif')};
+              --font-body: ${resolveFontFamily(fontBody, 'sans-serif')};
+              --font-label: ${resolveFontFamily(fontLabel, 'monospace')};
               --neon-thickness: ${(config as any)?.neon_thickness || '4px'};
               --neon-glow: ${(config as any)?.neon_thickness === '2px' ? '10px' : (config as any)?.neon_thickness === '6px' ? '26px' : (config as any)?.neon_thickness === '8px' ? '36px' : '18px'};
-              ${config?.global_background_image ? `--global-bg-image: url('${config.global_background_image}');` : ''}
+              ${config?.global_background_image && !config.global_background_image.startsWith('data:') ? `--global-bg-image: url('${config.global_background_image}');` : ''}
               
               /* Liquid Glass Light */
               --bg1: color-mix(in srgb, var(--primary) 15%, #ffffff);
               --bg2: color-mix(in srgb, var(--secondary) 15%, #f8f9fa);
               --bg3: color-mix(in srgb, var(--tertiary) 15%, #ffffff);
-              --glass-bg: rgba(255, 255, 255, 0.4);
-              --glass-border: rgba(255, 255, 255, 0.6);
-              --pill-bg: rgba(255, 255, 255, 0.55);
-              --text-color: #1a1a1a;
+              --glass-bg: rgba(255, 255, 255, 0.72);
+              --glass-border: rgba(0, 0, 0, 0.08);
+              --pill-bg: rgba(255, 255, 255, 0.78);
+              --text-color: #111827;
+              --text-muted: #4b5563;
+              --accent-text: color-mix(in srgb, var(--primary) 82%, #000000);
+              --tertiary-text: color-mix(in srgb, var(--tertiary) 82%, #000000);
+              --badge-blue-text: #1d4ed8;
+              --badge-green-text: #15803d;
+              --badge-purple-text: #7e22ce;
+              --badge-amber-text: #b45309;
+              --badge-rose-text: #be123c;
+              --btn-blue-text: #1d4ed8;
             }
             [data-theme="dark"] {
               --background: #0A0A0A;
@@ -247,10 +316,19 @@ export default async function RootLayout({
               --bg1: color-mix(in srgb, var(--primary) 12%, #000000);
               --bg2: color-mix(in srgb, var(--secondary) 12%, #020202);
               --bg3: color-mix(in srgb, var(--tertiary) 12%, #000000);
-              --glass-bg: rgba(20, 20, 30, 0.45);
+              --glass-bg: rgba(20, 20, 30, 0.55);
               --glass-border: rgba(255, 255, 255, 0.15);
-              --pill-bg: rgba(255, 255, 255, 0.18);
+              --pill-bg: rgba(255, 255, 255, 0.14);
               --text-color: #ffffff;
+              --text-muted: #cbd5e1;
+              --accent-text: color-mix(in srgb, var(--primary) 62%, #ffffff);
+              --tertiary-text: color-mix(in srgb, var(--tertiary) 62%, #ffffff);
+              --badge-blue-text: #93c5fd;
+              --badge-green-text: #86efac;
+              --badge-purple-text: #d8b4fe;
+              --badge-amber-text: #fcd34d;
+              --badge-rose-text: #fda4af;
+              --btn-blue-text: #93c5fd;
             }
 
             @media (prefers-color-scheme: dark) {
@@ -260,10 +338,19 @@ export default async function RootLayout({
                 --bg1: color-mix(in srgb, var(--primary) 12%, #000000);
                 --bg2: color-mix(in srgb, var(--secondary) 12%, #020202);
                 --bg3: color-mix(in srgb, var(--tertiary) 12%, #000000);
-                --glass-bg: rgba(20, 20, 30, 0.45);
+                --glass-bg: rgba(20, 20, 30, 0.55);
                 --glass-border: rgba(255, 255, 255, 0.15);
-                --pill-bg: rgba(255, 255, 255, 0.18);
+                --pill-bg: rgba(255, 255, 255, 0.14);
                 --text-color: #ffffff;
+                --text-muted: #cbd5e1;
+                --accent-text: color-mix(in srgb, var(--primary) 62%, #ffffff);
+                --tertiary-text: color-mix(in srgb, var(--tertiary) 62%, #ffffff);
+                --badge-blue-text: #93c5fd;
+                --badge-green-text: #86efac;
+                --badge-purple-text: #d8b4fe;
+                --badge-amber-text: #fcd34d;
+                --badge-rose-text: #fda4af;
+                --btn-blue-text: #93c5fd;
               }
             }
 
@@ -304,15 +391,32 @@ export default async function RootLayout({
                   ? `https://www.googletagmanager.com/gtm.js?id=${config.ga4_id}`
                   : `https://www.googletagmanager.com/gtag/js?id=${config.ga4_id}`
               }
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="google-tag-config" strategy="afterInteractive">{`
+            <Script id="google-tag-config" strategy="lazyOnload">{`
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
               ${config.ga4_id.startsWith('G-') ? `gtag('config', '${config.ga4_id}');` : ''}
             `}</Script>
           </>
+        )}
+
+        {/* Microsoft Clarity Behavioral Analytics */}
+        {clarityId && (
+          <Script
+            id="microsoft-clarity-init"
+            strategy="lazyOnload"
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${clarityId}");
+              `
+            }}
+          />
         )}
 
         <Providers>

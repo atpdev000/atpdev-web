@@ -14,13 +14,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   star:      <Star size={20} />,
 };
 
-// Mapeo de color_key → clases Tailwind
-const COLOR_MAP: Record<string, { text: string; border: string; bg: string; dot: string }> = {
-  blue:   { text: "text-blue-400",   border: "border-blue-500",   bg: "bg-blue-500/20",   dot: "border-blue-500"   },
-  purple: { text: "text-purple-400", border: "border-purple-500", bg: "bg-purple-500/20", dot: "border-purple-500" },
-  emerald:{ text: "text-emerald-400",border: "border-emerald-500",bg: "bg-emerald-500/20",dot: "border-emerald-500"},
-  amber:  { text: "text-amber-400",  border: "border-amber-500",  bg: "bg-amber-500/20",  dot: "border-amber-500"  },
-  rose:   { text: "text-rose-400",   border: "border-rose-500",   bg: "bg-rose-500/20",   dot: "border-rose-500"   },
+// Mapeo de color_key → clases Tailwind y tokens accesibles
+const COLOR_MAP: Record<string, { colorVar: string; border: string; bg: string; dot: string }> = {
+  blue:   { colorVar: "var(--badge-blue-text)",   border: "border-blue-500",   bg: "bg-blue-500/20",   dot: "border-blue-500"   },
+  purple: { colorVar: "var(--badge-purple-text)", border: "border-purple-500", bg: "bg-purple-500/20", dot: "border-purple-500" },
+  emerald:{ colorVar: "var(--badge-green-text)",  border: "border-emerald-500",bg: "bg-emerald-500/20",dot: "border-emerald-500"},
+  amber:  { colorVar: "var(--badge-amber-text)",  border: "border-amber-500",  bg: "bg-amber-500/20",  dot: "border-amber-500"  },
+  rose:   { colorVar: "var(--badge-rose-text)",   border: "border-rose-500",   bg: "bg-rose-500/20",   dot: "border-rose-500"   },
 };
 
 import { translateClient } from "@/utils/translate";
@@ -109,17 +109,17 @@ export default function ExperienceTimeline({ initialExperiences = [], lang = 'es
                         <div className={`absolute top-0 ${index % 2 === 0 ? 'left-0' : 'right-0'} w-32 h-32 ${colors.bg} blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}></div>
 
                         <div className={`flex items-center gap-3 mb-2 ${index % 2 !== 0 && "md:justify-end"}`}>
-                          <div className={`p-2 rounded-lg border shadow-sm ${colors.border} ${colors.text} ${index % 2 !== 0 && "md:order-last"}`} style={{ backgroundColor: 'var(--pill-bg)' }}>
+                          <div className={`p-2 rounded-lg border shadow-sm ${colors.border} ${index % 2 !== 0 && "md:order-last"}`} style={{ backgroundColor: 'var(--pill-bg)', color: colors.colorVar }}>
                             {icon}
                           </div>
-                          <span className="text-sm font-bold px-3 py-1 rounded-full border shadow-sm transition-colors" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--glass-border)', color: 'var(--text-color)', opacity: 0.8 }}>
+                          <span className="text-sm font-bold px-3 py-1 rounded-full border shadow-sm transition-colors" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--glass-border)', color: 'var(--text-color)' }}>
                             {exp.date_range}
                           </span>
                         </div>
 
                         <h3 className="text-xl font-bold mb-1 transition-colors" style={{ color: 'var(--text-color)' }}>{exp.role}</h3>
-                        <h4 className={`text-md font-semibold ${colors.text} mb-3`}>{exp.company}</h4>
-                        <p className="text-sm leading-relaxed transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>{exp.description}</p>
+                        <h4 className="text-md font-semibold mb-3" style={{ color: colors.colorVar }}>{exp.company}</h4>
+                        <p className="text-sm leading-relaxed transition-colors" style={{ color: 'var(--text-muted)' }}>{exp.description}</p>
                       </div>
                     </div>
                   </motion.div>

@@ -44,18 +44,10 @@ body {
               radial-gradient(circle at 80% 30%, var(--bg2), transparent 60%),
               radial-gradient(circle at 50% 90%, var(--bg3), transparent 60%),
               var(--background);
-  background-size: 200% 200%;
-  animation: moveGradient 12s ease-in-out infinite;
   color: var(--text-color);
   font-family: var(--font-body);
-  transition: background 0.6s ease, color 0.6s ease;
+  transition: background-color 0.6s ease, color 0.6s ease;
   min-height: 100vh;
-}
-
-@keyframes moveGradient {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 /* Utilitarios globales de diseño de alto contraste */

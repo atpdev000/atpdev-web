@@ -69,7 +69,7 @@ export default function Portfolio({
                 </span>
               )}
             </h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">{ui.featuredDesc}</p>
+            <p className="max-w-2xl mx-auto" style={{ color: 'var(--text-muted)' }}>{ui.featuredDesc}</p>
           </div>
 
           <div className="flex flex-wrap gap-3 mb-12 justify-center">
@@ -125,23 +125,23 @@ export default function Portfolio({
                         </div>
                       )}
                     </div>
-                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border" style={{ color: 'var(--primary)', borderColor: 'var(--primary)' }}>
+                    <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-blue-400/60 text-blue-200">
                       {project.status}
                     </div>
                   </div>
                   <div className="p-8 flex-1 flex flex-col">
-                    <div className="text-xs font-bold mb-2 uppercase tracking-widest" style={{ color: 'var(--primary)' }}>{project.category}</div>
+                    <div className="text-xs font-bold mb-2 uppercase tracking-widest" style={{ color: 'var(--accent-text)' }}>{project.category}</div>
                     <h3 className="text-2xl font-bold mb-3 flex items-center justify-between" style={{ color: 'var(--text-color)' }}>
                       {project.title}
                       <div className="flex gap-1">
                         {aiModels.filter(model => model.is_visible && project.stack.some((t: string) => model.tags.includes(t.toLowerCase()))).slice(0, 3).map(model => (
                           <div key={model.id} className="w-6 h-6 rounded bg-[#262626] border border-gray-700 flex items-center justify-center" title={`Powered by ${model.name}`}>
-                            {cloneElement(ICONS_MAP[model.icon_name] as React.ReactElement<any>, { size: 12, color: 'var(--primary)' })}
+                            {cloneElement(ICONS_MAP[model.icon_name] as React.ReactElement<any>, { size: 12, color: '#93c5fd' })}
                           </div>
                         ))}
                       </div>
                     </h3>
-                    <p className="text-gray-400 text-sm mb-6 line-clamp-2 flex-1">{project.description}</p>
+                    <p className="text-sm mb-6 line-clamp-2 flex-1" style={{ color: 'var(--text-muted)' }}>{project.description}</p>
                     <div className="flex items-center justify-between gap-2 mt-auto pt-4 border-t border-[var(--glass-border)]">
                       <div className="flex flex-wrap gap-1.5 overflow-hidden max-h-7">
                         {project.stack.slice(0, 3).map((tech: string) => (
@@ -154,11 +154,13 @@ export default function Portfolio({
                       {project.slug && (
                         <Link 
                           href={`/apps/${project.slug}`}
+                          aria-label={`${ui.viewPage || 'Ver Página'} - ${project.title}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setNavigatingSlug(project.slug);
                           }}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 border border-blue-500/30 transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl bg-blue-600/15 hover:bg-blue-600/30 border border-blue-500/40 transition-all hover:scale-105 active:scale-95 flex-shrink-0"
+                          style={{ color: 'var(--btn-blue-text)' }}
                         >
                           {navigatingSlug === project.slug ? (
                             <>

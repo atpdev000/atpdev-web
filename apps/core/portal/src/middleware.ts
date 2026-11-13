@@ -35,6 +35,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/sitemap') ||
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml' ||
+    pathname === '/llms.txt' ||
+    pathname === '/ads.txt' ||
+    pathname === '/app-ads.txt' ||
     pathname.includes('.') // like favicon.ico, images, pdfs
   ) {
     return NextResponse.next();
@@ -62,6 +65,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Matcher ignoring `/_next/` and `/api/`
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  // Matcher ignoring `/_next/`, `/api/`, and root machine-readable files
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|llms.txt|robots.txt|sitemap.xml|ads.txt|app-ads.txt).*)'],
 };
