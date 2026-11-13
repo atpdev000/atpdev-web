@@ -43,9 +43,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if the pathname is missing a locale
-  // We check if the first segment is a valid 2-letter code
-  const pathnameIsMissingLocale = !/^\/[a-z]{2}(\/|$)/.test(pathname);
+  // Check if the pathname starts with one of the supported locale prefixes
+  const firstSegment = pathname.split('/')[1] || '';
+  const pathnameIsMissingLocale = !supportedLocales.includes(firstSegment);
 
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request);
