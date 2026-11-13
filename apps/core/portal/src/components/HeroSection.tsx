@@ -18,7 +18,7 @@ export default function HeroSection({
 
   return (
     <section id="hero" className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 md:px-16 text-center overflow-hidden pt-20 pb-20">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] z-0 opacity-20" style={{ backgroundColor: 'var(--primary)' }}></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full z-0 pointer-events-none" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 70%)' }}></div>
 
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">
         <div className="mb-6 px-4 py-1.5 border rounded-full text-xs font-semibold tracking-widest flex items-center gap-2 transition-colors" style={{ borderColor: 'var(--primary)', backgroundColor: 'color-mix(in srgb, var(--primary) 12%, transparent)', color: 'var(--accent-text)' }}>
@@ -49,7 +49,7 @@ export default function HeroSection({
 
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-16 w-full sm:w-auto">
           <MagneticEffect intensity={0.2} className="inline-flex w-full sm:w-auto">
-            <a href="#portfolio" className={`w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.03] hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)] ${glowClass}`} style={{ backgroundColor: 'var(--primary)', '--glow-bg': 'var(--primary)', '--glow-border': '0px' } as React.CSSProperties}>
+            <a href="#portfolio" className={`w-full sm:w-auto text-white px-8 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 hover:opacity-90 hover:scale-[1.03] hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)] ${glowClass}`} style={{ backgroundColor: 'var(--btn-primary-bg)', '--glow-bg': 'var(--btn-primary-bg)', '--glow-border': '0px' } as React.CSSProperties}>
               {ui.btnProjects}
             </a>
           </MagneticEffect>

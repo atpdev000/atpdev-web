@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { Terminal, X, Menu } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { translateClient } from "@/utils/translate";
+import { useState } from "react";
+import { getUiDictionary } from "@/utils/i18n-ui";
 import ThemeToggle from "./ThemeToggle";
 import MagneticEffect from "./MagneticEffect";
 
@@ -13,20 +13,11 @@ export default function Navbar() {
   const lang = params?.lang as string || 'es';
 
   const [isOpen, setIsOpen] = useState(false);
-
-  const [tProyectos, setTProyectos] = useState("Proyectos");
-  const [tSobreMi, setTSobreMi] = useState("Sobre Mí");
-  const [tContacto, setTContacto] = useState("Contacto");
-  const [tExperiencia, setTExperiencia] = useState("Experiencia");
-
-  useEffect(() => {
-    if (lang !== 'es') {
-      translateClient("Proyectos", lang).then(setTProyectos);
-      translateClient("Sobre Mí", lang).then(setTSobreMi);
-      translateClient("Contacto", lang).then(setTContacto);
-      translateClient("Experiencia", lang).then(setTExperiencia);
-    }
-  }, [lang]);
+  const dict = getUiDictionary(lang);
+  const tSobreMi = dict.linkAbout;
+  const tExperiencia = dict.linkExperience;
+  const tProyectos = dict.linkProjects;
+  const tContacto = dict.linkContact;
 
   const linkPrefix = lang === 'es' ? '' : `/${lang}`;
 
@@ -39,7 +30,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between border-b transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(20px)' }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between border-b transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)' }}>
         <MagneticEffect intensity={0.1}>
           <Link href={`${linkPrefix}/`} className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity" style={{ color: 'var(--text-color)' }}>
             <Terminal size={24} style={{ color: 'var(--primary)' }} />
@@ -58,7 +49,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 border-l pl-4" style={{ borderColor: 'var(--glass-border)' }}>
             <ThemeToggle />
             <MagneticEffect intensity={0.2}>
-              <Link href={`${linkPrefix}/#contact`} className="text-white px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 hover:scale-[1.05] hover:shadow-[0_0_20px_var(--primary)] flex" style={{ backgroundColor: 'var(--primary)' }}>
+              <Link href={`${linkPrefix}/#contact`} className="text-white px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 hover:scale-[1.05] hover:shadow-[0_0_20px_var(--primary)] flex" style={{ backgroundColor: 'var(--btn-primary-bg)' }}>
                 {tContacto}
               </Link>
             </MagneticEffect>
@@ -103,7 +94,7 @@ export default function Navbar() {
                 href={`${linkPrefix}/#contact`}
                 onClick={() => setIsOpen(false)}
                 className="w-full flex items-center justify-center text-white px-6 py-3 rounded-xl text-base font-bold transition-all shadow-lg hover:brightness-110"
-                style={{ backgroundColor: 'var(--primary)' }}
+                style={{ backgroundColor: 'var(--btn-primary-bg)' }}
               >
                 {tContacto}
               </Link>

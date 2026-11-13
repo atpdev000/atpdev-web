@@ -1,7 +1,7 @@
 // SERVER COMPONENT – fetches all data at build/request time, fully visible to Google
 import type { Metadata } from "next";
 import { getProjects, getSiteConfig, getSkills, getExperiences, getAIModels, Project } from "@atpdev/database";
-import { translateProject, translateConfig, translateAiModel } from "@/utils/translate-server";
+import { translateProject, translateConfig, translateAiModel, translateExperience, translateSkill } from "@/utils/translate-server";
 import { getUiDictionary } from "@/utils/i18n-ui";
 import { getTechStackData } from "@/utils/tech-stack";
 
@@ -48,10 +48,12 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
 
   const publicProjects = projects.filter((p: Project) => p.status !== 'Privado');
 
-  const [tProjectsRaw, tConfig, tAiModels] = await Promise.all([
+  const [tProjectsRaw, tConfig, tAiModels, tExperiences, tSkills] = await Promise.all([
     Promise.all(publicProjects.map(p => translateProject(p, lang))),
     translateConfig(config, lang),
     Promise.all(aiModels.map(m => translateAiModel(m, lang))),
+    Promise.all(experiences.map(e => translateExperience(e, lang))),
+    Promise.all(skills.map(s => translateSkill(s, lang))),
   ]);
 
   // En el landing solo se muestran tarjetas y modal resumen; evitamos duplicar artículos completos en el payload RSC.
@@ -62,7 +64,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
   }));
 
   const ui = getUiDictionary(lang);
-  const { displayTechStack, augmentedSkills } = getTechStackData(tProjects, skills);
+  const { displayTechStack, augmentedSkills } = getTechStackData(tProjects, tSkills);
 
   const enableGlow = tConfig?.enable_glow_effect !== false;
   const glowStyle = tConfig?.glow_style || 'border';
@@ -71,11 +73,11 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
     <main>
       <GlowWrapper enabled={enableGlow} className="w-full text-[var(--text-color)] transition-colors duration-500">
         <HeroSection config={tConfig} ui={ui} displayTechStack={displayTechStack} />
-        <AboutSection initialSkills={augmentedSkills} initialCredlyUrl={tConfig?.credly_url || ""} config={tConfig} lang={lang} enableGlow={enableGlow} glowStyle={glowStyle} />
-        <ExperienceTimeline initialExperiences={experiences} lang={lang} enableGlow={enableGlow} glowStyle={glowStyle} />
+        <AboutSection initialSkills={augmentedSkills} initialCredlyUrl={tConfig?.credly_url || ""} config={tConfig} lang={lang} uiDict={ui} enableGlow={enableGlow} glowStyle={glowStyle} />
+        <ExperienceTimeline initialExperiences={tExperiences} lang={lang} uiDict={ui} enableGlow={enableGlow} glowStyle={glowStyle} />
         <AIModelsSection projects={tProjects} ui={ui} aiModels={tAiModels} enableGlow={enableGlow} glowStyle={glowStyle} />
         <Portfolio projects={tProjects} ui={ui} aiModels={tAiModels} enableGlow={enableGlow} glowStyle={glowStyle} />
-        <ContactForm config={tConfig} />
+        <ContactForm config={tConfig} uiDict={ui} />
         <Footer config={tConfig} ui={ui} />
       </GlowWrapper>
     </main>

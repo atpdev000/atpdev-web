@@ -24,6 +24,9 @@ export default function CookieBanner() {
         'analytics_storage': 'granted'
       });
     }
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("atpdev:consent-accepted"));
+    }
   };
 
   const decline = () => {

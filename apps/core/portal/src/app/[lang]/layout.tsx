@@ -5,6 +5,7 @@ import CookieBanner from "@/components/CookieBanner";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import AdSenseInjector from "@/components/AdSenseInjector";
 import LivePreviewListener from "@/components/LivePreviewListener";
+import ThirdPartyScripts from "@/components/ThirdPartyScripts";
 import { getSiteConfig, translateText } from "@atpdev/database";
 import { Providers } from "@/components/providers";
 import CustomCursor from "@/components/CustomCursor";
@@ -303,6 +304,7 @@ export default async function RootLayout({
               --badge-amber-text: #b45309;
               --badge-rose-text: #be123c;
               --btn-blue-text: #1d4ed8;
+              --btn-primary-bg: color-mix(in srgb, var(--primary) 82%, #000000);
             }
             [data-theme="dark"] {
               --background: #0A0A0A;
@@ -325,6 +327,7 @@ export default async function RootLayout({
               --badge-amber-text: #fcd34d;
               --badge-rose-text: #fda4af;
               --btn-blue-text: #93c5fd;
+              --btn-primary-bg: color-mix(in srgb, var(--primary) 82%, #000000);
             }
 
             @media (prefers-color-scheme: dark) {
@@ -347,6 +350,7 @@ export default async function RootLayout({
                 --badge-amber-text: #fcd34d;
                 --badge-rose-text: #fda4af;
                 --btn-blue-text: #93c5fd;
+                --btn-primary-bg: color-mix(in srgb, var(--primary) 82%, #000000);
               }
             }
 
@@ -376,44 +380,8 @@ export default async function RootLayout({
           gtag('set', 'ads_data_redaction', true);
         `}</Script>
 
-        {/* Google Analytics 4 & Google Tag (GTM / GA4) */}
-        {config?.ga4_id && (
-          <>
-            <Script 
-              id="google-tag-script"
-              async 
-              src={
-                config.ga4_id.startsWith('GTM-')
-                  ? `https://www.googletagmanager.com/gtm.js?id=${config.ga4_id}`
-                  : `https://www.googletagmanager.com/gtag/js?id=${config.ga4_id}`
-              }
-              strategy="lazyOnload"
-            />
-            <Script id="google-tag-config" strategy="lazyOnload">{`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              ${config.ga4_id.startsWith('G-') ? `gtag('config', '${config.ga4_id}');` : ''}
-            `}</Script>
-          </>
-        )}
-
-        {/* Microsoft Clarity Behavioral Analytics */}
-        {clarityId && (
-          <Script
-            id="microsoft-clarity-init"
-            strategy="lazyOnload"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function(c,l,a,r,i,t,y){
-                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-                })(window, document, "clarity", "script", "${clarityId}");
-              `
-            }}
-          />
-        )}
+        {/* Google Analytics & Microsoft Clarity cargados post-interacción/consentimiento */}
+        <ThirdPartyScripts ga4Id={config?.ga4_id} clarityId={clarityId} />
 
         <Providers>
           <CustomCursor glowStyle={normalizeGlowStyle(config?.glow_style)} />

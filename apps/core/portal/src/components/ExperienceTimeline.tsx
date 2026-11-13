@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Briefcase, BookOpen, Laptop, Activity, Star } from "lucide-react";
 import { Experience } from "@atpdev/database";
+import { getUiDictionary } from "@/utils/i18n-ui";
 
 // Mapeo de icon_key → icono Lucide
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -23,46 +23,25 @@ const COLOR_MAP: Record<string, { colorVar: string; border: string; bg: string; 
   rose:   { colorVar: "var(--badge-rose-text)",   border: "border-rose-500",   bg: "bg-rose-500/20",   dot: "border-rose-500"   },
 };
 
-import { translateClient } from "@/utils/translate";
-
 interface ExperienceTimelineProps {
   initialExperiences?: Experience[];
   lang?: string;
+  uiDict?: Record<string, string>;
   enableGlow?: boolean;
   glowStyle?: string;
 }
 
-export default function ExperienceTimeline({ initialExperiences = [], lang = 'es', enableGlow = true, glowStyle = 'border' }: ExperienceTimelineProps) {
+export default function ExperienceTimeline({ initialExperiences = [], lang = 'es', uiDict, enableGlow = true, glowStyle = 'border' }: ExperienceTimelineProps) {
   const glowClass = "interactive-card";
+  const experiences = initialExperiences;
 
-  const [experiences, setExperiences] = useState<Experience[]>(initialExperiences);
-
-  const [ui, setUi] = useState({
-    title1: "Trayectoria",
-    title2: " Profesional",
-    subtitle: "Mi camino combinando el desarrollo de software y la docencia.",
-    loadingText: "Cargando experiencia..."
-  });
-
-  useEffect(() => {
-    if (lang === 'es') return;
-    const translateData = async () => {
-      const translated = await Promise.all(initialExperiences.map(async e => ({
-        ...e,
-        role: await translateClient(e.role, lang),
-        company: await translateClient(e.company, lang),
-        date_range: await translateClient(e.date_range, lang),
-        description: await translateClient(e.description, lang)
-      })));
-      setExperiences(translated);
-
-      const keys = Object.keys(ui) as (keyof typeof ui)[];
-      const newUi = { ...ui };
-      await Promise.all(keys.map(async k => { newUi[k] = await translateClient(ui[k], lang); }));
-      setUi(newUi);
-    };
-    translateData();
-  }, [lang]);
+  const dict = uiDict || getUiDictionary(lang);
+  const ui = {
+    title1: dict.expTitle1,
+    title2: dict.expTitle2,
+    subtitle: dict.expSubtitle,
+    loadingText: dict.expLoading
+  };
 
   return (
     <section id="experience" className="py-24 relative">
@@ -105,7 +84,7 @@ export default function ExperienceTimeline({ initialExperiences = [], lang = 'es
 
                     {/* Content */}
                     <div className={`ml-8 md:ml-0 md:w-1/2 ${index % 2 === 0 ? "md:pl-12" : "md:pr-12 text-left md:text-right"}`}>
-                      <div className={`p-6 rounded-2xl border transition-colors group relative overflow-hidden shadow-lg hover:scale-[1.02] ${glowClass}`} style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(30px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}>
+                      <div className={`p-6 rounded-2xl border transition-colors group relative overflow-hidden shadow-lg hover:scale-[1.02] ${glowClass}`} style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}>
                         <div className={`absolute top-0 ${index % 2 === 0 ? 'left-0' : 'right-0'} w-32 h-32 ${colors.bg} blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}></div>
 
                         <div className={`flex items-center gap-3 mb-2 ${index % 2 !== 0 && "md:justify-end"}`}>

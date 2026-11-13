@@ -25,10 +25,10 @@ export const SOCIAL_PLATFORMS = [
 ];
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { translateClient } from "@/utils/translate";
+import { useState } from "react";
+import { getUiDictionary } from "@/utils/i18n-ui";
 
-export default function ContactForm({ config }: { config?: SiteConfig | null }) {
+export default function ContactForm({ config, uiDict }: { config?: SiteConfig | null; uiDict?: Record<string, string> }) {
   const params = useParams();
   const lang = params?.lang as string || 'es';
 
@@ -37,39 +37,28 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
   const [phoneValue, setPhoneValue] = useState<string | undefined>();
   const [phoneWidgetActive, setPhoneWidgetActive] = useState(false);
   
-  const [ui, setUi] = useState({
-    title1: "¿Tienes un proyecto",
-    title2: "en mente? Hablemos.",
-    subtitle: "Ya sea para desarrollo de aplicaciones móviles, sistemas web, integraciones con IA o colaboración en docencia, estoy siempre abierto a discutir nuevas oportunidades de impacto.",
-    emailLabel: "Email Directo",
-    phoneLabel: "Celular / WhatsApp",
-    socialLabel: "Redes Sociales Activas",
-    formName: "Nombre Completo",
-    formNamePlaceholder: "Ej. Juan Pérez",
-    formEmail: "Correo Electrónico",
-    formEmailPlaceholder: "juan@empresa.com",
-    formPhone: "Teléfono (Opcional)",
-    formMessage: "Mensaje",
-    formMessagePlaceholder: "Cuéntame sobre tu idea o proyecto...",
-    btnSending: "Enviando...",
-    btnSent: "Mensaje Enviado",
-    btnError: "Error. Intenta de nuevo",
-    btnSend: "Enviar Mensaje"
-  });
-
-  useEffect(() => {
-    if (lang !== 'es') {
-      const loadTranslation = async () => {
-        const keys = Object.keys(ui) as (keyof typeof ui)[];
-        const newUi = { ...ui };
-        await Promise.all(keys.map(async k => {
-          newUi[k] = await translateClient(ui[k], lang);
-        }));
-        setUi(newUi);
-      };
-      loadTranslation();
-    }
-  }, [lang]);
+  const dict = uiDict || getUiDictionary(lang);
+  const ui = {
+    title1: dict.contactTitle1,
+    title2: dict.contactTitle2,
+    subtitle: dict.contactSubtitle,
+    emailLabel: dict.contactEmailLabel,
+    phoneLabel: dict.contactPhoneLabel,
+    socialLabel: dict.contactSocialLabel,
+    formName: dict.contactFormName,
+    formNamePlaceholder: dict.contactFormNamePlaceholder,
+    formEmail: dict.contactFormEmail,
+    formEmailPlaceholder: dict.contactFormEmailPlaceholder,
+    formPhone: dict.contactFormPhone,
+    formMessage: dict.contactFormMessage,
+    formMessagePlaceholder: dict.contactFormMessagePlaceholder,
+    btnSending: dict.contactBtnSending,
+    btnSent: dict.contactBtnSent,
+    btnError: dict.contactBtnError,
+    btnSend: dict.contactBtnSend,
+    sentDesc: dict.contactSentDesc,
+    sendAnother: dict.contactSendAnother,
+  };
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -111,7 +100,7 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
 
   return (
     <section id="contact" className="py-24 relative overflow-hidden transition-colors border-t" style={{ borderColor: 'var(--glass-border)' }}>
-      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)' }}></div>
       
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -179,7 +168,7 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
           </div>
 
           {/* Form */}
-          <div className="p-8 rounded-3xl shadow-2xl relative border transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(30px)' }}>
+          <div className="p-8 rounded-3xl shadow-2xl relative border transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)' }}>
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-3xl pointer-events-none"></div>
             
             {status === "success" ? (
@@ -326,7 +315,7 @@ export default function ContactForm({ config }: { config?: SiteConfig | null }) 
                       ? "bg-red-600 hover:bg-red-700"
                       : "hover:scale-[1.03] hover:shadow-[0_0_25px_var(--primary)] hover:opacity-90"
                   }`}
-                  style={status !== "error" ? { backgroundColor: 'var(--primary)' } : {}}
+                  style={status !== "error" ? { backgroundColor: 'var(--btn-primary-bg)' } : {}}
                 >
                   {status === "submitting" ? (
                     <>{ui.btnSending}</>

@@ -83,7 +83,7 @@ export default function Portfolio({
                     : "hover:brightness-110 hover:shadow-[0_0_15px_var(--primary)]"
                 }`}
                 style={{ 
-                  backgroundColor: filter === cat.value ? 'var(--primary)' : 'var(--pill-bg)',
+                  backgroundColor: filter === cat.value ? 'var(--btn-primary-bg)' : 'var(--pill-bg)',
                   color: filter === cat.value ? 'white' : 'var(--text-color)',
                   border: filter === cat.value ? 'none' : '1px solid var(--glass-border)'
                 }}
@@ -104,7 +104,7 @@ export default function Portfolio({
                   transition={{ duration: 0.3 }}
                   key={project.id}
                   className={`rounded-2xl overflow-hidden border transition-all group cursor-pointer flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:scale-[1.02] ${glowClass}`}
-                  style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(20px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
+                  style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
                   onClick={() => setSelectedProject(project.id)}
                 >
                   <div className="relative h-64 overflow-hidden flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>

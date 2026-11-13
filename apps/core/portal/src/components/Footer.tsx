@@ -9,7 +9,7 @@ export default function Footer({
   ui: Record<string, string>;
 }) {
   return (
-    <footer className="pt-16 pb-8 border-t transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(20px)' }}>
+    <footer className="pt-16 pb-8 border-t transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)' }}>
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
         <div>
           <h3 className="text-2xl font-black mb-4" style={{ color: 'var(--text-color)' }}>ATP DEV</h3>

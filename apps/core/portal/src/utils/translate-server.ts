@@ -1,4 +1,21 @@
-import { translateText, Project, SiteConfig, AIModelData } from "@atpdev/database";
+import { translateText, Project, SiteConfig, AIModelData, Experience, Skill } from "@atpdev/database";
+
+export async function translateExperience(e: Experience, lang: string): Promise<Experience> {
+  if (lang === 'es' || !lang) return e;
+  const [role, company, date_range, description] = await Promise.all([
+    translateText(e.role, lang),
+    translateText(e.company, lang),
+    translateText(e.date_range, lang),
+    translateText(e.description, lang),
+  ]);
+  return { ...e, role, company, date_range, description };
+}
+
+export async function translateSkill(s: Skill, lang: string): Promise<Skill> {
+  if (lang === 'es' || !lang) return s;
+  const category = await translateText(s.category, lang);
+  return { ...s, category };
+}
 
 export async function translateProject(p: Project, lang: string): Promise<Project> {
   if (lang === 'es' || !lang) return p;

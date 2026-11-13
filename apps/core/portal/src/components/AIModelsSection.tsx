@@ -64,7 +64,7 @@ export default function AIModelsSection({ projects, ui, aiModels, enableGlow = t
 
   return (
     <section id="ai-models" className="py-24 relative overflow-hidden transition-colors border-t" style={{ borderColor: 'var(--glass-border)' }}>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full blur-[150px] opacity-10 pointer-events-none" style={{ backgroundColor: 'var(--tertiary)' }}></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--tertiary) 12%, transparent) 0%, transparent 70%)' }}></div>
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
@@ -94,7 +94,7 @@ export default function AIModelsSection({ projects, ui, aiModels, enableGlow = t
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className={`border rounded-3xl p-8 transition-all group hover:-translate-y-1 hover:shadow-2xl shadow-lg ${glowClass}`}
-              style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(30px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
+              style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
             >
               <div className="flex items-center justify-between mb-6">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center border" style={{ backgroundColor: 'var(--pill-bg)', borderColor: 'var(--primary)', color: 'var(--accent-text)' }}>

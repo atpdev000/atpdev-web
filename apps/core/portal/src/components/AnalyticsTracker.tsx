@@ -20,16 +20,25 @@ export default function AnalyticsTracker() {
       // No registrar localhost si no se desea, pero para pruebas es útil
       // if (domain === 'localhost') return;
 
-      fetch('/api/track', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          domain,
-          path,
-        }),
-      }).catch(err => console.error('Analytics tracking failed:', err));
+      const sendTrack = () => {
+        fetch('/api/track', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            domain,
+            path,
+          }),
+        }).catch(err => console.error('Analytics tracking failed:', err));
+      };
+
+      const w = window as any;
+      if (typeof w.requestIdleCallback === 'function') {
+        w.requestIdleCallback(sendTrack, { timeout: 3000 });
+      } else {
+        setTimeout(sendTrack, 1200);
+      }
     }
   }, [pathname]);
 

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Code2, Smartphone, Database, BrainCircuit, GraduationCap, Award, Server, ExternalLink } from "lucide-react";
 import { Skill, SiteConfig } from "@atpdev/database";
+import { getUiDictionary } from "@/utils/i18n-ui";
 
 // Mapeo de icon_key → componente Lucide
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -24,35 +25,35 @@ const COLOR_MAP: Record<string, { colorVar: string }> = {
   amber:  { colorVar: "var(--badge-amber-text)"  },
 };
 
-import { translateClient } from "@/utils/translate";
-
 interface AboutSectionProps {
   initialSkills?: Skill[];
   initialCredlyUrl?: string;
   config?: SiteConfig | null;
   lang?: string;
+  uiDict?: Record<string, string>;
   enableGlow?: boolean;
   glowStyle?: string;
 }
 
-export default function AboutSection({ initialSkills = [], initialCredlyUrl = "", config = null, lang = 'es', enableGlow = true, glowStyle = 'border' }: AboutSectionProps) {
+export default function AboutSection({ initialSkills = [], initialCredlyUrl = "", config = null, lang = 'es', uiDict, enableGlow = true, glowStyle = 'border' }: AboutSectionProps) {
   const glowClass = "interactive-card";
 
-  const [skills, setSkills] = useState<Skill[]>(initialSkills);
-  const [credlyUrl, setCredlyUrl] = useState<string>(initialCredlyUrl);
+  const skills = initialSkills;
+  const credlyUrl = initialCredlyUrl;
   const [avatarFailed, setAvatarFailed] = useState(false);
 
-  const [ui, setUi] = useState({
-    title1: "Sobre ",
-    title2: "Mí",
-    subtitle: "Ingeniero de Sistemas apasionado por la docencia y el desarrollo de software de alto impacto.",
+  const dict = uiDict || getUiDictionary(lang);
+  const ui = {
+    title1: dict.aboutTitle1,
+    title2: dict.aboutTitle2,
+    subtitle: dict.aboutSubtitle,
     card1Title: "Percy Acha Taipe",
-    card1Desc: "Bachiller en Ingeniería de Sistemas por la Universidad Nacional José María Arguedas (UNAJMA). Combino mi experiencia técnica en desarrollo Fullstack y Mobile con mi vocación por la enseñanza.",
-    card2Title: "Formación Académica",
-    card2Desc: "Ingeniería de Sistemas (UNAJMA)\nPosgrado en progreso (Maestría en IA, UNIR)",
-    card3Title: "Especialización Continua",
-    card3DescSuffix: ", Oracle SQL, Power BI, IA, Desarrollo del Kernel Linux (LFD103)."
-  });
+    card1Desc: dict.aboutCard1Desc,
+    card2Title: dict.aboutCard2Title,
+    card2Desc: dict.aboutCard2Desc,
+    card3Title: dict.aboutCard3Title,
+    card3DescSuffix: dict.aboutCard3DescSuffix
+  };
 
   const displaySubtitle = config?.bio_short?.trim() || ui.subtitle;
   const displayName = config?.full_name?.trim() || ui.card1Title;
@@ -63,29 +64,11 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
     setAvatarFailed(false);
   }, [avatarUrl]);
 
-  useEffect(() => {
-    if (lang === 'es') return;
-    const translateData = async () => {
-      const translatedSkills = await Promise.all(initialSkills.map(async s => ({
-        ...s,
-        category: await translateClient(s.category, lang),
-        items: await Promise.all(s.items.map(i => translateClient(i, lang)))
-      })));
-      setSkills(translatedSkills);
-
-      const keys = Object.keys(ui) as (keyof typeof ui)[];
-      const newUi = { ...ui };
-      await Promise.all(keys.map(async k => { newUi[k] = await translateClient(ui[k], lang); }));
-      setUi(newUi);
-    };
-    translateData();
-  }, [lang]);
-
   return (
     <section id="about" className="py-24 relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1000px] pointer-events-none opacity-20">
-        <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] rounded-full blur-[120px]" style={{ backgroundColor: 'var(--primary)' }}></div>
-        <div className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full blur-[120px]" style={{ backgroundColor: 'var(--tertiary)' }}></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1000px] pointer-events-none">
+        <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--primary) 18%, transparent) 0%, transparent 70%)' }}></div>
+        <div className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--tertiary) 18%, transparent) 0%, transparent 70%)' }}></div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -111,8 +94,8 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className={`lg:col-span-5 backdrop-blur-xl border rounded-3xl p-8 flex flex-col justify-center transition-colors shadow-lg hover:scale-[1.02] ${glowClass}`}
-            style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(30px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
+            className={`lg:col-span-5 border rounded-3xl p-8 flex flex-col justify-center transition-colors shadow-lg hover:scale-[1.02] ${glowClass}`}
+            style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
           >
             <div className="flex items-center gap-4 mb-6">
               {avatarUrl && !avatarFailed && (
