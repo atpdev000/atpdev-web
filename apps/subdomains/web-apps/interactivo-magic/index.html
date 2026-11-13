@@ -21,11 +21,15 @@
     content="Diseña experiencias interactivas personalizadas con animaciones a 60 FPS para cumpleaños, aniversarios y ocasiones especiales." />
   <meta property="og:image" content="https://magic.atpdev.dev/logo.png" />
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts (non-render-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" media="print" onload="this.media='all'" />
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
+  </noscript>
 
   <meta name="google-adsense-account" content="ca-pub-5414009811868137" />
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5414009811868137" crossorigin="anonymous"></script>
@@ -106,9 +110,14 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <header style="max-width:60rem;margin:0 auto;padding:4rem 1.25rem 2rem;text-align:center;color:#f8fafc;font-family:'Outfit',ui-sans-serif,system-ui,sans-serif;">
+      <h1 style="font-size:2.1rem;font-weight:900;line-height:1.2;margin:0 0 0.75rem;">InteractivoMagic — Estudio de Tarjetas y Experiencias Interactivas 3D</h1>
+      <p style="font-size:1rem;color:#cbd5e1;max-width:42rem;margin:0 auto;line-height:1.6;">Crea libros digitales 3D, galaxias de estrellas y dedicatorias animadas con música listas para compartir sin registros.</p>
+    </header>
+  </div>
 
-  <main id="editorial-guide" class="magic-editorial" aria-label="Guía Creativa y Técnica de InteractivoMagic">
+  <section id="editorial-guide" class="magic-editorial" aria-label="Guía Creativa y Técnica de InteractivoMagic">
     <div class="magic-editorial-inner">
       <span class="magic-badge">Guía Creativa &amp; Arquitectura Interactiva</span>
       <h2>Tarjetas digitales interactivas en 3D, Canvas y música sincronizada sin registros</h2>
@@ -190,7 +199,7 @@
         </nav>
       </footer>
     </div>
-  </main>
+  </section>
 
   <script>
     if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {

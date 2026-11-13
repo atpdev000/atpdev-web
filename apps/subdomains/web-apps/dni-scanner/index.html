@@ -123,9 +123,14 @@
 </head>
 
 <body class="bg-[#090d16] text-white">
-  <div id="root"></div>
+  <div id="root">
+    <header style="max-width:56rem;margin:0 auto;padding:4rem 1.25rem 2rem;text-align:center;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;">
+      <h1 style="font-size:2rem;font-weight:800;line-height:1.2;margin:0 0 0.75rem;color:#f8fafc;">DNI Master Scanner — Escáner HD de DNI y Documentos en A4</h1>
+      <p style="font-size:1rem;color:#94a3b8;max-width:40rem;margin:0 auto;line-height:1.6;">Digitaliza, rectifica la perspectiva y exporta tu documento de identidad en PDF A4 o Word (.docx) 100% desde tu navegador.</p>
+    </header>
+  </div>
 
-  <main id="editorial-guide" class="dni-editorial" aria-label="Guía Técnica y Privacidad de DNI Master Scanner">
+  <section id="editorial-guide" class="dni-editorial" aria-label="Guía Técnica y Privacidad de DNI Master Scanner">
     <div class="dni-editorial-inner">
       <span class="dni-badge">Guía Técnica &amp; Estándar ISO/IEC 7810 ID-1</span>
       <h2>Escaneo, rectificación de perspectiva y exportación A4 oficial sin subir documentos a la nube</h2>
@@ -217,7 +222,7 @@
         </nav>
       </footer>
     </div>
-  </main>
+  </section>
 
   <script>
     if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {

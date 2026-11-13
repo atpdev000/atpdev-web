@@ -32,7 +32,8 @@ const AppleStoreIcon = ({ size = 24 }: { size?: number }) => (
 );
 
 export async function generateStaticParams() {
-  const projects = await getProjects();
+  const allProjects = await getProjects();
+  const projects = allProjects.filter(p => p.status !== 'Privado');
   const langs = ['es', 'en', 'ru', 'hi', 'zh', 'fr', 'de', 'pt', 'ja'];
   
   // Create combinations for all languages and all slugs
@@ -54,7 +55,7 @@ export async function generateMetadata(
   const projects = await getProjects();
   const project = projects.find(p => p.slug === slug);
 
-  if (!project) return {};
+  if (!project || project.status === 'Privado') return {};
 
   const title = lang === 'es' ? project.title : await translateText(project.title, lang);
   const description = lang === 'es' 
@@ -118,7 +119,7 @@ export default async function ProjectPage({
 
   const project = projects.find(p => p.slug === slug);
 
-  if (!project) {
+  if (!project || project.status === 'Privado') {
     notFound();
   }
 
