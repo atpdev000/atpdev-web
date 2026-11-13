@@ -251,6 +251,7 @@
       "railway_url": "https://backend-freedownloaderpro.up.railway.app",
       "custom_url": "http://127.0.0.1:8000",
       "active_url": "http://127.0.0.1:8000",
+      "youtube_proxy_url": "",
       "auto_fallback_enabled": false,
       "timeout_seconds": 30
     },

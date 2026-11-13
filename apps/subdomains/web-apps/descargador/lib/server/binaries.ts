@@ -288,6 +288,14 @@ export function getYtDlpJsRuntimeArgs(): string[] {
 }
 
 /**
+ * Devuelve --proxy si se configuró un proxy residencial/ISP en Admin o entorno.
+ */
+export function getYtDlpProxyArgs(proxyUrl?: string): string[] {
+  const cleanProxy = (proxyUrl || process.env.YOUTUBE_PROXY_URL || '').trim()
+  return cleanProxy ? ['--proxy', cleanProxy] : []
+}
+
+/**
  * Localiza cookies.txt (incluyendo el archivo compartido del backend Python en Hetzner)
  * o la variable YOUTUBE_COOKIES, copiándolo a un archivo temporal para evitar que yt-dlp
  * sobrescriba o corrompa el archivo maestro de cookies.

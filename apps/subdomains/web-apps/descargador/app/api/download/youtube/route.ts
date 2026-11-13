@@ -5,7 +5,7 @@ import path from 'path'
 import fs from 'fs'
 import os from 'os'
 import dns from 'dns'
-import { findYtDlpBinary, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs } from '@/lib/server/binaries'
+import { findYtDlpBinary, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs, getYtDlpProxyArgs } from '@/lib/server/binaries'
 import { getBackendEndpoint } from '@/lib/server/backend-config'
 import { Innertube, UniversalCache, Platform } from 'youtubei.js'
 
@@ -238,15 +238,17 @@ async function extractWithInvidious(url: string): Promise<any> {
   return null
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android', proxyUrl?: string): Promise<any> {
   const cookieArgs = getYoutubeCookiesArgs()
   const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
+  const proxyArgs = getYtDlpProxyArgs(proxyUrl)
 
   return new Promise((resolve, reject) => {
     const args = [
       '--socket-timeout', '15',
       '--dump-json',
       ...jsRuntimeArgs,
+      ...proxyArgs,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
@@ -325,18 +327,20 @@ export async function POST(request: NextRequest) {
     console.log('🎬 [YouTube Serverless] Procesando URL:', cleanedUrl)
 
     const bin = findYtDlpBinary()
+    const backendInfo = getBackendEndpoint()
+    const proxyUrl = backendInfo.youtubeProxyUrl
     let rawInfo: any = null
     let extractionError: any = null
 
     if (bin) {
       try {
         // Intento 1 con clientes tv_embedded,web_embedded,visionos (bypasea el bloqueo bot de datacenters como Render)
-        rawInfo = await extractMetadata(cleanedUrl, bin, 'tv_embedded,web_embedded,visionos')
+        rawInfo = await extractMetadata(cleanedUrl, bin, 'tv_embedded,web_embedded,visionos', proxyUrl)
       } catch (err: any) {
         console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
         try {
           console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (visionos,ios)...')
-          rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos,ios')
+          rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos,ios', proxyUrl)
         } catch (retryErr: any) {
           console.error('❌ [YouTube Serverless] Reintento visionos,ios falló:', retryErr.message)
           extractionError = retryErr
@@ -370,8 +374,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback 3 a API externa Python (Render / Railway dinámico desde el CMS)
-    const backendInfo = getBackendEndpoint()
+    // Fallback 3 a API externa Python (Render / Railway / Hetzner dinámico desde el CMS)
     const PYTHON_API_URL = backendInfo.url || process.env.PYTHON_API_URL?.replace(/\/$/, '')
     if (!rawInfo && PYTHON_API_URL) {
       try {
@@ -379,7 +382,12 @@ export async function POST(request: NextRequest) {
         const extRes = await fetch(`${PYTHON_API_URL}/api/v1/youtube/download`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: cleanedUrl, quality, format_type }),
+          body: JSON.stringify({
+            url: cleanedUrl,
+            quality,
+            format_type,
+            ...(proxyUrl ? { proxy_url: proxyUrl } : {})
+          }),
           signal: AbortSignal.timeout(backendInfo.timeoutSeconds * 1000)
         })
         if (extRes.ok) {
@@ -399,7 +407,12 @@ export async function POST(request: NextRequest) {
             const fbRes = await fetch(`${backendInfo.fallbackUrl}/api/v1/youtube/download`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ url: cleanedUrl, quality, format_type }),
+              body: JSON.stringify({
+                url: cleanedUrl,
+                quality,
+                format_type,
+                ...(proxyUrl ? { proxy_url: proxyUrl } : {})
+              }),
               signal: AbortSignal.timeout(backendInfo.timeoutSeconds * 1000)
             })
             if (fbRes.ok) {

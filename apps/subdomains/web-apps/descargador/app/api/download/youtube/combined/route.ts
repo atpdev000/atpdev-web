@@ -7,7 +7,8 @@ import os from 'os'
 import https from 'https'
 import { Readable } from 'stream'
 import { finished } from 'stream/promises'
-import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs } from '@/lib/server/binaries'
+import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs, getYtDlpProxyArgs } from '@/lib/server/binaries'
+import { getBackendEndpoint } from '@/lib/server/backend-config'
 
 async function downloadStreamToDisk(
   sourceUrl: string,
@@ -94,15 +95,17 @@ async function downloadStreamToDisk(
   })
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android'): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android', proxyUrl?: string): Promise<any> {
   const cookieArgs = getYoutubeCookiesArgs()
   const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
+  const proxyArgs = getYtDlpProxyArgs(proxyUrl)
 
   return new Promise((resolve, reject) => {
     const args = [
       '--socket-timeout', '15',
       '--dump-json',
       ...jsRuntimeArgs,
+      ...proxyArgs,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
@@ -254,6 +257,9 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
+    const backendInfo = getBackendEndpoint()
+    const proxyArgs = getYtDlpProxyArgs(backendInfo.youtubeProxyUrl)
+
     const tempDir = os.tmpdir()
     const tempFileBase = path.join(tempDir, `ytdl_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`)
     const expectedFile = `${tempFileBase}.${finalExt}`
@@ -287,6 +293,7 @@ export async function POST(request: NextRequest) {
         ...ffmpegArgs,
         '--socket-timeout', '20',
         ...jsRuntimeArgs,
+        ...proxyArgs,
         '--newline',
         '--no-playlist',
         '--no-warnings',
@@ -697,6 +704,7 @@ export async function POST(request: NextRequest) {
         ...ffmpegArgs,
         '--socket-timeout', '15',
         ...jsRuntimeArgs,
+        ...proxyArgs,
         '--newline',
         '--no-playlist',
         '--no-warnings',

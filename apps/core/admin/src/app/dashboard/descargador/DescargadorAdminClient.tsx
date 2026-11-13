@@ -62,7 +62,11 @@ import {
   checkBackendHealthAction,
   checkGatewayPingAction,
   syncBuiltApkAction,
-  uploadApkFileAction
+  uploadApkFileAction,
+  getYoutubeCookiesStatusAction,
+  uploadYoutubeCookiesAction,
+  testYoutubeExtractionAction,
+  type YoutubeCookiesStatusResult
 } from "./actions";
 import UnifiedThemeStudio from "@/components/theme/UnifiedThemeStudio";
 
@@ -432,6 +436,92 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
       });
     } finally {
       setCheckingHealth(false);
+    }
+  };
+
+  // YouTube Anti-Bot (Cookies.txt & Proxy Residencial) State
+  const [cookiesStatus, setCookiesStatus] = useState<YoutubeCookiesStatusResult | null>(null);
+  const [loadingCookiesStatus, setLoadingCookiesStatus] = useState(false);
+  const [cookiesInput, setCookiesInput] = useState("");
+  const [uploadingCookies, setUploadingCookies] = useState(false);
+  const [cookiesNotice, setCookiesNotice] = useState<{ ok: boolean; text: string } | null>(null);
+  const cookiesFileInputRef = useRef<HTMLInputElement>(null);
+  const [ytTestUrl, setYtTestUrl] = useState("https://www.youtube.com/watch?v=RF5FQ90_FvY");
+  const [testingYoutube, setTestingYoutube] = useState(false);
+  const [ytTestResult, setYtTestResult] = useState<{
+    success: boolean;
+    title?: string;
+    formatsCount?: number;
+    duration?: number;
+    latencyMs: number;
+    error?: string;
+  } | null>(null);
+
+  const refreshCookiesStatus = async () => {
+    setLoadingCookiesStatus(true);
+    try {
+      const target = config.backend?.active_url || config.backend?.custom_url || "http://127.0.0.1:8000";
+      const res = await getYoutubeCookiesStatusAction(target);
+      setCookiesStatus(res);
+    } finally {
+      setLoadingCookiesStatus(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "backend") {
+      refreshCookiesStatus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const handleCookiesFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = typeof reader.result === "string" ? reader.result : "";
+      setCookiesInput(content);
+      setCookiesNotice({
+        ok: true,
+        text: `Archivo "${file.name}" cargado (${content.length} bytes). Haz clic en "Subir Cookies al VPS" para aplicarlo.`,
+      });
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleUploadCookies = async () => {
+    setUploadingCookies(true);
+    setCookiesNotice(null);
+    try {
+      const target = config.backend?.active_url || config.backend?.custom_url || "http://127.0.0.1:8000";
+      const res = await uploadYoutubeCookiesAction(cookiesInput, target);
+      if (res.success) {
+        setCookiesNotice({ ok: true, text: res.message || "Cookies actualizadas correctamente en el VPS." });
+        setCookiesInput("");
+        if (res.status) {
+          setCookiesStatus(res.status);
+        } else {
+          await refreshCookiesStatus();
+        }
+      } else {
+        setCookiesNotice({ ok: false, text: res.error || "No se pudieron subir las cookies." });
+      }
+    } finally {
+      setUploadingCookies(false);
+    }
+  };
+
+  const handleTestYoutubeExtraction = async () => {
+    setTestingYoutube(true);
+    setYtTestResult(null);
+    try {
+      const target = config.backend?.active_url || config.backend?.custom_url || "http://127.0.0.1:8000";
+      const res = await testYoutubeExtractionAction(ytTestUrl, target, config.backend?.youtube_proxy_url);
+      setYtTestResult(res);
+    } finally {
+      setTestingYoutube(false);
     }
   };
 
@@ -2486,9 +2576,225 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               </div>
             ) : (
               <div className="p-4 rounded-xl bg-slate-900/40 border border-slate-800 text-center text-xs text-slate-400">
-                Haz clic en <strong>Probar Render</strong>, <strong>Probar Railway</strong> o <strong>Probar Activo</strong> para verificar la conectividad y latencia en vivo.
+                Haz clic en <strong>Probar Hetzner</strong>, <strong>Probar Railway</strong> o <strong>Probar Activo</strong> para verificar la conectividad y latencia en vivo.
               </div>
             )}
+          </div>
+
+          {/* 3.5 Gestión Anti-Bot YouTube (Cookies.txt & Proxy Residencial) */}
+          <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Youtube className="w-4 h-4 text-red-400" />
+                  Gestión Anti-Bot YouTube (Cookies.txt &amp; Proxy Residencial)
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  YouTube bloquea IPs de datacenter (Hetzner) cuando las cookies expiran. Renueva <code className="text-slate-300">cookies.txt</code> en 5 segundos o configura un Proxy Residencial / ISP 24/7.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {cookiesStatus?.success ? (
+                  cookiesStatus.is_expired ? (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">
+                      Cookies expiradas ({cookiesStatus.expired_auth_count || 0} vencidas / {cookiesStatus.valid_auth_count || 0} válidas)
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      Cookies vigentes ({cookiesStatus.valid_auth_count || 0} auth válidas)
+                    </span>
+                  )
+                ) : (
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                    {loadingCookiesStatus ? "Verificando..." : "Estado no disponible"}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={refreshCookiesStatus}
+                  disabled={loadingCookiesStatus}
+                  className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {loadingCookiesStatus ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  Verificar Cookies
+                </button>
+              </div>
+            </div>
+
+            {/* Estado actual de auth cookies en VPS */}
+            {cookiesStatus && (
+              <div className={`p-3.5 rounded-xl border text-xs space-y-2 ${
+                cookiesStatus.success && !cookiesStatus.is_expired
+                  ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-200"
+                  : "bg-rose-500/5 border-rose-500/25 text-rose-200"
+              }`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-semibold flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5" />
+                    {cookiesStatus.success
+                      ? (cookiesStatus.message || `Archivo cookies.txt: ${cookiesStatus.bytes || 0} bytes`)
+                      : (cookiesStatus.error || "No se pudo leer el estado de cookies")}
+                  </span>
+                  {cookiesStatus.earliest_valid_expiry && (
+                    <span className="font-mono text-[11px] text-slate-300">
+                      Próxima expiración: {cookiesStatus.earliest_valid_expiry}
+                    </span>
+                  )}
+                </div>
+                {cookiesStatus.auth_cookies && cookiesStatus.auth_cookies.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {cookiesStatus.auth_cookies.map((c, idx) => (
+                      <span
+                        key={`${c.name}-${idx}`}
+                        className={`px-2 py-0.5 rounded-md font-mono text-[10px] border ${
+                          c.expired
+                            ? "bg-rose-950/60 border-rose-500/30 text-rose-300"
+                            : "bg-emerald-950/60 border-emerald-500/30 text-emerald-300"
+                        }`}
+                      >
+                        {c.name}: {c.expired ? "EXPIRADA" : "OK"} ({c.expires_iso ? c.expires_iso.slice(0, 10) : "sesión"})
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Subida de cookies.txt */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <Upload className="w-3.5 h-3.5 text-amber-400" />
+                    Actualizar cookies.txt en Hetzner (sin SSH)
+                  </label>
+                  <input
+                    ref={cookiesFileInputRef}
+                    type="file"
+                    accept=".txt"
+                    onChange={handleCookiesFileSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => cookiesFileInputRef.current?.click()}
+                    className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-semibold text-slate-200 cursor-pointer transition-all"
+                  >
+                    Cargar archivo .txt
+                  </button>
+                </div>
+                <textarea
+                  value={cookiesInput}
+                  onChange={(e) => setCookiesInput(e.target.value)}
+                  rows={5}
+                  placeholder="# Netscape HTTP Cookie File&#10;.youtube.com&#9;TRUE&#9;/&#9;TRUE&#9;...&#10;Pega aquí el contenido exportado con 'Get cookies.txt LOCALLY' (ventana incógnito con sesión de YouTube)"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-slate-200 focus:border-amber-500 focus:outline-none resize-y"
+                />
+                {cookiesNotice && (
+                  <div className={`p-2.5 rounded-lg text-xs border ${
+                    cookiesNotice.ok
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                      : "bg-rose-500/10 border-rose-500/30 text-rose-300"
+                  }`}>
+                    {cookiesNotice.text}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleUploadCookies}
+                  disabled={uploadingCookies || !cookiesInput.trim()}
+                  className="w-full py-2 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {uploadingCookies ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {uploadingCookies ? "Subiendo cookies..." : "Subir Cookies al VPS"}
+                </button>
+              </div>
+
+              {/* Proxy Residencial + Prueba Real */}
+              <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <Globe className="w-3.5 h-3.5 text-cyan-400" />
+                    Proxy Residencial / ISP (Solución Permanente 24/7)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={config.backend?.youtube_proxy_url || ""}
+                      onChange={(e) => setConfig({
+                        ...config,
+                        backend: { ...(config.backend || {}), youtube_proxy_url: e.target.value }
+                      })}
+                      placeholder="http://usuario:clave@host:puerto  o  socks5://..."
+                      className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-slate-200 focus:border-cyan-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                      Guardar
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Si configuras un proxy residencial (ej. Webshare / IPRoyal / Smartproxy), tanto el backend Python como las rutas Next.js de <code className="text-slate-300">descargador</code> lo usarán automáticamente para evitar bloqueos de IP datacenter.
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-800 space-y-2">
+                  <label className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                    Probar Extracción Real de YouTube en Hetzner
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={ytTestUrl}
+                      onChange={(e) => setYtTestUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=RF5FQ90_FvY"
+                      className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs font-mono text-slate-200 focus:border-emerald-500 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleTestYoutubeExtraction}
+                      disabled={testingYoutube}
+                      className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                    >
+                      {testingYoutube ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Youtube className="w-3.5 h-3.5" />}
+                      {testingYoutube ? "Probando..." : "Probar YouTube"}
+                    </button>
+                  </div>
+                  {ytTestResult && (
+                    <div className={`p-3 rounded-xl border text-xs ${
+                      ytTestResult.success
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
+                        : "bg-rose-500/10 border-rose-500/30 text-rose-200"
+                    }`}>
+                      {ytTestResult.success ? (
+                        <div className="space-y-1">
+                          <div className="font-bold flex items-center gap-1.5 text-emerald-300">
+                            <CheckCircle2 className="w-4 h-4" />
+                            Extracción exitosa en {ytTestResult.latencyMs}ms
+                          </div>
+                          <div>Título: <strong>{ytTestResult.title}</strong></div>
+                          <div>Formatos disponibles: <strong>{ytTestResult.formatsCount ?? 0}</strong></div>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <div className="font-bold flex items-center gap-1.5 text-rose-300">
+                            <XCircle className="w-4 h-4" />
+                            Falló en {ytTestResult.latencyMs}ms
+                          </div>
+                          <div className="font-mono text-[11px] break-all">{ytTestResult.error}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 4. Tarjeta Keep-Alive / UptimeRobot (Activo) & cron-job.org (Respaldo) */}

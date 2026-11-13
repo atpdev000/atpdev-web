@@ -5,6 +5,7 @@ export interface ResolvedBackend {
   provider: 'render' | 'railway' | 'custom';
   fallbackUrl?: string;
   timeoutSeconds: number;
+  youtubeProxyUrl?: string;
 }
 
 /**
@@ -49,7 +50,8 @@ export function getBackendEndpoint(): ResolvedBackend {
       url: primaryUrl.replace(/\/$/, ''),
       provider,
       fallbackUrl: backend?.auto_fallback_enabled !== false ? fallbackUrl.replace(/\/$/, '') : undefined,
-      timeoutSeconds: backend?.timeout_seconds || 30
+      timeoutSeconds: backend?.timeout_seconds || 30,
+      youtubeProxyUrl: backend?.youtube_proxy_url?.trim() || undefined
     };
   } catch (err) {
     return {

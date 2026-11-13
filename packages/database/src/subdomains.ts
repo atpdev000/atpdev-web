@@ -99,6 +99,7 @@ export interface SubdomainBackend {
   railway_url?: string;
   custom_url?: string;
   active_url?: string;
+  youtube_proxy_url?: string;
   auto_fallback_enabled?: boolean;
   timeout_seconds?: number;
 }
