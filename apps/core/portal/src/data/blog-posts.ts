@@ -844,6 +844,378 @@ Every job page serializes strictly sanitized \`JobPosting\` structured data matc
 
 Composite PostgreSQL indexes across \`(status, region, deadline)\`, parallel \`Promise.allSettled\` fetches, and Next.js Incremental Static Regeneration (\`revalidate\`) keep **TTFB** consistently low even during peak national civil-service announcement surges.`
     }
+  },
+  {
+    slug: 'gastronomia-computacional-escalado-recetas-i18n',
+    publishedAt: '2026-10-08',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 7,
+    tags: ['Next.js', 'i18n', 'JSON-LD', 'TypeScript', 'PerúSabor'],
+    relatedProjectSlug: 'perusabor-pro',
+    relatedProjectName: 'PerúSabor Pro',
+    es: {
+      title: 'Gastronomía computacional: modelado de recetas, escalado proporcional e i18n con Next.js',
+      category: 'Arquitectura Web & Datos',
+      excerpt:
+        'Cómo estructurar recetarios digitales de cocina peruana con proporciones dinámicas por comensal, equivalencias de medidas, Schema.org Recipe y búsqueda semántica.',
+      content: `## El desafío técnico detrás de un recetario digital profesional
+
+La mayoría de portales gastronómicos almacenan los ingredientes de una receta como texto plano en HTML (\`"2 cucharadas de ají panca"\` o \`"1/2 kg de papa amarilla"\`). Aunque resulta cómodo para publicar un blog tradicional, ese enfoque rompe cualquier funcionalidad interactiva seria: impide recalcular porciones con precisión, dificulta convertir unidades entre gramos, tazas y onzas, y vuelve impreciso el filtrado por ingredientes disponibles o restricciones alimentarias.
+
+Al diseñar **perusabor.atpdev.dev**, decidimos tratar cada plato de la gastronomía peruana —desde un cebiche clásico hasta una carapulcra con sopa seca o un rocoto relleno arequipeño— como una estructura de datos fuertemente tipada en **TypeScript**.
+
+## Modelo normalizado de ingredientes y escalado inteligente
+
+Cada receta separa claramente la narrativa culinaria del grafo de cantidades:
+
+- **Estructura atómica por insumo:** cada ingrediente declara \`cantidadBase\`, \`unidad\`, \`comportamientoEscalado\` (\`lineal\`, \`fijo\`, \`logaritmico\`) y notas regionales (por ejemplo, reemplazos cuando el usuario cocina fuera del Perú y busca alternativas al ají amarillo fresco).
+- **Redondeo culinario legible:** multiplicar \`0.5\` huevo por \`3\` comensales no debería mostrar \`1.5 unidades\`, ni \`0.333333 cucharaditas\` de sal. Aplicamos reglas de redondeo fraccionario y tolerancia por familia de insumo (especias, líquidos, proteínas y piezas enteras) para conservar la usabilidad real en cocina.
+- **Temporizador integrado por paso:** cada etapa de cocción expone duración estimada y alertas visuales sin abandonar la vista de preparación, evitando que el usuario tenga que desbloquear el teléfono con las manos húmedas constantemente.
+
+## SEO técnico con \`Schema.org Recipe\` y rendimiento SSR
+
+Un recetario público vive o muere según la calidad de su indexación y su tiempo de carga en dispositivos móviles dentro de la cocina:
+
+1. **Datos estructurados \`Recipe\` JSON-LD:** cada ficha publica \`prepTime\`, \`cookTime\`, \`totalTime\`, \`recipeYield\`, \`recipeCuisine: "Peruvian"\`, lista limpia de \`recipeIngredient\` y pasos \`HowToStep\` sincronizados exactamente con el texto visible.
+2. **Server Components con tipado estricto:** el catálogo completo se pre-renderiza en el servidor para entregar contenido HTML inmediato tanto a buscadores como a lectores con conexiones móviles lentas.
+3. **Sitemaps e imágenes optimizadas:** el mapa XML expone únicamente recetas completas verificadas, acompañadas de textos alternativos descriptivos e imágenes ligeras para mantener **CLS cercano a 0**.`
+    },
+    en: {
+      title: 'Computational Gastronomy: Modeling Recipes, Dynamic Scaling, and Structured Data in Next.js',
+      category: 'Web Architecture & Data',
+      excerpt:
+        'Designing typed culinary data structures for Peruvian recipes with proportional serving scaling, fractional rounding rules, and validated Schema.org Recipe JSON-LD.',
+      content: `## Structuring recipes beyond plain HTML paragraphs
+
+Most food portals store ingredient lists as unstructured HTML strings (\`"2 tbsp aji panca"\`, \`"1/2 kg yellow potato"\`). While fast to author, unstructured text blocks accurate serving scaling, metric/imperial conversions, and allergen or pantry filtering. For **perusabor.atpdev.dev**, every Peruvian recipe is modeled in strongly typed **TypeScript** records.
+
+## Smart ingredient scaling rules
+
+Rather than naively multiplying every number linearly:
+
+- Each ingredient defines a base quantity, canonical unit, scaling curve (\`linear\`, \`sublinear\` for aromatics/spices, or \`fixed\` for frying oil), and regional substitution hints when cooking abroad.
+- A culinary fraction formatter prevents unreadable outputs like \`0.33333 tsp\`, rounding naturally to kitchen-friendly increments.
+- Step-by-step timers run directly inside the cooking view so users keep hands free while preparing dishes.
+
+## Server-side rendering and \`Recipe\` JSON-LD
+
+Every dish route pre-renders complete editorial context on the server alongside synchronized **Schema.org \`Recipe\`** markup (\`prepTime\`, \`cookTime\`, \`recipeIngredient\`, \`HowToStep\`) and clean XML sitemaps for fast mobile discovery.`
+    }
+  },
+  {
+    slug: 'animaciones-canvas-css-60fps-capacitor-mobile',
+    publishedAt: '2026-10-12',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 7,
+    tags: ['Canvas 2D', 'CSS', 'Vite', 'Capacitor', 'Performance'],
+    relatedProjectSlug: 'interactivo-magic',
+    relatedProjectName: 'Interactivo Magic',
+    es: {
+      title: 'Animaciones fluidas a 60 FPS en móvil con HTML5 Canvas, CSS Compositor y Capacitor',
+      category: 'Frontend & Mobile',
+      excerpt:
+        'Técnicas prácticas para lograr tarjetas interactivas con partículas, confeti y transiciones suaves sin provocar jank ni consumo excesivo de batería en gama media.',
+      content: `## Por qué tantas animaciones web tartamudean en Android de gama media
+
+Crear experiencias interactivas memorables —como tarjetas digitales animadas, celebraciones con confeti, fuegos artificiales o sobres virtuales que se abren al tacto— exige respetar estrictamente el *pipeline* de renderizado del navegador. Cuando una aplicación anima propiedades como \`top\`, \`left\`, \`width\` o \`box-shadow\` en cada cuadro, fuerza fases repetidas de **Layout** y **Paint**, desplomando los cuadros por segundo por debajo de **24 FPS** en teléfonos económicos.
+
+En **magic.atpdev.dev** construimos decenas de escenas interactivas personalizadas para cumpleaños, aniversarios y fechas especiales combinando aceleración por GPU y una arquitectura híbrida ligera.
+
+## Reglas de oro para mantener 60 FPS constantes
+
+Aplicamos cuatro principios medibles en cada plantilla interactiva:
+
+1. **Propiedades exclusivas del Compositor:** las animaciones CSS de tarjetas, pétalos y botones utilizan únicamente \`transform\` (\`translate3d\`, \`scale\`, \`rotate\`) y \`opacity\`, delegando el cálculo al hilo compositor de la GPU sin recalcular geometría.
+2. **Pool de partículas reutilizable en HTML5 Canvas:** en lugar de crear y destruir cientos de objetos cada segundo (lo que dispara pausas del recolector de basura de JavaScript), pre-asignamos un arreglo fijo de partículas y reciclamos sus coordenadas al salir del *viewport*.
+3. **Escalado responsable por \`devicePixelRatio\`:** en pantallas móviles 3x o 4x, renderizar un lienzo full-screen a resolución nativa multiplica hasta por 16 los píxeles a rellenar. Limitamos el factor DPR de efectos ambientales a \`Math.min(window.devicePixelRatio, 2)\` sin pérdida perceptible de nitidez.
+4. **Respeto a \`prefers-reduced-motion\` y visibilidad:** cuando la pestaña pasa a segundo plano (\`document.hidden\`), el bucle \`requestAnimationFrame\` se pausa de inmediato para no drenar batería ni CPU innecesariamente.
+
+## Contenido indexable junto a aplicaciones interactivas
+
+Un aprendizaje clave al llevar experiencias interactivas a la web abierta es que los rastreadores y evaluadores automáticos necesitan contexto editorial claro alrededor del lienzo visual. Combinar la aplicación fluida con guías de uso, explicaciones técnicas, preguntas frecuentes y políticas visibles permite ofrecer tanto una experiencia lúdica de cero fricción como un sitio transparente para buscadores.`
+    },
+    en: {
+      title: 'Sustaining 60 FPS Mobile Animations with HTML5 Canvas, CSS Compositing, and Capacitor',
+      category: 'Frontend & Mobile',
+      excerpt:
+        'Eliminating frame drops on mid-range smartphones through compositor-only CSS transforms, object-pooled Canvas particles, DPR capping, and visibility pausing.',
+      content: `## Why celebratory web animations drop frames on mid-range phones
+
+Interactive cards, particle bursts, and animated reveals stall quickly when JavaScript or CSS mutates layout-triggering properties (\`top\`, \`left\`, \`width\`) on every animation tick. Inside **magic.atpdev.dev**, lightweight architecture keeps motion smooth even inside mobile WebViews.
+
+## Four practices behind steady 60 FPS scenes
+
+- **Compositor-only transforms:** UI transitions animate strictly \`transform\` and \`opacity\`, offloading work to the GPU compositor layer.
+- **Object-pooled Canvas particles:** Pre-allocated particle arrays avoid continuous garbage-collection pauses during confetti or firework loops.
+- **Bounded \`devicePixelRatio\`:** Clamping particle Canvas backing stores to \`Math.min(dpr, 2)\` cuts fill-rate overhead dramatically on high-density displays.
+- **Lifecycle & motion awareness:** Pausing \`requestAnimationFrame\` on background tabs and honoring \`prefers-reduced-motion\` preserves battery life and accessibility.`
+    }
+  },
+  {
+    slug: 'arquitectura-multi-subdominio-nextjs-caddy-pm2',
+    publishedAt: '2026-10-18',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 8,
+    tags: ['Caddy', 'PM2', 'VPS', 'Next.js', 'DevOps'],
+    relatedProjectSlug: 'chamba-pro',
+    relatedProjectName: 'Chamba Pro',
+    es: {
+      title: 'Orquestación de 11 aplicaciones web en un solo VPS con Caddy, PM2 y Monorepo pnpm',
+      category: 'Infraestructura & DevOps',
+      excerpt:
+        'Cómo desplegar múltiples aplicaciones Next.js, backends Node y SPAs en un servidor Linux económico con certificados TLS automáticos, aislamiento de puertos y despliegues sin caos.',
+      content: `## Centralizar proyectos sin multiplicar costos de infraestructura
+
+Cuando mantienes varios productos activos en producción —un portal principal, un agregador laboral, un procesador PDF, un recetario, un generador de sorteos y un panel administrativo— contratar instancias independientes en plataformas *serverless* o PaaS por cada proyecto dispara los costos mensuales y fragmenta la observabilidad.
+
+En **ATP Dev** consolidamos todo el ecosistema sobre un monorepo estructurado con **pnpm workspaces** desplegado en un servidor VPS único administrado mediante **Caddy Server** y **PM2**.
+
+## Separación limpia en el servidor: Caddy + PM2
+
+Cada subdominio apunta al mismo servidor mediante DNS, pero el enrutamiento se resuelve de forma explícita y verificable:
+
+- **TLS automático sin cronjobs frágiles:** **Caddy** gestiona la emisión y renovación automática de certificados **Let's Encrypt** para cada subdominio (\`www.atpdev.dev\`, \`chamba.atpdev.dev\`, \`pdf.atpdev.dev\`, \`sorteos.atpdev.dev\`, etc.) con HTTP/2 y HTTP/3 habilitados por defecto.
+- **Aplicaciones SSR aisladas por puerto interno:** cada app Next.js corre en modo \`next start\` asignada a un puerto local distinto (\`3000\` a \`3010\`) supervisada por **PM2** con reinicio automático ante fallos y límites de memoria definidos.
+- **SPAs estáticas servidas directo desde disco:** herramientas ligeras compiladas con Vite se sirven mediante \`file_server\` y \`try_files\` directamente desde Caddy, consumiendo prácticamente cero memoria RAM en reposo.
+
+## Disciplina de despliegue y verificación post-release
+
+Un monorepo en VPS solo es seguro si cada actualización sigue una secuencia predecible: compilar únicamente los paquetes impactados, validar códigos de estado HTTP reales (\`200 OK\`), comprobar que \`robots.txt\`, \`sitemap.xml\` y \`ads.txt\` respondan en cada host sin redirecciones rotas, y revisar métricas de consumo de memoria y tiempos de respuesta tras reiniciar los procesos en PM2.`
+    },
+    en: {
+      title: 'Operating 11 Web Apps on One Linux VPS with Caddy, PM2, and a pnpm Monorepo',
+      category: 'Infrastructure & DevOps',
+      excerpt:
+        'Practical production architecture using Caddy automatic TLS reverse proxying, isolated PM2 ports for Next.js servers, and zero-overhead static serving for SPAs.',
+      content: `## Consolidating multiple products without cloud sprawl
+
+Running distinct portfolios, job aggregators, utility tools, and APIs on separate paid PaaS plans quickly multiplies operational overhead. The **ATP Dev** ecosystem runs cleanly from a structured **pnpm monorepo** deployed onto a single Linux VPS.
+
+## Reverse proxy isolation and static efficiency
+
+- **Automatic HTTPS via Caddy:** Each subdomain terminates TLS cleanly with zero manual certificate scripts and routes either to a dedicated local Next.js port (\`3000–3010\`) or directly to static \`dist/\` bundles via \`file_server\`.
+- **Process supervision with PM2:** Memory caps and per-service restarts isolate failures so rebuilding or restarting one service never interrupts sibling applications.
+- **Post-deploy verification:** Automated checks confirm \`200 OK\` HTML responses, \`robots.txt\`, \`sitemap.xml\`, and asset integrity immediately after every rollout.`
+    }
+  },
+  {
+    slug: 'bases-datos-postgresql-plpgsql-consultas-cronologicas',
+    publishedAt: '2026-10-24',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 7,
+    tags: ['PostgreSQL', 'Supabase', 'SQL', 'SSR', 'Datos'],
+    relatedProjectSlug: 'code-history-day-web',
+    relatedProjectName: 'CodeHistory',
+    es: {
+      title: 'Consultas cronológicas, normalización histórica e ISR en PostgreSQL para efemérides técnicas',
+      category: 'Bases de Datos & Backend',
+      excerpt:
+        'Cómo modelar efemérides por mes y día en PostgreSQL con soporte multi-año, caché incremental en Next.js y contenido editorial indexable desde el primer byte.',
+      content: `## De un calendario estático a una base de conocimientos históricos
+
+Una plataforma de efemérides sobre computación (**codehistory.atpdev.dev**) o historia universal (**almaniq.atpdev.dev**) requiere responder preguntas en fracciones de milisegundo alrededor de ejes temporales exactos: *"¿Qué hitos de la ingeniería de software ocurrieron un día como hoy?"* o *"¿Cómo se conecta este lenguaje de 1972 con los sistemas actuales?"*.
+
+## Modelado eficiente de fechas históricas en PostgreSQL
+
+Al almacenar eventos que abarcan siglos —desde 1843 con Ada Lovelace hasta lanzamientos de software modernos— usar comparaciones simples sobre campos \`DATE\` completos impide aprovechar índices cuando se consulta solo por mes y día (\`MM-DD\`):
+
+- **Columnas indexadas de calendario:** almacenamos \`month_day\` normalizado o índice compuesto \`(event_month, event_day, significance_rank)\` junto al año histórico exacto en entero (\`event_year\`), evitando aplicar funciones \`EXTRACT()\` no indexables dentro de cláusulas \`WHERE\` calientes.
+- **Clasificación editorial y verificación:** cada registro distingue entre fecha exacta documentada (primer *commit*, publicación académica, lanzamiento oficial) y contexto técnico explicado en prosa clara para lectores y estudiantes.
+- **Respaldo tipado ante picos o mantenimiento:** el servidor combina consultas a **Supabase PostgreSQL** con catálogos curados locales de reserva y estrategias **ISR (\`revalidate\`)**, garantizando que la página jamás entregue pantallas vacías de *"Cargando..."* a visitantes ni rastreadores.
+
+## Por qué la hidratación mixta perjudica el SEO informativo
+
+Uno de los errores más comunes en aplicaciones educativas creadas con React consiste en renderizar un esqueleto vacío en SSR y pedir los datos históricos recién en el navegador mediante \`useEffect\`. Al mover la consulta inicial a **Server Components** e hidratar únicamente los controles interactivos (filtros de fecha, navegación entre años y búsqueda), la primera respuesta HTML ya transporta todo el valor histórico y educativo.`
+    },
+    en: {
+      title: 'Chronological Indexing and Server-Side Ephemeris Delivery in PostgreSQL and Next.js',
+      category: 'Databases & Backend',
+      excerpt:
+        'Designing fast month/day lookup schemas in PostgreSQL alongside Incremental Static Regeneration so educational timelines never ship empty loading shells.',
+      content: `## Fast month-and-day queries across historical centuries
+
+Historical platforms like **codehistory.atpdev.dev** and **almaniq.atpdev.dev** query events across arbitrary centuries using month-day axes rather than full timestamps.
+
+## Schema design and zero-skeleton delivery
+
+- **Index-friendly month/day keys:** Storing integer \`event_month\`, \`event_day\`, and \`event_year\` columns with composite indexes keeps daily lookups fast without full-table \`EXTRACT()\` scans.
+- **Verified editorial depth:** Each entry pairs verified publication/release dates with accessible architectural explanations.
+- **SSR first, interactive enhancement second:** Moving initial fetches from client \`useEffect\` hooks into Next.js **Server Components** with ISR ensures visitors and search crawlers receive complete HTML immediately.`
+    }
+  },
+  {
+    slug: 'clean-architecture-kotlin-jetpack-compose-hilt',
+    publishedAt: '2026-10-30',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 8,
+    tags: ['Kotlin', 'Jetpack Compose', 'Android', 'CameraX', 'Hilt'],
+    relatedProjectSlug: 'lectorqr-pro',
+    relatedProjectName: 'LectorQR Pro',
+    es: {
+      title: 'Clean Architecture en Android moderno con Kotlin, Jetpack Compose, CameraX y Hilt',
+      category: 'Ingeniería Android',
+      excerpt:
+        'Cómo desacoplar el análisis de códigos QR con CameraX y ML Kit del estado de UI en Compose, reduciendo bloqueos, fugas de ciclo de vida y duplicidad de lógica.',
+      content: `## Más allá del clásico patrón monolítico en \`MainActivity\`
+
+En aplicaciones Android enfocadas en cámara y procesamiento en tiempo real —como escáneres de códigos QR y códigos de barras— el antipatrón más frecuente consiste en mezclar permisos de cámara, inicialización de \`CameraX\`, callbacks de detección y lógica de navegación dentro de un único \`Activity\` difícil de probar.
+
+En **LectorQR Pro** (junto a su portal web en **lectorqr.atpdev.dev**) estructuramos la aplicación siguiendo **Clean Architecture + MVVM unidireccional (UDF)** optimizada para **Kotlin** y **Jetpack Compose**.
+
+## Capas claras y ciclo de vida predecible
+
+La separación de responsabilidades evita acoplamientos frágiles al actualizar dependencias de Google Play o cámaras de distintos fabricantes:
+
+1. **Capa de Datos e Infraestructura (\`data\`):** encapsula Room para historial local persistente sin conexión, análisis de imagen mediante **ML Kit / ZXing** sobre \`ImageAnalysis.Analyzer\` ejecutado en un \`ExecutorService\` dedicado, y validación estricta de esquemas detectados (\`https://\`, \`WIFI:\`, \`BEGIN:VCARD\`, \`mailto:\`, EAN-13).
+2. **Capa de Dominio (\`domain\`):** define casos de uso puros en Kotlin sin dependencias de Android (\`ParseQrPayloadUseCase\`, \`InspectUrlSafetyUseCase\`) verificables con pruebas unitarias instantáneas en JVM.
+3. **Capa de Presentación (\`ui\`):** los \`ViewModel\` inyectados con **Hilt** exponen un único \`StateFlow<ScannerUiState>\` inmutable consumido por pantallas declarativas en **Jetpack Compose**, garantizando recomposiciones mínimas.
+
+## Seguridad ante códigos QR maliciosos
+
+Un lector moderno no debe abrir automáticamente cualquier URL escaneada. Antes de invocar un \`Intent\` externo, el parser clasifica el protocolo, expone de forma legible el dominio real de destino, detecta parámetros sospechosos o enlaces acortados y exige confirmación consciente del usuario —protegiendo la privacidad sin sacrificar velocidad.`
+    },
+    en: {
+      title: 'Modern Android Clean Architecture with Kotlin, Jetpack Compose, CameraX, and Hilt',
+      category: 'Android Engineering',
+      excerpt:
+        'Decoupling CameraX frame analyzers and QR payload parsers from Compose UI state using Hilt injection, immutable StateFlow models, and safe URI validation.',
+      content: `## Keeping camera pipelines out of UI components
+
+Real-time Android scanner apps easily collapse into unmaintainable lifecycle bugs when permissions, **CameraX** setup, frame decoding, and navigation live inside a single Activity. **LectorQR Pro** isolates these layers with **Clean Architecture + UDF**.
+
+## Layered separation and payload safety
+
+- **Data layer:** Runs \`ImageAnalysis.Analyzer\` on background executors with **ML Kit** and stores offline scan history inside **Room**.
+- **Domain layer:** Pure Kotlin use cases validate Wi-Fi configurations, vCards, EAN barcodes, and external URLs, testable directly on the JVM.
+- **Presentation layer:** **Hilt**-injected ViewModels expose immutable \`StateFlow\` models to **Jetpack Compose**.
+- **Anti-phishing safeguard:** External URLs are never auto-launched blindly; the parsed host and scheme are surfaced clearly before any browser Intent fires.`
+    }
+  },
+  {
+    slug: 'consent-mode-v2-privacidad-analitica-web-nextjs',
+    publishedAt: '2026-11-04',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 7,
+    tags: ['Privacidad', 'Consent Mode v2', 'Core Web Vitals', 'Next.js'],
+    relatedProjectSlug: 'sorteos-pro',
+    relatedProjectName: 'Sorteos Pro',
+    es: {
+      title: 'Implementación limpia de Consent Mode v2, analítica diferida y políticas transparentes en Next.js',
+      category: 'Privacidad & Rendimiento Web',
+      excerpt:
+        'Cómo cumplir con estándares de privacidad, evitar scripts invasivos antes de la interacción inicial y mantener Core Web Vitals excelentes sin perder métricas reales.',
+      content: `## Privacidad del usuario y velocidad de carga no son objetivos opuestos
+
+Añadir etiquetas de medición, mapas de calor o monetización directamente en el encabezado sin gobierno técnico suele producir dos problemas graves: viola expectativas de consentimiento transparente y dispara el tiempo de bloqueo total (**TBT**) en dispositivos móviles al descargar decenas de kilobytes de scripts externos antes de que el usuario siquiera vea el contenido principal.
+
+En todo el ecosistema **atpdev.dev** adoptamos una arquitectura unificada basada en consentimiento explícito, carga diferida post-LCP y páginas legales reales accesibles desde cada vista.
+
+## Principios técnicos de nuestra implementación
+
+1. **Estado inicial seguro en Consent Mode v2:** antes de cargar cualquier etiqueta de medición opcional, inicializamos \`gtag('consent', 'default', ...)\` respetando valores denegados por defecto cuando corresponde y actualizando únicamente ante la acción explícita del visitante en nuestro banner ligero.
+2. **Retraso inteligente tras \`Largest Contentful Paint\`:** las integraciones de telemetría no esenciales esperan a la carga completa y a una ventana de reposo o primera interacción real del usuario (\`scroll\`, \`pointerdown\`, \`keydown\`), logrando puntajes de **LCP inferiores a 1 segundo** y **Rendimiento > 90** en escritorio y móvil.
+3. **Aislamiento estricto de entornos locales:** ningún rastreador de terceros debe contaminar paneles de analítica desde sesiones de desarrollo (\`localhost\`, \`127.0.0.1\`). Verificamos el \`hostname\` en tiempo de ejecución antes de inyectar cualquier identificador de proyecto.
+4. **Exclusión en páginas sensibles y legales:** las rutas de política de privacidad, términos de uso y avisos de transparencia no cargan anuncios invasivos y ofrecen enlaces claros de contacto y gestión de cookies.`
+    },
+    en: {
+      title: 'Clean Consent Mode v2, Post-LCP Analytics Deferral, and Transparent Privacy Architecture',
+      category: 'Web Privacy & Performance',
+      excerpt:
+        'Balancing accurate telemetry, explicit cookie consent defaults, localhost exclusion, and fast Largest Contentful Paint scores across multi-app Next.js portals.',
+      content: `## Protecting privacy and Core Web Vitals simultaneously
+
+Dropping analytics and ad tags blindly into document heads slows mobile rendering and violates clear user consent expectations. Across **atpdev.dev**, telemetry follows strict lifecycle boundaries.
+
+## Key engineering safeguards
+
+- **Default Consent Mode v2 initialization:** Consent flags initialize safely before optional analytics fire and update upon explicit banner choice.
+- **Post-LCP deferred loading:** Non-essential scripts wait for page readiness or first interaction so initial paint and **LCP** remain unaffected.
+- **Localhost isolation & legal route exclusions:** Runtime hostname guards filter \`localhost\` traffic from production dashboards, while \`/privacy\` and \`/terms\` routes remain ad-free.`
+    }
+  },
+  {
+    slug: 'diseno-ui-accesible-contraste-wcag-modo-oscuro',
+    publishedAt: '2026-11-08',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 6,
+    tags: ['Accesibilidad', 'WCAG', 'CSS', 'Design Systems', 'Lighthouse'],
+    relatedProjectSlug: 'almaniq-web',
+    relatedProjectName: 'Almaniq',
+    es: {
+      title: 'Accesibilidad WCAG AA real: contraste en modo claro/oscuro, jerarquía semántica y Lighthouse 100',
+      category: 'Diseño UI & Accesibilidad',
+      excerpt:
+        'Errores sutiles de contraste que penalizan sitios modernos con colores neón o pasteles y cómo resolverlos mediante tokens semánticos en CSS.',
+      content: `## Por qué un acento bonito para botones falla en enlaces de texto
+
+Al construir sistemas de diseño con soporte dual para **modo oscuro** y **modo claro**, es extremadamente común elegir un color de marca vibrante —por ejemplo, cian eléctrico o esmeralda brillante— y reutilizar exactamente el mismo código hexadecimal tanto en fondos de botones con texto blanco como en enlaces pequeños sobre fondos claros.
+
+Durante nuestras auditorías automáticas con **Google Lighthouse**, detectamos exactamente ese patrón: un tono \`#10b981\` luce legible sobre fondo oscuro \`#0a0f18\`, pero sobre blanco puro \`#ffffff\` apenas alcanza una relación de contraste cercana a \`2.5:1\`, quedando muy por debajo del umbral **WCAG AA de \`4.5:1\`** exigido para texto normal.
+
+## Solución mediante tokens de propósito en CSS
+
+En lugar de asignar colores genéricos por matiz, definimos variables CSS separadas según su función óptica en ambos temas:
+
+- **\`--accent\`:** reservado para bordes suaves, indicadores gráficos grandes y botones rellenos de alto impacto visual.
+- **\`--accent-text\`:** calibrado específicamente por contraste matemático (\`#047857\` sobre fondo claro y \`#34d399\` sobre fondo oscuro) para garantizar lectura cómoda en enlaces, migas de pan, categorías y etiquetas pequeñas.
+- **Orden jerárquico de encabezados (\`h1\` -> \`h2\` -> \`h3\`):** evitar saltos arbitrarios de \`<h1>\` directo a \`<h4>\` permite tanto a lectores de pantalla como a herramientas de auditoría interpretar la estructura editorial sin ambigüedades, llevando la puntuación de **Accesibilidad de Lighthouse a 100/100**.`
+    },
+    en: {
+      title: 'Practical WCAG AA Accessibility: Dual-Theme Contrast Tokens and 100/100 Lighthouse Audits',
+      category: 'UI Design & Accessibility',
+      excerpt:
+        'Resolving subtle contrast failures on vibrant brand accents across light and dark themes using semantic CSS tokens and strict heading hierarchies.',
+      content: `## Why one brand hex color rarely works in both themes
+
+A vivid cyan or emerald accent (\`#10b981\`) often reads clearly on dark surfaces yet drops below a \`2.6:1\` contrast ratio on white backgrounds—failing the **4.5:1 WCAG AA** requirement for body links and metadata labels.
+
+## Purpose-driven CSS contrast tokens
+
+- Separate **\`--accent\`** (surfaces, badges, large UI indicators) from **\`--accent-text\`** (calibrated \`>= 4.5:1\` ink for light and dark themes independently).
+- Enforce sequential heading levels (\`h1 -> h2 -> h3\`) and meaningful button labels so automated **Lighthouse** audits achieve **100/100 Accessibility** alongside better human readability.`
+    }
+  },
+  {
+    slug: 'calculadora-remuneraciones-cas-dl728-peru-logica',
+    publishedAt: '2026-11-12',
+    updatedAt: '2026-11-12',
+    readingTimeMinutes: 8,
+    tags: ['TypeScript', 'Perú', 'Legislación Laboral', 'CAS', 'Finanzas'],
+    relatedProjectSlug: 'chamba-pro',
+    relatedProjectName: 'Chamba Pro',
+    es: {
+      title: 'Ingeniería de reglas laborales en TypeScript: cálculo neto para regímenes CAS, D.L. 728 y UIT en Perú',
+      category: 'Lógica de Dominio & Producto',
+      excerpt:
+        'Cómo modelar descuentos de AFP/ONP, impuesto a la renta de quinta categoría por tramos progresivos de UIT, EsSalud y gratificaciones de forma transparente y verificable.',
+      content: `## Traducir normativa laboral compleja a software claro para postulantes
+
+Cuando un profesional en Perú evalúa una convocatoria pública bajo régimen **CAS (D.L. 1057)** frente a una oferta privada en planilla **D.L. 728**, comparar únicamente el sueldo bruto publicado induce a errores importantes de decisión: cambian el derecho a gratificaciones de julio y diciembre, la **CTS**, los aguinaldos estatales de **S/ 300**, la bonificación extraordinaria y las retenciones previsionales o tributarias.
+
+Dentro de las herramientas de **chamba.atpdev.dev**, modelamos estas reglas en funciones puras de **TypeScript** desglosadas paso a paso para que cualquier usuario entienda exactamente de dónde sale su sueldo neto mensual y su ingreso anualizado real.
+
+## Desglose modular de reglas tributarias y previsionales
+
+Nuestra lógica separa parámetros oficiales actualizables por ejercicio fiscal de las fórmulas de cálculo:
+
+- **Parámetros anuales centralizados:** valor oficial de la **UIT** vigente, tope de **EsSalud** en contratos CAS y tasas de comisión sobre flujo / prima de seguro / aporte obligatorio (**10 %**) según sistema pensionario (**ONP 13 %** o **AFP**: Integra, Prima, Profuturo, Hábitat).
+- **Tramos progresivos de Impuesto a la Renta de Quinta Categoría:** el cálculo proyecta la remuneración anual (considerando 12 sueldos en CAS frente a 14 en D.L. 728), deduce **7 UIT** fijas de inafectación legal y aplica escalonadamente las tasas de **8 %**, **14 %**, **17 %**, **20 %** y **30 %** sobre el exceso en cada tramo, dividiendo el resultado mensual de manera transparente.
+- **Comparación anualizada honesta:** más allá del monto mensual en boleta, la herramienta contrasta compensación total anual incluyendo CTS y gratificaciones legales —ayudando al postulante a tomar decisiones informadas antes de postular.`
+    },
+    en: {
+      title: 'Encoding Peruvian Payroll Rules in TypeScript: CAS, D.L. 728, AFP/ONP, and Progressive UIT Tax',
+      category: 'Domain Logic & Product',
+      excerpt:
+        'Structuring pure TypeScript calculators for public CAS contracts vs. private D.L. 728 payrolls, pension deductions, and progressive 5ta Categoría income tax brackets.',
+      content: `## Comparing public CAS offers against private payroll accurately
+
+Comparing raw gross monthly salaries between a Peruvian public **CAS (D.L. 1057)** tender and a private **D.L. 728** role overlooks major structural differences: 12 monthly payments plus modest holiday stipends versus 14 salaries, **CTS** severance deposits, and extraordinary bonuses.
+
+## Modular domain formulas in pure TypeScript
+
+- **Versioned fiscal constants:** Annual **UIT** reference units, **ONP (13%)** vs. **AFP** mandatory/insurance/commission rates, and CAS EsSalud caps live in explicit config tables.
+- **Progressive tax engine:** Annualized compensation deducts the statutory **7 UIT** allowance before applying progressive **8%, 14%, 17%, 20%, and 30%** brackets clearly step by step so candidates see exact monthly net take-home pay.`
+    }
   }
 ];
 

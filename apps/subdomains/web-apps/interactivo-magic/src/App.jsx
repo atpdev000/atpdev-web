@@ -31,9 +31,6 @@ import { initializeAdMob, showBannerAd, showRewardedAd, showInterstitial, prepar
 import { getAdSenseClientId } from './config/adsenseConfig';
 import UpdateNotification from './components/UpdateNotification';
 import { DOWNLOAD_LINKS } from './config/versionConfig';
-import AdsterraNativeBanner from './components/AdsterraNativeBanner';
-import AdsterraBanner728x90 from './components/AdsterraBanner728x90';
-import EzoicAd from './components/EzoicAd';
 import './styles/index.css';
 
 const CATEGORIES = [
@@ -1617,13 +1614,6 @@ function App() {
       {/* Version Update Notification */}
       <UpdateNotification />
 
-      {/* SLOT A: Header Ad - Display (Web only) */}
-      {!isMobileApp && (
-        <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-          <AdsterraBanner728x90 />
-        </div>
-      )}
-
       {/* Hero Section (Web only) */}
       {!selectedTemplate && !isMobileApp && (
         <section className="hero-section container" style={{ textAlign: 'center', paddingTop: '6rem', paddingBottom: '4rem' }}>
@@ -1693,13 +1683,6 @@ function App() {
               </a>
             </div>
           </motion.div>
-
-          {/* SLOT B: Mid Landing Ad - In-article */}
-          {!isMobileApp && (
-            <div style={{ marginTop: '2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-              <AdsterraNativeBanner />
-            </div>
-          )}
 
           {/* Animated Icons */}
           <motion.div
@@ -1927,16 +1910,10 @@ function App() {
               ))}
           </div>
 
-          {!isMobileApp && (
-            <div style={{ margin: '4rem auto 2rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <AdsterraNativeBanner className="container" />
-            </div>
-          )}
-
           {isMobileApp && (
             <div style={{ textAlign: 'center', marginTop: '3rem', opacity: 0.6 }}>
               <button
-                onClick={() => window.open('https://interactivomagic.ftydownloader.com/politica-privacidad.html', '_blank')}
+                onClick={() => window.open('/politica-privacidad.html', '_blank')}
                 style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.85rem', textDecoration: 'underline', cursor: 'pointer' }}
               >
                 Política de Privacidad
@@ -1954,11 +1931,6 @@ function App() {
           gap: '2rem',
           alignItems: 'start'
         }} className="form-layout-grid">
-          {/* Ad Lateral Izquierdo (Desktop) */}
-          <div className="side-ad-form left-ad" style={{ display: 'none' }}>
-            {!isMobileApp && <EzoicAd id="101" />}
-          </div>
-
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -1967,11 +1939,6 @@ function App() {
           >
             {!showResult ? (
               <>
-                {!isMobileApp && (
-                  <div style={{ marginBottom: '2rem', width: '100%' }}>
-                    <AdsterraNativeBanner />
-                  </div>
-                )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                   <button
                     onClick={() => setSelectedTemplate(null)}
@@ -3782,13 +3749,6 @@ function App() {
                       </>
                     )}
                   </button>
-
-                  {/* Form Bottom Ezoic Ad */}
-                  {!isMobileApp && (
-                    <div style={{ marginTop: '2rem', marginBottom: '1rem', textAlign: 'center' }}>
-                      <EzoicAd id="104" />
-                    </div>
-                  )}
                 </div>
               </>
             ) : (
@@ -3815,13 +3775,6 @@ function App() {
                 }}>
                   ¡Tu mensaje mágico está listo!
                 </h2>
-
-                {!isMobileApp && (
-                  <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                    <AdsterraNativeBanner />
-                    <EzoicAd id="105" />
-                  </div>
-                )}
 
                 <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem', fontSize: '1.1rem', lineHeight: '1.6' }}>
                   Abre la vista previa, comparte el link por WhatsApp o descarga el archivo HTML para enviarlo directamente.
@@ -3936,11 +3889,6 @@ function App() {
               </motion.div>
             )}
           </motion.div>
-
-          {/* Ad Lateral Derecho (Desktop) */}
-          <div className="side-ad-form right-ad" style={{ display: isMobileApp ? 'none' : 'block' }}>
-            {!isMobileApp && <EzoicAd id="102" />}
-          </div>
         </div>
       )
       }
@@ -4035,27 +3983,6 @@ function App() {
         )
       }
 
-      {/* Ad Placeholder Section */}
-      {
-        !selectedTemplate && !isMobileApp && (
-          <div className="container" style={{ marginTop: '4rem', marginBottom: '4rem' }}>
-            <div className="glass" style={{ padding: '1rem', textAlign: 'center', borderStyle: 'dashed', background: 'rgba(255,255,255,0.02)' }}>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '1rem' }}>Publicidad</p>
-              <div style={{ minHeight: '100px', display: 'flex', alignItems: 'center', flexDirection: 'column', justifyContent: 'center', gap: '0.5rem' }}>
-                <EzoicAd id="103" />
-              </div>
-            </div>
-          </div>
-        )
-      }
-
-      {/* SLOT D: Footer Ad - Display */}
-      {!selectedTemplate && !isMobileApp && (
-        <div style={{ margin: '4rem auto', display: 'flex', justifyContent: 'center' }}>
-          <AdsterraBanner728x90 />
-        </div>
-      )}
-
       {/* Footer */}
       {
         !selectedTemplate && !isMobileApp && (
@@ -4077,31 +4004,22 @@ function App() {
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <li><a href="#plantillas" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Plantillas</a></li>
                     <li><a href="#como-funciona" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Cómo funciona</a></li>
-                    <li><a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Precios</a></li>
+                    <li><a href="https://www.atpdev.dev/apps/interactivo-magic" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Ficha Técnica</a></li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Compañía</h4>
+                  <h4 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Legal</h4>
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    <li><a href="https://interactivomagic.ftydownloader.com/politica-privacidad.html" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Privacidad</a></li>
-                    <li><a href="#" onClick={(e) => { e.preventDefault(); setLegalModal('terms'); }} style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Términos</a></li>
-                    <li><a href="#" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Contacto</a></li>
+                    <li><a href="/politica-privacidad.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Política de Privacidad</a></li>
+                    <li><a href="#" onClick={(e) => { e.preventDefault(); setLegalModal('terms'); }} style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Términos de Uso</a></li>
+                    <li><a href="https://www.atpdev.dev" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>ATP Dev Portal</a></li>
                   </ul>
-                </div>
-
-                <div>
-                  <h4 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Síguenos</h4>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <a href="#" className="social-link" style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'white' }}>F</a>
-                    <a href="#" className="social-link" style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'white' }}>T</a>
-                    <a href="#" className="social-link" style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', color: 'white' }}>I</a>
-                  </div>
                 </div>
               </div>
 
               <div style={{ textAlign: 'center', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                © 2026 InteractivoMagic - Hecho con ❤️ para compartir momentos especiales
+                © 2026 InteractivoMagic by ATP Dev - Hecho con ❤️ para compartir momentos especiales
               </div>
             </div>
           </footer>

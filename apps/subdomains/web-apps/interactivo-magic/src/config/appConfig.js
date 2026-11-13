@@ -1,5 +1,5 @@
 // Production Domain Configuration
-export const PRODUCTION_DOMAIN = 'https://interactivomagic.ftydownloader.com';
+export const PRODUCTION_DOMAIN = 'https://magic.atpdev.dev';
 export const SHORTENER_API = 'https://s.ftydownloader.com'; // Your custom shortener domain
 export const SHORTENER_TYPE = 'custom'; // Enabled custom by default as requested
 export const CUSTOM_SHORTENER_API_KEY = ''; // Optional: if your self-hosted API requires a key

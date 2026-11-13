@@ -6,18 +6,20 @@
   <link rel="icon" type="image/png" href="/logo.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>InteractivoMagic | Crea Mensajes Mágicos e Interactivos</title>
+  <title>InteractivoMagic | Mensajes Mágicos y Tarjetas Interactivas 3D</title>
   <meta name="description"
-    content="La plataforma #1 para crear mensajes interactivos, propuestas de amor y felicitaciones de cumpleaños mágicas. ¡Sorprende a tus seres queridos ahora!" />
+    content="Crea tarjetas interactivas 3D, galaxias de estrellas, cartas digitales con música y dedicatorias animadas listas para compartir por enlace o archivo HTML." />
   <meta name="keywords"
-    content="mensajes interactivos, propuestas de amor, tarjetas virtuales, felicitaciones de cumpleaños, sorpresa digital" />
+    content="mensajes interactivos, tarjetas virtuales 3d, felicitaciones digitales, cartas animadas, sorpresa whatsapp" />
+  <link rel="canonical" href="https://magic.atpdev.dev/" />
 
   <!-- Open Graph / Meta Social -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="InteractivoMagic | Mensajes que Sorprenden" />
+  <meta property="og:url" content="https://magic.atpdev.dev/" />
+  <meta property="og:title" content="InteractivoMagic | Tarjetas Interactivas y Experiencias Web" />
   <meta property="og:description"
-    content="Crea experiencias únicas e interactivas para compartir en WhatsApp. ¡Gratis y rápido!" />
-  <meta property="og:image" content="https://interactivomagic.com/og-image.jpg" />
+    content="Diseña experiencias interactivas personalizadas con animaciones a 60 FPS para cumpleaños, aniversarios y ocasiones especiales." />
+  <meta property="og:image" content="https://magic.atpdev.dev/logo.png" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,11 +27,176 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
 
-  <!-- Google AdSense desactivado hasta contar con contenido SSR editorial suficiente -->
+  <meta name="google-adsense-account" content="ca-pub-5414009811868137" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5414009811868137" crossorigin="anonymous"></script>
+
+  <style>
+    .magic-editorial {
+      background: #090612;
+      color: #e2e8f0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4.5rem 1.25rem;
+      font-family: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
+      line-height: 1.7;
+    }
+    .magic-editorial-inner { max-width: 60rem; margin: 0 auto; }
+    .magic-badge {
+      display: inline-block;
+      padding: 0.25rem 0.85rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(244, 114, 182, 0.35);
+      background: rgba(244, 114, 182, 0.12);
+      color: #f9a8d4;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .magic-editorial h2 {
+      color: #ffffff;
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin: 0 0 1rem;
+      line-height: 1.25;
+    }
+    .magic-editorial h3 {
+      color: #f9a8d4;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 1.8rem 0 0.65rem;
+    }
+    .magic-editorial p { margin: 0 0 1rem; color: #cbd5e1; font-size: 0.98rem; }
+    .magic-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .magic-card {
+      background: rgba(24, 16, 44, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+    .magic-card strong { color: #ffffff; display: block; margin-bottom: 0.35rem; font-size: 1rem; }
+    .magic-card span { color: #cbd5e1; font-size: 0.88rem; }
+    .magic-faq {
+      background: rgba(24, 16, 44, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 0.9rem;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.9rem;
+    }
+    .magic-faq strong { color: #ffffff; display: block; margin-bottom: 0.35rem; }
+    .magic-footer-links {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .magic-footer-links a { color: #f9a8d4; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
 </head>
 
 <body>
   <div id="root"></div>
+
+  <main id="editorial-guide" class="magic-editorial" aria-label="Guía Creativa y Técnica de InteractivoMagic">
+    <div class="magic-editorial-inner">
+      <span class="magic-badge">Guía Creativa &amp; Arquitectura Interactiva</span>
+      <h2>Tarjetas digitales interactivas en 3D, Canvas y música sincronizada sin registros</h2>
+      <p>
+        <strong>InteractivoMagic</strong> (<code>magic.atpdev.dev</code>) es un estudio creativo web creado dentro de
+        <strong>ATP Dev</strong> que transforma dedicatorias tradicionales de texto plano en escenas interactivas
+        personalizables con partículas en HTML5 Canvas, efectos tipográficos y libros tridimensionales ejecutados
+        directamente en cualquier navegador moderno o teléfono móvil sin obligar al destinatario a instalar aplicaciones.
+      </p>
+
+      <h3>Categorías creativas disponibles y casos de uso recomendados</h3>
+      <div class="magic-cards">
+        <div class="magic-card">
+          <strong>Libros y cartas 3D</strong>
+          <span>Experiencias con páginas animadas, dedicatorias por capítulos y galerías fotográficas ligeras diseñadas para aniversarios, agradecimientos familiares y celebraciones especiales.</span>
+        </div>
+        <div class="magic-card">
+          <strong>Galaxias y esferas musicales</strong>
+          <span>Escenas estelares renderizadas en Canvas 2D donde nombres, frases y recuerdos orbitan acompañados por melodías seleccionadas por el creador.</span>
+        </div>
+        <div class="magic-card">
+          <strong>Minijuegos y retos lúdicos</strong>
+          <span>Ruletas de planes, tarjetas rascables digitales y rompecabezas pensados para invitar a amigos, parejas o compañeros de estudio de forma divertida.</span>
+        </div>
+        <div class="magic-card">
+          <strong>Eventos, Navidad y Año Nuevo</strong>
+          <span>Plantillas festivas para felicitaciones de cumpleaños, fin de año, agradecimientos docentes y metas grupales listas para enviar por enlace directo.</span>
+        </div>
+      </div>
+
+      <h3>Cómo logramos animaciones suaves a 60 FPS en dispositivos móviles</h3>
+      <p>
+        Cuando se comparte una tarjeta interactiva por mensajería, la mayoría de receptores la abren desde el navegador
+        integrado en Android o iOS. Para garantizar fluidez inmediata sin drenar la batería, todas nuestras escenas evitan
+        recalcular propiedades costosas de maquetación (<code>top</code> o <code>left</code>) durante la animación y se
+        apoyan en transformaciones aceleradas por GPU (<code>transform</code> y <code>opacity</code>), acotando el factor
+        de densidad de píxeles en Canvas y pausando el bucle visual automáticamente si el usuario cambia de pestaña.
+      </p>
+
+      <h3>Consejos editoriales para crear una dedicatoria memorable</h3>
+      <p>
+        Las tarjetas digitales más recordadas combinan tres detalles simples: un título breve con el nombre real del
+        destinatario, fotografías ligeras bien encuadradas antes de generar el enlace y un mensaje concreto que evoque un
+        recuerdo compartido en lugar de frases genéricas. Antes de enviar tu link por WhatsApp, Telegram o correo
+        electrónico, utiliza el botón <strong>Ver Vista Previa</strong> para confirmar la legibilidad en pantalla
+        vertical.
+      </p>
+
+      <h3>Preguntas frecuentes</h3>
+      <div class="magic-faq">
+        <strong>¿El destinatario necesita crear una cuenta para abrir mi tarjeta?</strong>
+        <p style="margin:0;">
+          No. Quien recibe el enlace o archivo HTML puede abrir la escena directamente en Chrome, Safari o su navegador
+          móvil habitual con un solo toque.
+        </p>
+      </div>
+      <div class="magic-faq">
+        <strong>¿Puedo descargar la experiencia como archivo HTML independiente?</strong>
+        <p style="margin:0;">
+          Sí. Al completar tu personalización en la web puedes copiar el enlace acortado o descargar un archivo
+          autocontenido listo para conservar o reenviar sin depender de editores externos.
+        </p>
+      </div>
+      <div class="magic-faq">
+        <strong>¿Cómo protegen la privacidad de los mensajes generados?</strong>
+        <p style="margin:0;">
+          No exigimos registro previo ni vendemos bases de datos de contactos. Puedes consultar las condiciones vigentes
+          en nuestra Política de Privacidad.
+        </p>
+      </div>
+
+      <footer class="magic-footer-links">
+        <span>© 2026 InteractivoMagic · Ecosistema creativo de <a href="https://www.atpdev.dev">ATP Dev</a></span>
+        <nav aria-label="Enlaces legales y ecosistema" style="display:flex;gap:1.25rem;flex-wrap:wrap;">
+          <a href="/politica-privacidad.html">Política de Privacidad</a>
+          <a href="https://www.atpdev.dev/apps/interactivo-magic">Ficha Técnica</a>
+          <a href="https://www.atpdev.dev/blog">Blog de Ingeniería</a>
+          <a href="https://sorteos.atpdev.dev">Sorteos Pro</a>
+        </nav>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
+      var guide = document.getElementById('editorial-guide');
+      if (guide) guide.remove();
+    }
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

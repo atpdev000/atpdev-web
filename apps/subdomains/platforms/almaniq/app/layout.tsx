@@ -4,13 +4,23 @@ import AnalyticsTracker from '@/components/AnalyticsTracker'
 import CookieBanner from '@/components/CookieBanner'
 import AdSenseInjector from '@/components/AdSenseInjector'
 import Script from 'next/script'
+const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137'
+
 export const metadata: Metadata = {
-  title: 'Almaniq | Curiosidades, Historia y Tendencias Globales',
-  description: 'Descubre curiosidades, efemérides históricas y tendencias globales día a día con Almaniq.',
+  metadataBase: new URL('https://almaniq.atpdev.dev'),
+  title: 'Almaniq | Curiosidades, Historia Universal y Tendencias Globales',
+  description:
+    'Almanaque digital de historia universal, hitos científicos, curiosidades culturales y tendencias verificadas día a día. Editado por ATP Dev.',
+  alternates: {
+    canonical: 'https://almaniq.atpdev.dev',
+  },
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',
+  },
+  other: {
+    'google-adsense-account': adsenseId,
   },
 }
 
@@ -60,6 +70,7 @@ export default function RootLayout({
       </head>
       <body>
         <AnalyticsTracker />
+        <AdSenseInjector adsenseId={adsenseId} />
         {children}
         <CookieBanner />
       </body>

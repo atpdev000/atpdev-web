@@ -4,8 +4,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>DNI Master - Scanner Digital HD</title>
-  <!-- Google AdSense desactivado hasta contar con contenido SSR editorial suficiente -->
+  <title>DNI Master - Scanner Digital HD y Exportación A4 Oficial</title>
+  <meta name="description" content="Escanea, corrige la perspectiva y exporta tu DNI o documento de identidad en PDF A4 oficial o Word a tamaño real (85.60 x 53.98 mm) 100% en tu navegador, sin subir archivos a servidores." />
+  <link rel="canonical" href="https://dni.atpdev.dev/" />
+  <meta name="google-adsense-account" content="ca-pub-5414009811868137" />
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5414009811868137" crossorigin="anonymous"></script>
+  <style>
+    .dni-editorial {
+      background: #090d16;
+      color: #cbd5e1;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 4rem 1.25rem;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.7;
+    }
+    .dni-editorial-inner { max-width: 56rem; margin: 0 auto; }
+    .dni-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      background: rgba(59, 130, 246, 0.12);
+      color: #93c5fd;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .dni-editorial h2 {
+      color: #f8fafc;
+      font-size: 1.65rem;
+      font-weight: 800;
+      margin: 0 0 1rem;
+      line-height: 1.25;
+    }
+    .dni-editorial h3 {
+      color: #93c5fd;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 1.75rem 0 0.6rem;
+    }
+    .dni-editorial p { margin: 0 0 1rem; font-size: 0.96rem; color: #cbd5e1; }
+    .dni-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .dni-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+    .dni-card strong { color: #ffffff; display: block; margin-bottom: 0.35rem; font-size: 0.98rem; }
+    .dni-card span { font-size: 0.88rem; color: #cbd5e1; }
+    .dni-faq {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 0.9rem;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 0.9rem;
+    }
+    .dni-faq strong { color: #f8fafc; display: block; margin-bottom: 0.35rem; }
+    .dni-footer-links {
+      margin-top: 2.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .dni-footer-links a { color: #93c5fd; text-decoration: underline; text-underline-offset: 3px; }
+  </style>
   <script>
     // OpenCV Non-Blocking Multi-CDN Loader
     window.cvLoadError = false;
@@ -48,6 +123,107 @@
 
 <body class="bg-[#090d16] text-white">
   <div id="root"></div>
+
+  <main id="editorial-guide" class="dni-editorial" aria-label="Guía Técnica y Privacidad de DNI Master Scanner">
+    <div class="dni-editorial-inner">
+      <span class="dni-badge">Guía Técnica &amp; Estándar ISO/IEC 7810 ID-1</span>
+      <h2>Escaneo, rectificación de perspectiva y exportación A4 oficial sin subir documentos a la nube</h2>
+      <p>
+        <strong>DNI Master Scanner</strong> (<code>dni.atpdev.dev</code>) es una aplicación web diseñada por
+        <strong>ATP Dev</strong> para digitalizar documentos de identidad, carnés universitarios, licencias de conducir
+        y tarjetas con dimensiones estándar desde la cámara o una fotografía común, generando en segundos un archivo
+        <strong>PDF en hoja A4</strong> o documento <strong>Word (.docx)</strong> listo para imprimir o adjuntar en
+        trámites administrativos.
+      </p>
+
+      <h3>¿Por qué una fotografía normal falla al imprimir un documento en A4?</h3>
+      <p>
+        Al fotografiar un documento sobre un escritorio, la lente del teléfono introduce dos distorsiones inevitables:
+        <em>deformación trapezoidal de perspectiva</em> (los bordes dejan de ser paralelos) y <em>escala arbitraria</em>
+        según la distancia de disparo. Al pegarla directamente en un procesador de texto, la impresión suele resultar
+        gigante, borrosa, inclinada o con sombras oscuras que invalidan la lectura de huellas, sellos y códigos MRZ.
+      </p>
+
+      <div class="dni-grid">
+        <div class="dni-card">
+          <strong>1. Rectificación por homografía</strong>
+          <span>Ajusta manualmente las cuatro esquinas exactas del anverso y reverso para proyectar el plano deformado a un rectángulo ortogonal perfecto en alta definición.</span>
+        </div>
+        <div class="dni-card">
+          <strong>2. Escala física ISO/IEC 7810 ID-1</strong>
+          <span>La plantilla de exportación respeta la proporción oficial de tarjetas de identificación (85.60 × 53.98 mm) centrada sobre lienzo A4 (210 × 297 mm).</span>
+        </div>
+        <div class="dni-card">
+          <strong>3. Filtros de contraste documental</strong>
+          <span>Incluye realce mágico tipo escáner de oficina, blanco y negro nítido para fotocopias claras y modo color fiel para conservar hologramas legibles.</span>
+        </div>
+        <div class="dni-card">
+          <strong>4. Procesamiento 100 % local</strong>
+          <span>El recorte cuadrilátero, los filtros y la generación del PDF o DOCX se ejecutan íntegramente en la memoria del navegador: tus imágenes nunca se envían a servidores externos.</span>
+        </div>
+      </div>
+
+      <h3>Buenas prácticas para lograr un escaneo nítido para trámites en Perú y Latinoamérica</h3>
+      <p>
+        Para obtener un documento impecable en el primer intento, apoya el DNI o cédula sobre una superficie lisa que
+        contraste con los bordes (por ejemplo, madera oscura o mesa mate), utiliza luz difusa lateral evitando el flash
+        directo del teléfono sobre los elementos reflectantes de seguridad y coloca ambas caras en posición horizontal
+        antes de marcar los cuatro vértices en el editor. Una vez revisado el resultado en el previsualizador dual,
+        exporta en formato <strong>PDF A4 Oficial</strong> si necesitas subirlo a mesas de partes virtuales (como
+        trámites SUNAT, universidades, bancos o postulaciones CAS) o elige <strong>Word (.docx)</strong> si deseas
+        añadir notas adicionales antes de imprimir.
+      </p>
+
+      <h3>Arquitectura y privacidad centrada en el usuario</h3>
+      <p>
+        Tratándose de documentos de identidad personal, la confidencialidad no puede depender únicamente de promesas
+        textuales. Todo el flujo matemático de <strong>DNI Master Scanner</strong> corre dentro de tu propio dispositivo
+        mediante Canvas 2D, visión por computadora en cliente y ensamblaje binario local de PDF y DOCX. Al cerrar la
+        pestaña o pulsar <em>Nuevo Escaneo</em>, las capturas temporales se descartan automáticamente de la sesión del
+        navegador sin dejar copias almacenadas en bases de datos remotas.
+      </p>
+
+      <h3>Preguntas frecuentes</h3>
+      <div class="dni-faq">
+        <strong>¿Las fotografías de mi DNI se guardan en algún servidor de ATP Dev?</strong>
+        <p style="margin:0;">
+          No. Ni las fotos originales ni los documentos PDF/Word generados salen de tu dispositivo durante el escaneo o
+          la exportación. Todo ocurre en tu navegador web.
+        </p>
+      </div>
+      <div class="dni-faq">
+        <strong>¿Qué formatos permite descargar la herramienta?</strong>
+        <p style="margin:0;">
+          Puedes descargar cada cara individualmente en imagen PNG sin pérdidas, generar una hoja A4 lista para imprimir
+          en formato PDF o exportar un documento editable en Word (.docx) con anverso y reverso alineados.
+        </p>
+      </div>
+      <div class="dni-faq">
+        <strong>¿Sirve también para carné de extranjería, brevete o tarjetas profesionales?</strong>
+        <p style="margin:0;">
+          Sí. Cualquier documento rectangular estándar (formato ID-1 o similar) puede rectificarse con los cuatro
+          tiradores de esquina para lograr un acabado plano y limpio.
+        </p>
+      </div>
+
+      <footer class="dni-footer-links">
+        <span>© 2026 DNI Master Scanner · Herramienta de <a href="https://www.atpdev.dev">ATP Dev</a></span>
+        <nav aria-label="Enlaces legales y documentación" style="display:flex;gap:1.25rem;flex-wrap:wrap;">
+          <a href="/privacidad.html">Política de Privacidad</a>
+          <a href="https://www.atpdev.dev/apps/dni-scanner-pro">Ficha Técnica</a>
+          <a href="https://www.atpdev.dev/blog">Blog de Ingeniería</a>
+          <a href="https://pdf.atpdev.dev">Master@PDF</a>
+        </nav>
+      </footer>
+    </div>
+  </main>
+
+  <script>
+    if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
+      var guide = document.getElementById('editorial-guide');
+      if (guide) guide.remove();
+    }
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

@@ -2,14 +2,14 @@
 export const CURRENT_VERSION = '1.2.0';
 
 // URL donde se verifica la última versión disponible
-export const VERSION_CHECK_URL = 'https://interactivomagic.ftydownloader.com/version.json';
+export const VERSION_CHECK_URL = 'https://magic.atpdev.dev/version.json';
 
 // Enlaces de descarga
 export const DOWNLOAD_LINKS = {
     // Placeholder - actualizar cuando esté en Play Store
     playStore: '#',
-    // APK desde Vercel public folder
-    apkDirect: 'https://interactivomagic.ftydownloader.com/downloads/app-release.apk'
+    // APK desde carpeta public
+    apkDirect: 'https://magic.atpdev.dev/downloads/app-release.apk'
 };
 
 /**
