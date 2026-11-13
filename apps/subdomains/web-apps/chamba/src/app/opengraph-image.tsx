@@ -57,7 +57,7 @@ export default async function Image() {
             >
               ch
             </div>
-            <div style={{ fontSize: '32px', fontWeight: 900, letterSpacing: '-1px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '32px', fontWeight: 900, letterSpacing: '-1px' }}>
               chamba <span style={{ color: '#10b981' }}>PRO</span>
             </div>
           </div>

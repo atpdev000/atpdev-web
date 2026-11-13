@@ -34,7 +34,7 @@ const SAMPLE_CERTIFICATES: Record<string, Certificate> = {
     totalParticipants: 1420,
     issuedAt: '2026-09-22T14:30:00.000Z',
     verificationHash: '98a41e8dc34f6782b3a2e1d0987fa421990c8b23f54316a7e029d5b4129e160a',
-    verificationUrl: 'https://sorteos.atpdev.pe/certificados/CERT-SP-98A41E8D'
+    verificationUrl: 'https://sorteos.atpdev.dev/certificados/CERT-SP-98A41E8D'
   },
   'CERT-SP-77B12C44': {
     id: 'CERT-SP-77B12C44',
@@ -48,7 +48,7 @@ const SAMPLE_CERTIFICATES: Record<string, Certificate> = {
     totalParticipants: 840,
     issuedAt: '2026-10-01T18:15:00.000Z',
     verificationHash: '77b12c44e99f01ab8832cb3901f4172a188f8d910129bc489012a9bcfe1234ef',
-    verificationUrl: 'https://sorteos.atpdev.pe/certificados/CERT-SP-77B12C44'
+    verificationUrl: 'https://sorteos.atpdev.dev/certificados/CERT-SP-77B12C44'
   }
 };
 
@@ -100,7 +100,7 @@ export default function VerificarPage() {
             totalParticipants: found.totalCommentsCount || found.participants?.length || 100,
             issuedAt: found.createdAt || new Date().toISOString(),
             verificationHash: found.verificationHash || 'sha256-hash-verificado-en-base-de-datos',
-            verificationUrl: `https://sorteos.atpdev.pe/certificados/${found.certificateId || found.id}`
+            verificationUrl: `https://sorteos.atpdev.dev/certificados/${found.certificateId || found.id}`
           });
           return;
         }

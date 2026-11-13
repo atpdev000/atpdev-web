@@ -18,7 +18,7 @@ const SAMPLE_CERTIFICATE: Certificate = {
   totalParticipants: 1420,
   issuedAt: '2026-09-22T14:30:00.000Z',
   verificationHash: '98a41e8dc34f6782b3a2e1d0987fa421990c8b23f54316a7e029d5b4129e160a',
-  verificationUrl: 'https://sorteos.atpdev.pe/certificados/CERT-SP-98A41E8D'
+  verificationUrl: 'https://sorteos.atpdev.dev/certificados/CERT-SP-98A41E8D'
 };
 
 export default function CertificadoPage({ params }: { params: Promise<{ id: string }> }) {

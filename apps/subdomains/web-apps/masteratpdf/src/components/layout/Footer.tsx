@@ -47,7 +47,7 @@ export const Footer = () => {
                         </p>
                         <div className="pt-2">
                             <a 
-                                href="https://atpdev.dev" 
+                                href="https://www.atpdev.dev" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline"
@@ -134,9 +134,17 @@ export const Footer = () => {
                 {/* Bottom bar */}
                 <div className="mt-12 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
                     <p>© {currentYear} MasterAtPDF · Diseñado con precisión por ATP DEV Ecosystem.</p>
-                    <p className="flex items-center gap-1 text-[11px]">
-                        <span>Hecho para profesionales de alto rendimiento</span>
-                    </p>
+                    <div className="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+                        <Link href="/privacidad" className="hover:text-brand transition-colors">
+                            Privacidad
+                        </Link>
+                        <Link href="/terminos" className="hover:text-brand transition-colors">
+                            Términos de Uso
+                        </Link>
+                        <a href="https://www.atpdev.dev/contacto" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">
+                            Contacto
+                        </a>
+                    </div>
                 </div>
             </div>
         </footer>

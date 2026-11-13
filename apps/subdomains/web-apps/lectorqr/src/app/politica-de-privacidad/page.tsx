@@ -92,7 +92,7 @@ export default function PoliticaPrivacidadPage() {
             Si tienes dudas o inquietudes sobre esta Política de Privacidad o requieres ejercer tus derechos de acceso, rectificación o supresión bajo el RGPD o leyes locales, puedes contactarnos a través de:
           </p>
           <p className="font-mono text-cyan-400">
-            Email: privacidad@atpdev.pe • contacto@atpdev.pe<br />
+            Email: contacto@atpdev.dev<br />
             Entidad: ATP DEV Perú • Lima, Perú
           </p>
         </section>

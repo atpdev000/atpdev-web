@@ -81,7 +81,7 @@ ${prize}
 El premio es personal, intransferible y no podrá ser canjeado por su valor en dinero en efectivo ni sustituido por otro bien salvo acuerdo expreso del Organizador.
 
 6. ELECCIÓN DEL GANADOR Y CERTIFICACIÓN PÚBLICA
-La selección del ganador y suplentes se llevará a cabo el día de cierre mediante la plataforma tecnológica Sorteos Pro (https://sorteos.atpdev.pe), garantizando:
+La selección del ganador y suplentes se llevará a cabo el día de cierre mediante la plataforma tecnológica Sorteos Pro (https://sorteos.atpdev.dev), garantizando:
 a) Selección aleatoria certificada con algoritmos criptográficos basados en el estándar SHA-256.
 b) Emisión de un Certificado de Validez Público con marca temporal inmutable.
 c) Publicación del resultado en los canales oficiales del Organizador.

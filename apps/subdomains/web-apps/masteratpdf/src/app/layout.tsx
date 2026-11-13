@@ -11,6 +11,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pdf.atpdev.dev"),
+  alternates: {
+    canonical: "/",
+  },
   title: "MasterAtPDF Pro • Herramientas PDF Profesionales Online | ATP DEV",
   description: "Suite definitiva de herramientas PDF de alto rendimiento: unir, dividir, organizar, rotar, comprimir y convertir documentos con máxima privacidad en tu navegador.",
   keywords: "PDF tools, unir PDF, dividir PDF, comprimir PDF, organizar PDF, reemplazar pagina PDF, PDF a Word, Word a PDF, PDF a JPG, ATP DEV",
