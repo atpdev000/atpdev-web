@@ -1,11 +1,13 @@
-import { getAllExperiences, getAllSkills } from "@atpdev/database";
+import { getAllExperiences, getAllSkills, getSiteConfig } from "@atpdev/database";
 import { Plus, User2 } from "lucide-react";
 import {
   addExperience, editExperience, removeExperience, toggleExperienceActive,
   addSkill, editSkill, removeSkill, toggleSkillActive,
+  updateAboutBioAction,
 } from "./actions";
 import ExperienceCard from "./ExperienceCard";
 import SkillCard from "./SkillCard";
+import { AboutCardForm } from "./AboutCardForm";
 
 const ICON_OPTIONS = [
   { key: "briefcase", label: "💼 Briefcase" },
@@ -36,7 +38,11 @@ const selectClass = "bg-[#1A1A1A] border border-gray-800 text-white px-3 py-2.5 
 export const dynamic = 'force-dynamic';
 
 export default async function ProfilePage() {
-  const [experiences, skills] = await Promise.all([getAllExperiences(), getAllSkills()]);
+  const [experiences, skills, siteConfig] = await Promise.all([
+    getAllExperiences(),
+    getAllSkills(),
+    getSiteConfig(),
+  ]);
 
   return (
     <div>
@@ -46,8 +52,25 @@ export default async function ProfilePage() {
           Perfil Profesional
         </h1>
         <p className="text-gray-400">
-          Gestiona tu trayectoria laboral y habilidades técnicas. Los cambios se reflejan al instante en el portal.
+          Gestiona tu tarjeta &quot;Sobre Mí&quot;, trayectoria laboral y habilidades técnicas. Los cambios se reflejan al instante en el portal.
         </p>
+      </div>
+
+      {/* ══════════════════════════════════════════
+          TARJETA SUPERIOR: SOBRE MÍ (BIO CARD)
+      ══════════════════════════════════════════ */}
+      <div className="bg-[#262626] border border-gray-800 rounded-2xl p-6 mb-8">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+          👤 Sobre Mí (Tarjeta Principal)
+        </h2>
+        <AboutCardForm
+          initialFullName={siteConfig?.full_name || "Percy Acha Taipe"}
+          initialBioShort={siteConfig?.bio_short || ""}
+          initialBioLong={siteConfig?.bio_long || ""}
+          initialCredlyUrl={siteConfig?.credly_url || ""}
+          initialAvatarUrl={siteConfig?.avatar_url || ""}
+          saveAction={updateAboutBioAction}
+        />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">

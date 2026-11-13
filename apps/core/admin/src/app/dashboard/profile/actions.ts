@@ -4,13 +4,35 @@ import { revalidatePath } from "next/cache";
 import {
   createExperience, deleteExperience, updateExperience,
   createSkill, deleteSkill, updateSkill,
+  updateSiteConfig,
 } from "@atpdev/database";
 import { revalidatePortalCache } from "@/lib/revalidate-portal";
 
 async function revalidateProfileCaches() {
   revalidatePath("/dashboard/profile");
+  revalidatePath("/dashboard/settings");
   revalidatePath("/", "layout");
   await revalidatePortalCache();
+}
+
+export async function updateAboutBioAction(formData: FormData): Promise<{ success: boolean; error?: string }> {
+  const full_name = ((formData.get("full_name") as string) || "").trim();
+  const bio_short = ((formData.get("bio_short") as string) || "").trim();
+  const bio_long = ((formData.get("bio_long") as string) || "").trim();
+  const credly_url = ((formData.get("credly_url") as string) || "").trim();
+
+  const success = await updateSiteConfig({
+    full_name,
+    bio_short,
+    bio_long,
+    credly_url,
+  });
+
+  if (!success) {
+    return { success: false, error: "Error guardando en Supabase." };
+  }
+  await revalidateProfileCaches();
+  return { success: true };
 }
 
 // ─── EXPERIENCIAS ────────────────────────────────────────────────────────────
