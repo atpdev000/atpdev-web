@@ -3,6 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
+import { revalidatePortalCache } from "@/lib/revalidate-portal";
 import {
   createProject as dbCreateProject,
   updateProjectStatus as dbUpdateProjectStatus,
@@ -417,6 +418,13 @@ export async function getIpaSignedUploadUrlAction(fileName: string): Promise<{ e
 }
 
 
+async function revalidateProjectCaches() {
+  revalidatePath("/dashboard/projects");
+  revalidatePath("/dashboard");
+  revalidatePath("/", "layout");
+  await revalidatePortalCache();
+}
+
 export async function createProject(formData: FormData) {
   const domainType = (formData.get("domainType") as string) || "subruta";
   const title = formData.get("title") as string;
@@ -476,9 +484,7 @@ export async function createProject(formData: FormData) {
       const created = projects.find(p => p.slug === slug);
       if (created) await syncProjectGithubData(created.id, githubRepo, { overwriteImage: !capturedImage });
     }
-    revalidatePath("/dashboard/projects");
-    revalidatePath("/dashboard");
-    revalidatePath("/", "layout"); // Revalidate main portal too!
+    await revalidateProjectCaches();
     return { success: true };
   } else {
     return { success: false, error: result.error };
@@ -488,8 +494,7 @@ export async function createProject(formData: FormData) {
 export async function syncGithub(id: number, repoFullName: string) {
   const success = await syncProjectGithubData(id, repoFullName);
   if (success) {
-    revalidatePath("/dashboard/projects");
-    revalidatePath("/", "layout");
+    await revalidateProjectCaches();
   }
   return success;
 }
@@ -543,9 +548,7 @@ export async function updateProjectAction(id: number, formData: FormData) {
   }
 
   if (result.success) {
-    revalidatePath("/dashboard/projects");
-    revalidatePath("/dashboard");
-    revalidatePath("/", "layout");
+    await revalidateProjectCaches();
     return { success: true };
   } else {
     return { success: false, error: result.error };
@@ -555,9 +558,7 @@ export async function updateProjectAction(id: number, formData: FormData) {
 export async function updateStatus(id: number, status: string) {
   const success = await dbUpdateProjectStatus(id, status);
   if (success) {
-    revalidatePath("/dashboard/projects");
-    revalidatePath("/dashboard");
-    revalidatePath("/", "layout");
+    await revalidateProjectCaches();
   }
   return success;
 }
@@ -565,9 +566,7 @@ export async function updateStatus(id: number, status: string) {
 export async function deleteProject(id: number) {
   const success = await dbDeleteProject(id);
   if (success) {
-    revalidatePath("/dashboard/projects");
-    revalidatePath("/dashboard");
-    revalidatePath("/", "layout");
+    await revalidateProjectCaches();
   }
   return success;
 }

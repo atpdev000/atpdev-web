@@ -2,6 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createAIModel, updateAIModel, deleteAIModel, reorderAIModels, AIModelData } from "@atpdev/database";
+import { revalidatePortalCache } from "@/lib/revalidate-portal";
+
+async function revalidateModelsCaches() {
+  revalidatePath("/dashboard/ai-models");
+  revalidatePath("/[lang]", "layout");
+  await revalidatePortalCache();
+}
 
 export async function createModelAction(formData: FormData) {
   const model = {
@@ -18,8 +25,7 @@ export async function createModelAction(formData: FormData) {
   };
   
   await createAIModel(model);
-  revalidatePath("/dashboard/ai-models");
-  revalidatePath("/[lang]", "layout");
+  await revalidateModelsCaches();
 }
 
 export async function updateModelAction(id: string, formData: FormData) {
@@ -35,26 +41,22 @@ export async function updateModelAction(id: string, formData: FormData) {
   };
   
   await updateAIModel(id, model);
-  revalidatePath("/dashboard/ai-models");
-  revalidatePath("/[lang]", "layout");
+  await revalidateModelsCaches();
 }
 
 export async function deleteModelAction(id: string) {
   await deleteAIModel(id);
-  revalidatePath("/dashboard/ai-models");
-  revalidatePath("/[lang]", "layout");
+  await revalidateModelsCaches();
 }
 
 export async function toggleVisibilityAction(id: string, is_visible: boolean) {
   await updateAIModel(id, { is_visible });
-  revalidatePath("/dashboard/ai-models");
-  revalidatePath("/[lang]", "layout");
+  await revalidateModelsCaches();
 }
 
 export async function reorderAIModelsAction(modelIds: string[]) {
   const success = await reorderAIModels(modelIds);
   if (success) {
-    revalidatePath("/dashboard/ai-models");
-    revalidatePath("/[lang]", "layout");
+    await revalidateModelsCaches();
   }
 }

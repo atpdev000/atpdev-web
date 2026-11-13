@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { updateSiteConfig } from "@atpdev/database";
+import { revalidatePortalCache } from "@/lib/revalidate-portal";
 
 export async function saveSettings(formData: FormData) {
   const updates: Record<string, string | string[] | boolean> = {};
@@ -47,6 +48,7 @@ export async function saveSettings(formData: FormData) {
     revalidatePath("/dashboard/settings");
     revalidatePath("/dashboard");
     revalidatePath("/", "layout");
+    await revalidatePortalCache();
   }
 }
 

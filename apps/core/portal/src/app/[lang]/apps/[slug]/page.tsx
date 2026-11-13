@@ -2,9 +2,10 @@ import { getProjects, translateText, getSiteConfig } from "@atpdev/database";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Code, Download, Clock } from "lucide-react";
+import { ExternalLink, Code, Download, Clock } from "lucide-react";
+import { BackToPortfolioLink } from "@/components/BackToPortfolioLink";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 import type { Metadata } from "next";
 import Script from "next/script";
@@ -323,11 +324,11 @@ export default async function ProjectPage({
           {/* Navigation & Reading Time Row */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10 relative z-10">
             <nav className="flex items-center gap-2 text-xs text-slate-300 font-medium">
-              <Link href={`/${lang === 'es' ? '' : lang}`} className="hover:text-white transition-colors">
+              <Link href={lang === 'es' ? '/' : `/${lang}`} prefetch={true} className="hover:text-white transition-colors">
                 {lang === 'es' ? 'Inicio' : 'Home'}
               </Link>
               <span className="text-slate-500">/</span>
-              <Link href={`/${lang === 'es' ? '' : lang}#portfolio`} className="hover:text-white transition-colors">
+              <Link href={`${lang === 'es' ? '' : `/${lang}`}/#portfolio`} prefetch={true} className="hover:text-white transition-colors">
                 Apps
               </Link>
               <span className="text-slate-500">/</span>
@@ -335,9 +336,10 @@ export default async function ProjectPage({
             </nav>
 
             <div className="flex items-center gap-3">
-              <Link href={`/${lang === 'es' ? '' : lang}/#portfolio`} className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all active:scale-95 shadow-sm">
-                <ArrowLeft size={14} /> {customLegalSettings.back_button_text || customLegalSettings.backText || texts.back}
-              </Link>
+              <BackToPortfolioLink
+                href={`${lang === 'es' ? '' : `/${lang}`}/#portfolio`}
+                label={customLegalSettings.back_button_text || customLegalSettings.backText || texts.back}
+              />
               <span className="text-xs px-3.5 py-1.5 bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 rounded-xl font-mono flex items-center gap-1.5 shadow-sm font-semibold">
                 <Clock size={13} className="text-cyan-300" />
                 <span>{readingTimeMinutes} min {lang === 'es' ? 'de lectura' : 'read'}</span>

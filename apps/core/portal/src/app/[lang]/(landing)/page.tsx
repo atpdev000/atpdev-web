@@ -14,7 +14,7 @@ import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 import { GlowWrapper } from "@/components/GlowWrapper";
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -48,11 +48,18 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
 
   const publicProjects = projects.filter((p: Project) => p.status !== 'Privado');
 
-  const [tProjects, tConfig, tAiModels] = await Promise.all([
+  const [tProjectsRaw, tConfig, tAiModels] = await Promise.all([
     Promise.all(publicProjects.map(p => translateProject(p, lang))),
     translateConfig(config, lang),
     Promise.all(aiModels.map(m => translateAiModel(m, lang))),
   ]);
+
+  // En el landing solo se muestran tarjetas y modal resumen; evitamos duplicar artículos completos en el payload RSC.
+  const tProjects = tProjectsRaw.map(({ long_description: _ld, screenshots: _sc, ...rest }) => ({
+    ...rest,
+    long_description: "",
+    screenshots: [],
+  }));
 
   const ui = getUiDictionary(lang);
   const { displayTechStack, augmentedSkills } = getTechStackData(tProjects, skills);
