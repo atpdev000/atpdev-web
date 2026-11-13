@@ -238,26 +238,28 @@ async function extractWithInvidious(url: string): Promise<any> {
   return null
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android', proxyUrl?: string): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = '', proxyUrl?: string): Promise<any> {
   const cookieArgs = getYoutubeCookiesArgs()
   const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
   const proxyArgs = getYtDlpProxyArgs(proxyUrl)
+  const clientArgs = playerClient ? ['--extractor-args', `youtube:player_client=${playerClient}`] : []
 
   return new Promise((resolve, reject) => {
     const args = [
       '--socket-timeout', '15',
       '--dump-json',
       ...jsRuntimeArgs,
+      '--remote-components', 'ejs:github',
       ...proxyArgs,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
-      '--extractor-args', `youtube:player_client=${playerClient}`,
+      ...clientArgs,
       ...cookieArgs,
       url
     ]
 
-    console.log(`🚀 [YouTube Serverless] Ejecutando: ${binPath} con ${url} (player_client=${playerClient})`)
+    console.log(`🚀 [YouTube Serverless] Ejecutando: ${binPath} con ${url} (player_client=${playerClient || 'default'})`)
     const ytProcess = spawn(binPath, args)
 
     let stdout = ''
@@ -334,15 +336,15 @@ export async function POST(request: NextRequest) {
 
     if (bin) {
       try {
-        // Intento 1 con clientes tv_embedded,web_embedded,visionos (bypasea el bloqueo bot de datacenters como Render)
-        rawInfo = await extractMetadata(cleanedUrl, bin, 'tv_embedded,web_embedded,visionos', proxyUrl)
+        // Intento 1: cliente por defecto + Deno + ejs:github + cookies/proxy (evita 'The page needs to be reloaded')
+        rawInfo = await extractMetadata(cleanedUrl, bin, '', proxyUrl)
       } catch (err: any) {
         console.warn('⚠️ [YouTube Serverless] Intento 1 falló:', err.message)
         try {
-          console.log('🔄 [YouTube Serverless] Reintentando con cliente alternativo (visionos,ios)...')
-          rawInfo = await extractMetadata(cleanedUrl, bin, 'visionos,ios', proxyUrl)
+          console.log('🔄 [YouTube Serverless] Reintentando con clientes web alternativos (web,web_embedded,mweb)...')
+          rawInfo = await extractMetadata(cleanedUrl, bin, 'web,web_embedded,mweb', proxyUrl)
         } catch (retryErr: any) {
-          console.error('❌ [YouTube Serverless] Reintento visionos,ios falló:', retryErr.message)
+          console.error('❌ [YouTube Serverless] Reintento web,web_embedded,mweb falló:', retryErr.message)
           extractionError = retryErr
         }
       }

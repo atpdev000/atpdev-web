@@ -95,26 +95,28 @@ async function downloadStreamToDisk(
   })
 }
 
-async function extractMetadata(url: string, binPath: string, playerClient = 'visionos,android', proxyUrl?: string): Promise<any> {
+async function extractMetadata(url: string, binPath: string, playerClient = '', proxyUrl?: string): Promise<any> {
   const cookieArgs = getYoutubeCookiesArgs()
   const jsRuntimeArgs = getYtDlpJsRuntimeArgs()
   const proxyArgs = getYtDlpProxyArgs(proxyUrl)
+  const clientArgs = playerClient ? ['--extractor-args', `youtube:player_client=${playerClient}`] : []
 
   return new Promise((resolve, reject) => {
     const args = [
       '--socket-timeout', '15',
       '--dump-json',
       ...jsRuntimeArgs,
+      '--remote-components', 'ejs:github',
       ...proxyArgs,
       '--no-warnings',
       '--no-check-certificates',
       '--geo-bypass',
-      '--extractor-args', `youtube:player_client=${playerClient}`,
+      ...clientArgs,
       ...cookieArgs,
       url
     ]
 
-    console.log(`🚀 [YouTube Serverless] Extrayendo metadatos: ${binPath} con ${url} (player_client=${playerClient})`)
+    console.log(`🚀 [YouTube Serverless] Extrayendo metadatos: ${binPath} con ${url} (player_client=${playerClient || 'default'})`)
     const ytProcess = spawn(binPath, args)
 
     let stdout = ''
@@ -293,6 +295,7 @@ export async function POST(request: NextRequest) {
         ...ffmpegArgs,
         '--socket-timeout', '20',
         ...jsRuntimeArgs,
+        '--remote-components', 'ejs:github',
         ...proxyArgs,
         '--newline',
         '--no-playlist',
@@ -300,7 +303,6 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=visionos,android',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,
@@ -704,6 +706,7 @@ export async function POST(request: NextRequest) {
         ...ffmpegArgs,
         '--socket-timeout', '15',
         ...jsRuntimeArgs,
+        '--remote-components', 'ejs:github',
         ...proxyArgs,
         '--newline',
         '--no-playlist',
@@ -711,7 +714,7 @@ export async function POST(request: NextRequest) {
         '--no-part',
         '--no-check-certificates',
         '--geo-bypass',
-        '--extractor-args', 'youtube:player_client=visionos,android',
+        '--extractor-args', 'youtube:player_client=web,web_embedded,mweb',
         ...cookieArgs,
         '-f', formatArg,
         '-o', tempOutputPattern,
