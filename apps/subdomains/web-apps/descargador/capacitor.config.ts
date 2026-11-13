@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Descargador Pro',
   webDir: 'out',
   server: {
-    url: 'https://descargador-pro-nt6e.onrender.com',
+    url: 'https://descargador.atpdev.dev',
     androidScheme: 'https',
     cleartext: true
   },
