@@ -121,6 +121,9 @@ export async function generateMetadata(
     verification: {
       google: "xLX9HT_roi66Iips-tYL5paIvBDDP_EftOni_R9KyYw",
     },
+    other: {
+      "google-adsense-account": config?.adsense_id?.trim() || "ca-pub-5414009811868137",
+    },
     openGraph: {
       type: "website",
       locale: localeToOgLocale(lang),
