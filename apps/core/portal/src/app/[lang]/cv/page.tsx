@@ -56,7 +56,7 @@ export default async function CvPage({
     translateConfig(config, lang),
     Promise.all(activeExperiences.map((e) => translateExperience(e, lang))),
     Promise.all(skills.filter((s) => s.is_active !== false).map((s) => translateSkill(s, lang))),
-    Promise.all(publicProjects.slice(0, 6).map((p) => translateProject(p, lang))),
+    Promise.all(publicProjects.map((p) => translateProject(p, lang))),
   ]);
 
   const fullName = tConfig?.full_name || "Percy Acha Taipe";
@@ -175,20 +175,42 @@ export default async function CvPage({
           {tProjects.length > 0 && (
             <section className="mb-6">
               <h2 className="text-xs font-extrabold uppercase tracking-widest text-indigo-700 border-b border-slate-200 pb-1.5 mb-3">
-                {isEn ? "Selected Production Projects" : "Proyectos Destacados en Producción"}
+                {isEn ? "Projects in Production" : "Proyectos en Producción"}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                {tProjects.map((project) => (
-                  <div key={project.id} className="break-inside-avoid">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <h3 className="text-sm font-bold text-slate-900">{project.title}</h3>
-                      <span className="text-[11px] font-medium text-slate-500 shrink-0">{project.category}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                {tProjects.map((project) => {
+                  const hasDemo =
+                    project.demolink &&
+                    project.demolink.trim() !== "" &&
+                    project.demolink !== "#" &&
+                    !project.demolink.includes("/apps/");
+                  const projectHref = hasDemo
+                    ? project.demolink
+                    : project.slug
+                      ? `https://www.atpdev.dev${prefix}/apps/${project.slug}`
+                      : "";
+                  return (
+                    <div key={project.id} className="break-inside-avoid">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <h3 className="text-sm font-bold text-slate-900">{project.title}</h3>
+                        <span className="text-[11px] font-medium text-slate-500 shrink-0">{project.category}</span>
+                      </div>
+                      <p className="text-xs text-slate-700 leading-relaxed mt-1">
+                        {project.description}
+                      </p>
+                      {projectHref && (
+                        <a
+                          href={projectHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-[11px] text-indigo-700 underline mt-1 break-all"
+                        >
+                          {projectHref.replace(/^https?:\/\//, "")}
+                        </a>
+                      )}
                     </div>
-                    <p className="text-xs text-slate-700 leading-snug mt-0.5 line-clamp-2">
-                      {project.description}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
@@ -214,3 +236,4 @@ export default async function CvPage({
     </div>
   );
 }
+
