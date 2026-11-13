@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Mail, Globe, MapPin, Send, CheckCircle2, MessageSquare, ShieldCheck } from 'lucide-react';
 
 export default function ContactoPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -54,21 +54,21 @@ export default function ContactoPage() {
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block">Correo Oficial:</span>
-                  <a href="mailto:contacto@atpdev.pe" className="text-white font-bold hover:underline">
-                    contacto@atpdev.pe
+                  <a href="mailto:contacto@atpdev.dev" className="text-white font-bold hover:underline">
+                    contacto@atpdev.dev
                   </a>
-                  <p className="text-[11px] text-slate-500">soporte@atpdev.pe</p>
+                  <p className="text-[11px] text-slate-500">Atención técnica y soporte editorial</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 shrink-0">
-                  <Phone className="w-4 h-4" />
+                  <Globe className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">WhatsApp & Teléfono:</span>
-                  <a href="https://wa.me/51987654321" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:underline">
-                    +51 987 654 321
+                  <span className="text-slate-400 font-semibold block">Portal Corporativo:</span>
+                  <a href="https://www.atpdev.dev/contacto" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:underline">
+                    www.atpdev.dev/contacto
                   </a>
                   <p className="text-[11px] text-slate-500">Lunes a Viernes de 9:00 a 18:00 (GMT-5)</p>
                 </div>
@@ -89,7 +89,7 @@ export default function ContactoPage() {
             <div className="pt-3 border-t border-slate-800">
               <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-semibold">
                 <ShieldCheck className="w-4 h-4" />
-                <span>Sitio Web Oficial Verificado</span>
+                <span>Ecosistema ATP DEV Perú</span>
               </div>
             </div>
           </div>

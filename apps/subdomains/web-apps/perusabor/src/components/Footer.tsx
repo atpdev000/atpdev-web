@@ -110,9 +110,18 @@ export const Footer: React.FC = () => {
 
         <div className="pt-6 border-t border-stone-200 dark:border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-stone-500 dark:text-stone-400">
           <p>© 2026 Perú Sabor Inteligente. Desarrollado con pasión gastronómica y rigor técnico.</p>
-          <div className="flex items-center gap-2">
-            <span>Diseñado en Lima, Perú</span>
-            <span className="text-red-500">🇵🇪</span>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link href="/privacidad" className="hover:text-[#c22929] transition-colors">
+              Privacidad
+            </Link>
+            <Link href="/terminos" className="hover:text-[#c22929] transition-colors">
+              Términos de Uso
+            </Link>
+            <a href="https://www.atpdev.dev/contacto" target="_blank" rel="noopener noreferrer" className="hover:text-[#c22929] transition-colors">
+              Contacto
+            </a>
+            <span className="text-stone-300 dark:text-stone-700">•</span>
+            <span>Lima, Perú 🇵🇪</span>
           </div>
         </div>
 

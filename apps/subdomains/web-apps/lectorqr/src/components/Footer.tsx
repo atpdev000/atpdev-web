@@ -33,7 +33,7 @@ export const Footer: React.FC = () => {
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Google AdSense Verified</span>
+              <span>Estándares Web &amp; SEO</span>
             </div>
           </div>
         </div>

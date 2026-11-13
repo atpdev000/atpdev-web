@@ -397,7 +397,7 @@ const TemplateEngine = {
     <meta property="og:type" content="website" />
     <meta property="og:title" content="InteractivoMagic | Un mensaje para ${data.name}" />
     <meta property="og:description" content="Haz clic para abrir tu sorpresa interactiva de parte de ${data.sender} ✨" />
-    <meta property="og:image" content="https://interactivomagic.ftydownloader.com/og-image.jpg" />
+    <meta property="og:image" content="https://magic.atpdev.dev/og-image.jpg" />
 
     <style>
         body { 

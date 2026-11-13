@@ -302,7 +302,7 @@ export default function HomePage() {
       )}
 
       {/* Espacio Publicitario Oficial AdSense */}
-      <AdBanner slot="5414009811868137" />
+      <AdBanner />
 
       {/* Highlights & Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">

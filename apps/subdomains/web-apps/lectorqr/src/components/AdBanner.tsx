@@ -11,17 +11,25 @@ interface AdBannerProps {
 }
 
 export function AdBanner({
-  slot = '5414009811868137',
+  slot = '',
   format = 'horizontal',
   className = '',
 }: AdBannerProps) {
+  const resolvedSlot = (slot || process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER || '').trim();
+  const hasValidSlot = Boolean(resolvedSlot && resolvedSlot !== '5414009811868137');
+
   useEffect(() => {
+    if (!hasValidSlot) return;
     try {
       ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
     } catch {
       // Adsbygoogle ya inicializado o bloqueado
     }
-  }, []);
+  }, [hasValidSlot]);
+
+  if (!hasValidSlot) {
+    return null;
+  }
 
   return (
     <div
@@ -32,7 +40,7 @@ export function AdBanner({
           Publicidad
         </span>
         <span className="text-[10px] text-slate-500">
-          Anuncios verificados por Google
+          Anuncio patrocinado
         </span>
       </div>
 
@@ -42,7 +50,7 @@ export function AdBanner({
           className="adsbygoogle"
           style={{ display: 'block', minHeight: '90px', width: '100%' }}
           data-ad-client="ca-pub-5414009811868137"
-          data-ad-slot={slot}
+          data-ad-slot={resolvedSlot}
           data-ad-format={format === 'rectangle' ? 'rectangle' : 'auto'}
           data-full-width-responsive="true"
         />

@@ -1089,7 +1089,7 @@ function App() {
       } catch (e) {
         console.error("Error decoding B64 data:", e);
       }
-    } else if (vId) {
+    } else if (vId && SHORTENER_API) {
       console.log(`[App] Loading data by ID: ${vId}`);
       setIsLoadingView(true);
       fetch(`${SHORTENER_API}/api/v1/get/${vId}`)
@@ -1129,6 +1129,8 @@ function App() {
           setViewError('network');
         })
         .finally(() => setIsLoadingView(false));
+    } else if (vId) {
+      setViewError('expired');
     }
   }, []);
 
@@ -1335,33 +1337,38 @@ function App() {
       console.log(`[App] Generating link. Long URL length: ${longUrl.length}`);
 
       try {
-        const response = await fetch(`${SHORTENER_API}/api/v1/shorten`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: longUrl })
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.id) {
-            // Use the base URL helper to ensure we get the correct production domain
-            const base = getBaseUrl();
-            const internalLink = `${base}${window.location.pathname}?v=${result.id}`;
-            setGeneratedUrl(internalLink);
-            console.log("[App] SUCCESS: ID-based link generated:", internalLink);
-          } else {
-            setGeneratedUrl(result.short_url || result.url);
-          }
-        } else {
-          console.warn("[App] Custom shortener failed, status:", response.status);
-          const errorData = await response.json().catch(() => ({}));
-          console.error("[App] Shortener Error Detail:", errorData);
-          
+        if (!SHORTENER_API) {
           const shortUrl = await shortenUrl(longUrl);
           setGeneratedUrl(shortUrl || longUrl);
-          
-          if (!shortUrl || shortUrl === longUrl) {
-            alert("⚠️ El acortador personalizado está en mantenimiento. Se ha generado un link largo, pero podría no funcionar bien en algunas aplicaciones. Por favor, intenta de nuevo en unos minutos.");
+        } else {
+          const response = await fetch(`${SHORTENER_API}/api/v1/shorten`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: longUrl })
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            if (result.id) {
+              // Use the base URL helper to ensure we get the correct production domain
+              const base = getBaseUrl();
+              const internalLink = `${base}${window.location.pathname}?v=${result.id}`;
+              setGeneratedUrl(internalLink);
+              console.log("[App] SUCCESS: ID-based link generated:", internalLink);
+            } else {
+              setGeneratedUrl(result.short_url || result.url);
+            }
+          } else {
+            console.warn("[App] Custom shortener failed, status:", response.status);
+            const errorData = await response.json().catch(() => ({}));
+            console.error("[App] Shortener Error Detail:", errorData);
+            
+            const shortUrl = await shortenUrl(longUrl);
+            setGeneratedUrl(shortUrl || longUrl);
+            
+            if (!shortUrl || shortUrl === longUrl) {
+              alert("⚠️ El acortador personalizado está en mantenimiento. Se ha generado un link largo, pero podría no funcionar bien en algunas aplicaciones. Por favor, intenta de nuevo en unos minutos.");
+            }
           }
         }
       } catch (shortenerErr) {

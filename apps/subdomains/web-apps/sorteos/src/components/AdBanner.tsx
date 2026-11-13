@@ -12,8 +12,10 @@ interface AdBannerProps {
   className?: string;
 }
 
-export function AdBanner({ slot = '5414009811868137', format = 'horizontal', className = '' }: AdBannerProps) {
+export function AdBanner({ slot = '', format = 'horizontal', className = '' }: AdBannerProps) {
   const [isPro, setIsPro] = useState<boolean | null>(null);
+  const activeSlot = (slot || process.env.NEXT_PUBLIC_ADSENSE_SLOT_BANNER || '').trim();
+  const hasValidSlot = Boolean(activeSlot && activeSlot !== '5414009811868137');
 
   useEffect(() => {
     const checkProStatus = async () => {
@@ -37,22 +39,22 @@ export function AdBanner({ slot = '5414009811868137', format = 'horizontal', cla
   }, []);
 
   useEffect(() => {
-    if (isPro === false) {
+    if (isPro === false && hasValidSlot) {
       try {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
       } catch {
         // adsbygoogle already pushed or blocked
       }
     }
-  }, [isPro]);
+  }, [isPro, hasValidSlot]);
 
   // Si es usuario PRO, NO SE MUESTRA NINGÚN ANUNCIO (experiencia 100% limpia)
   if (isPro === true) {
     return null;
   }
 
-  // Si aún está cargando la verificación, no mostramos nada para evitar parpadeo
-  if (isPro === null) {
+  // Si aún está cargando o no hay un ID de bloque real configurado, no renderizar cajas vacías (Auto Ads opera nativamente)
+  if (isPro === null || !hasValidSlot) {
     return null;
   }
 
@@ -80,7 +82,7 @@ export function AdBanner({ slot = '5414009811868137', format = 'horizontal', cla
           className="adsbygoogle"
           style={{ display: 'block', minHeight: '90px', width: '100%' }}
           data-ad-client={cleanClientId}
-          data-ad-slot={slot}
+          data-ad-slot={activeSlot}
           data-ad-format={format === 'rectangle' ? 'rectangle' : 'auto'}
           data-full-width-responsive="true"
         />
