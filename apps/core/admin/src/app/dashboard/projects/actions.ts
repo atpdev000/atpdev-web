@@ -2,6 +2,7 @@
 // Trigger dual deployment sync for Vercel admin & portal (All-Active Sync)
 
 import { revalidatePath } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
 import {
   createProject as dbCreateProject,
   updateProjectStatus as dbUpdateProjectStatus,
@@ -249,6 +250,37 @@ function normalizeUrl(raw: string): string {
 
 type ScreenshotResult = { error: string } | { imageUrl: string };
 
+async function persistProjectImage(
+  buffer: Buffer,
+  fileName: string,
+  contentType: string
+): Promise<string | null> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (supabaseUrl && serviceKey) {
+    try {
+      const adminClient = createClient(supabaseUrl, serviceKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+      const safeExt = (fileName.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+      const objectPath = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${safeExt}`;
+      const { error } = await adminClient.storage
+        .from("project-images")
+        .upload(objectPath, buffer, { contentType, upsert: true });
+      if (!error) {
+        const { data } = adminClient.storage.from("project-images").getPublicUrl(objectPath);
+        const headRes = await fetch(data.publicUrl, { method: "HEAD", signal: AbortSignal.timeout(8000) });
+        if (headRes.ok) {
+          return data.publicUrl;
+        }
+      }
+    } catch (err) {
+      console.warn("No se pudo subir imagen con service role:", err);
+    }
+  }
+  return uploadProjectImage(buffer, fileName, contentType);
+}
+
 // Toma una captura real del sitio en vivo (no del repo). Se usa desde el botón
 // "📸 Capturar del sitio" en el formulario, con lo que el usuario ya escribió en URL.
 export async function captureScreenshot(siteUrl: string): Promise<ScreenshotResult> {
@@ -261,16 +293,19 @@ export async function captureScreenshot(siteUrl: string): Promise<ScreenshotResu
     return { error: outcome.error };
   }
 
-  // Persistimos la captura en Supabase Storage para evitar que la URL temporal de Microlink expire con 403.
+  // Persistimos la captura en Supabase Storage (o Data URL si Storage falla) para evitar que la URL temporal de Microlink expire con 403.
   try {
-    const imgRes = await fetch(outcome.url);
+    const imgRes = await fetch(outcome.url, { signal: AbortSignal.timeout(15000) });
     if (imgRes.ok) {
       const contentType = imgRes.headers.get("content-type") || "image/png";
       const buffer = Buffer.from(await imgRes.arrayBuffer());
       const ext = contentType.includes("jpeg") ? "jpg" : contentType.includes("webp") ? "webp" : "png";
-      const permanentUrl = await uploadProjectImage(buffer, `capture-${Date.now()}.${ext}`, contentType);
+      const permanentUrl = await persistProjectImage(buffer, `capture-${Date.now()}.${ext}`, contentType);
       if (permanentUrl) {
         return { imageUrl: permanentUrl };
+      }
+      if (buffer.length <= 2 * 1024 * 1024) {
+        return { imageUrl: `data:${contentType};base64,${buffer.toString("base64")}` };
       }
     }
   } catch (err) {
@@ -298,7 +333,7 @@ export async function uploadImageFile(formData: FormData): Promise<ScreenshotRes
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const imageUrl = await uploadProjectImage(buffer, file.name, file.type);
+  const imageUrl = await persistProjectImage(buffer, file.name, file.type);
   if (!imageUrl) {
     // Fallback inteligente: si Supabase Storage no está disponible o el bucket no es público,
     // convertimos la imagen a base64 Data URL para que se guarde y previsualice sin problemas.

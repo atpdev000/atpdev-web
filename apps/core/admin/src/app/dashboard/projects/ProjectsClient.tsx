@@ -183,8 +183,10 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
 
   const [autofillState, setAutofillState] = useState<"idle" | "loading" | "error">("idle");
   const [autofillError, setAutofillError] = useState("");
-  const [screenshotState, setScreenshotState] = useState<"idle" | "loading" | "error">("idle");
+  const [screenshotState, setScreenshotState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [screenshotError, setScreenshotError] = useState("");
+  const [imageLoadError, setImageLoadError] = useState(false);
+  const [brokenThumbUrls, setBrokenThumbUrls] = useState<Record<string, boolean>>({});
   const [uploadState, setUploadState] = useState<"idle" | "loading" | "error">("idle");
   const [uploadError, setUploadError] = useState("");
   const [apkUploadState, setApkUploadState] = useState<"idle" | "loading" | "error">("idle");
@@ -290,6 +292,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
     
     setUploadState("idle");
     setImagePreview(editingProject?.image || "");
+    setImageLoadError(false);
     setAutofillState("idle");
     setAutofillError("");
     setScreenshotState("idle");
@@ -301,6 +304,10 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
     setInlineUploadState("idle");
     setInlineUploadError("");
   }, [editingId]);
+
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [imagePreview]);
 
   // Cierra el dropdown si haces clic afuera
   useEffect(() => {
@@ -409,14 +416,25 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
   const handleCaptureScreenshot = async () => {
     setScreenshotState("loading");
     setScreenshotError("");
-    const result = await captureScreenshot(demolink);
-    if ("error" in result) {
+    try {
+      const result = await captureScreenshot(demolink);
+      if ("error" in result) {
+        setScreenshotState("error");
+        setScreenshotError(result.error);
+        return;
+      }
+      setImageLoadError(false);
+      setImagePreview(result.imageUrl);
+      setScreenshotState("success");
+    } catch (err) {
       setScreenshotState("error");
-      setScreenshotError(result.error);
-      return;
+      const msg = err instanceof Error ? err.message : "";
+      setScreenshotError(
+        msg.includes("Server Action") || msg.includes("Server Reference")
+          ? "La sesión de la página quedó desactualizada tras un despliegue. Recarga con Ctrl+F5 e inténtalo de nuevo."
+          : "No se pudo capturar la imagen del sitio. Inténtalo nuevamente."
+      );
     }
-    setImagePreview(result.imageUrl);
-    setScreenshotState("idle");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -816,8 +834,19 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                   <tr key={proj.id} className="hover:bg-white/5 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        {proj.image ? (
-                          <img src={proj.image} className="w-10 h-10 rounded-lg object-cover" alt={proj.title} />
+                        {proj.image && !brokenThumbUrls[`${proj.id}:${proj.image}`] ? (
+                          <img
+                            key={proj.image}
+                            src={proj.image}
+                            className="w-10 h-10 rounded-lg object-cover shrink-0"
+                            alt={proj.title}
+                            onError={() =>
+                              setBrokenThumbUrls((prev) => ({
+                                ...prev,
+                                [`${proj.id}:${proj.image}`]: true,
+                              }))
+                            }
+                          />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
                             <FolderKanban size={18} />
@@ -1303,16 +1332,15 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Imagen del proyecto</label>
             <div className="flex items-center gap-3">
-              <div className="w-16 h-16 shrink-0 rounded-lg bg-\[\#1A1A1A\] border border-gray-800 overflow-hidden flex items-center justify-center">
-                {imagePreview ? (
+              <div className="w-16 h-16 shrink-0 rounded-lg bg-[#1A1A1A] border border-gray-800 overflow-hidden flex items-center justify-center">
+                {imagePreview && !imageLoadError ? (
                   <img
+                    key={imagePreview}
                     src={imagePreview}
                     alt="Preview"
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      // Si la URL falla al cargar (ej. URL rota vieja de DB), oculta la imagen rota
-                      (e.target as HTMLElement).style.display = 'none';
-                    }}
+                    onLoad={() => setImageLoadError(false)}
+                    onError={() => setImageLoadError(true)}
                   />
                 ) : (
                   <ImageOff size={18} className="text-gray-600" />
@@ -1350,6 +1378,9 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
                 </div>
               </div>
             </div>
+            {screenshotState === "success" && (
+              <p className="text-[11px] text-emerald-400">¡Captura lista! Pulsa &quot;Guardar Cambios&quot; abajo para guardarla.</p>
+            )}
             {screenshotState === "error" && <p className="text-[11px] text-red-400">{screenshotError}</p>}
             {uploadState === "error" && <p className="text-[11px] text-red-400">{uploadError}</p>}
             {!demolink.trim() && (
