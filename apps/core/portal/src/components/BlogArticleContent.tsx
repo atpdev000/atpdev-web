@@ -59,7 +59,7 @@ export function BlogArticleContent({ content }: { content: string }) {
                 style={{
                   backgroundColor: 'var(--glass-bg)',
                   borderColor: 'var(--glass-border)',
-                  color: 'var(--primary)',
+                  color: 'var(--accent-text)',
                 }}
                 {...props}
               >
@@ -70,7 +70,7 @@ export function BlogArticleContent({ content }: { content: string }) {
           blockquote: ({ ...props }) => (
             <blockquote
               className="border-l-4 pl-4 italic my-6 py-1"
-              style={{ borderColor: 'var(--primary)', color: 'var(--text-muted)' }}
+              style={{ borderColor: 'var(--accent-text)', color: 'var(--text-muted)' }}
               {...props}
             />
           ),
@@ -78,7 +78,7 @@ export function BlogArticleContent({ content }: { content: string }) {
             <a
               href={href}
               className="underline font-semibold hover:opacity-80 transition-opacity"
-              style={{ color: 'var(--primary)' }}
+              style={{ color: 'var(--accent-text)' }}
               {...props}
             >
               {children}

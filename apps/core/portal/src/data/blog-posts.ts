@@ -137,17 +137,48 @@ An **Offline-First** architecture reverses that dependency: the local SQLite dat
 
 Naive queries using leading wildcards prevent SQLite B-Tree indexes from kicking in, forcing full sequential table scans on every keystroke. Across **14,000+ clinical entries** containing notes, inclusion rules, and synonyms, each keystroke easily takes 90 to 240 milliseconds on entry-level devices with slower eMMC flash storage—producing visible scroll and typing jank.
 
-SQLite natively solves this with **Full-Text Search (FTS4)**. Declaring an \`@Fts4(contentEntity = ...)\` virtual entity in Room builds a synchronized inverted prefix and token index without duplicating bulky text payloads across disk pages.
+SQLite natively solves this with **Full-Text Search (FTS4)**. Declaring an \`@Fts4(contentEntity = ...)\` virtual entity in Room builds a synchronized inverted prefix and token index without duplicating bulky text payloads across disk pages:
+
+~~~kotlin
+@Fts4(contentEntity = Cie10Entity::class)
+@Entity(tableName = "cie10_fts")
+data class Cie10FtsEntity(
+    val code: String,
+    val titleNormalized: String,
+    val notes: String
+)
+~~~
 
 ## Reactive Flow pipelines, accent folding, and query sanitization
 
 Spanish and Portuguese users rarely type diacritics on mobile keyboards during hurried lookups (\`hipertension\` instead of \`Hipertensión\`). Folding both indexed fields and incoming search queries into normalized ASCII via \`Normalizer.Form.NFD\` lets FTS4 prefix expressions (\`token*\`) match accurately across accents.
 
-Inside the \`ViewModel\`, combining \`debounce(75)\`, \`distinctUntilChanged()\`, \`flatMapLatest\`, and \`flowOn(Dispatchers.IO)\` ensures stale queries are cancelled immediately when a user keeps typing, keeping the main UI thread completely clear. Stripping FTS4 syntax operators such as hyphens, quotes, or colons prior to constructing the \`MATCH\` argument also eliminates \`SQLiteException\` crashes on medical codes like \`E11-9\`.
+Inside the \`ViewModel\`, combining \`debounce(75)\`, \`distinctUntilChanged()\`, \`flatMapLatest\`, and \`flowOn(Dispatchers.IO)\` ensures stale queries are cancelled immediately when a user keeps typing, keeping the main UI thread completely clear:
+
+~~~kotlin
+val results: StateFlow<List<ClinicalSummary>> = query
+    .debounce(75)
+    .map { sanitizeAndNormalize(it) }
+    .distinctUntilChanged()
+    .flatMapLatest { tokens ->
+        if (tokens.isEmpty()) repository.observeRecent()
+        else repository.searchByFts(tokens.joinToString(" ") { "$it*" })
+    }
+    .flowOn(Dispatchers.IO)
+    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+~~~
+
+Stripping FTS4 syntax operators such as hyphens, quotes, or colons prior to constructing the \`MATCH\` argument also eliminates \`SQLiteException\` crashes on medical codes like \`E11-9\`, while projecting only summary columns keeps \`LazyColumn\` scrolling fluid.
 
 ## Pre-populated assets and dual-database separation
 
-Compiling, vacuuming, and packing a ready-to-query \`.db\` inside \`assets/databases/\` via \`.createFromAsset(...)\` skips heavy first-launch JSON parsing and keeps cold startup under **450 ms**. Storing read-only clinical tables in a separate Room instance from user-owned bookmarks and history ensures future catalog updates never risk losing saved user state.`
+Compiling, vacuuming (\`VACUUM\` + \`ANALYZE\`), and packing a ready-to-query \`.db\` inside \`assets/databases/\` via \`.createFromAsset(...)\` skips heavy first-launch JSON parsing and keeps cold startup under **450 ms**. Storing read-only clinical tables in a separate Room instance from user-owned bookmarks and history ensures future catalog updates never risk losing saved user state.
+
+## Production verification checklist
+
+- Benchmark cold startup and p95 FTS4 search latency with Android **Macrobenchmark** on entry-level devices.
+- Unit-test accent folding, dotted medical codes (\`J06.9\`), empty inputs, and punctuation edge cases prior to release.
+- Verify search, filtering, and copy actions end-to-end in complete airplane mode during QA.`
     }
   },
   {
@@ -218,25 +249,37 @@ Antes de dar por cerrada una optimización, valida siempre desde consola y con P
         'A field-tested checklist: eliminating inline base64 payloads from SSR HTML, self-hosting fonts with next/font, deferring third-party scripts, and cutting TTFB behind Caddy.',
       content: `## Why measurable speed defines SEO, retention, and ad readiness
 
-A Lighthouse performance score stuck around 80 rarely comes from a single dramatic failure. More often it stems from accumulated everyday shortcuts: screenshots serialized as Base64 data URIs inside PostgreSQL Markdown columns, render-blocking external CSS requests to Google Fonts, and third-party scripts fighting React hydration for main-thread CPU time.
+A Lighthouse performance score stuck around 80 rarely comes from a single dramatic bottleneck. More often it stems from accumulated everyday shortcuts: screenshots serialized as Base64 strings inside PostgreSQL Markdown columns, render-blocking external CSS requests to Google Fonts, synchronous server data waterfalls, and third-party tags competing with React hydration for main-thread CPU budget.
 
-During systematic audits of **atpdev.dev** and **chamba.atpdev.dev**, fixing four structural causes drove major gains across **TTFB**, **FCP**, **LCP**, and **CLS**:
+During systematic production audits of **atpdev.dev** and **chamba.atpdev.dev**, addressing four architectural root causes drove major, verifiable gains across **TTFB**, **FCP**, **LCP**, **TBT**, and **CLS**.
 
 ## 1. Remove hidden Base64 payloads from SSR and RSC flight data
 
-When rich text fields embed \`data:image/webp;base64,...\` directly inside article bodies, Next.js App Router ships the entire image string twice—once inside rendered HTML and again inside React Server Component payloads (\`self.__next_f\`). Migrating those inline images to CDN object storage as optimized \`.webp\` files with explicit width and height attributes dropped page weight from multi-megabyte HTML down to lightweight markup and stabilized CLS near zero.
+When CMS rich-text fields store screenshots as inline Base64 data URIs inside Markdown bodies, Next.js App Router transmits every image twice—once inside rendered server HTML and again inside React Server Component flight scripts (\`self.__next_f.push\`). In one real production case observed during audit, just four inline screenshots bloated a project article past **2 MB of initial HTML**, stalling download time and main-thread parsing.
+
+Moving every inline image into object storage CDN (Supabase Storage or S3) as an optimized \`.webp\` asset with explicit \`width\` and \`height\` attributes slashes document transfer size into tens of kilobytes while locking layout geometry so **CLS stays under 0.01**.
 
 ## 2. Eliminate external font waterfalls with \`next/font\`
 
-Manual \`fonts.googleapis.com\` stylesheets block initial rendering while the browser discovers downstream \`.woff2\` files. Switching to \`next/font/google\` downloads font files at build time, serves them from the primary HTTP/2 origin, and generates automatic \`size-adjust\` fallback metrics to keep typography crisp without layout shifts.
+Manual \`fonts.googleapis.com\` stylesheets create a critical network chain: DNS + TLS to Google Fonts, CSS download, then downstream discovery of \`.woff2\` files on \`fonts.gstatic.com\`. Even with preconnect hints, that round trip delays first text paint by 150–300 ms.
+
+Switching to \`next/font/google\` inside \`app/layout.tsx\` downloads font weights at build time, serves static assets over your primary HTTP/2 connection, enforces \`font-display: swap\`, and applies automatic \`size-adjust\` fallback metrics so hero titles never shift after font swap.
 
 ## 3. Defer analytics and ad tags off the critical path
 
-Using \`next/script\` with \`strategy="afterInteractive"\` and restricting ad script injection away from legal or thin utility routes protects hydration speed and keeps **Total Blocking Time (TBT)** consistently low.
+Third-party analytics, heatmaps, and ad libraries executed eagerly during boot compete directly against interactive hydration. Using \`next/script\` with \`strategy="afterInteractive"\` and restricting ad script injection strictly away from legal views (\`/privacy\`, \`/terms\`) or corporate homepages protects hydration responsiveness and keeps **Total Blocking Time** near zero.
 
-## 4. Cut TTFB with ISR, parallel fetches, and Caddy Zstd compression
+## 4. Cut TTFB with ISR, parallel queries, and Caddy Zstd compression
 
-Replacing unnecessary \`force-dynamic\` flags with Incremental Static Regeneration (\`revalidate\`), running database calls via \`Promise.allSettled\`, enforcing a single-hop 301 canonical redirect, and enabling \`encode zstd gzip\` in Caddy allows pages to respond rapidly even under throttled mobile emulation.`
+When PageSpeed warns about slow server response time, inspect server execution patterns first:
+
+- **Avoid unnecessary \`force-dynamic\`:** portfolio routes, articles, and product detail pages shine under Incremental Static Regeneration (\`export const revalidate = 3600\`), serving pre-rendered HTML from memory in under 25 ms.
+- **Avoid per-request synchronous translation loops:** cache translated content or pre-build primary locales statically so SSR never waits 600+ ms per external translation request.
+- **Single-hop canonical 301 + Zstd:** configure Caddy behind TLS with \`encode zstd gzip\`, immutable long-term caching on \`/_next/static/\`, and a direct single-hop 301 from apex to \`https://www.atpdev.dev\`.
+
+## Repeatable verification before any release
+
+Check \`curl -sIL\` to verify zero redirect chains, verify compressed HTML stays compact, and confirm both Desktop and throttled Mobile Lighthouse scores remain healthy after deployment.`
     }
   },
   {
@@ -310,17 +353,37 @@ Cuando el mapa ilumina con claridad el halo amarillento o las manchas foliares n
         'Running offline computer-vision CNNs directly on mobile devices using CameraX, INT8 quantization, and Grad-CAM activation overlays for field reliability.',
       content: `## Why agricultural vision cannot rely on cloud-only inference
 
-Cloud vision APIs look effortless on office Wi-Fi, yet break down immediately in remote orchard valleys across Apurimac and the Peruvian Andes lacking consistent cellular coverage. Shifting neural inference onto the handset with **TensorFlow Lite (LiteRT)** completes diagnosis locally in **45 to 120 milliseconds**, eliminates per-call backend fees, and protects farm data privacy.
+Cloud vision APIs look effortless on office Wi-Fi, yet break down immediately in remote orchard valleys across Apurimac and the Peruvian Andes lacking consistent cellular coverage. Sending dozens of high-resolution leaf snapshots per plot over patchy 3G wastes time, drains handset batteries, and blocks field engineers right when preventive action is needed. Shifting neural inference directly onto the handset with **TensorFlow Lite (LiteRT)** completes diagnosis locally in **45 to 120 milliseconds**, eliminates per-call server costs, and keeps grower records private.
 
 ## Preventing preprocessing drift between Python and Kotlin
 
-Most real-world accuracy drops in mobile computer vision happen before the neural network even runs: reversed BGR/RGB channels, ignored EXIF rotation metadata on CameraX \`YUV_420_888\` buffers, or scaling pixel intensities differently from training normalization. Aligning exact crop dimensions, rotation compensation, and float scaling in Kotlin keeps field metrics faithful to validation benchmarks.
+Most real-world accuracy drops in mobile computer vision happen before the neural network even runs, caused by subtle discrepancies between Python training notebooks and Kotlin runtime pipelines:
 
-## INT8 quantization, delegates, and Grad-CAM overlays
+1. **CameraX frame pressure:** configuring \`ImageAnalysis\` with \`STRATEGY_KEEP_ONLY_LATEST\` prevents stale camera frames from backing up in memory on mid-range phones.
+2. **EXIF orientation & RGB alignment:** CameraX delivers \`YUV_420_888\` buffers whose sensor rotation sits in \`imageProxy.imageInfo.rotationDegrees\`. Rotating before center-cropping and strictly reading \`RGB\` channel order avoids misclassifying iron chlorosis or nitrogen deficiency.
+3. **Matching float scaling:** if MobileNetV3 or EfficientNet-Lite trained on pixels normalized to \`[-1, 1]\` or \`[0, 1]\`, exact same scaling must populate the native \`ByteBuffer\` in Kotlin:
 
-Applying representative **INT8 post-training quantization** cuts \`.tflite\` size by roughly **75%** while keeping classification performance intact. Pairing **XNNPACK** multi-threaded CPU execution with selective GPU delegation prevents thermal throttling on mid-range handsets.
+~~~kotlin
+val inputBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3)
+    .order(ByteOrder.nativeOrder())
+for (pixel in pixels) {
+    inputBuffer.putFloat(((pixel shr 16 and 0xFF) / 127.5f) - 1.0f)
+    inputBuffer.putFloat(((pixel shr 8 and 0xFF) / 127.5f) - 1.0f)
+    inputBuffer.putFloat(((pixel and 0xFF) / 127.5f) - 1.0f)
+}
+~~~
 
-To earn genuine trust from agronomists, exporting the final convolutional activation feature map alongside class weights lets Kotlin synthesize a real-time **Grad-CAM** heatmap overlay. By visibly highlighting leaf chlorosis or necrotic lesions instead of soil background clutter, users confirm that model predictions rest on sound visual evidence.`
+## INT8 quantization, hardware delegates, and Grad-CAM overlays
+
+Unquantized \`FP32\` CNN checkpoints weigh 15–45 MB and warm devices rapidly during continuous parcel scouting. Applying **full integer quantization (INT8)** calibrated on real sunlit and shaded field photos cuts \`.tflite\` weight by roughly **75%** while keeping classification accuracy steady. Using **XNNPACK** multi-core CPU execution as the reliable baseline, with validated GPU delegate opt-ins, prevents crashes on older mobile GPU drivers.
+
+To earn genuine trust from field agronomists, predictions alone ("Chlorosis — 89%") are not enough; experts need to verify the model did not overfit to soil background or sky reflections. Exposing the final convolutional activation map tensor alongside dense class weights lets Kotlin compute a fast **Grad-CAM** heatmap overlay blended cleanly over the captured leaf. When highlighted hotspots land squarely on necrotic spots or yellow leaf margins, technicians verify visually that the prediction rests on real agronomic evidence.
+
+## Field reliability safeguards
+
+- **Blur & exposure pre-checks:** Laplacian variance checks reject motion-blurred wind shots before running inference.
+- **Calibrated abstention threshold:** below \`0.65\` confidence, prompt for a clearer capture rather than guessing an incorrect disease label.
+- **Offline Room audit logs:** persist model version, confidence score, and local inspection notes completely offline.`
     }
   },
   {
@@ -407,18 +470,53 @@ Una suite diseñada con procesamiento local escala horizontalmente hasta el infi
         'How to merge, split, rotate, and reorder confidential PDF files directly inside browser memory without ever uploading user documents to a remote backend.',
       content: `## Removing remote server exposure from everyday PDF workflows
 
-Contracts, medical records, payroll slips, and academic submissions routinely carry private information. Traditional web converters upload entire files to remote servers just to extract three pages or fix an upside-down scan, exposing sensitive documents while requiring costly backend compute clusters running \`Ghostscript\` or \`qpdf\`.
+Employment contracts, medical charts, judicial filings, payroll slips, and university theses routinely carry private personal data. Yet most legacy online PDF utilities force users to upload entire multi-megabyte documents to opaque third-party servers just to merge two files, rotate an upside-down scan, or extract three signed pages.
 
-A **Zero-Upload** browser architecture delegates everything directly into local RAM via **Web Workers**, **pdfjs-dist**, and **pdf-lib**—verifiable right in browser DevTools showing zero outbound document bytes.
+That traditional pattern exposes confidential files to remote storage or server logs while forcing developers to finance expensive outbound bandwidth and heavy backend worker queues running \`Ghostscript\` or \`qpdf\`. A **Zero-Upload** browser architecture reverses that model using modern JavaScript, **Web Workers**, and **WebAssembly**, verifiable directly inside DevTools Network showing zero outbound document bytes.
 
 ## Splitting visual preview and lossless binary assembly
 
-1. **\`pdfjs-dist\` for crisp thumbnails:** Rendering pages onto HiDPI \`<canvas>\` nodes allows smooth drag-and-drop reordering and rotation checks.
-2. **\`pdf-lib\` for ISO-compliant output:** Copying selected pages across \`PDFDocument\` instances preserves searchable vector text, internal links, and crisp typography cleanly without rasterizing every page.
+1. **\`pdfjs-dist\` for crisp interactive thumbnails:** Decodes selected pages onto HiDPI \`<canvas>\` elements so users can drag, reorder, rotate, and inspect exact layouts smoothly.
+2. **\`pdf-lib\` for ISO-compliant output:** Reads raw \`ArrayBuffer\` bytes cleanly in client memory, clones chosen pages via \`copyPages\`, preserves selectable vector fonts and internal hyperlinks intact, applies exact 90-degree rotations, and serializes a clean PDF with object streams enabled:
+
+~~~ts
+import { PDFDocument, degrees } from 'pdf-lib';
+
+export async function buildMergedPdf(
+  operations: Array<{ bytes: ArrayBuffer; pageIndexes: number[]; rotateDelta?: number }>
+): Promise<Uint8Array> {
+  const output = await PDFDocument.create();
+  for (const op of operations) {
+    const source = await PDFDocument.load(op.bytes, { ignoreEncryption: false });
+    const copied = await output.copyPages(source, op.pageIndexes);
+    for (const page of copied) {
+      if (op.rotateDelta) {
+        page.setRotation(degrees((page.getRotation().angle + op.rotateDelta) % 360));
+      }
+      output.addPage(page);
+    }
+  }
+  return output.save({ useObjectStreams: true });
+}
+~~~
+
+## Handling encrypted PDFs, selective compression, and range validation
+
+Real user documents rarely match tidy synthetic test files:
+
+- **Owner-encrypted documents:** Catching encryption errors per file lets the UI alert users cleanly about which specific document requires unlocking without crashing the whole batch.
+- **Vector-safe compression:** Flattening whole pages into raster JPEGs ruins selectable text. Selective compression targets oversized embedded raster image streams down to legible 150 DPI while leaving crisp vector typography untouched.
+- **Strict range parsing:** Sanitizing user-typed ranges (\`1-4, 7, 10-12\`) avoids out-of-bounds exceptions across mixed page counts.
 
 ## Memory hygiene on constrained mobile browsers
 
-Handling 50+ MB files safely inside browser tabs requires **lazy rendering** via \`IntersectionObserver\` on long documents, **zero-copy transferable \`ArrayBuffer\`** handoffs into Web Workers, graceful password-encryption checks, and immediate \`URL.revokeObjectURL\` cleanup after download triggers.`
+Handling 50–100 MB documents reliably inside mobile tabs requires explicit cleanup:
+
+- **Lazy rendering via \`IntersectionObserver\`:** Never render 250 thumbnail canvases simultaneously; decode pages only as they enter viewport proximity.
+- **Zero-copy Worker transfers:** Pass \`ArrayBuffer\` payloads via transferable object lists (\`postMessage(data, [data.buffer])\`) to avoid duplicating gigabytes in RAM.
+- **Prompt \`URL.revokeObjectURL\`:** Free temporary preview and download blobs immediately once saved or cleared.
+
+Zero-upload processing scales horizontally across thousands of simultaneous users at nearly zero backend compute cost while guaranteeing privacy by design.`
     }
   },
   {
@@ -477,13 +575,25 @@ Al ejecutarse íntegramente mediante \`Canvas 2D\` en memoria del navegador, ni 
         'Turning tilted mobile camera snapshots of IDs or receipts into crisp rectangular scans mapped to exact A4 printable layouts using pure TypeScript.',
       content: `## Rectifying camera perspective without heavy OpenCV bundles
 
-Importing full WebAssembly builds of OpenCV solely to dewarp a snapshot hurts initial load budgets and Core Web Vitals on mobile networks. Solving the 8-degree-of-freedom projective homography system directly via Gaussian elimination with partial pivoting in pure TypeScript takes less than 0.2 milliseconds with zero runtime weight.
+In everyday administrative procedures—job applications, university enrollments, and bank filings—users routinely photograph national ID cards, receipts, and certificates with mobile phones. Holding a handset perfectly parallel to paper without casting glare or angled keystone distortion is nearly impossible.
+
+Importing multi-megabyte WebAssembly builds of OpenCV solely to dewarp a snapshot hurts First Load JS budgets and Core Web Vitals on mobile networks. Solving the **8-degree-of-freedom projective homography** system directly via Gaussian elimination with partial pivoting in **pure TypeScript** takes less than **0.2 milliseconds** with zero runtime weight. Mapping four user-adjusted corner handles toward standardized physical proportions (such as **ISO/IEC 7810 ID-1**, \`85.60 × 53.98 mm\`) straightens angled photos immediately.
 
 ## Inverse warping, bilinear sampling, and tonal enhancement
 
-Forward pixel mapping leaves missing pixel holes whenever decimal destination positions round unevenly. Using **inverse warping** to loop smoothly over every integer destination coordinate and reading continuous source coordinates via **bilinear interpolation** preserves sharp barcode bars, fine microprint, and clean signatures.
+Forward pixel mapping leaves missing pixel holes whenever decimal destination positions round unevenly. Using **inverse warping** to loop smoothly over every integer destination coordinate and sampling continuous source coordinates via **bilinear interpolation** across four neighboring pixels preserves sharp barcode bars, fine microprint, and clean signatures.
 
-From the resulting \`ImageData\` canvas buffer, lightweight luminance normalization fixes uneven desk shadows while preserving stamp colors when needed. Exporting centered front-and-back scans onto calibrated **210 × 297 mm A4 pages** using \`jsPDF\` produces print-ready PDFs completely client-side with zero image uploads.`
+From the resulting \`ImageData\` offscreen canvas buffer, lightweight luminance adjustments fix harsh desk lighting cleanly:
+
+- **Balanced original color:** preserves official identity hues, portraits, and ink stamps accurately for formal applications.
+- **High-contrast grayscale:** applies histogram normalization to reduce uneven indoor shadow gradients.
+- **Clean black-and-white document mode:** clarifies pale thermal paper receipts without thickening fine glyph strokes.
+
+## Respecting EXIF orientation and calibrated A4 export with \`jsPDF\`
+
+Portrait camera snapshots frequently store rotation flags inside EXIF headers rather than rotating physical JPEG pixels. Decoding inputs via \`createImageBitmap(file, { imageOrientation: 'from-image' })\` and capping working dimensions to 2,200 px keeps memory lean while aligning corner handles accurately.
+
+Exporting centered front-and-back scans onto calibrated **210 × 297 mm A4 pages** using \`jsPDF\` produces print-ready PDFs directly inside local browser memory—ensuring sensitive identity scans never leave the user's device.`
     }
   },
   {
@@ -559,13 +669,40 @@ Con ello, cualquier participante puede validar la integridad de entrada sin depe
         'Avoiding modulo bias and V8 comparator distortion using Fisher-Yates shuffling paired with crypto.getRandomValues and SHA-256 audit hashes.',
       content: `## Two subtle flaws hidden inside naive JavaScript giveaways
 
-Reaching for \`array.sort(() => Math.random() - 0.5)\` remains one of the most widespread bugs in casual giveaway widgets. Sorting algorithms depend on strict weak ordering; returning erratic comparator signs breaks transitivity inside TimSort and introduces measurable positional bias across participant lists, while \`Math.random()\` optimizes simulation speed over cryptographic entropy.
+Reaching for \`array.sort(() => Math.random() - 0.5)\` remains one of the most widespread anti-patterns in casual giveaway tools and classroom team pickers. Two mathematical bugs sit beneath the surface:
+
+1. **Non-cryptographic PRNG:** \`Math.random()\` typically implements variants of \`xorshift128+\` optimized for graphics speed and physics loops rather than auditable cryptographic unpredictability.
+2. **Broken sort transitivity:** Standard array sorting implementations such as TimSort assume comparator functions enforce strict weak ordering. Returning random positive or negative signs breaks transitivity, leaving early or late entries measurably more likely to settle near certain positions.
 
 ## Uniformity with Fisher-Yates, Web Crypto API, and rejection sampling
 
-Achieving true mathematical uniformity (\`1 / N\` odds per candidate) requires **Fisher-Yates shuffling** paired with \`window.crypto.getRandomValues(new Uint32Array(1))\`. To avoid **modulo bias** whenever \`2^32\` is not evenly divisible by the candidate range, rejection sampling discards values above the highest exact multiple before computing the remainder.
+Delivering genuine \`1 / N\` statistical equality requires walking a shallow copy backwards with **Fisher-Yates (Knuth) shuffling** driven by **Web Crypto API** (\`window.crypto.getRandomValues\`). To prevent **modulo bias** whenever \`2^32\` does not divide evenly by the candidate pool size, **rejection sampling** discards integers inside the trailing partial block:
 
-Clean input deduplication, configurable alternate winners, and a client-computed **SHA-256** integrity digest via \`crypto.subtle.digest\` give organizers transparent proof of input integrity without storing participant names on any remote server.`
+~~~ts
+function secureRandomInt(maxExclusive: number): number {
+  const limit = Math.floor(0x100000000 / maxExclusive) * maxExclusive;
+  const buffer = new Uint32Array(1);
+  while (true) {
+    crypto.getRandomValues(buffer);
+    if (buffer[0] < limit) return buffer[0] % maxExclusive;
+  }
+}
+
+export function fairShuffle<T>(entries: readonly T[]): T[] {
+  const copy = [...entries];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = secureRandomInt(i + 1);
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+~~~
+
+## Clean roster hygiene and SHA-256 verification receipts
+
+In real livestreams and social campaigns, organizers copy rosters from spreadsheets or chat threads full of blank lines, trailing spaces, and accidental duplicates. Pre-normalizing whitespace, offering clear duplicate toggles, and reserving alternate winners upfront eliminates manual disputes mid-broadcast.
+
+Computing a client-side **SHA-256** verification digest via \`crypto.subtle.digest\` over the canonical input list and UTC timestamp allows organizers to export downloadable proof sheets confirming participants were never altered or silently filtered after setup—all inside browser memory without uploading participant names to third-party servers.`
     }
   },
   {
@@ -614,15 +751,25 @@ El último componente clave en campo es un historial local persistente construid
         'Building a zero-tracker QR scanner and vector generator with CameraX lifecycle binding, strict scheme validation, and anti-quishing domain warnings.',
       content: `## Why everyday QR apps still require security-first architecture
 
-Too many free mobile QR utilities over-request permissions—location, contacts, background storage—and blindly pass decoded payloads directly into an Android browser \`Intent\`. That leaves users vulnerable to **quishing** (QR phishing stickers placed over public signs or merchant stands) and hidden download redirects.
+Too many free mobile QR utilities over-request invasive permissions—background GPS location, contact books, or full external storage—to solve a task needing only momentary camera access. Worse, many blindly pass any decoded string straight into an implicit Android browser \`Intent\`, masking the true destination host and leaving everyday users exposed to **quishing** (phishing stickers pasted over restaurant menus, public notices, or merchant payment stands).
+
+Engineering a modern reader with **Kotlin, Jetpack Compose, CameraX, and Dagger Hilt** means pairing smooth low-light detection with strict pre-launch security inspection.
 
 ## Lifecycle-safe CameraX capture and Dagger Hilt separation
 
-Binding **CameraX** \`Preview\` and \`ImageAnalysis\` (\`STRATEGY_KEEP_ONLY_LATEST\`) directly to Jetpack Compose lifecycle state frees camera hardware reliably and avoids frame queue memory buildup. Using **Dagger Hilt** to decouple frame decoding, URL safety heuristics, and Room scan history lets core inspection logic stay covered by fast JVM unit tests.
+Rather than managing low-level \`Camera2\` state machines across vendor quirks, binding **CameraX** \`Preview\` and \`ImageAnalysis\` directly to the Jetpack Compose screen \`LifecycleOwner\` ensures sensor hardware powers down the millisecond users background the app:
 
-## Pre-launch payload validation and private vector export
+- Setting \`BackpressureStrategy.STRATEGY_KEEP_ONLY_LATEST\` avoids frame queue pileups while decoding live video streams.
+- Restricting analysis coordinates to the central reticle box lowers CPU cycles per frame and minimizes thermal throttling during repeated warehouse or store scans.
+- Injecting the decoder engine, URL safety validator, and local Room history repository via **Dagger Hilt** lets security inspection rules stay verified via fast JVM unit tests without an emulator.
 
-Before allowing navigation, strict URI inspection neutralizes \`javascript:\` or \`data:\` schemes, reveals true registrable root domains against misleading subdomains or Punycode tricks, flags opaque shorteners, and lets users generate crisp local **SVG** and **PNG** QR exports via ZXing completely offline.`
+## Pre-launch payload inspection, vector exports, and offline history
+
+QR payloads carry URLs, Wi-Fi credentials (\`WIFI:T:WPA;S:...;;\`), vCard contacts, phone links, or arbitrary text. Before offering an open button, a security layer enforces three checks:
+
+1. **Strict scheme allowlist:** only \`https://\` and \`http://\` trigger external web actions after user confirmation; dangerous schemes such as \`javascript:\`, \`data:\`, or \`file://\` display strictly as inert text.
+2. **Root domain unmasking:** deceptive subdomains, Punycode (\`xn--\`) lookalikes, opaque URL shorteners, and raw IP hosts trigger prominent domain warnings.
+3. **Zero-server QR generation & local Room logs:** generating business or Wi-Fi QR matrices via **ZXing** exports crisp offline **SVG** and **PNG** files while keeping scan history strictly stored in local Room tables with accessible TalkBack labeling and high-contrast torch controls.`
     }
   },
   {
@@ -677,18 +824,25 @@ Antes de liberar nuevas taxonomías o filtros de búsqueda hacia indexación pú
         'Preventing thin soft-404 taxonomy pages with dynamic index/noindex rules, active-inventory sitemaps, and clean Schema.org JobPosting markup.',
       content: `## Avoiding programmatic SEO pitfalls in public tender portals
 
-Generating dynamic city and category routes in **Next.js App Router** makes scaling regional landing pages effortless—yet easily backfires into *thin content* rejections whenever regional inventories drop to zero while pages still return \`200 OK\` inside \`sitemap.xml\`.
+Generating dynamic city, sector, and profession routes in **Next.js App Router** (\`/empleos/en/[region]\`, \`/empleos/[slug]\`) scales regional landing coverage quickly—yet routinely triggers Search Console indexing drops or AdSense *low-value content* rejections whenever portals commit two classic structural mistakes:
+
+1. **Indexed soft-404 taxonomy shells:** exposing hundreds of regional or category combinations inside \`sitemap.xml\` that return \`200 OK\` with zero active openings and only an empty placeholder notice.
+2. **Stale expired announcements:** letting months-old closed civil-service tenders compete in search snippets without clear expiration status or active regional alternatives.
+
+Inside **chamba.atpdev.dev**, deterministic server-side rules ensure search crawlers and Peruvian applicants explore exclusively structured, active, verified listings linked to institutional public bases (\`.gob.pe\`, SERVIR, regional governments, and verified private employers).
 
 ## Inventory-driven indexing rules with Supabase PostgreSQL
 
-In **chamba.atpdev.dev**, server components query active open tenders before emitting metadata:
+Every regional route queries live open-tender counts in **Supabase PostgreSQL** prior to emitting metadata:
 
-- Regions with live postings emit \`robots: { index: true, follow: true }\`, clean query-free canonical links, and remain listed in \`sitemap.xml\`.
-- Temporarily empty regional categories automatically emit \`noindex, follow\` and fall back to relevant nearby active tenders for human visitors, protecting crawl budget across search engines.
+- Regions holding live vacancies emit \`robots: { index: true, follow: true }\`, strip redundant query strings in canonical links, remain listed in \`sitemap.xml\`, and render clear salary ranges, contract regimes (CAS D.L. 1057, D.L. 728, D.L. 276), and direct institutional application URLs.
+- Temporarily empty regional categories automatically emit \`robots: { index: false, follow: true }\`, drop out of \`sitemap.xml\`, and fall back to relevant nearby active tenders for human visitors—protecting crawl budget across search engines.
 
 ## Clean Schema.org \`JobPosting\` JSON-LD and peak load caching
 
-Every job page serializes strictly sanitized \`JobPosting\` structured data matching visible entity names, normalized Peruvian regions, and exact \`validThrough\` deadlines. Composite indexes across \`(status, region, deadline)\` paired with ISR keep **TTFB** consistently low even during peak civil-service announcement surges.`
+Every job page serializes strictly sanitized \`JobPosting\` structured data matching visible entity names word for word—including full ISO 8601 \`datePosted\` timestamps, exact official \`validThrough\` deadlines, normalized \`PE\` regions, and avoiding synthetic salary figures whenever public notices omit exact compensation.
+
+Composite PostgreSQL indexes across \`(status, region, deadline)\`, parallel \`Promise.allSettled\` fetches, and Next.js Incremental Static Regeneration (\`revalidate\`) keep **TTFB** consistently low even during peak national civil-service announcement surges.`
     }
   }
 ];

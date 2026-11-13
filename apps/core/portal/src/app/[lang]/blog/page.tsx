@@ -70,7 +70,7 @@ export default async function BlogIndexPage({
         <div className="max-w-5xl mx-auto">
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs mb-6 font-medium" style={{ color: 'var(--text-muted)' }}>
-            <Link href={`${prefix}/`} className="hover:underline" style={{ color: 'var(--primary)' }}>
+            <Link href={`${prefix}/`} className="hover:underline" style={{ color: 'var(--accent-text)' }}>
               {isEn ? 'Home' : 'Inicio'}
             </Link>
             <span>/</span>
@@ -84,7 +84,7 @@ export default async function BlogIndexPage({
             className="p-7 sm:p-10 rounded-3xl border mb-10 shadow-xl"
             style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border" style={{ borderColor: 'var(--glass-border)', color: 'var(--primary)' }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 border" style={{ borderColor: 'var(--glass-border)', color: 'var(--accent-text)' }}>
               <BookOpen size={14} />
               <span>{isEn ? 'ATP Dev Engineering Journal' : 'Publicaciones Técnicas ATP Dev'}</span>
             </div>
@@ -118,7 +118,7 @@ export default async function BlogIndexPage({
             style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
           >
             <div className="flex items-start gap-3">
-              <UserCheck size={22} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--primary)' }} />
+              <UserCheck size={22} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--accent-text)' }} />
               <div>
                 <h2 className="text-base font-bold mb-1">
                   {isEn ? 'Written by Percy Acha Taipe — Systems Engineer (UNAJMA)' : 'Escrito por Percy Acha Taipe — Ingeniero de Sistemas (UNAJMA)'}
@@ -133,7 +133,7 @@ export default async function BlogIndexPage({
             <Link
               href={`${prefix}/sobre-mi`}
               className="px-4 py-2 rounded-xl text-xs font-bold border whitespace-nowrap hover:opacity-80 transition-opacity"
-              style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+              style={{ borderColor: 'var(--accent-text)', color: 'var(--accent-text)' }}
             >
               {isEn ? 'Author Profile →' : 'Perfil del Autor →'}
             </Link>
@@ -149,7 +149,7 @@ export default async function BlogIndexPage({
               >
                 <div>
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3 text-xs font-semibold">
-                    <span className="px-2.5 py-1 rounded-lg border" style={{ borderColor: 'var(--glass-border)', color: 'var(--primary)' }}>
+                    <span className="px-2.5 py-1 rounded-lg border" style={{ borderColor: 'var(--glass-border)', color: 'var(--accent-text)' }}>
                       {post.category}
                     </span>
                     <span className="flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
@@ -188,7 +188,7 @@ export default async function BlogIndexPage({
                     <Link
                       href={`${prefix}/blog/${post.slug}`}
                       className="inline-flex items-center gap-1.5 text-sm font-bold hover:opacity-80 transition-opacity"
-                      style={{ color: 'var(--primary)' }}
+                      style={{ color: 'var(--accent-text)' }}
                     >
                       <span>{isEn ? 'Read full guide' : 'Leer guía completa'}</span>
                       <ArrowRight size={15} />

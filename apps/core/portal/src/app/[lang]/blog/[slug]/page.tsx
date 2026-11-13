@@ -131,11 +131,11 @@ export default async function BlogArticlePage({
           {/* Breadcrumb & Back */}
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-              <Link href={`${prefix}/`} className="hover:underline" style={{ color: 'var(--primary)' }}>
+              <Link href={`${prefix}/`} className="hover:underline" style={{ color: 'var(--accent-text)' }}>
                 {isEn ? 'Home' : 'Inicio'}
               </Link>
               <span>/</span>
-              <Link href={`${prefix}/blog`} className="hover:underline" style={{ color: 'var(--primary)' }}>
+              <Link href={`${prefix}/blog`} className="hover:underline" style={{ color: 'var(--accent-text)' }}>
                 {isEn ? 'Articles' : 'Artículos'}
               </Link>
               <span>/</span>
@@ -160,7 +160,7 @@ export default async function BlogArticlePage({
             style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
           >
             <div className="flex flex-wrap items-center gap-3 text-xs font-semibold mb-4">
-              <span className="px-3 py-1 rounded-full border uppercase tracking-wider" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>
+              <span className="px-3 py-1 rounded-full border uppercase tracking-wider" style={{ borderColor: 'var(--accent-text)', color: 'var(--accent-text)' }}>
                 {post.category}
               </span>
               <span className="inline-flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
@@ -185,7 +185,7 @@ export default async function BlogArticlePage({
 
             <div className="flex flex-wrap items-center justify-between gap-4 pt-5 border-t" style={{ borderColor: 'var(--glass-border)' }}>
               <div className="flex items-center gap-2.5 text-sm">
-                <User size={16} style={{ color: 'var(--primary)' }} />
+                <User size={16} style={{ color: 'var(--accent-text)' }} />
                 <span>
                   {isEn ? 'By ' : 'Por '}
                   <Link href={`${prefix}/sobre-mi`} className="font-bold hover:underline">
@@ -225,7 +225,7 @@ export default async function BlogArticlePage({
             style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
           >
             <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--primary)' }}>
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--accent-text)' }}>
                 <Layers size={14} />
                 <span>{isEn ? 'Production Implementation' : 'Implementación en Producción'}</span>
               </div>
@@ -260,7 +260,7 @@ export default async function BlogArticlePage({
                   style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
                 >
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
+                    <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--accent-text)' }}>
                       {rel.category}
                     </span>
                     <h3 className="text-base font-bold mt-2 mb-2 leading-snug">{rel.title}</h3>
