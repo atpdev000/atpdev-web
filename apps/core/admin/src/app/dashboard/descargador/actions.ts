@@ -312,10 +312,16 @@ export async function uploadYoutubeCookiesAction(
       return { success: false, error: data?.detail || `HTTP ${res.status}` };
     }
     revalidatePath('/dashboard/descargador');
+    const rawStatus =
+      typeof data?.cookies_status === 'object' && data.cookies_status !== null
+        ? data.cookies_status
+        : typeof data?.exists === 'boolean'
+          ? data
+          : undefined;
     return {
       success: true,
       message: data?.message || 'Cookies actualizadas correctamente.',
-      status: data?.status ? { success: true, ...data.status } : undefined,
+      status: rawStatus ? { success: true, ...rawStatus } : undefined,
     };
   } catch (err: any) {
     return {
