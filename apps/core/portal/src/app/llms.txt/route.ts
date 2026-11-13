@@ -1,4 +1,5 @@
 import { getProjects, getSiteConfig } from "@atpdev/database";
+import { BLOG_POSTS } from "@/data/blog-posts";
 
 export const revalidate = 3600;
 
@@ -24,6 +25,10 @@ export async function GET() {
     })
     .join("\n");
 
+  const blogLines = BLOG_POSTS.map(
+    (post) => `- [${post.es.title}](${BASE_URL}/blog/${post.slug}): ${post.es.excerpt}`
+  ).join("\n");
+
   const markdown = `# ${fullName} — ATP Dev
 
 > ${bioShort} Portafolio oficial, aplicaciones móviles Android/iOS, plataformas web Next.js y proyectos con Inteligencia Artificial de ${fullName} (Andahuaylas, Perú).
@@ -32,7 +37,13 @@ export async function GET() {
 
 - [Portafolio Principal (Español)](${BASE_URL}/): Vista general, perfil profesional, experiencia, stack tecnológico y proyectos destacados.
 - [Portfolio (English)](${BASE_URL}/en): English version of the developer portfolio and published applications.
+- [Sobre Mí — Perfil Técnico](${BASE_URL}/sobre-mi): Formación académica, trayectoria profesional y catálogo técnico.
+- [Artículos Técnicos y Guías](${BASE_URL}/blog): Guías de arquitectura Android Offline-First, Edge AI, Next.js Core Web Vitals y WebAssembly.
 - [Sitemap XML](${BASE_URL}/sitemap.xml): Índice completo de URLs multidioma y páginas de aplicaciones.
+
+## Artículos Técnicos Publicados
+
+${blogLines}
 
 ## Proyectos y Aplicaciones Publicadas
 

@@ -25,6 +25,7 @@ export default function Navbar() {
     { href: `${linkPrefix}/#about`,     label: tSobreMi },
     { href: `${linkPrefix}/#experience`, label: tExperiencia },
     { href: `${linkPrefix}/#portfolio`, label: tProyectos },
+    { href: `${linkPrefix}/blog`,       label: dict.linkBlog },
     { href: `${linkPrefix}/#contact`,   label: tContacto },
   ];
 
@@ -40,7 +41,7 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-8">
-          {links.slice(0, 3).map(l => (
+          {links.slice(0, 4).map(l => (
             <Link key={l.href} href={l.href} className="group relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-[1.05]" style={{ color: 'var(--text-color)' }}>
               <span className="relative z-10 transition-colors duration-300 group-hover:text-[var(--primary)]">{l.label}</span>
               <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300" style={{ backgroundColor: 'var(--primary)' }}></div>

@@ -207,6 +207,27 @@ export default async function SobreMiPage({ params }: { params: Promise<{ lang: 
           </div>
         </section>
       )}
+
+      {/* Artículos Técnicos y Guías */}
+      <section
+        className="rounded-3xl border p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        style={{ backgroundColor: "var(--glass-bg)", borderColor: "var(--glass-border)" }}
+      >
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold">{await t("Artículos Técnicos y Guías de Arquitectura")}</h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            {await t("Explora guías detalladas sobre Android Offline-First, Edge AI con TensorFlow Lite, Next.js y WebAssembly.")}
+          </p>
+        </div>
+        <Link
+          href={`${prefix}/blog`}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white whitespace-nowrap hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: "var(--btn-primary-bg)" }}
+        >
+          <span>{await t("Leer Artículos")}</span>
+          <ArrowUpRight size={16} />
+        </Link>
+      </section>
     </main>
   );
 }

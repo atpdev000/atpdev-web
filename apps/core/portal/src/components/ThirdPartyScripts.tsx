@@ -84,3 +84,4 @@ export default function ThirdPartyScripts({ ga4Id, clarityId }: ThirdPartyScript
 
   return null;
 }
+

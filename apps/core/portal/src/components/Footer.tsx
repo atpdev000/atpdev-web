@@ -20,6 +20,7 @@ export default function Footer({
           <ul className="space-y-3">
             <li><a href="#about" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkAbout}</a></li>
             <li><Link href="/sobre-mi" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>ATP Dev Perfil</Link></li>
+            <li><Link href="/blog" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>Artículos Técnicos</Link></li>
             <li><a href="#experience" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
             <li><a href="#portfolio" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
           </ul>

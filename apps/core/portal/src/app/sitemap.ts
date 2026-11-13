@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getProjects } from '@atpdev/database';
+import { BLOG_POSTS } from '@/data/blog-posts';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = 'https://www.atpdev.dev';
@@ -33,6 +34,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
       alternates: buildAlternates('/sobre-mi'),
     },
+    {
+      url: `${BASE_URL}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+      alternates: buildAlternates('/blog'),
+    },
   ];
 
   const langRoutes: MetadataRoute.Sitemap = langs.flatMap(lang => [
@@ -50,7 +58,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
       alternates: buildAlternates('/sobre-mi'),
     },
+    {
+      url: `${BASE_URL}/${lang}/blog`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+      alternates: buildAlternates('/blog'),
+    },
   ]);
+
+  const esBlogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map(post => ({
+    url: `${BASE_URL}/blog/${post.slug}`,
+    lastModified: new Date(post.updatedAt),
+    changeFrequency: 'monthly' as const,
+    priority: 0.85,
+    alternates: buildAlternates(`/blog/${post.slug}`),
+  }));
+
+  const otherLangBlogRoutes: MetadataRoute.Sitemap = langs.flatMap(lang =>
+    BLOG_POSTS.map(post => ({
+      url: `${BASE_URL}/${lang}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedAt),
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+      alternates: buildAlternates(`/blog/${post.slug}`),
+    }))
+  );
+
+  const blogRoutes: MetadataRoute.Sitemap = [...esBlogRoutes, ...otherLangBlogRoutes];
 
   // Dynamic projects routes (solo fichas de producto, excluyendo subpáginas legales/créditos con noindex)
   let projectRoutes: MetadataRoute.Sitemap = [];
@@ -81,5 +116,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error("Error fetching projects for sitemap:", error);
   }
 
-  return [...mainRoutes, ...langRoutes, ...projectRoutes];
+  return [...mainRoutes, ...langRoutes, ...blogRoutes, ...projectRoutes];
 }

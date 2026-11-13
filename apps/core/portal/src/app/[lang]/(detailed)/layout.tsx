@@ -17,6 +17,9 @@ export default function DetailedLayout({
             <span className="font-mono text-[var(--accent-text)]">&gt;_</span> ATP DEV
           </Link>
           <nav className="flex items-center gap-5 text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+            <Link href="/blog" className="hover:text-[var(--text-color)] transition-colors">
+              Artículos
+            </Link>
             <Link href="/#portfolio" className="hover:text-[var(--text-color)] transition-colors">
               Proyectos
             </Link>
