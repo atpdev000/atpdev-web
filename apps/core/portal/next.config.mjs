@@ -54,6 +54,15 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/cv.html',
+        destination: '/cv',
+        permanent: false,
+      },
+    ];
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error"] } : false,
   },

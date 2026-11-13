@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SiteConfig } from "@atpdev/database";
 import { Download } from "lucide-react";
 import Typewriter from "@/components/Typewriter";
@@ -6,15 +7,21 @@ import MagneticEffect from "@/components/MagneticEffect";
 export default function HeroSection({
   config,
   ui,
-  displayTechStack
+  displayTechStack,
+  lang = "es",
 }: {
   config: SiteConfig | null;
   ui: Record<string, string>;
   displayTechStack: string[];
+  lang?: string;
 }) {
   const enableGlow = config?.enable_glow_effect !== false;
   const styleStr = config?.glow_style || 'border';
   const glowClass = "interactive-card";
+  const linkPrefix = lang === "es" ? "" : `/${lang}`;
+  const customCvUrl = config?.cv_url?.trim();
+  const hasExternalCustomCv = Boolean(customCvUrl && customCvUrl !== "/cv.html" && customCvUrl !== "/cv");
+  const cvHref = hasExternalCustomCv ? customCvUrl! : `${linkPrefix}/cv`;
 
   return (
     <section id="hero" className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 md:px-16 text-center overflow-hidden pt-20 pb-20">
@@ -59,9 +66,15 @@ export default function HeroSection({
             </a>
           </MagneticEffect>
           <MagneticEffect intensity={0.1} className="inline-flex w-full sm:w-auto justify-center sm:justify-start">
-            <a href="/cv.html" target="_blank" rel="noopener noreferrer" className="group hover:text-[var(--accent-text)] underline text-sm ml-0 sm:ml-4 flex items-center gap-1 transition-all duration-300 hover:scale-105" style={{ color: 'var(--text-muted)' }}>
-              <Download size={14} className="transition-transform duration-300 group-hover:-translate-y-1" /> {ui.btnPdf}
-            </a>
+            {hasExternalCustomCv ? (
+              <a href={cvHref} target="_blank" rel="noopener noreferrer" className="group hover:text-[var(--accent-text)] underline text-sm ml-0 sm:ml-4 flex items-center gap-1 transition-all duration-300 hover:scale-105" style={{ color: 'var(--text-muted)' }}>
+                <Download size={14} className="transition-transform duration-300 group-hover:-translate-y-1" /> {ui.btnPdf}
+              </a>
+            ) : (
+              <Link href={cvHref} className="group hover:text-[var(--accent-text)] underline text-sm ml-0 sm:ml-4 flex items-center gap-1 transition-all duration-300 hover:scale-105" style={{ color: 'var(--text-muted)' }}>
+                <Download size={14} className="transition-transform duration-300 group-hover:-translate-y-1" /> {ui.btnPdf}
+              </Link>
+            )}
           </MagneticEffect>
         </div>
 
