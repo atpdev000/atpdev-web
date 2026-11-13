@@ -71,7 +71,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
     <main>
       <GlowWrapper enabled={enableGlow} className="w-full text-[var(--text-color)] transition-colors duration-500">
         <HeroSection config={tConfig} ui={ui} displayTechStack={displayTechStack} />
-        <AboutSection initialSkills={augmentedSkills} initialCredlyUrl={tConfig?.credly_url || ""} lang={lang} enableGlow={enableGlow} glowStyle={glowStyle} />
+        <AboutSection initialSkills={augmentedSkills} initialCredlyUrl={tConfig?.credly_url || ""} config={tConfig} lang={lang} enableGlow={enableGlow} glowStyle={glowStyle} />
         <ExperienceTimeline initialExperiences={experiences} lang={lang} enableGlow={enableGlow} glowStyle={glowStyle} />
         <AIModelsSection projects={tProjects} ui={ui} aiModels={tAiModels} enableGlow={enableGlow} glowStyle={glowStyle} />
         <Portfolio projects={tProjects} ui={ui} aiModels={tAiModels} enableGlow={enableGlow} glowStyle={glowStyle} />

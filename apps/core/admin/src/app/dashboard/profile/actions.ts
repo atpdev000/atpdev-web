@@ -5,6 +5,13 @@ import {
   createExperience, deleteExperience, updateExperience,
   createSkill, deleteSkill, updateSkill,
 } from "@atpdev/database";
+import { revalidatePortalCache } from "@/lib/revalidate-portal";
+
+async function revalidateProfileCaches() {
+  revalidatePath("/dashboard/profile");
+  revalidatePath("/", "layout");
+  await revalidatePortalCache();
+}
 
 // ─── EXPERIENCIAS ────────────────────────────────────────────────────────────
 
@@ -17,7 +24,7 @@ export async function addExperience(formData: FormData) {
   const color_key   = (formData.get("color_key") as string) || "blue";
   const sort_order  = parseInt((formData.get("sort_order") as string) || "0");
   await createExperience({ role, company, date_range, description, icon_key, color_key, sort_order, is_active: true });
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 export async function editExperience(formData: FormData) {
@@ -30,17 +37,17 @@ export async function editExperience(formData: FormData) {
   const color_key   = (formData.get("color_key") as string) || "blue";
   const sort_order  = parseInt((formData.get("sort_order") as string) || "0");
   await updateExperience(id, { role, company, date_range, description, icon_key, color_key, sort_order });
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 export async function removeExperience(id: number) {
   await deleteExperience(id);
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 export async function toggleExperienceActive(id: number, current: boolean) {
   await updateExperience(id, { is_active: !current });
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 // ─── SKILLS ──────────────────────────────────────────────────────────────────
@@ -53,7 +60,7 @@ export async function addSkill(formData: FormData) {
   const sort_order = parseInt((formData.get("sort_order") as string) || "0");
   const items      = itemsRaw.split(",").map((s) => s.trim()).filter(Boolean);
   await createSkill({ category, icon_key, color_key, items, sort_order, is_active: true });
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 export async function editSkill(formData: FormData) {
@@ -65,15 +72,15 @@ export async function editSkill(formData: FormData) {
   const sort_order = parseInt((formData.get("sort_order") as string) || "0");
   const items      = itemsRaw.split(",").map((s) => s.trim()).filter(Boolean);
   await updateSkill(id, { category, icon_key, color_key, items, sort_order });
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 export async function removeSkill(id: number) {
   await deleteSkill(id);
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }
 
 export async function toggleSkillActive(id: number, current: boolean) {
   await updateSkill(id, { is_active: !current });
-  revalidatePath("/dashboard/profile");
+  await revalidateProfileCaches();
 }

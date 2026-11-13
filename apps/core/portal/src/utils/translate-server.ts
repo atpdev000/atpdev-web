@@ -15,13 +15,14 @@ export async function translateProject(p: Project, lang: string): Promise<Projec
 export async function translateConfig(c: SiteConfig | null, lang: string): Promise<SiteConfig | null> {
   if (!c || lang === 'es' || !lang) return c;
   const tw = c.hero_typewriter || [];
-  const [hero_title, hero_subtitle, bio_short, hero_typewriter] = await Promise.all([
+  const [hero_title, hero_subtitle, bio_short, bio_long, hero_typewriter] = await Promise.all([
     translateText(c.hero_title, lang),
     translateText(c.hero_subtitle, lang),
     translateText(c.bio_short, lang),
+    translateText(c.bio_long, lang),
     Promise.all(tw.map((w: string) => translateText(w, lang))),
   ]);
-  return { ...c, hero_title, hero_subtitle, bio_short, hero_typewriter };
+  return { ...c, hero_title, hero_subtitle, bio_short, bio_long, hero_typewriter };
 }
 
 export async function translateAiModel(m: AIModelData, lang: string): Promise<AIModelData> {

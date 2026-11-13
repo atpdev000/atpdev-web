@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Code2, Smartphone, Database, BrainCircuit, GraduationCap, Award, Server, ExternalLink } from "lucide-react";
-import { Skill } from "@atpdev/database";
+import { Skill, SiteConfig } from "@atpdev/database";
 
 // Mapeo de icon_key → componente Lucide
 const ICON_MAP: Record<string, React.ReactNode> = {
@@ -28,16 +28,18 @@ import { translateClient } from "@/utils/translate";
 interface AboutSectionProps {
   initialSkills?: Skill[];
   initialCredlyUrl?: string;
+  config?: SiteConfig | null;
   lang?: string;
   enableGlow?: boolean;
   glowStyle?: string;
 }
 
-export default function AboutSection({ initialSkills = [], initialCredlyUrl = "", lang = 'es', enableGlow = true, glowStyle = 'border' }: AboutSectionProps) {
+export default function AboutSection({ initialSkills = [], initialCredlyUrl = "", config = null, lang = 'es', enableGlow = true, glowStyle = 'border' }: AboutSectionProps) {
   const glowClass = "interactive-card";
 
   const [skills, setSkills] = useState<Skill[]>(initialSkills);
   const [credlyUrl, setCredlyUrl] = useState<string>(initialCredlyUrl);
+  const [avatarFailed, setAvatarFailed] = useState(false);
 
   const [ui, setUi] = useState({
     title1: "Sobre ",
@@ -50,6 +52,15 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
     card3Title: "Especialización Continua",
     card3DescSuffix: ", Oracle SQL, Power BI, IA, Desarrollo del Kernel Linux (LFD103)."
   });
+
+  const displaySubtitle = config?.bio_short?.trim() || ui.subtitle;
+  const displayName = config?.full_name?.trim() || ui.card1Title;
+  const displayBioLong = config?.bio_long?.trim() || ui.card1Desc;
+  const avatarUrl = config?.avatar_url?.trim() || "";
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [avatarUrl]);
 
   useEffect(() => {
     if (lang === 'es') return;
@@ -88,7 +99,7 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
             {ui.title1} <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(to right, var(--primary), var(--tertiary))' }}>{ui.title2}</span>
           </h2>
           <p className="max-w-2xl mx-auto text-lg transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
-            {ui.subtitle}
+            {displaySubtitle}
           </p>
         </motion.div>
 
@@ -102,9 +113,21 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
             className={`lg:col-span-5 backdrop-blur-xl border rounded-3xl p-8 flex flex-col justify-center transition-colors shadow-lg hover:scale-[1.02] ${glowClass}`}
             style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(30px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
           >
-            <h3 className="text-2xl font-bold mb-6 transition-colors" style={{ color: 'var(--text-color)' }}>{ui.card1Title}</h3>
-            <p className="leading-relaxed mb-6 transition-colors" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
-              {ui.card1Desc}
+            <div className="flex items-center gap-4 mb-6">
+              {avatarUrl && !avatarFailed && (
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border shrink-0 shadow-md" style={{ borderColor: 'var(--primary)', backgroundColor: 'var(--pill-bg)' }}>
+                  <img
+                    src={avatarUrl}
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                    onError={() => setAvatarFailed(true)}
+                  />
+                </div>
+              )}
+              <h3 className="text-2xl font-bold transition-colors" style={{ color: 'var(--text-color)' }}>{displayName}</h3>
+            </div>
+            <p className="leading-relaxed mb-6 transition-colors whitespace-pre-line" style={{ color: 'var(--text-color)', opacity: 0.8 }}>
+              {displayBioLong}
             </p>
 
             <div className="space-y-4">
