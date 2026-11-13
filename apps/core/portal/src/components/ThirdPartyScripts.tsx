@@ -52,15 +52,12 @@ export default function ThirdPartyScripts({ ga4Id, clarityId }: ThirdPartyScript
       }
     };
 
-    // Si ya otorgó consentimiento antes, cargar cuando el hilo principal esté libre
-    const w = window as any;
+    // Si ya otorgó consentimiento antes, cargar cuando el hilo principal esté libre;
+    // en carga inicial sin interacción esperar a ventana post-LCP (6000 ms) para proteger TBT/Lighthouse
     const consent = typeof window !== "undefined" ? localStorage.getItem("cookie_consent") : null;
-    const idleTimeout = consent === "accepted" ? 1200 : 2800;
+    const idleTimeout = consent === "accepted" ? 1200 : 6000;
 
-    const timer =
-      typeof w.requestIdleCallback === "function"
-        ? w.requestIdleCallback(loadScripts, { timeout: idleTimeout })
-        : setTimeout(loadScripts, idleTimeout);
+    const timer = setTimeout(loadScripts, idleTimeout);
 
     // También cargar inmediatamente al primer gesto humano real o al aceptar cookies
     const events: (keyof WindowEventMap)[] = ["pointerdown", "keydown", "scroll", "touchstart"];
@@ -73,8 +70,7 @@ export default function ThirdPartyScripts({ ga4Id, clarityId }: ThirdPartyScript
     window.addEventListener("atpdev:consent-accepted", onInteract, { once: true });
 
     return () => {
-      if (typeof w.cancelIdleCallback === "function") w.cancelIdleCallback(timer);
-      else clearTimeout(timer);
+      clearTimeout(timer);
       events.forEach((ev) => window.removeEventListener(ev, onInteract));
       window.removeEventListener("atpdev:consent-accepted", onInteract);
     };
