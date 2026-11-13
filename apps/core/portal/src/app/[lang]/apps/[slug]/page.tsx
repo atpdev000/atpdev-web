@@ -176,6 +176,71 @@ export default async function ProjectPage({
   const wordCount = translatedDesc.split(/\s+/).length;
   const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
+  const stackSummary = project.stack?.length > 0 ? project.stack.slice(0, 4).join(", ") : "Next.js y TypeScript";
+  const isMedicalApp = slug.includes("cie-10");
+  const isAgroApp = slug.includes("paltoscan");
+  const hasMobileBuild = Boolean(project.playstore || hasAppstore);
+
+  const rawFaqItems = isMedicalApp
+    ? [
+        {
+          question: `¿${translatedTitle} funciona sin conexión a internet?`,
+          answer: "Sí, la base de datos CIE-10 y el motor de búsqueda Room FTS4 están integrados localmente para operar 100% offline en consultorios u hospitales sin cobertura.",
+        },
+        {
+          question: "¿Los datos de búsqueda clínica son privados?",
+          answer: "Sí. Las consultas se ejecutan localmente en el dispositivo sin exigir registro ni almacenar historiales médicos en servidores externos.",
+        },
+        {
+          question: "¿Es compatible con dispositivos Android?",
+          answer: "Sí, cuenta con compilación nativa optimizada para Android mediante Kotlin, Jetpack Compose y Clean Architecture.",
+        },
+      ]
+    : isAgroApp
+      ? [
+          {
+            question: `¿${translatedTitle} analiza las hojas sin conexión a internet?`,
+            answer: "Sí. El modelo de TensorFlow Lite corre directamente en el teléfono Android (Edge AI) para realizar inspecciones foliares en parcelas agrícolas sin señal.",
+          },
+          {
+            question: "¿El análisis reemplaza la evaluación de un ingeniero agrónomo?",
+            answer: "No. PaltoScan entrega mapas de calor Grad-CAM y predicciones visuales como herramienta técnica de apoyo en campo para agilizar el pre-diagnóstico.",
+          },
+          {
+            question: "¿Las imágenes de los cultivos se suben a la nube?",
+            answer: "No. Las fotografías y resultados quedan guardados localmente en la base Room del dispositivo para proteger la privacidad del productor.",
+          },
+        ]
+      : [
+          {
+            question: `¿Cómo acceder a ${translatedTitle}?`,
+            answer: project.demolink
+              ? `Puedes acceder directamente desde la web oficial del proyecto o revisar aquí su ficha técnica, flujo de arquitectura y módulos principales (${stackSummary}).`
+              : `Puedes consultar la ficha técnica completa y descargar el instalador disponible desde los enlaces verificados en esta página.`,
+          },
+          {
+            question: `¿Qué tecnologías utiliza ${translatedTitle}?`,
+            answer: `Está construido sobre ${stackSummary}, priorizando rendimiento, seguridad sobre HTTPS y compatibilidad responsiva en escritorio y móvil.`,
+          },
+          {
+            question: hasMobileBuild
+              ? `¿Está disponible para dispositivos móviles?`
+              : `¿Requiere instalar programas o registrarse para comenzar?`,
+            answer: hasMobileBuild
+              ? "Sí, incluye compilación compatible con dispositivos móviles junto con acceso directo y documentación técnica actualizada."
+              : "No requiere instalar software adicional ni crear cuentas obligatorias para explorar la plataforma desde cualquier navegador moderno.",
+          },
+        ];
+
+  const faqItems = lang === "es"
+    ? rawFaqItems
+    : await Promise.all(
+        rawFaqItems.map(async (item) => ({
+          question: await translateText(item.question, lang),
+          answer: await translateText(item.answer, lang),
+        }))
+      );
+
   return (
     <main className="main">
       <GlowWrapper enabled={enableGlow} className="w-full text-[var(--text-color)] transition-colors duration-500 min-h-screen py-16 px-6 relative overflow-hidden">
@@ -248,13 +313,6 @@ export default async function ProjectPage({
                 "image": (project.image && project.image.trim() !== "") ? project.image : "https://www.atpdev.dev/og-image.png",
                 "operatingSystem": operatingSystems,
                 "url": `https://www.atpdev.dev/${lang === 'es' ? '' : lang + '/'}apps/${project.slug}`,
-                "aggregateRating": {
-                  "@type": "AggregateRating",
-                  "ratingValue": "4.9",
-                  "ratingCount": "142",
-                  "bestRating": "5",
-                  "worstRating": "1"
-                },
                 "offers": {
                   "@type": "Offer",
                   "price": "0",
@@ -267,24 +325,14 @@ export default async function ProjectPage({
               },
               {
                 "@type": "FAQPage",
-                "mainEntity": [
-                  {
-                    "@type": "Question",
-                    "name": lang === 'es' ? `¿${translatedTitle} funciona sin conexión a internet?` : `Does ${translatedTitle} work offline?`,
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": lang === 'es' ? "Sí, la aplicación cuenta con persistencia de datos local optimizada (Room SQLite FTS4) para operar 100% offline sin latencia." : "Yes, the application features optimized local persistence for 100% offline operation without network latency."
-                    }
+                "mainEntity": faqItems.map((item) => ({
+                  "@type": "Question",
+                  "name": item.question,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": item.answer,
                   },
-                  {
-                    "@type": "Question",
-                    "name": lang === 'es' ? `¿Es compatible con dispositivos Android e iOS?` : `Is it compatible with Android and iOS devices?`,
-                    "acceptedAnswer": {
-                      "@type": "Answer",
-                      "text": lang === 'es' ? "Sí, cuenta con compilación e instaladores nativos para Android (APK / Play Store) e iOS (IPA / App Store)." : "Yes, it provides native installers and builds for both Android (APK / Play Store) and iOS (IPA / App Store)."
-                    }
-                  }
-                ]
+                })),
               },
               {
                 "@type": "BreadcrumbList",
@@ -410,9 +458,10 @@ export default async function ProjectPage({
             )}
 
             {/* FAQ Accordion Section */}
-            <FaqAccordion 
-              lang={lang} 
-              hideHeader={(project.long_description || project.description || '').includes("Preguntas Frecuentes") || (project.long_description || project.description || '').includes("Frequently Asked")} 
+            <FaqAccordion
+              items={faqItems}
+              lang={lang}
+              hideHeader={(project.long_description || project.description || '').includes("Preguntas Frecuentes") || (project.long_description || project.description || '').includes("Frequently Asked")}
             />
           </div>
 

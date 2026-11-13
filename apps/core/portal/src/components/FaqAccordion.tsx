@@ -20,31 +20,24 @@ export function FaqAccordion({ items, lang = "es", hideHeader = false }: FaqAcco
 
   const defaultFaqs: FaqItem[] = [
     {
-      question: lang === "es" ? "¿Cómo instalar la aplicación APK en dispositivos Android?" : "How to install the APK application on Android devices?",
-      answer: lang === "es" 
-        ? "Haz clic en el botón 'Descargar APK Directo' o 'Ver en Google Play'. Si descargas el archivo APK directo, abre el archivo descargado en tu teléfono y concede permiso para 'Instalar aplicaciones de fuentes desconocidas'. La instalación es 100% segura y libre de virus."
-        : "Click on the 'Download APK Direct' or 'View on Google Play' button. If downloading the direct APK file, open it on your phone and grant permission to 'Install apps from unknown sources'. The installation is 100% safe and virus-free.",
+      question: lang === "es" ? "¿Cómo acceder o utilizar esta plataforma?" : "How can I access or use this platform?",
+      answer: lang === "es"
+        ? "Puedes utilizar la herramienta directamente desde el enlace oficial de la aplicación web o descargar el paquete móvil cuando esté disponible en Google Play o App Store."
+        : "You can access the tool directly through its official web application link or install the mobile release when available on Google Play or App Store.",
       icon: <Download size={18} className="text-emerald-400" />
     },
     {
-      question: lang === "es" ? "¿Cómo instalar el archivo IPA en iPhone / iPad (iOS)?" : "How to install the IPA file on iPhone / iPad (iOS)?",
+      question: lang === "es" ? "¿El uso básico requiere registro o suscripción?" : "Does basic usage require registration or a subscription?",
       answer: lang === "es"
-        ? "Para instalar el ejecutable IPA nativo en iOS sin pasar por la App Store, puedes utilizar herramientas oficiales de instalación como AltStore, Sideloadly o Xcode. También dispones del enlace a la App Store cuando esté publicada oficialmente."
-        : "To install the native IPA executable on iOS without the App Store, you can use standard tools like AltStore, Sideloadly, or Xcode. An official App Store link is also provided when published.",
-      icon: <ShieldCheck size={18} className="text-sky-400" />
-    },
-    {
-      question: lang === "es" ? "¿La aplicación funciona 100% sin conexión a Internet (Offline)?" : "Does the app work 100% offline without an internet connection?",
-      answer: lang === "es"
-        ? "Sí, toda la base de datos de diagnósticos (10,000+ códigos) y el motor de búsqueda Room FTS4 están empaquetados localmente dentro del ejecutable. Funciona en hospitales, aviones y zonas sin cobertura."
-        : "Yes, the full diagnostic database (10,000+ codes) and Room FTS4 search engine are locally bundled inside the binary. Works in hospitals, planes, and zero-coverage areas.",
+        ? "No. Las herramientas públicas y guías técnicas de ATP Dev se pueden consultar directamente en el navegador sin registros forzados."
+        : "No. ATP Dev public tools and technical guides can be accessed directly in the browser without forced sign-ups.",
       icon: <Zap size={18} className="text-yellow-400" />
     },
     {
-      question: lang === "es" ? "¿Mis datos médicos o de búsqueda son privados y seguros?" : "Are my medical or search data private and secure?",
+      question: lang === "es" ? "¿Cómo se protegen los datos y la privacidad del usuario?" : "How is user data and privacy protected?",
       answer: lang === "es"
-        ? "Absolutamente. La aplicación no requiere registro ni almacena datos personales en servidores externos. Cumple estrictamente con la privacidad del personal médico y la normativa de protección de datos."
-        : "Absolutely. The application requires no registration and stores zero personal data on external servers. Fully compliant with medical privacy standards.",
+        ? "Todas las aplicaciones operan sobre HTTPS cifrado y priorizan el procesamiento local en el dispositivo siempre que la arquitectura lo permite, cumpliendo nuestra Política de Privacidad."
+        : "All applications run over encrypted HTTPS and prioritize local on-device processing whenever possible, in compliance with our Privacy Policy.",
       icon: <Lock size={18} className="text-purple-400" />
     }
   ];

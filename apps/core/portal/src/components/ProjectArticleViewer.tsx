@@ -104,9 +104,11 @@ export function ProjectArticleViewer({
         <div className="flex items-center gap-3 text-xs font-mono text-gray-300">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-            <ShieldCheck size={14} /> SHA-256 Verificado
+            <ShieldCheck size={14} /> {playstore || appstore ? "SHA-256 Verificado" : "HTTPS Verificado"}
           </span>
-          <span className="hidden sm:inline text-gray-500">• 100% Offline & Seguro</span>
+          <span className="hidden sm:inline text-gray-500">
+            • {playstore || appstore ? "100% Offline & Seguro" : "Web App Segura & Rápida"}
+          </span>
         </div>
         <div className="flex items-center gap-3">
           <button

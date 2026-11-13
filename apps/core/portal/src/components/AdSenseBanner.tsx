@@ -3,17 +3,21 @@
 import { useEffect } from "react";
 
 export function AdSenseBanner({ adsenseId, slot }: { adsenseId?: string | null; slot?: string }) {
+  const validSlot = slot?.trim();
+  const canRenderManualSlot = Boolean(adsenseId && validSlot && /^\d+$/.test(validSlot));
+
   useEffect(() => {
+    if (!canRenderManualSlot) return;
     try {
-      if (typeof window !== "undefined" && adsenseId) {
+      if (typeof window !== "undefined") {
         ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
       }
     } catch (e) {
       console.error("AdSense banner push error", e);
     }
-  }, [adsenseId]);
+  }, [canRenderManualSlot]);
 
-  if (!adsenseId) return null;
+  if (!canRenderManualSlot || !adsenseId) return null;
 
   return (
     <div className="my-8 w-full flex flex-col items-center justify-center min-h-[90px] bg-white/5 border border-white/10 rounded-2xl p-4 overflow-hidden shadow-inner">
@@ -22,7 +26,7 @@ export function AdSenseBanner({ adsenseId, slot }: { adsenseId?: string | null; 
         className="adsbygoogle"
         style={{ display: "block", textAlign: "center", width: "100%" }}
         data-ad-client={adsenseId}
-        data-ad-slot={slot || "auto"}
+        data-ad-slot={validSlot}
         data-ad-format="auto"
         data-full-width-responsive="true"
       />

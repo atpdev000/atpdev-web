@@ -19,6 +19,7 @@ export default function Footer({
           <h4 className="font-bold mb-4 uppercase tracking-widest text-xs" style={{ color: 'var(--text-color)' }}>{ui.footerLinks}</h4>
           <ul className="space-y-3">
             <li><a href="#about" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkAbout}</a></li>
+            <li><Link href="/sobre-mi" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>ATP Dev Perfil</Link></li>
             <li><a href="#experience" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
             <li><a href="#portfolio" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
           </ul>
