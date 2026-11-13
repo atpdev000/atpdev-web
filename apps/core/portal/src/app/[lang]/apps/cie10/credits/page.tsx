@@ -8,10 +8,19 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang = "es" } = await params;
-  const title = lang === "es" ? "Créditos y Fuentes | CIE-10 App" : await translateText("Credits & Sources | CIE-10 App", lang);
+  const BASE_URL = "https://www.atpdev.dev";
+  const path = "/apps/cie10/credits";
+  const title = lang === "es" ? "Créditos y Fuentes - CIE-10 App" : await translateText("Credits & Sources - CIE-10 App", lang);
   return {
-    title: `${title} | ATP Dev`,
+    title,
     description: "Información sobre la Clasificación Internacional de Enfermedades (CIE-10), fuentes oficiales OMS y créditos del desarrollador.",
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+    },
   };
 }
 

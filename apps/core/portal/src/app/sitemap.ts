@@ -3,7 +3,8 @@ import { getProjects } from '@atpdev/database';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = 'https://www.atpdev.dev';
-  const langs = ['en', 'ru', 'fr', 'de', 'pt', 'hi', 'ja', 'zh'];
+  // Enfocar el sitemap en idiomas principales y URLs con contenido real (evitando páginas legales finas y traducciones masivas de bajo valor)
+  const langs = ['en'];
   const allLangs = ['es', ...langs];
 
   const buildAlternates = (path: string) => {
@@ -29,22 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/sobre-mi`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.7,
       alternates: buildAlternates('/sobre-mi'),
-    },
-    {
-      url: `${BASE_URL}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-      alternates: buildAlternates('/privacy'),
-    },
-    {
-      url: `${BASE_URL}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-      alternates: buildAlternates('/terms'),
     },
   ];
 
@@ -60,95 +47,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${BASE_URL}/${lang}/sobre-mi`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
-      priority: 0.5,
+      priority: 0.6,
       alternates: buildAlternates('/sobre-mi'),
-    },
-    {
-      url: `${BASE_URL}/${lang}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.2,
-      alternates: buildAlternates('/privacy'),
-    },
-    {
-      url: `${BASE_URL}/${lang}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.2,
-      alternates: buildAlternates('/terms'),
     },
   ]);
 
-  // Dynamic projects routes
+  // Dynamic projects routes (solo fichas de producto, excluyendo subpáginas legales/créditos con noindex)
   let projectRoutes: MetadataRoute.Sitemap = [];
   try {
     const allProjects = await getProjects();
     const projects = allProjects.filter(p => p.status !== 'Privado');
     
-    // Main lang (es) project routes
-    const esProjectRoutes = projects.filter(p => p.slug).flatMap(p => [
-      {
-        url: `${BASE_URL}/apps/${p.slug}`,
+    const esProjectRoutes = projects.filter(p => p.slug).map(p => ({
+      url: `${BASE_URL}/apps/${p.slug}`,
+      lastModified: new Date(p.created_at || new Date()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+      alternates: buildAlternates(`/apps/${p.slug}`),
+    }));
+
+    const otherLangProjectRoutes = langs.flatMap(lang => 
+      projects.filter(p => p.slug).map(p => ({
+        url: `${BASE_URL}/${lang}/apps/${p.slug}`,
         lastModified: new Date(p.created_at || new Date()),
         changeFrequency: 'weekly' as const,
-        priority: 0.8,
+        priority: 0.7,
         alternates: buildAlternates(`/apps/${p.slug}`),
-      },
-      {
-        url: `${BASE_URL}/apps/${p.slug}/privacy`,
-        lastModified: new Date(p.created_at || new Date()),
-        changeFrequency: 'monthly' as const,
-        priority: 0.4,
-        alternates: buildAlternates(`/apps/${p.slug}/privacy`),
-      },
-      {
-        url: `${BASE_URL}/apps/${p.slug}/terms`,
-        lastModified: new Date(p.created_at || new Date()),
-        changeFrequency: 'monthly' as const,
-        priority: 0.4,
-        alternates: buildAlternates(`/apps/${p.slug}/terms`),
-      },
-      {
-        url: `${BASE_URL}/apps/${p.slug}/credits`,
-        lastModified: new Date(p.created_at || new Date()),
-        changeFrequency: 'monthly' as const,
-        priority: 0.4,
-        alternates: buildAlternates(`/apps/${p.slug}/credits`),
-      },
-    ]);
-
-    // Other langs project routes
-    const otherLangProjectRoutes = langs.flatMap(lang => 
-      projects.filter(p => p.slug).flatMap(p => [
-        {
-          url: `${BASE_URL}/${lang}/apps/${p.slug}`,
-          lastModified: new Date(p.created_at || new Date()),
-          changeFrequency: 'weekly' as const,
-          priority: 0.7,
-          alternates: buildAlternates(`/apps/${p.slug}`),
-        },
-        {
-          url: `${BASE_URL}/${lang}/apps/${p.slug}/privacy`,
-          lastModified: new Date(p.created_at || new Date()),
-          changeFrequency: 'monthly' as const,
-          priority: 0.3,
-          alternates: buildAlternates(`/apps/${p.slug}/privacy`),
-        },
-        {
-          url: `${BASE_URL}/${lang}/apps/${p.slug}/terms`,
-          lastModified: new Date(p.created_at || new Date()),
-          changeFrequency: 'monthly' as const,
-          priority: 0.3,
-          alternates: buildAlternates(`/apps/${p.slug}/terms`),
-        },
-        {
-          url: `${BASE_URL}/${lang}/apps/${p.slug}/credits`,
-          lastModified: new Date(p.created_at || new Date()),
-          changeFrequency: 'monthly' as const,
-          priority: 0.3,
-          alternates: buildAlternates(`/apps/${p.slug}/credits`),
-        },
-      ])
+      }))
     );
 
     projectRoutes = [...esProjectRoutes, ...otherLangProjectRoutes];

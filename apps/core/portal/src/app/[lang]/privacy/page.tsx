@@ -7,7 +7,7 @@ import { GlowWrapper } from "@/components/GlowWrapper";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  const title = lang === 'es' ? "Política de Privacidad | ATP Dev" : await translateText("Política de Privacidad | ATP Dev", lang);
+  const title = lang === 'es' ? "Política de Privacidad" : await translateText("Política de Privacidad", lang);
   const description = lang === 'es' ? "Política de privacidad y protección de datos de los servicios y aplicaciones de ATP Dev." : await translateText("Política de privacidad y protección de datos de los servicios y aplicaciones de ATP Dev.", lang);
   
   const BASE_URL = "https://www.atpdev.dev";

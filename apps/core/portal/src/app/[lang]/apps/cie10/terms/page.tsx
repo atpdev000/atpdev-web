@@ -8,10 +8,19 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang = "es" } = await params;
-  const title = lang === "es" ? "Términos y Condiciones | CIE-10 App" : await translateText("Terms & Conditions | CIE-10 App", lang);
+  const BASE_URL = "https://www.atpdev.dev";
+  const path = "/apps/cie10/terms";
+  const title = lang === "es" ? "Términos y Condiciones - CIE-10 App" : await translateText("Terms & Conditions - CIE-10 App", lang);
   return {
-    title: `${title} | ATP Dev`,
+    title,
     description: "Términos y Condiciones de uso para la aplicación CIE10 - Códigos y Enfermedades. Información sobre el uso de referencias médicas, licencias y responsabilidad.",
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+    },
   };
 }
 

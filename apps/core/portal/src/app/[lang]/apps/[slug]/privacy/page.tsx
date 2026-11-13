@@ -13,10 +13,19 @@ export async function generateMetadata({
   const project = projects.find((p) => p.slug === slug);
   if (!project) return {};
 
-  const title = lang === "es" ? `Política de Privacidad | ${project.title}` : await translateText(`Privacy Policy | ${project.title}`, lang);
+  const BASE_URL = "https://www.atpdev.dev";
+  const path = `/apps/${slug}/privacy`;
+  const title = lang === "es" ? `Política de Privacidad - ${project.title}` : await translateText(`Privacy Policy - ${project.title}`, lang);
   return {
-    title: `${title} | ATP Dev`,
+    title,
     description: `Política de Privacidad oficial para la aplicación ${project.title}. Transparencia de datos, publicidad y privacidad.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+    },
   };
 }
 

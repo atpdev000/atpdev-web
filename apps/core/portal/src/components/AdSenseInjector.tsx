@@ -8,12 +8,12 @@ export default function AdSenseInjector({ adsenseId }: { adsenseId: string | nul
 
   if (!adsenseId) return null;
 
-  // Evitar mostrar anuncios en la página principal o rutas base de idioma.
-  // Ejemplos que coinciden: "/", "/es", "/en", "/es/", "/en/"
-  const isLandingPage = pathname === "/" || /^\/[a-z]{2}\/?$/.test(pathname);
+  // Evitar inyectar AdSense en la landing page o en páginas legales/créditos (política AdSense: sin anuncios en páginas sin contenido editorial)
+  const isLandingPage = pathname === "/" || /^\/[a-z]{2}\/?$/i.test(pathname);
+  const isExcludedUtilityPage = /(?:^|\/)(?:privacy|terms|credits)\/?$/i.test(pathname);
 
-  if (isLandingPage) {
-    return null; // No inyectar AdSense en la landing page principal
+  if (isLandingPage || isExcludedUtilityPage) {
+    return null;
   }
 
   return (

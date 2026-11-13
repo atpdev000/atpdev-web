@@ -12,9 +12,6 @@ export const metadata: Metadata = {
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',
   },
-  other: {
-    'google-adsense-account': process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137',
-  },
 }
 
 export default function RootLayout({
@@ -63,7 +60,6 @@ export default function RootLayout({
       </head>
       <body>
         <AnalyticsTracker />
-        <AdSenseInjector adsenseId={process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137'} />
         {children}
         <CookieBanner />
       </body>

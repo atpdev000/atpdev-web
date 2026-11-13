@@ -7,7 +7,7 @@ import { GlowWrapper } from "@/components/GlowWrapper";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  const title = lang === 'es' ? "Términos de Servicio | ATP Dev" : await translateText("Términos de Servicio | ATP Dev", lang);
+  const title = lang === 'es' ? "Términos de Servicio" : await translateText("Términos de Servicio", lang);
   const description = lang === 'es' ? "Términos de servicio y condiciones de uso aplicables a todos los sitios web y subdominios de ATP Dev." : await translateText("Términos de servicio y condiciones de uso aplicables a todos los sitios web y subdominios de ATP Dev.", lang);
   
   const BASE_URL = "https://www.atpdev.dev";
@@ -58,7 +58,7 @@ export default async function TermsOfService({
     h3: await t("3. Servicios de Desarrollo y Consultoría"),
     p3: await t("Las solicitudes de contacto para servicios de desarrollo de software, integraciones o consultoría están sujetas a evaluación. El envío de una solicitud a través del formulario de contacto no garantiza la prestación del servicio. Todos los acuerdos comerciales finales se formalizarán por separado."),
     h4: await t("4. Subdominios y Aplicaciones de Terceros"),
-    p4: await t("Este sitio enlaza a proyectos y herramientas alojadas en subdominios (ej. papascan.atpdev.dev). El uso de esas herramientas específicas puede estar sujeto a sus propios términos de uso, especialmente aquellas que ofrecen funcionalidades Premium o que muestran anuncios a través de Google AdSense."),
+    p4: await t("Este sitio enlaza a proyectos y herramientas alojadas en subdominios (ej. chamba.atpdev.dev). El uso de esas herramientas específicas puede estar sujeto a sus propios términos de uso, especialmente aquellas que ofrecen funcionalidades Premium o que muestran anuncios a través de Google AdSense."),
     h5: await t("5. Limitación de Responsabilidad"),
     p5: await t("ATP Dev no será responsable de ningún daño directo, indirecto, incidental, especial o consecuente que resulte del uso o la incapacidad de usar nuestros servicios web o el software aquí promocionado."),
   };

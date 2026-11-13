@@ -21,6 +21,7 @@ export const viewport: Viewport = {
 
 export function generateMetadata(): Metadata {
   const config = getSubdomainConfig('descargador')
+  const adsenseEnabled = config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_enabled !== false
   const siteUrl = config?.seo?.canonical_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://descargador.atpdev.dev'
   const title = config?.seo?.meta_title || 'Descargador Pro - Descargar Videos de Facebook HD, TikTok Sin Marca de Agua e Instagram ✅ Gratis'
   const description = config?.seo?.meta_description || '🚀 La herramienta más rápida para descargar videos de Facebook en HD, TikTok sin marca de agua e Instagram. Descargador Pro: 100% gratis, seguro y en alta calidad. MP4 y MP3.'
@@ -42,7 +43,9 @@ export function generateMetadata(): Metadata {
     },
     other: {
       'ezoic-site-verification': config?.monetization?.ezoic_verification_code || 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
-      'google-adsense-account': config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137'
+      ...(adsenseEnabled && config?.monetization?.adsense_client_id
+        ? { 'google-adsense-account': config.monetization.adsense_client_id }
+        : {})
     },
     openGraph: {
       title,
@@ -212,7 +215,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `window.__DESCARGADOR_ADS_CONFIG__ = ${JSON.stringify({
-              enabled: config?.monetization?.adsense_enabled !== false,
+              enabled: config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_enabled !== false,
               clientId: config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137',
               slots: {
                 leaderboard: config?.monetization?.adsense_slot_header || process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER || '4095225502',

@@ -13,10 +13,19 @@ export async function generateMetadata({
   const project = projects.find((p) => p.slug === slug);
   if (!project) return {};
 
-  const title = lang === "es" ? `Créditos y Fuentes | ${project.title}` : await translateText(`Credits & Sources | ${project.title}`, lang);
+  const BASE_URL = "https://www.atpdev.dev";
+  const path = `/apps/${slug}/credits`;
+  const title = lang === "es" ? `Créditos y Fuentes - ${project.title}` : await translateText(`Credits & Sources - ${project.title}`, lang);
   return {
-    title: `${title} | ATP Dev`,
+    title,
     description: `Créditos oficiales y atribuciones para la aplicación ${project.title}.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+    },
   };
 }
 

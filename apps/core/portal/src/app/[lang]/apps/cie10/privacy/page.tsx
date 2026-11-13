@@ -8,10 +8,19 @@ export async function generateMetadata({
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
   const { lang = "es" } = await params;
-  const title = lang === "es" ? "Política de Privacidad | CIE-10 App" : await translateText("Privacy Policy | CIE-10 App", lang);
+  const BASE_URL = "https://www.atpdev.dev";
+  const path = "/apps/cie10/privacy";
+  const title = lang === "es" ? "Política de Privacidad - CIE-10 App" : await translateText("Privacy Policy - CIE-10 App", lang);
   return {
-    title: `${title} | ATP Dev`,
+    title,
     description: "Política de Privacidad oficial para la aplicación móvil CIE10 - Códigos y Enfermedades (Android e iOS). Cumplimiento AdMob, Gemini IA y privacidad de datos de salud.",
+    robots: {
+      index: false,
+      follow: true,
+    },
+    alternates: {
+      canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+    },
   };
 }
 

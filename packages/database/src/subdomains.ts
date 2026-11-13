@@ -428,7 +428,7 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     threads_enabled: true,
     audio_extractor_enabled: true,
     ffmpeg_client_enabled: true,
-    adsense_enabled: true,
+    adsense_enabled: false,
     admob_enabled: true,
     blog_enabled: true
   },

@@ -4,7 +4,7 @@ import { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  const title = lang === 'es' ? "Sobre Mí | ATP Dev" : await translateText("Sobre Mí | ATP Dev", lang);
+  const title = lang === 'es' ? "Sobre Mí" : await translateText("Sobre Mí", lang);
   const description = lang === 'es' ? "Perfil profesional y habilidades de Percy Acha Taipe." : await translateText("Perfil profesional y habilidades de Percy Acha Taipe.", lang);
   
   const BASE_URL = "https://www.atpdev.dev";
