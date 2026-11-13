@@ -11,6 +11,12 @@ export default function ThirdPartyScripts({ ga4Id, clarityId }: ThirdPartyScript
   const loadedRef = useRef(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")) {
+      return;
+    }
+
     const loadScripts = () => {
       if (loadedRef.current) return;
       loadedRef.current = true;
