@@ -15,14 +15,22 @@ export default async function NotFound() {
   const fontBody = config?.font_body || "Inter";
   const fontLabel = config?.font_label || "JetBrains Mono";
   
+  const BUILTIN_FONTS = new Set(["Hanken Grotesk", "Inter", "Fira Code", "JetBrains Mono"]);
   const fonts = Array.from(new Set([fontHeadline, fontBody, fontLabel]));
-  const googleFontsUrl = `https://fonts.googleapis.com/css2?${fonts.map(f => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800`).join('&')}&display=swap`;
+  const customFonts = fonts.filter(f => !BUILTIN_FONTS.has(f));
+  const googleFontsUrl = customFonts.length > 0
+    ? `https://fonts.googleapis.com/css2?${customFonts.map(f => `family=${f.replace(/ /g, '+')}:wght@400;500;600;700;800`).join('&')}&display=swap`
+    : null;
 
   return (
     <>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link href={googleFontsUrl} rel="stylesheet" />
+      {googleFontsUrl && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link href={googleFontsUrl} rel="stylesheet" />
+        </>
+      )}
       <style dangerouslySetInnerHTML={{
         __html: `
           :root {
