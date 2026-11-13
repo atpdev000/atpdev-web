@@ -228,12 +228,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return
     }
 
-    // 💡 SI EL FORMATO YA CONTIENE AUDIO (por ejemplo 360p itag 18 o progresivo),
-    // descargar directamente sin gastar recursos en combinarlo
-    if (format.hasAudio) {
-      console.log(`⚡ Formato ${quality} ya contiene audio integrado (itag: ${format.itag}). Descargando directo...`)
-      return handleSimpleDownload(quality)
-    }
+    // Siempre mantener el flujo dentro de downloadCombined (no redirigir a descarga simple sin audio)
+    const isProgressiveWithAudio = !!format.hasAudio && !format.url?.includes('.m3u8')
 
     const cleanTitle = (videoInfo?.title || 'video').replace(/[/\\?%*:|"<>]/g, '_').trim()
     const defaultFilename = `${cleanTitle}_${quality}.mp4`
@@ -330,9 +326,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           url: originalUrl || url,
           quality: quality,
           video_url: format.url,
-          audio_url: audioCandidate?.url,
+          audio_url: isProgressiveWithAudio ? undefined : audioCandidate?.url,
           video_itag: format.itag,
-          audio_itag: (audioCandidate as any)?.itag || (format.recommended_audio as any)?.itag || 140,
+          audio_itag: isProgressiveWithAudio ? undefined : ((audioCandidate as any)?.itag || (format.recommended_audio as any)?.itag || 140),
           is_pro: isPro,
           plan: plan,
           downloadId,
@@ -1213,43 +1209,41 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       return { format: null, hasAudio: false, hasRecommendedAudio: false };
     }
 
-    // 1. Priorizar según preferencia
-    let best = null;
+    const getNominalRes = (f: VideoFormat): number => {
+      if (typeof f.width === 'number' && typeof f.height === 'number' && f.width > 0 && f.height > 0) {
+        return Math.min(f.width, f.height);
+      }
+      return getH(f);
+    };
 
-    if (preferVideoOnly) {
-      // Intentar encontrar uno que NO tenga audio (DASH/Video Only)
-      best = videos.find(f => !f.hasAudio && getH(f) === targetHeight);
-      if (best) return { format: best, hasAudio: false, hasRecommendedAudio: !!best.recommended_audio };
+    const tolerance = Math.max(36, Math.round(targetHeight * 0.12));
+    const isHls = (f: VideoFormat) =>
+      f.url.includes('.m3u8') || f.url.includes('manifest/hls') || (f.format || '').toLowerCase().includes('m3u8');
 
-      // Si no hay video solo, caer al con audio
-      best = videos.find(f => getH(f) === targetHeight);
-    } else {
-      // Modo normal: Priorizar el que ya tiene audio (Combined)
-      best = videos.find(f => f.hasAudio && getH(f) === targetHeight);
-      if (best) return { format: best, hasAudio: true, hasRecommendedAudio: false };
+    const matchingRes = videos.filter(f => {
+      const r = getNominalRes(f);
+      if (r > 0) return Math.abs(r - targetHeight) <= tolerance;
+      return (f.quality + (f.resolution || '')).toLowerCase().includes(qualityLabel.toLowerCase());
+    });
 
-      // Si no hay con audio, caer al video solo
-      best = videos.find(f => getH(f) === targetHeight);
-    }
+    const rankCandidate = (f: VideoFormat): number => {
+      let score = 0;
+      if (!isHls(f)) score += 100;
+      if ((f.format || '').toLowerCase() === 'mp4') score += 50;
+      if (preferVideoOnly ? !f.hasAudio : !!f.hasAudio) score += 25;
+      if (preferVideoOnly && !f.hasAudio && !isHls(f)) score += 20;
+      if (!preferVideoOnly && !isHls(f) && !f.hasAudio) score += 10;
+      const diff = Math.abs(getNominalRes(f) - targetHeight);
+      return score - diff * 0.1;
+    };
 
-    if (best) return { format: best, hasAudio: !!best.hasAudio, hasRecommendedAudio: !!best.recommended_audio };
-
-    // 3. Fallback por texto (ej: si dice 1080 en el nombre)
-    best = videos.find(f => (f.quality + (f.resolution || '')).toLowerCase().includes(qualityLabel.toLowerCase()));
-    if (best) return { format: best, hasAudio: !!best.hasAudio, hasRecommendedAudio: !!best.recommended_audio };
-
-    // 4. Fallback al más cercano
-    const sorted = [...videos].sort((a, b) => getH(b) - getH(a));
-    if (targetHeight > 1080) {
-      best = sorted.find(f => getH(f) >= targetHeight * 0.85);
-    } else {
-      best = sorted.find(f => getH(f) <= targetHeight) || sorted[0];
-    }
+    const ranked = [...matchingRes].sort((a, b) => rankCandidate(b) - rankCandidate(a));
+    const best = ranked[0] || null;
 
     return {
       format: best || null,
       hasAudio: !!best?.hasAudio,
-      hasRecommendedAudio: !!best?.recommended_audio
+      hasRecommendedAudio: !!best?.recommended_audio || !!findBestAudioFormat()
     };
   }
 
@@ -1323,7 +1317,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
   const ProgressBar = ({ progress, quality, details }: { progress: number, quality: string, details?: string }) => (
     <div className="w-full min-w-[170px] py-1">
-      <div className="w-full bg-gray-200 rounded-full h-3 mb-1.5 overflow-hidden shadow-inner">
+      <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 mb-1.5 overflow-hidden shadow-inner">
         <div
           className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 h-3 rounded-full transition-all duration-300 ease-out flex items-center justify-end pr-1 text-[9px] text-white font-bold"
           style={{ width: `${Math.min(Math.max(progress, 0), 100)}%` }}
@@ -1331,21 +1325,21 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           {progress >= 15 && `${Math.round(progress)}%`}
         </div>
       </div>
-      <div className="text-xs text-gray-700 text-center font-medium">
+      <div className="text-xs text-gray-700 dark:text-slate-200 text-center font-medium">
         {progress < 100 ? (
           <div>
-            <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700 px-0.5">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-gray-700 dark:text-slate-200 px-0.5">
               <span>Descargando {quality}</span>
-              <span className="text-emerald-700 font-bold">{Math.round(progress)}%</span>
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">{Math.round(progress)}%</span>
             </div>
             {details && (
-              <div className="text-[11px] text-gray-600 font-medium mt-0.5">
+              <div className="text-[11px] text-gray-600 dark:text-slate-300 font-medium mt-0.5">
                 {details}
               </div>
             )}
           </div>
         ) : (
-          <span className="text-emerald-700 font-bold flex items-center justify-center gap-1">
+          <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-center gap-1">
             <span>✅</span> ¡Descarga completada!
           </span>
         )}
@@ -1386,11 +1380,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     children: React.ReactNode
   }) => (
     <button
+      type="button"
       onClick={onClick}
-      className={`px - 4 py - 2 font - semibold rounded - t - lg transition - colors ${active
-        ? 'bg-red-600 text-white border-b-2 border-red-700'
-        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        } `}
+      className={`px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-t-xl transition-colors cursor-pointer ${active
+        ? 'bg-red-600 text-white border-b-2 border-red-700 shadow-sm'
+        : 'bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-300 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700/70'
+        }`}
     >
       {children}
     </button>
@@ -1483,12 +1478,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           <div className="mt-4 sm:mt-6 p-2.5 sm:p-4 md:p-6 bg-green-50/90 dark:bg-slate-800/90 rounded-2xl border border-green-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
-                <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-green-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                <h3 className="text-lg font-semibold text-green-800">¡Video listo para descargar!</h3>
+                <h3 className="text-lg font-semibold text-green-800 dark:text-emerald-300">¡Video listo para descargar!</h3>
               </div>
-              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">
+              <span className="text-xs bg-green-200 dark:bg-emerald-900/60 text-green-800 dark:text-emerald-200 px-2 py-1 rounded-full border border-transparent dark:border-emerald-700/50">
                 {videoInfo.method}
               </span>
             </div>
@@ -1504,12 +1499,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                 </div>
               )}
               <div className="md:col-span-2">
-                <h4 className="font-semibold text-gray-900 mb-2 text-sm leading-tight">{videoInfo.title}</h4>
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm leading-tight">{videoInfo.title}</h4>
 
-                <div className="text-xs text-gray-600 space-y-2">
+                <div className="text-xs text-gray-600 dark:text-slate-300 space-y-2">
                   {videoInfo.channel && (
                     <p className="flex items-center">
-                      <svg className="h-3 w-3 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-3 w-3 mr-1 text-gray-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                       {videoInfo.channel}
@@ -1518,7 +1513,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
                   <div className="flex flex-wrap gap-4">
                     <p className="flex items-center">
-                      <svg className="h-3 w-3 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-3 w-3 mr-1 text-gray-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       ⏱️ {formatDuration(videoInfo.duration)}
@@ -1526,7 +1521,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
                     {videoInfo.viewCount && (
                       <p className="flex items-center">
-                        <svg className="h-3 w-3 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="h-3 w-3 mr-1 text-gray-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
@@ -1535,7 +1530,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                     )}
                   </div>
 
-                  <p className="text-green-600 font-medium">
+                  <p className="text-green-600 dark:text-emerald-400 font-medium">
                     ✅ {availableQualities.length} calidades disponibles
                   </p>
                 </div>
@@ -1576,7 +1571,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               </h4>
 
               {/* NAVEGACIÓN DE PESTAÑAS */}
-              <div className="flex space-x-2 mb-6 border-b">
+              <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-slate-700">
                 <TabButton
                   active={activeTab === 'simple'}
                   onClick={() => handleTabChange('simple')}
@@ -1594,14 +1589,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               {/* CONTENIDO DE PESTAÑAS */}
               {activeTab === 'simple' && (
                 <div>
-                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-                    <div className="flex items-center space-x-2 text-orange-800">
+                  <div className="bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-700/50 rounded-lg p-4 mb-4">
+                    <div className="flex items-center space-x-2 text-orange-800 dark:text-orange-200">
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span className="font-semibold">Solo Video (Sin Audio)</span>
                     </div>
-                    <p className="text-orange-700 text-sm mt-2">
+                    <p className="text-orange-700 dark:text-orange-300 text-sm mt-2">
                       Descarga solo el video sin audio. Útil si quieres el video original sin procesar.
                     </p>
                   </div>
@@ -1617,7 +1612,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                         <div key={quality.value} className={`flex items-center justify-between gap-2 border rounded-xl p-2 sm:p-2.5 overflow-hidden ${isAvailable ? 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800' : 'border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 opacity-60'} `}>
                           <div className="flex-1 min-w-0 pr-1">
                             <p className="font-bold text-gray-900 dark:text-white text-xs sm:text-sm truncate">{quality.label}</p>
-                            {!isAvailable && <p className="text-[10px] text-red-500 mt-0.5">No disponible</p>}
+                            {!isAvailable && <p className="text-[10px] text-red-500 dark:text-rose-400 mt-0.5">No disponible</p>}
                           </div>
 
                           {isDownloading ? (
@@ -1651,14 +1646,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                   </div>
 
                   {/* DESKTOP: Table Layout */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
+                  <div className="hidden md:block overflow-x-auto rounded-lg border border-gray-300 dark:border-slate-700">
+                    <table className="w-full border-collapse bg-white dark:bg-slate-900/85">
                       <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">File type</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Format</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Peso</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Action</th>
+                        <tr className="bg-gray-100 dark:bg-slate-800">
+                          <th className="border-b border-r border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">File type</th>
+                          <th className="border-b border-r border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Format</th>
+                          <th className="border-b border-r border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Peso</th>
+                          <th className="border-b border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1668,36 +1663,37 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                           const formatInfo = getFormatInfo(quality.value, true)
 
                           return (
-                            <tr key={quality.value} className={`hover:bg-gray-50 ${!isAvailable ? 'opacity-50' : ''}`}>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-800 font-medium">
+                            <tr key={quality.value} className={`border-b last:border-b-0 border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/80 transition-colors ${!isAvailable ? 'opacity-55' : ''}`}>
+                              <td className="border-r border-gray-200 dark:border-slate-800 px-4 py-3 text-gray-800 dark:text-slate-100 font-medium">
                                 {quality.label}
                                 {!isAvailable && (
-                                  <span className="text-xs text-red-500 ml-2">(No disponible)</span>
+                                  <span className="text-xs text-red-500 dark:text-rose-400 ml-2">(No disponible)</span>
                                 )}
                               </td>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-600">
+                              <td className="border-r border-gray-200 dark:border-slate-800 px-4 py-3 text-gray-600 dark:text-slate-300">
                                 <div className="flex items-center">
                                   {formatInfo.type}
                                   {formatInfo.hasAudio && (
-                                    <span className="ml-2 text-green-600" title="Incluye audio">🎵</span>
+                                    <span className="ml-2 text-green-600 dark:text-emerald-400" title="Incluye audio">🎵</span>
                                   )}
                                 </div>
                               </td>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-600">
+                              <td className="border-r border-gray-200 dark:border-slate-800 px-4 py-3 text-gray-600 dark:text-slate-300">
                                 {formatInfo.size}
                               </td>
-                              <td className="border border-gray-300 px-4 py-3">
+                              <td className="px-4 py-3">
                                 {isDownloading ? (
                                   <div className="w-full">
                                     <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                                   </div>
                                 ) : (
                                   <button
+                                    type="button"
                                     onClick={() => handleSimpleDownload(quality.value, quality.ext || 'mp4')}
                                     disabled={!isAvailable || downloading !== null}
-                                    className={`py-2 px-4 rounded-lg font-semibold transition-colors text-sm flex items-center justify-center w-full ${isAvailable && !downloading
-                                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    className={`py-2 px-4 rounded-lg font-semibold transition-colors text-sm flex items-center justify-center w-full cursor-pointer ${isAvailable && !downloading
+                                      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+                                      : 'bg-gray-200 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-transparent dark:border-slate-700 cursor-not-allowed'
                                       }`}
                                   >
                                     {isAvailable ? (
@@ -1726,32 +1722,32 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                 <div>
                   {/* Banner Estado Plan PRO vs Gratis */}
                   {isPro ? (
-                    <div className="bg-gradient-to-r from-amber-50 to-emerald-50 border border-emerald-300 rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                      <div className="flex items-center space-x-3 text-emerald-800">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-xl shrink-0">
+                    <div className="bg-gradient-to-r from-amber-50 to-emerald-50 dark:from-emerald-950/60 dark:to-slate-900 border border-emerald-300 dark:border-emerald-700/60 rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                      <div className="flex items-center space-x-3 text-emerald-800 dark:text-emerald-200">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/60 flex items-center justify-center text-xl shrink-0">
                           👑
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-emerald-900">Membresía PRO Activa ({plan.toUpperCase()})</p>
-                          <p className="text-xs text-emerald-700">Tienes acceso ilimitado a descargas combinadas en 1080p, 2K y 4K con FFmpeg acelerado.</p>
+                          <p className="font-bold text-sm text-emerald-900 dark:text-emerald-200">Membresía PRO Activa ({plan.toUpperCase()})</p>
+                          <p className="text-xs text-emerald-700 dark:text-emerald-300">Tienes acceso ilimitado a descargas combinadas en 1080p, 2K y 4K con FFmpeg acelerado.</p>
                         </div>
                       </div>
                       <Link
                         href="/planes"
-                        className="text-xs font-bold text-emerald-800 hover:text-emerald-900 bg-emerald-200/60 hover:bg-emerald-200 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap self-start sm:self-auto"
+                        className="text-xs font-bold text-emerald-800 dark:text-emerald-100 hover:text-emerald-900 bg-emerald-200/60 dark:bg-emerald-800/60 hover:bg-emerald-200 dark:hover:bg-emerald-700 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap self-start sm:self-auto"
                       >
                         Gestionar Plan
                       </Link>
                     </div>
                   ) : (
-                    <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 border border-amber-200 rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-                      <div className="flex items-center space-x-3 text-amber-900">
-                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-xl shrink-0">
+                    <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/40 dark:via-slate-900 dark:to-orange-950/30 border border-amber-200 dark:border-amber-700/50 rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                      <div className="flex items-center space-x-3 text-amber-900 dark:text-amber-200">
+                        <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-xl shrink-0">
                           ✨
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-amber-900">Descargas Gratis hasta 720p HD</p>
-                          <p className="text-xs text-amber-700">Las calidades 1080p Full HD, 2K y 4K con audio integrado requieren el Plan PRO.</p>
+                          <p className="font-bold text-sm text-amber-900 dark:text-amber-200">Descargas Gratis hasta 720p HD</p>
+                          <p className="text-xs text-amber-700 dark:text-amber-300">Las calidades 1080p Full HD, 2K y 4K con audio integrado requieren el Plan PRO.</p>
                         </div>
                       </div>
                       <Link
@@ -1842,14 +1838,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                   </div>
 
                   {/* DESKTOP: Table Layout */}
-                  <div className={isNative ? 'hidden' : 'hidden md:block overflow-x-auto'}>
-                    <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
+                  <div className={isNative ? 'hidden' : 'hidden md:block overflow-x-auto rounded-lg border border-gray-300 dark:border-slate-700'}>
+                    <table className="w-full border-collapse bg-white dark:bg-slate-900/85">
                       <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Resolución</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Formato</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Nivel / Acceso</th>
-                          <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-700">Acción</th>
+                        <tr className="bg-gray-100 dark:bg-slate-800">
+                          <th className="border-b border-r border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Resolución</th>
+                          <th className="border-b border-r border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Formato</th>
+                          <th className="border-b border-r border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Nivel / Acceso</th>
+                          <th className="border-b border-gray-300 dark:border-slate-700 px-4 py-3 text-left font-semibold text-gray-700 dark:text-slate-200">Acción</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1860,55 +1856,56 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                           const isLocked = isProTier && !isPro
 
                           return (
-                            <tr key={quality.value} className={`hover:bg-gray-50 ${!isAvailable ? 'opacity-50' : isProTier ? 'bg-amber-50/20' : ''}`}>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-800 font-medium">
-                                <div className="flex items-center gap-2">
+                            <tr key={quality.value} className={`border-b last:border-b-0 border-gray-200 dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800/80 transition-colors ${!isAvailable ? 'opacity-55' : isProTier ? 'bg-amber-50/20 dark:bg-amber-950/15' : ''}`}>
+                              <td className="border-r border-gray-200 dark:border-slate-800 px-4 py-3 text-gray-800 dark:text-slate-100 font-medium">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <span>{quality.label}</span>
                                   {isProTier && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
                                       👑 PRO
                                     </span>
                                   )}
                                   {!isProTier && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-green-100 dark:bg-emerald-900/50 text-green-700 dark:text-emerald-300 border border-transparent dark:border-emerald-700/50">
                                       Gratis
                                     </span>
                                   )}
                                   {!isAvailable && (
-                                    <span className="text-xs text-red-500 ml-1">(No disponible)</span>
+                                    <span className="text-xs text-red-500 dark:text-rose-400 ml-1">(No disponible)</span>
                                   )}
                                 </div>
                               </td>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-600">
+                              <td className="border-r border-gray-200 dark:border-slate-800 px-4 py-3 text-gray-600 dark:text-slate-300">
                                 <div className="flex items-center gap-1.5">
-                                  <span className="font-medium text-xs">MP4</span>
-                                  <span className="text-green-600 text-xs font-medium" title="Audio y video combinados">
+                                  <span className="font-medium text-xs text-gray-800 dark:text-slate-200">MP4</span>
+                                  <span className="text-green-600 dark:text-emerald-400 text-xs font-medium" title="Audio y video combinados">
                                     🔊 Video + Audio
                                   </span>
                                 </div>
                               </td>
-                              <td className="border border-gray-300 px-4 py-3 text-gray-600 text-xs">
+                              <td className="border-r border-gray-200 dark:border-slate-800 px-4 py-3 text-gray-600 dark:text-slate-300 text-xs">
                                 {isLocked ? (
-                                  <span className="text-amber-700 font-semibold flex items-center gap-1">
+                                  <span className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
                                     🔒 Requiere Plan PRO
                                   </span>
                                 ) : isProTier ? (
-                                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                                  <span className="text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
                                     ✨ PRO Desbloqueado
                                   </span>
                                 ) : (
-                                  <span className="text-gray-600">
+                                  <span className="text-gray-600 dark:text-slate-300">
                                     100% Libre / Sin límites
                                   </span>
                                 )}
                               </td>
-                              <td className="border border-gray-300 px-4 py-3">
+                              <td className="px-4 py-3">
                                 {isDownloading ? (
                                   <div className="w-full">
                                     <ProgressBar progress={downloadProgress} quality={quality.value} details={downloadDetails} />
                                   </div>
                                 ) : (
                                   <button
+                                    type="button"
                                     onClick={() => {
                                       if (isLocked) {
                                         setTargetProQuality(quality.value)
@@ -1918,9 +1915,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                                       }
                                     }}
                                     disabled={!isAvailable || !!downloading}
-                                    className={`py-2 px-4 rounded-lg font-bold transition-all text-xs flex items-center justify-center w-full shadow-sm ${
+                                    className={`py-2 px-4 rounded-lg font-bold transition-all text-xs flex items-center justify-center w-full shadow-sm cursor-pointer ${
                                       !isAvailable
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                        ? 'bg-gray-200 dark:bg-slate-800 text-gray-500 dark:text-slate-400 border border-transparent dark:border-slate-700 cursor-not-allowed'
                                         : isLocked
                                         ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white'
                                         : isProTier
