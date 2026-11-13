@@ -12,28 +12,24 @@ import "../globals.css";
 
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-hanken",
   display: "swap",
 });
 
 const interFont = Inter({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-inter",
   display: "swap",
 });
 
 const firaCode = Fira_Code({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   variable: "--font-fira-code",
   display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-jetbrains-mono",
   display: "swap",
 });
