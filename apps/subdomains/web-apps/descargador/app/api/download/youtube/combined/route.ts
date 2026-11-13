@@ -560,7 +560,7 @@ export async function POST(request: NextRequest) {
           })
         }
 
-        const metadata = await extractMetadata(cleanedUrl, ytDlp, 'visionos,ios')
+        const metadata = await extractMetadata(cleanedUrl, ytDlp, '', backendInfo.youtubeProxyUrl)
         const formats: any[] = metadata.formats || []
 
         if (isAudioOnly) {
