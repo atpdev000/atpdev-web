@@ -16,7 +16,15 @@ export default function LivePreviewListener() {
 
     const handleMessage = (event: MessageEvent) => {
       // Security Hardening: Ensure message comes from a trusted origin
-      const trustedOrigins = ["http://localhost:3000", "http://localhost:3003", "https://www.atpdev.dev", "https://admin.atpdev.dev"];
+      const trustedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3003",
+        "https://atpdev.dev",
+        "https://www.atpdev.dev",
+        "https://admin.atpdev.dev",
+        "https://admin.atpdev.pe",
+      ];
       if (!trustedOrigins.includes(event.origin) && process.env.NODE_ENV === "production") {
          return; // Reject untrusted iframe messages
       }

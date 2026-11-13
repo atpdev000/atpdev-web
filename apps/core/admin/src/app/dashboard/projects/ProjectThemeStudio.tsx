@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Moon, Sun, Wand2, Square, ChevronDown, Sparkles, Loader2, Palette, X, Eye, Zap, Laptop } from "lucide-react";
+import { Moon, Sun, Wand2, Square, ChevronDown, Sparkles, Loader2, Palette, X, Eye, Zap, Laptop, RefreshCw, ExternalLink } from "lucide-react";
 import { suggestThemeWithAI } from "../settings/actions";
+import { OFFICIAL_APP_URLS, useResolvedPreviewUrl } from "@/lib/preview-url";
 
 export type ProjectThemeConfig = {
   theme_mode: string;
@@ -104,12 +105,14 @@ function generatePalette(seedHex: string, theme: string, mode: string) {
 // ==========================================
 export function ProjectThemeStudio({
   title,
+  previewPath = "",
   initialConfig,
   onClose,
   onChange,
   onCoverGenerated
 }: {
   title: string;
+  previewPath?: string;
   initialConfig: string | null;
   onClose: () => void;
   onChange: (config: ProjectThemeConfig) => void;
@@ -117,17 +120,24 @@ export function ProjectThemeStudio({
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const hiddenIframeRef = useRef<HTMLIFrameElement>(null);
-  const [portalUrl, setPortalUrl] = useState<string>("http://localhost:3000");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (process.env.NEXT_PUBLIC_PORTAL_URL) {
-        setPortalUrl(process.env.NEXT_PUBLIC_PORTAL_URL);
-      } else {
-        setPortalUrl("http://localhost:3000");
-      }
-    }
-  }, []);
+  const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
+  const officialEnvPortal = process.env.NEXT_PUBLIC_PORTAL_URL;
+  const officialBaseUrl =
+    officialEnvPortal && !officialEnvPortal.includes("localhost")
+      ? officialEnvPortal
+      : OFFICIAL_APP_URLS.portal;
+  const { previewUrl: portalBaseUrl, source: previewSource } = useResolvedPreviewUrl(
+    "http://localhost:3000",
+    officialBaseUrl,
+    true,
+    iframeRefreshKey
+  );
+  const normalizedPath = previewPath
+    ? previewPath.startsWith("/")
+      ? previewPath
+      : `/${previewPath}`
+    : "";
+  const portalUrl = `${portalBaseUrl.replace(/\/$/, "")}${normalizedPath}`;
 
   let parsedConfig: Partial<ProjectThemeConfig> = {};
   if (initialConfig) {
@@ -175,19 +185,21 @@ export function ProjectThemeStudio({
   // Sync with Live Preview Iframe
   useEffect(() => {
     if (iframeRef.current && iframeRef.current.contentWindow) {
-      iframeRef.current.contentWindow.postMessage({
-        type: "UPDATE_THEME_PREVIEW",
-        payload: {
-          mode, primary, secondary, tertiary, neutral, 
-          fontHeadline, fontBody, fontLabel, radiusScale, 
-          globalBackgroundImage, 
-          glowStyle: mouseEffects.join(','),
-          neonThickness,
-          neonGlow: neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px"
-        }
-      }, portalUrl);
+      try {
+        iframeRef.current.contentWindow.postMessage({
+          type: "UPDATE_THEME_PREVIEW",
+          payload: {
+            mode, primary, secondary, tertiary, neutral,
+            fontHeadline, fontBody, fontLabel, radiusScale,
+            globalBackgroundImage,
+            glowStyle: mouseEffects.join(','),
+            neonThickness,
+            neonGlow: neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px"
+          }
+        }, "*");
+      } catch {}
     }
-  }, [mode, primary, secondary, tertiary, neutral, fontHeadline, fontBody, fontLabel, radiusScale, globalBackgroundImage, mouseEffects, neonThickness]);
+  }, [mode, primary, secondary, tertiary, neutral, fontHeadline, fontBody, fontLabel, radiusScale, globalBackgroundImage, mouseEffects, neonThickness, portalUrl]);
 
   // Sync changes to parent
   useEffect(() => {
@@ -760,29 +772,61 @@ export function ProjectThemeStudio({
 
       {/* RIGHT PANEL: LIVE PREVIEW (ACTUAL PORTAL) */}
       <div className="flex-1 relative bg-[#050505] hidden md:block">
-        <div className="absolute top-4 left-4 flex items-center gap-2 text-white bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs font-bold tracking-widest uppercase z-10 shadow-xl pointer-events-none">
-          <Eye size={14} className="text-emerald-400" /> Vista Previa en Vivo (Portal Real)
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between gap-2 z-10 pointer-events-none">
+          <div className="flex items-center gap-2 text-white bg-black/85 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs font-bold tracking-wider uppercase shadow-xl pointer-events-auto">
+            <Eye size={14} className="text-emerald-400" />
+            <span>
+              Vista Previa en Vivo ({previewSource === 'local' ? 'Local :3000' : 'Portal Oficial'})
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-black/85 backdrop-blur-md p-1.5 rounded-full border border-white/10 shadow-xl pointer-events-auto">
+            <button
+              type="button"
+              onClick={() => setIframeRefreshKey((k) => k + 1)}
+              className="p-1.5 rounded-full text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+              title="Recargar vista previa"
+            >
+              <RefreshCw size={14} />
+            </button>
+            <a
+              href={portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 rounded-full text-gray-300 hover:text-emerald-400 hover:bg-white/10 transition-colors"
+              title="Abrir página oficial en nueva pestaña"
+            >
+              <ExternalLink size={14} />
+            </a>
+          </div>
         </div>
         
         <iframe 
           ref={iframeRef}
+          key={`${portalUrl}-${iframeRefreshKey}`}
           src={portalUrl}
           className="w-full h-full border-0"
           title="Portal Live Preview"
           onLoad={() => {
-            if (iframeRef.current && iframeRef.current.contentWindow) {
-              iframeRef.current.contentWindow.postMessage({
-                type: "UPDATE_THEME_PREVIEW",
-                payload: {
-                  mode, primary, secondary, tertiary, neutral, 
-                  fontHeadline, fontBody, fontLabel, radiusScale, 
-                  globalBackgroundImage, 
-                  glowStyle: mouseEffects.join(','),
-                  neonThickness,
-                  neonGlow: neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px"
-                }
-              }, portalUrl);
-            }
+            const sendTheme = () => {
+              if (iframeRef.current && iframeRef.current.contentWindow) {
+                try {
+                  iframeRef.current.contentWindow.postMessage({
+                    type: "UPDATE_THEME_PREVIEW",
+                    payload: {
+                      mode, primary, secondary, tertiary, neutral,
+                      fontHeadline, fontBody, fontLabel, radiusScale,
+                      globalBackgroundImage,
+                      glowStyle: mouseEffects.join(','),
+                      neonThickness,
+                      neonGlow: neonThickness === "2px" ? "10px" : neonThickness === "4px" ? "18px" : neonThickness === "6px" ? "26px" : "36px"
+                    }
+                  }, "*");
+                } catch {}
+              }
+            };
+            sendTheme();
+            setTimeout(sendTheme, 350);
           }}
         />
       </div>

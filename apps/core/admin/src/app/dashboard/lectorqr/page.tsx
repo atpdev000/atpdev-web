@@ -103,7 +103,7 @@ export default function LectorQRAdminDashboard() {
 
         <div className="flex items-center gap-3">
           <a
-            href="http://localhost:3010"
+            href="https://lectorqr.atpdev.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"

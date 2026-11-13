@@ -260,6 +260,23 @@ export async function captureScreenshot(siteUrl: string): Promise<ScreenshotResu
   if ("error" in outcome) {
     return { error: outcome.error };
   }
+
+  // Persistimos la captura en Supabase Storage para evitar que la URL temporal de Microlink expire con 403.
+  try {
+    const imgRes = await fetch(outcome.url);
+    if (imgRes.ok) {
+      const contentType = imgRes.headers.get("content-type") || "image/png";
+      const buffer = Buffer.from(await imgRes.arrayBuffer());
+      const ext = contentType.includes("jpeg") ? "jpg" : contentType.includes("webp") ? "webp" : "png";
+      const permanentUrl = await uploadProjectImage(buffer, `capture-${Date.now()}.${ext}`, contentType);
+      if (permanentUrl) {
+        return { imageUrl: permanentUrl };
+      }
+    }
+  } catch (err) {
+    console.warn("No se pudo persistir captura en Storage; usando URL temporal:", err);
+  }
+
   return { imageUrl: outcome.url };
 }
 

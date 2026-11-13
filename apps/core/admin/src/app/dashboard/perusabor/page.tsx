@@ -97,12 +97,12 @@ export default function PeruSaborAdminDashboard() {
 
         <div className="flex items-center gap-2.5">
           <a
-            href="http://localhost:3009"
+            href="https://perusabor.atpdev.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition-colors"
           >
-            <span>Abrir Web App (Puerto 3009)</span>
+            <span>Abrir Web App</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>

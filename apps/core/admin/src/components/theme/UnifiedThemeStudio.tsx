@@ -40,6 +40,7 @@ import {
   X
 } from "lucide-react";
 import { SubdomainTheme } from "@atpdev/database";
+import { OFFICIAL_APP_URLS, useResolvedPreviewUrl } from "@/lib/preview-url";
 
 export interface PresetColor {
   name: string;
@@ -52,6 +53,7 @@ export interface UnifiedThemeStudioProps {
   subdomainTitle: string;
   port: string;
   localUrl: string;
+  productionUrl?: string;
   theme: SubdomainTheme;
   presets: PresetColor[];
   onSaveTheme: (newTheme: SubdomainTheme) => Promise<boolean | void>;
@@ -157,6 +159,7 @@ export default function UnifiedThemeStudio({
   subdomainTitle,
   port,
   localUrl,
+  productionUrl,
   theme,
   presets,
   onSaveTheme,
@@ -166,10 +169,16 @@ export default function UnifiedThemeStudio({
   const [currentTheme, setCurrentTheme] = useState<SubdomainTheme>(theme);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('components');
+  const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('iframe');
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
-  const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
+
+  const officialUrl = productionUrl || OFFICIAL_APP_URLS[subdomain] || localUrl;
+  const {
+    previewUrl: activePreviewUrl,
+    source: previewSource,
+    isOnline: isServerOnline,
+  } = useResolvedPreviewUrl(localUrl, officialUrl, previewMode === 'iframe', iframeRefreshKey);
 
   // Gradient Builder Modal State
   const [showGradientBuilder, setShowGradientBuilder] = useState(false);
@@ -201,28 +210,6 @@ export default function UnifiedThemeStudio({
       neutral: currentTheme.neutral_color || "#94a3b8"
     };
   }, [activeSeedColor, activeColorTheme, activeThemeMode, currentTheme]);
-
-  // Check if local dev server is responding
-  useEffect(() => {
-    let active = true;
-    const checkConnection = async () => {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1200);
-        await fetch(localUrl, { mode: 'no-cors', signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (active) setIsServerOnline(true);
-      } catch {
-        if (active) setIsServerOnline(false);
-      }
-    };
-    checkConnection();
-    const interval = setInterval(checkConnection, 8000);
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, [localUrl, iframeRefreshKey]);
 
   // Listen to Gradient Builder events from iframe modal
   useEffect(() => {
@@ -1005,8 +992,10 @@ export default function UnifiedThemeStudio({
           <span className={`w-2.5 h-2.5 rounded-full ${isServerOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-amber-400'}`} />
           <span className="text-xs font-bold text-white tracking-wider uppercase font-mono flex items-center gap-1.5">
             <Eye size={13} className={isServerOnline ? "text-emerald-400" : "text-amber-400"} />
-            <span>{isServerOnline ? 'En Vivo:' : 'Simulación Activa:'}</span>
-            <strong className="text-pink-400 font-semibold lowercase">:{port}</strong>
+            <span>{previewMode === 'components' ? 'Simulación UI' : isServerOnline ? 'En Vivo:' : 'Conectando:'}</span>
+            <strong className="text-pink-400 font-semibold lowercase">
+              {previewSource === 'local' ? `:${port}` : activePreviewUrl.replace(/^https?:\/\//, '')}
+            </strong>
           </span>
         </div>
 
@@ -1082,7 +1071,6 @@ export default function UnifiedThemeStudio({
           <button
             type="button"
             onClick={() => {
-              setIsServerOnline(null);
               setIframeRefreshKey(prev => prev + 1);
             }}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
@@ -1091,7 +1079,7 @@ export default function UnifiedThemeStudio({
             <RefreshCw size={13} />
           </button>
           <a
-            href={localUrl}
+            href={activePreviewUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="p-1.5 rounded-lg text-slate-400 hover:text-pink-400 hover:bg-pink-500/10 transition"
@@ -1135,9 +1123,9 @@ export default function UnifiedThemeStudio({
               <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#070b14] space-y-3">
                 <Loader2 size={24} className="text-pink-400 animate-spin" />
                 <div>
-                  <h4 className="text-sm font-bold text-white">Verificando conexión en :{port}...</h4>
+                  <h4 className="text-sm font-bold text-white">Conectando vista previa de {subdomainTitle}...</h4>
                   <p className="text-xs text-slate-400 max-w-xs mt-1">
-                    Conectando con el portal de {subdomainTitle} en segundo plano.
+                    Cargando {activePreviewUrl.replace(/^https?:\/\//, '')}.
                   </p>
                 </div>
               </div>
@@ -1147,9 +1135,9 @@ export default function UnifiedThemeStudio({
                   <AlertCircle size={24} />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Servidor local en puerto :{port} en pausa</h4>
+                  <h4 className="text-sm font-bold text-white">Vista previa oficial temporalmente inaccesible</h4>
                   <p className="text-xs text-slate-400 max-w-xs mt-1">
-                    Para interactuar con el portal completo en vivo, ejecuta <code className="text-pink-400 font-mono">npm run dev:{subdomain}</code>.
+                    Ni localhost :{port} ni {activePreviewUrl} respondieron. Puedes usar Componentes UI simulados o reintentar.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
@@ -1164,7 +1152,6 @@ export default function UnifiedThemeStudio({
                   <button
                     type="button"
                     onClick={() => {
-                      setIsServerOnline(null);
                       setIframeRefreshKey(prev => prev + 1);
                     }}
                     className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 cursor-pointer"
@@ -1177,8 +1164,8 @@ export default function UnifiedThemeStudio({
             ) : (
               <iframe
                 ref={targetIframeRef as any}
-                key={iframeRefreshKey}
-                src={localUrl}
+                key={`${activePreviewUrl}-${iframeRefreshKey}`}
+                src={activePreviewUrl}
                 className="w-full h-full border-0 bg-transparent"
                 title={`${subdomainTitle} Live Preview`}
                 onLoad={() => broadcastThemeToIframe(currentTheme)}

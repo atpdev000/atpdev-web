@@ -3308,6 +3308,7 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
           subdomainTitle="Descargador Pro"
           port="3007"
           localUrl="http://localhost:3007"
+          productionUrl="https://descargador.atpdev.dev"
           theme={config.theme}
           presets={ACCENT_PRESETS}
           onSaveTheme={async (newTheme: SubdomainTheme) => {

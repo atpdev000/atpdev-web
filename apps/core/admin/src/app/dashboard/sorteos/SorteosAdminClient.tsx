@@ -1,6 +1,7 @@
 'use client';
 
 import UnifiedThemeStudio from "@/components/theme/UnifiedThemeStudio";
+import { OFFICIAL_APP_URLS, useResolvedPreviewUrl } from "@/lib/preview-url";
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   GiveawayRecord,
@@ -230,6 +231,12 @@ export default function SorteosAdminClient({
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('iframe');
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
+  const { previewUrl: sorteosLiveUrl } = useResolvedPreviewUrl(
+    'http://localhost:3006',
+    OFFICIAL_APP_URLS.sorteos,
+    true,
+    iframeRefreshKey
+  );
 
   const initialTheme = siteConfig.theme || ({} as any);
   const [themeMode, setThemeMode] = useState<'dark' | 'light'>(initialTheme.theme_mode === 'light' ? 'light' : 'dark');
@@ -730,13 +737,13 @@ export default function SorteosAdminClient({
 
         <div className="flex items-center gap-2 shrink-0">
           <a
-            href="http://localhost:3006"
+            href={sorteosLiveUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-medium text-xs border border-white/10 transition-colors"
           >
             <ExternalLink size={14} />
-            <span>Ver Sorteos Pro (3006)</span>
+            <span>Ver Sorteos Pro</span>
           </a>
           <button
             onClick={() => setActiveTab('create')}
@@ -1008,7 +1015,7 @@ export default function SorteosAdminClient({
                             <div className="flex items-center justify-end gap-1.5">
                               {/* Open Landing */}
                               <a
-                                href={`http://localhost:3006/sorteo/${g.id}`}
+                                href={`${sorteosLiveUrl}/sorteo/${g.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
@@ -1019,7 +1026,7 @@ export default function SorteosAdminClient({
 
                               {/* Open Certificate */}
                               <a
-                                href={`http://localhost:3006/certificados/${g.certificateId || g.id}`}
+                                href={`${sorteosLiveUrl}/certificados/${g.certificateId || g.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-1.5 rounded-lg bg-violet-950 hover:bg-violet-900 text-violet-300 hover:text-white border border-violet-500/30 transition-colors"
@@ -1387,6 +1394,7 @@ export default function SorteosAdminClient({
           subdomainTitle="Sorteos Pro"
           port="3006"
           localUrl="http://localhost:3006"
+          productionUrl={OFFICIAL_APP_URLS.sorteos}
           theme={siteConfig.theme}
           presets={[
             { name: 'Púrpura Neón (Oficial)', hex: '#8b5cf6' },
@@ -2312,7 +2320,7 @@ export default function SorteosAdminClient({
                   <RefreshCw size={14} />
                 </button>
                 <a
-                  href="http://localhost:3006"
+                  href={sorteosLiveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-1.5 rounded-lg text-slate-400 hover:text-violet-400 hover:bg-violet-500/10 transition-colors border border-slate-800 cursor-pointer"
@@ -2342,8 +2350,8 @@ export default function SorteosAdminClient({
 
                 <iframe
                   ref={modalIframeRef}
-                  key={`modal-${iframeRefreshKey}`}
-                  src="http://localhost:3006"
+                  key={`modal-${sorteosLiveUrl}-${iframeRefreshKey}`}
+                  src={sorteosLiveUrl}
                   className="w-full h-full border-0 bg-transparent"
                   title="Sorteos Pro Fullscreen Preview"
                   onLoad={() => {

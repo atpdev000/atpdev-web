@@ -32,7 +32,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' http://localhost:3003 https://*.atpdev.dev;",
+            value: "frame-ancestors 'self' http://localhost:3001 http://localhost:3003 https://*.atpdev.dev https://*.atpdev.pe;",
           },
           {
             key: 'X-DNS-Prefetch-Control',

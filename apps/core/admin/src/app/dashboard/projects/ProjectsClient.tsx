@@ -1824,6 +1824,7 @@ export default function ProjectsClient({ projects }: { projects: Project[] }) {
       {showGradientBuilderModal && (
         <ProjectThemeStudio 
           title={title}
+          previewPath={editingId && slug ? `/es/apps/${slug}` : ""}
           initialConfig={themeConfig}
           onClose={() => setShowGradientBuilderModal(false)}
           onChange={(config) => setThemeConfig(JSON.stringify(config))}

@@ -1,6 +1,7 @@
 'use client';
 
 import UnifiedThemeStudio from "@/components/theme/UnifiedThemeStudio";
+import { OFFICIAL_APP_URLS, useResolvedPreviewUrl } from "@/lib/preview-url";
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   JobPosting,
@@ -205,6 +206,12 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('iframe');
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
+  const { previewUrl: chambaLiveUrl } = useResolvedPreviewUrl(
+    'http://localhost:3005',
+    OFFICIAL_APP_URLS.chamba,
+    true,
+    iframeRefreshKey
+  );
 
   // Full Theme Builder states for Chamba Pro (matching Main Portal ThemeBuilder)
   const initialTheme = siteConfig.theme || ({} as any);
@@ -1167,7 +1174,7 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
                           <div className="flex items-center justify-end gap-1.5">
                             {/* 1. Ver en Chamba Pro en Vivo (Ojito) */}
                             <a
-                              href={`http://localhost:3005/empleos/${job.slug}`}
+                              href={`${chambaLiveUrl}/empleos/${job.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500 hover:text-slate-950 transition-colors"
@@ -1329,7 +1336,7 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
                 </div>
               </div>
               <a
-                href={`http://localhost:3005/empleos/${lastApprovedJob.slug}`}
+                href={`${chambaLiveUrl}/empleos/${lastApprovedJob.slug}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black font-display transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)] flex items-center gap-2 shrink-0 cursor-pointer"
@@ -1519,7 +1526,7 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
                       </a>
 
                       <a
-                        href={`http://localhost:3005/empleos/${job.slug}`}
+                        href={`${chambaLiveUrl}/empleos/${job.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-mono font-bold flex items-center gap-1.5 border border-amber-500/30 transition-colors"
@@ -2199,6 +2206,7 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
           subdomainTitle="Chamba Pro"
           port="3005"
           localUrl="http://localhost:3005"
+          productionUrl={OFFICIAL_APP_URLS.chamba}
           theme={siteConfig.theme}
           presets={[
             { name: 'Esmeralda Pro (Oficial)', hex: '#10b981' },
@@ -4088,7 +4096,7 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
                   <RefreshCw size={14} />
                 </button>
                 <a
-                  href="http://localhost:3005"
+                  href={chambaLiveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors border border-slate-800 cursor-pointer"
@@ -4118,8 +4126,8 @@ export default function ChambaAdminClient({ initialJobs, initialConfig }: Chamba
 
                 <iframe
                   ref={modalIframeRef}
-                  key={`modal-${iframeRefreshKey}`}
-                  src="http://localhost:3005"
+                  key={`modal-${chambaLiveUrl}-${iframeRefreshKey}`}
+                  src={chambaLiveUrl}
                   className="w-full h-full border-0 bg-transparent"
                   title="Chamba Pro Fullscreen Preview"
                   onLoad={() => {

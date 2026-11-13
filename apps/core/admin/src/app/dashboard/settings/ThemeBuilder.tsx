@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Moon, Sun, Wand2, Type, Square, ChevronDown, Sparkles, Loader2, Palette, X, Eye, Zap, Laptop, Tablet, Smartphone, RefreshCw, ExternalLink, Monitor, Layers, AlertCircle } from "lucide-react";
 import { suggestThemeWithAI } from "./actions";
+import { OFFICIAL_APP_URLS, useResolvedPreviewUrl } from "@/lib/preview-url";
 
 // ==========================================
 // COLOR MATH UTILITIES (Simulating MD3)
@@ -90,47 +91,20 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
   const [isOpen, setIsOpen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const hiddenIframeRef = useRef<HTMLIFrameElement>(null);
-  const [portalUrl, setPortalUrl] = useState<string>("http://localhost:3000");
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [previewMode, setPreviewMode] = useState<'iframe' | 'components'>('iframe');
-  const [isServerOnline, setIsServerOnline] = useState<boolean | null>(null);
   const [iframeRefreshKey, setIframeRefreshKey] = useState(0);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-        setPortalUrl("http://localhost:3000");
-      } else if (process.env.NEXT_PUBLIC_PORTAL_URL) {
-        setPortalUrl(process.env.NEXT_PUBLIC_PORTAL_URL);
-      } else {
-        setPortalUrl("https://atpdev.dev");
-      }
-    }
-  }, []);
-
-  // Prober de conexión para el portal :3000
-  useEffect(() => {
-    let active = true;
-    const checkConnection = async () => {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1200);
-        await fetch(portalUrl, { mode: 'no-cors', signal: controller.signal });
-        clearTimeout(timeoutId);
-        if (active) setIsServerOnline(true);
-      } catch {
-        if (active) setIsServerOnline(false);
-      }
-    };
-    if (isOpen) {
-      checkConnection();
-      const interval = setInterval(checkConnection, 8000);
-      return () => {
-        active = false;
-        clearInterval(interval);
-      };
-    }
-  }, [portalUrl, isOpen, iframeRefreshKey]);
+  const officialEnvPortal = process.env.NEXT_PUBLIC_PORTAL_URL;
+  const officialPortalUrl =
+    officialEnvPortal && !officialEnvPortal.includes("localhost")
+      ? officialEnvPortal
+      : OFFICIAL_APP_URLS.portal;
+  const {
+    previewUrl: portalUrl,
+    source: previewSource,
+    isOnline: isServerOnline,
+  } = useResolvedPreviewUrl("http://localhost:3000", officialPortalUrl, isOpen, iframeRefreshKey);
 
   // States
   const [mode, setMode] = useState(initialConfig?.theme_mode || "dark");
@@ -808,8 +782,10 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
                 <span className={`w-2.5 h-2.5 rounded-full ${isServerOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]' : 'bg-amber-400'}`} />
                 <span className="text-xs font-bold text-white tracking-wider uppercase font-mono flex items-center gap-2">
                   <Eye size={14} className={isServerOnline ? "text-emerald-400" : "text-amber-400"} />
-                  <span>{isServerOnline ? 'Live Preview:' : 'Simulación Activa:'}</span>
-                  <strong className="text-blue-400 font-semibold lowercase">portal.atpdev.dev (:3000)</strong>
+                  <span>{isServerOnline ? 'Live Preview:' : 'Conectando:'}</span>
+                  <strong className="text-blue-400 font-semibold lowercase">
+                    {previewSource === 'local' ? 'localhost:3000' : portalUrl.replace(/^https?:\/\//, '')}
+                  </strong>
                 </span>
               </div>
 
@@ -891,7 +867,6 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
                 <button
                   type="button"
                   onClick={() => {
-                    setIsServerOnline(null);
                     setIframeRefreshKey(prev => prev + 1);
                   }}
                   className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-gray-800/80 transition-colors border border-transparent hover:border-gray-700 cursor-pointer"
@@ -935,8 +910,8 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
                     <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#070b14] space-y-3">
                       <Loader2 size={24} className="text-blue-400 animate-spin" />
                       <div>
-                        <h4 className="text-sm font-bold text-white">Verificando conexión en :3000...</h4>
-                        <p className="text-xs text-slate-400 max-w-xs mt-1">Conectando con el portal principal en segundo plano.</p>
+                        <h4 className="text-sm font-bold text-white">Conectando vista previa del Portal...</h4>
+                        <p className="text-xs text-slate-400 max-w-xs mt-1">Cargando {portalUrl.replace(/^https?:\/\//, '')}.</p>
                       </div>
                     </div>
                   ) : isServerOnline === false ? (
@@ -945,9 +920,9 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
                         <AlertCircle size={24} />
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-white">Servidor local en puerto :3000 en pausa</h4>
+                        <h4 className="text-sm font-bold text-white">Vista previa oficial temporalmente inaccesible</h4>
                         <p className="text-xs text-slate-400 max-w-xs mt-1">
-                          Para ver el portal completo interactivo en vivo, ejecuta <code className="text-blue-400 font-mono">npm run dev</code>.
+                          Ni localhost :3000 ni {portalUrl} respondieron. Usa Componentes UI o reintenta.
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
@@ -962,7 +937,6 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
                         <button
                           type="button"
                           onClick={() => {
-                            setIsServerOnline(null);
                             setIframeRefreshKey(prev => prev + 1);
                           }}
                           className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center gap-1.5 cursor-pointer"
@@ -975,7 +949,7 @@ export function ThemeBuilder({ initialConfig }: { initialConfig: any }) {
                   ) : (
                     <iframe 
                       ref={iframeRef}
-                      key={iframeRefreshKey}
+                      key={`${portalUrl}-${iframeRefreshKey}`}
                       src={portalUrl}
                       className="w-full h-full border-0 bg-transparent"
                       title="Portal Live Preview"

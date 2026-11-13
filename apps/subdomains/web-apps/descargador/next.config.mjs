@@ -19,7 +19,10 @@ const nextConfig = {
       {
         source: '/:path*',
         headers: [
-          { key: 'X-Frame-Options', value: 'DENY' },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' http://localhost:3001 http://localhost:3002 http://localhost:3007 https://*.atpdev.dev https://*.atpdev.pe;",
+          },
           { key: 'X-Content-Type-Options', value: 'nosniff' }
         ],
       },

@@ -172,13 +172,13 @@ export default function MagicAdminClient({ initialConfig }: Props) {
 
           <div className="flex flex-wrap items-center gap-3">
             <a 
-              href="http://localhost:3008" 
+              href="https://magic.atpdev.dev" 
               target="_blank" 
               rel="noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium border border-slate-700/60 transition shadow-sm"
             >
               <ExternalLink className="w-4 h-4 text-pink-400" />
-              <span>Abrir Local (:3008)</span>
+              <span>Abrir Web Oficial</span>
             </a>
             <button
               onClick={handleSave}
@@ -342,6 +342,7 @@ export default function MagicAdminClient({ initialConfig }: Props) {
           subdomainTitle="Interactivo Magic"
           port="3008"
           localUrl="http://localhost:3008"
+          productionUrl="https://magic.atpdev.dev"
           theme={config.theme}
           presets={ACCENT_PRESETS}
           onSaveTheme={async (newTheme: SubdomainTheme) => {

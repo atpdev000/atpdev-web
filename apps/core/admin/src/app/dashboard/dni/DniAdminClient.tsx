@@ -131,12 +131,12 @@ export default function DniAdminClient({ initialConfig }: Props) {
 
         <div className="flex items-center gap-3">
           <a
-            href="http://localhost:3012"
+            href="https://dni.atpdev.dev"
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 border border-slate-700"
           >
-            <span>Ver Local (3012)</span>
+            <span>Ver Web Oficial</span>
             <ExternalLink size={14} />
           </a>
           <button
