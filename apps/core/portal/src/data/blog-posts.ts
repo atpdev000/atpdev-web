@@ -878,7 +878,11 @@ Un recetario público vive o muere según la calidad de su indexación y su tiem
 
 1. **Datos estructurados \`Recipe\` JSON-LD:** cada ficha publica \`prepTime\`, \`cookTime\`, \`totalTime\`, \`recipeYield\`, \`recipeCuisine: "Peruvian"\`, lista limpia de \`recipeIngredient\` y pasos \`HowToStep\` sincronizados exactamente con el texto visible.
 2. **Server Components con tipado estricto:** el catálogo completo se pre-renderiza en el servidor para entregar contenido HTML inmediato tanto a buscadores como a lectores con conexiones móviles lentas.
-3. **Sitemaps e imágenes optimizadas:** el mapa XML expone únicamente recetas completas verificadas, acompañadas de textos alternativos descriptivos e imágenes ligeras para mantener **CLS cercano a 0**.`
+3. **Sitemaps e imágenes optimizadas:** el mapa XML expone únicamente recetas completas verificadas, acompañadas de textos alternativos descriptivos e imágenes ligeras para mantener **CLS cercano a 0**.
+
+## Búsqueda tolerante a sinónimos regionales y listas de compras
+
+Otro problema clásico en recetarios latinoamericanos es la variación léxica entre países o regiones: *palta* frente a *aguacate*, *choclo* frente a *elote* o *frejol* frente a *alubia*. En lugar de exigir coincidencias exactas de texto, normalizamos un grafo ligero de sinónimos culinarios para que cualquier visitante encuentre preparaciones auténticas sin importar cómo busque cada ingrediente, generando además una lista consolidada de compras lista para marcar en el mercado.`
     },
     en: {
       title: 'Computational Gastronomy: Modeling Recipes, Dynamic Scaling, and Structured Data in Next.js',
@@ -887,19 +891,19 @@ Un recetario público vive o muere según la calidad de su indexación y su tiem
         'Designing typed culinary data structures for Peruvian recipes with proportional serving scaling, fractional rounding rules, and validated Schema.org Recipe JSON-LD.',
       content: `## Structuring recipes beyond plain HTML paragraphs
 
-Most food portals store ingredient lists as unstructured HTML strings (\`"2 tbsp aji panca"\`, \`"1/2 kg yellow potato"\`). While fast to author, unstructured text blocks accurate serving scaling, metric/imperial conversions, and allergen or pantry filtering. For **perusabor.atpdev.dev**, every Peruvian recipe is modeled in strongly typed **TypeScript** records.
+Most food portals store ingredient lists as unstructured HTML strings (\`"2 tbsp aji panca"\`, \`"1/2 kg yellow potato"\`). While fast to author, unstructured text blocks accurate serving scaling, metric/imperial conversions, and allergen or pantry filtering. For **perusabor.atpdev.dev**, every Peruvian recipe—from classic ceviche to regional stews—is modeled in strongly typed **TypeScript** records separating culinary prose from structured quantity graphs.
 
 ## Smart ingredient scaling rules
 
 Rather than naively multiplying every number linearly:
 
-- Each ingredient defines a base quantity, canonical unit, scaling curve (\`linear\`, \`sublinear\` for aromatics/spices, or \`fixed\` for frying oil), and regional substitution hints when cooking abroad.
-- A culinary fraction formatter prevents unreadable outputs like \`0.33333 tsp\`, rounding naturally to kitchen-friendly increments.
-- Step-by-step timers run directly inside the cooking view so users keep hands free while preparing dishes.
+- Each ingredient defines a base quantity, canonical unit, scaling curve (\`linear\`, \`sublinear\` for aromatics/spices, or \`fixed\` for frying oil), and practical substitution notes for cooks abroad.
+- A culinary fraction formatter prevents unreadable decimals like \`0.33333 tsp\`, rounding naturally to kitchen-friendly increments across solids, liquids, and whole items.
+- Step-by-step timers run directly inside the cooking view so home cooks keep hands free while tracking sauces, marinades, and simmering times.
 
-## Server-side rendering and \`Recipe\` JSON-LD
+## Server-side rendering, synonym search, and \`Recipe\` JSON-LD
 
-Every dish route pre-renders complete editorial context on the server alongside synchronized **Schema.org \`Recipe\`** markup (\`prepTime\`, \`cookTime\`, \`recipeIngredient\`, \`HowToStep\`) and clean XML sitemaps for fast mobile discovery.`
+Every dish route pre-renders complete editorial context on the server alongside synchronized **Schema.org \`Recipe\`** markup (\`prepTime\`, \`cookTime\`, \`recipeIngredient\`, \`HowToStep\`), lightweight regional synonym matching, and clean XML sitemaps for fast mobile discovery.`
     }
   },
   {
@@ -927,12 +931,12 @@ Aplicamos cuatro principios medibles en cada plantilla interactiva:
 
 1. **Propiedades exclusivas del Compositor:** las animaciones CSS de tarjetas, pétalos y botones utilizan únicamente \`transform\` (\`translate3d\`, \`scale\`, \`rotate\`) y \`opacity\`, delegando el cálculo al hilo compositor de la GPU sin recalcular geometría.
 2. **Pool de partículas reutilizable en HTML5 Canvas:** en lugar de crear y destruir cientos de objetos cada segundo (lo que dispara pausas del recolector de basura de JavaScript), pre-asignamos un arreglo fijo de partículas y reciclamos sus coordenadas al salir del *viewport*.
-3. **Escalado responsable por \`devicePixelRatio\`:** en pantallas móviles 3x o 4x, renderizar un lienzo full-screen a resolución nativa multiplica hasta por 16 los píxeles a rellenar. Limitamos el factor DPR de efectos ambientales a \`Math.min(window.devicePixelRatio, 2)\` sin pérdida perceptible de nitidez.
+3. **Escalado responsable por \`devicePixelRatio\`:** en pantallas móviles 3x o 4x, renderizar un lienzo full-screen a resolución nativa multiplica hasta por 16 los píeles a rellenar. Limitamos el factor DPR de efectos ambientales a \`Math.min(window.devicePixelRatio, 2)\` sin pérdida perceptible de nitidez.
 4. **Respeto a \`prefers-reduced-motion\` y visibilidad:** cuando la pestaña pasa a segundo plano (\`document.hidden\`), el bucle \`requestAnimationFrame\` se pausa de inmediato para no drenar batería ni CPU innecesariamente.
 
-## Contenido indexable junto a aplicaciones interactivas
+## Empaquetado híbrido y contenido indexable alrededor del lienzo
 
-Un aprendizaje clave al llevar experiencias interactivas a la web abierta es que los rastreadores y evaluadores automáticos necesitan contexto editorial claro alrededor del lienzo visual. Combinar la aplicación fluida con guías de uso, explicaciones técnicas, preguntas frecuentes y políticas visibles permite ofrecer tanto una experiencia lúdica de cero fricción como un sitio transparente para buscadores.`
+Un aprendizaje clave al llevar experiencias interactivas a la web abierta es que tanto buscadores como visitantes primerizos necesitan contexto editorial claro alrededor del lienzo visual: instrucciones paso a paso, categorías por ocasión, compatibilidad sin registro previo y enlace directo al detalle de privacidad, manteniendo a su vez la fluidez nativa al compilar con **Capacitor**.`
     },
     en: {
       title: 'Sustaining 60 FPS Mobile Animations with HTML5 Canvas, CSS Compositing, and Capacitor',
@@ -941,14 +945,14 @@ Un aprendizaje clave al llevar experiencias interactivas a la web abierta es que
         'Eliminating frame drops on mid-range smartphones through compositor-only CSS transforms, object-pooled Canvas particles, DPR capping, and visibility pausing.',
       content: `## Why celebratory web animations drop frames on mid-range phones
 
-Interactive cards, particle bursts, and animated reveals stall quickly when JavaScript or CSS mutates layout-triggering properties (\`top\`, \`left\`, \`width\`) on every animation tick. Inside **magic.atpdev.dev**, lightweight architecture keeps motion smooth even inside mobile WebViews.
+Interactive cards, confetti bursts, and animated reveals stall quickly when JavaScript or CSS mutates layout-triggering properties (\`top\`, \`left\`, \`width\`) on every animation frame, forcing repeated layout and paint passes across modest mobile GPUs. Inside **magic.atpdev.dev**, disciplined browser rendering rules keep animated greetings smooth even inside embedded messaging browsers and mobile WebViews.
 
 ## Four practices behind steady 60 FPS scenes
 
-- **Compositor-only transforms:** UI transitions animate strictly \`transform\` and \`opacity\`, offloading work to the GPU compositor layer.
-- **Object-pooled Canvas particles:** Pre-allocated particle arrays avoid continuous garbage-collection pauses during confetti or firework loops.
-- **Bounded \`devicePixelRatio\`:** Clamping particle Canvas backing stores to \`Math.min(dpr, 2)\` cuts fill-rate overhead dramatically on high-density displays.
-- **Lifecycle & motion awareness:** Pausing \`requestAnimationFrame\` on background tabs and honoring \`prefers-reduced-motion\` preserves battery life and accessibility.`
+- **Compositor-only transforms:** Card flips and floating accents animate strictly \`transform\` (\`translate3d\`, \`scale\`, \`rotate\`) and \`opacity\`, keeping work on the GPU compositor thread.
+- **Object-pooled Canvas particles:** Pre-allocated particle arrays recycle off-screen elements instead of hammering the JavaScript garbage collector with new allocations on every tick.
+- **Bounded \`devicePixelRatio\`:** Clamping ambient particle Canvas backing stores to \`Math.min(dpr, 2)\` avoids huge 9x–16x fill-rate spikes on ultra-dense smartphone displays without sacrificing visual crispness.
+- **Lifecycle & motion awareness:** Pausing \`requestAnimationFrame\` when \`document.hidden\` is true and honoring \`prefers-reduced-motion\` preserves battery life and accessibility across both web browsers and Capacitor builds.`
     }
   },
   {
@@ -974,9 +978,9 @@ En **ATP Dev** consolidamos todo el ecosistema sobre un monorepo estructurado co
 
 Cada subdominio apunta al mismo servidor mediante DNS, pero el enrutamiento se resuelve de forma explícita y verificable:
 
-- **TLS automático sin cronjobs frágiles:** **Caddy** gestiona la emisión y renovación automática de certificados **Let's Encrypt** para cada subdominio (\`www.atpdev.dev\`, \`chamba.atpdev.dev\`, \`pdf.atpdev.dev\`, \`sorteos.atpdev.dev\`, etc.) con HTTP/2 y HTTP/3 habilitados por defecto.
-- **Aplicaciones SSR aisladas por puerto interno:** cada app Next.js corre en modo \`next start\` asignada a un puerto local distinto (\`3000\` a \`3010\`) supervisada por **PM2** con reinicio automático ante fallos y límites de memoria definidos.
-- **SPAs estáticas servidas directo desde disco:** herramientas ligeras compiladas con Vite se sirven mediante \`file_server\` y \`try_files\` directamente desde Caddy, consumiendo prácticamente cero memoria RAM en reposo.
+- **TLS automático sin cronjobs frágiles:** **Caddy** gestiona la emisión y renovación automática de certificados **Let's Encrypt** para cada subdominio (\`www.atpdev.dev\`, \`chamba.atpdev.dev\`, \`pdf.atpdev.dev\`, \`sorteos.atpdev.dev\`, etc.) con HTTP/2 y HTTP/3 habilitados por defecto, además de redirecciones canónicas limpias desde el dominio raíz apex.
+- **Aplicaciones SSR aisladas por puerto interno:** cada app Next.js corre en modo \`next start\` asignada a un puerto local distinto (\`3000\` a \`3010\`) supervisada por **PM2** con reinicio automático ante fallos y límites de memoria definidos para que ningún proceso bloquee a los demás.
+- **SPAs estáticas servidas directo desde disco:** herramientas ligeras compiladas con Vite se sirven mediante \`file_server\` y \`try_files\` directamente desde Caddy, consumiendo prácticamente cero memoria RAM en reposo y respondiendo en milisegundos.
 
 ## Disciplina de despliegue y verificación post-release
 
@@ -989,13 +993,14 @@ Un monorepo en VPS solo es seguro si cada actualización sigue una secuencia pre
         'Practical production architecture using Caddy automatic TLS reverse proxying, isolated PM2 ports for Next.js servers, and zero-overhead static serving for SPAs.',
       content: `## Consolidating multiple products without cloud sprawl
 
-Running distinct portfolios, job aggregators, utility tools, and APIs on separate paid PaaS plans quickly multiplies operational overhead. The **ATP Dev** ecosystem runs cleanly from a structured **pnpm monorepo** deployed onto a single Linux VPS.
+Running distinct portfolios, job aggregators, utility tools, and APIs on separate paid PaaS plans quickly multiplies monthly bills and fragments logs. The **ATP Dev** ecosystem operates cleanly from a single **pnpm monorepo** deployed onto one hardened Linux VPS.
 
 ## Reverse proxy isolation and static efficiency
 
-- **Automatic HTTPS via Caddy:** Each subdomain terminates TLS cleanly with zero manual certificate scripts and routes either to a dedicated local Next.js port (\`3000–3010\`) or directly to static \`dist/\` bundles via \`file_server\`.
-- **Process supervision with PM2:** Memory caps and per-service restarts isolate failures so rebuilding or restarting one service never interrupts sibling applications.
-- **Post-deploy verification:** Automated checks confirm \`200 OK\` HTML responses, \`robots.txt\`, \`sitemap.xml\`, and asset integrity immediately after every rollout.`
+- **Automatic HTTPS via Caddy:** Each subdomain terminates TLS cleanly using built-in ACME automation, enforces canonical \`www\` redirects on the apex host, and proxies SSR apps to dedicated localhost ports (\`3000–3010\`).
+- **Process supervision with PM2:** Memory caps and per-service reloads isolate workloads so rebuilding one application never interrupts sibling subdomains.
+- **Zero-overhead static bundles:** Client-side utilities built with Vite serve straight from Caddy's \`file_server\` directive, consuming near-zero idle RAM.
+- **Automated post-deploy smoke checks:** Release verification confirms \`200 OK\` HTML delivery alongside working \`robots.txt\`, \`sitemap.xml\`, and \`ads.txt\` endpoints across every active host.`
     }
   },
   {
@@ -1025,7 +1030,7 @@ Al almacenar eventos que abarcan siglos —desde 1843 con Ada Lovelace hasta lan
 
 ## Por qué la hidratación mixta perjudica el SEO informativo
 
-Uno de los errores más comunes en aplicaciones educativas creadas con React consiste en renderizar un esqueleto vacío en SSR y pedir los datos históricos recién en el navegador mediante \`useEffect\`. Al mover la consulta inicial a **Server Components** e hidratar únicamente los controles interactivos (filtros de fecha, navegación entre años y búsqueda), la primera respuesta HTML ya transporta todo el valor histórico y educativo.`
+Uno de los errores más comunes en aplicaciones educativas creadas con React consiste en renderizar un esqueleto vacío en SSR y pedir los datos históricos recién en el navegador mediante \`useEffect\`. Al mover la consulta inicial a **Server Components** e hidratar únicamente los controles interactivos (filtros de fecha, navegación entre años y bloques de divulgación), la primera respuesta HTTP ya transporta valor histórico y educativo completo para usuarios y buscadores.`
     },
     en: {
       title: 'Chronological Indexing and Server-Side Ephemeris Delivery in PostgreSQL and Next.js',
@@ -1034,13 +1039,13 @@ Uno de los errores más comunes en aplicaciones educativas creadas con React con
         'Designing fast month/day lookup schemas in PostgreSQL alongside Incremental Static Regeneration so educational timelines never ship empty loading shells.',
       content: `## Fast month-and-day queries across historical centuries
 
-Historical platforms like **codehistory.atpdev.dev** and **almaniq.atpdev.dev** query events across arbitrary centuries using month-day axes rather than full timestamps.
+Educational platforms like **codehistory.atpdev.dev** and **almaniq.atpdev.dev** retrieve milestones across arbitrary centuries centered on recurring calendar month-day pairs rather than single timestamps.
 
 ## Schema design and zero-skeleton delivery
 
-- **Index-friendly month/day keys:** Storing integer \`event_month\`, \`event_day\`, and \`event_year\` columns with composite indexes keeps daily lookups fast without full-table \`EXTRACT()\` scans.
-- **Verified editorial depth:** Each entry pairs verified publication/release dates with accessible architectural explanations.
-- **SSR first, interactive enhancement second:** Moving initial fetches from client \`useEffect\` hooks into Next.js **Server Components** with ISR ensures visitors and search crawlers receive complete HTML immediately.`
+- **Index-friendly month/day keys:** Storing integer \`event_month\`, \`event_day\`, and \`event_year\` columns with composite indexes keeps daily queries sub-millisecond without sequential scans caused by unindexed \`EXTRACT()\` calls.
+- **Verified editorial context:** Every entry pairs confirmed historical dates with accessible architectural summaries linking older breakthroughs to modern tools.
+- **SSR first, interactive enhancement second:** Rendering encyclopedic timelines and methodology directly in Next.js **Server Components** with **ISR** guarantees visitors and crawlers never encounter empty loading placeholders.`
     }
   },
   {
@@ -1070,9 +1075,9 @@ La separación de responsabilidades evita acoplamientos frágiles al actualizar 
 2. **Capa de Dominio (\`domain\`):** define casos de uso puros en Kotlin sin dependencias de Android (\`ParseQrPayloadUseCase\`, \`InspectUrlSafetyUseCase\`) verificables con pruebas unitarias instantáneas en JVM.
 3. **Capa de Presentación (\`ui\`):** los \`ViewModel\` inyectados con **Hilt** exponen un único \`StateFlow<ScannerUiState>\` inmutable consumido por pantallas declarativas en **Jetpack Compose**, garantizando recomposiciones mínimas.
 
-## Seguridad ante códigos QR maliciosos
+## Seguridad ante códigos QR maliciosos y pruebas locales
 
-Un lector moderno no debe abrir automáticamente cualquier URL escaneada. Antes de invocar un \`Intent\` externo, el parser clasifica el protocolo, expone de forma legible el dominio real de destino, detecta parámetros sospechosos o enlaces acortados y exige confirmación consciente del usuario —protegiendo la privacidad sin sacrificar velocidad.`
+Un lector moderno no debe abrir automáticamente cualquier URL escaneada. Antes de invocar un \`Intent\` externo, el parser clasifica el protocolo, expone de forma legible el dominio real de destino, detecta parámetros sospechosos o enlaces acortados y exige confirmación consciente del usuario —protegiendo la privacidad sin sacrificar velocidad en cámara.`
     },
     en: {
       title: 'Modern Android Clean Architecture with Kotlin, Jetpack Compose, CameraX, and Hilt',
@@ -1081,14 +1086,14 @@ Un lector moderno no debe abrir automáticamente cualquier URL escaneada. Antes 
         'Decoupling CameraX frame analyzers and QR payload parsers from Compose UI state using Hilt injection, immutable StateFlow models, and safe URI validation.',
       content: `## Keeping camera pipelines out of UI components
 
-Real-time Android scanner apps easily collapse into unmaintainable lifecycle bugs when permissions, **CameraX** setup, frame decoding, and navigation live inside a single Activity. **LectorQR Pro** isolates these layers with **Clean Architecture + UDF**.
+Real-time Android scanner apps easily collapse into brittle lifecycle bugs when permissions, **CameraX** setup, frame decoding, and navigation live inside one monolithic Activity. **LectorQR Pro** separates these responsibilities through **Clean Architecture + Unidirectional Data Flow (UDF)**.
 
 ## Layered separation and payload safety
 
-- **Data layer:** Runs \`ImageAnalysis.Analyzer\` on background executors with **ML Kit** and stores offline scan history inside **Room**.
-- **Domain layer:** Pure Kotlin use cases validate Wi-Fi configurations, vCards, EAN barcodes, and external URLs, testable directly on the JVM.
-- **Presentation layer:** **Hilt**-injected ViewModels expose immutable \`StateFlow\` models to **Jetpack Compose**.
-- **Anti-phishing safeguard:** External URLs are never auto-launched blindly; the parsed host and scheme are surfaced clearly before any browser Intent fires.`
+- **Data layer:** Runs \`ImageAnalysis.Analyzer\` on background executors with **ML Kit** and persists offline history in **Room** without blocking camera preview frames.
+- **Domain layer:** Pure Kotlin use cases classify Wi-Fi strings, vCards, retail barcodes, and web URLs, testable cleanly on the JVM without Android instrumentation overhead.
+- **Presentation layer:** **Hilt**-injected ViewModels expose an immutable \`StateFlow\` consumed declaratively by **Jetpack Compose**.
+- **Anti-phishing safeguard:** External links never auto-launch blindly; full destination hosts and protocols are previewed clearly before firing any browser Intent.`
     }
   },
   {
@@ -1115,7 +1120,7 @@ En todo el ecosistema **atpdev.dev** adoptamos una arquitectura unificada basada
 1. **Estado inicial seguro en Consent Mode v2:** antes de cargar cualquier etiqueta de medición opcional, inicializamos \`gtag('consent', 'default', ...)\` respetando valores denegados por defecto cuando corresponde y actualizando únicamente ante la acción explícita del visitante en nuestro banner ligero.
 2. **Retraso inteligente tras \`Largest Contentful Paint\`:** las integraciones de telemetría no esenciales esperan a la carga completa y a una ventana de reposo o primera interacción real del usuario (\`scroll\`, \`pointerdown\`, \`keydown\`), logrando puntajes de **LCP inferiores a 1 segundo** y **Rendimiento > 90** en escritorio y móvil.
 3. **Aislamiento estricto de entornos locales:** ningún rastreador de terceros debe contaminar paneles de analítica desde sesiones de desarrollo (\`localhost\`, \`127.0.0.1\`). Verificamos el \`hostname\` en tiempo de ejecución antes de inyectar cualquier identificador de proyecto.
-4. **Exclusión en páginas sensibles y legales:** las rutas de política de privacidad, términos de uso y avisos de transparencia no cargan anuncios invasivos y ofrecen enlaces claros de contacto y gestión de cookies.`
+4. **Exclusión en páginas sensibles y legales:** las rutas de política de privacidad, términos de uso y avisos de transparencia no cargan anuncios invasivos y ofrecen enlaces claros de contacto y gestión de cookies desde el pie de página.`
     },
     en: {
       title: 'Clean Consent Mode v2, Post-LCP Analytics Deferral, and Transparent Privacy Architecture',
@@ -1124,13 +1129,13 @@ En todo el ecosistema **atpdev.dev** adoptamos una arquitectura unificada basada
         'Balancing accurate telemetry, explicit cookie consent defaults, localhost exclusion, and fast Largest Contentful Paint scores across multi-app Next.js portals.',
       content: `## Protecting privacy and Core Web Vitals simultaneously
 
-Dropping analytics and ad tags blindly into document heads slows mobile rendering and violates clear user consent expectations. Across **atpdev.dev**, telemetry follows strict lifecycle boundaries.
+Dropping analytics and ad scripts blindly into document heads slows mobile painting and undermines clear user consent expectations. Across **atpdev.dev**, telemetry obeys strict runtime and lifecycle boundaries.
 
 ## Key engineering safeguards
 
-- **Default Consent Mode v2 initialization:** Consent flags initialize safely before optional analytics fire and update upon explicit banner choice.
-- **Post-LCP deferred loading:** Non-essential scripts wait for page readiness or first interaction so initial paint and **LCP** remain unaffected.
-- **Localhost isolation & legal route exclusions:** Runtime hostname guards filter \`localhost\` traffic from production dashboards, while \`/privacy\` and \`/terms\` routes remain ad-free.`
+- **Default Consent Mode v2 initialization:** Consent signals initialize safely before optional measurement loads and update only after explicit user interaction with the consent banner.
+- **Post-LCP deferred loading:** Non-critical telemetry scripts wait for document readiness plus user interaction or an idle post-LCP timeout, preserving sub-second **Largest Contentful Paint** and responsive **INP** metrics.
+- **Localhost isolation & legal exclusions:** Hostname guards exclude \`localhost\` development traffic from live dashboards, while \`/privacy\` and \`/terms\` stay strictly ad-free.`
     }
   },
   {
@@ -1156,7 +1161,7 @@ Durante nuestras auditorías automáticas con **Google Lighthouse**, detectamos 
 
 En lugar de asignar colores genéricos por matiz, definimos variables CSS separadas según su función óptica en ambos temas:
 
-- **\`--accent\`:** reservado para bordes suaves, indicadores gráficos grandes y botones rellenos de alto impacto visual.
+- **\`--accent\`:** reservado para bordes suaves, indicadores gráficos grandes y botones rellenos de alto impacto visual donde la luminancia acompaña fondos o texto de alto contraste.
 - **\`--accent-text\`:** calibrado específicamente por contraste matemático (\`#047857\` sobre fondo claro y \`#34d399\` sobre fondo oscuro) para garantizar lectura cómoda en enlaces, migas de pan, categorías y etiquetas pequeñas.
 - **Orden jerárquico de encabezados (\`h1\` -> \`h2\` -> \`h3\`):** evitar saltos arbitrarios de \`<h1>\` directo a \`<h4>\` permite tanto a lectores de pantalla como a herramientas de auditoría interpretar la estructura editorial sin ambigüedades, llevando la puntuación de **Accesibilidad de Lighthouse a 100/100**.`
     },
@@ -1167,12 +1172,12 @@ En lugar de asignar colores genéricos por matiz, definimos variables CSS separa
         'Resolving subtle contrast failures on vibrant brand accents across light and dark themes using semantic CSS tokens and strict heading hierarchies.',
       content: `## Why one brand hex color rarely works in both themes
 
-A vivid cyan or emerald accent (\`#10b981\`) often reads clearly on dark surfaces yet drops below a \`2.6:1\` contrast ratio on white backgrounds—failing the **4.5:1 WCAG AA** requirement for body links and metadata labels.
+A vivid cyan or emerald accent (\`#10b981\`) reads cleanly on deep slate backgrounds yet drops near a \`2.5:1\` contrast ratio on white paper surfaces—failing **4.5:1 WCAG AA** contrast rules on article links, breadcrumbs, and category badges.
 
-## Purpose-driven CSS contrast tokens
+## Purpose-driven CSS contrast tokens and semantics
 
-- Separate **\`--accent\`** (surfaces, badges, large UI indicators) from **\`--accent-text\`** (calibrated \`>= 4.5:1\` ink for light and dark themes independently).
-- Enforce sequential heading levels (\`h1 -> h2 -> h3\`) and meaningful button labels so automated **Lighthouse** audits achieve **100/100 Accessibility** alongside better human readability.`
+- **Decouple brand fill from readable ink:** Reserve \`--accent\` for large fills and borders while calibrating \`--accent-text\` independently for light and dark themes (\`>= 4.5:1\`).
+- **Sequential headings & accessible labels:** Keeping strict \`h1 -> h2 -> h3\` order paired with clear \`aria-label\` descriptions on icon buttons and inline theme toggles brings automated **Lighthouse Accessibility** checks consistently to **100/100**.`
     }
   },
   {
@@ -1200,7 +1205,7 @@ Nuestra lógica separa parámetros oficiales actualizables por ejercicio fiscal 
 
 - **Parámetros anuales centralizados:** valor oficial de la **UIT** vigente, tope de **EsSalud** en contratos CAS y tasas de comisión sobre flujo / prima de seguro / aporte obligatorio (**10 %**) según sistema pensionario (**ONP 13 %** o **AFP**: Integra, Prima, Profuturo, Hábitat).
 - **Tramos progresivos de Impuesto a la Renta de Quinta Categoría:** el cálculo proyecta la remuneración anual (considerando 12 sueldos en CAS frente a 14 en D.L. 728), deduce **7 UIT** fijas de inafectación legal y aplica escalonadamente las tasas de **8 %**, **14 %**, **17 %**, **20 %** y **30 %** sobre el exceso en cada tramo, dividiendo el resultado mensual de manera transparente.
-- **Comparación anualizada honesta:** más allá del monto mensual en boleta, la herramienta contrasta compensación total anual incluyendo CTS y gratificaciones legales —ayudando al postulante a tomar decisiones informadas antes de postular.`
+- **Comparación anualizada honesta:** más allá del monto mensual en boleta, la herramienta contrasta compensación total anual incluyendo CTS y gratificaciones legales —ayudando al postulante a tomar decisiones informadas antes de postular con total transparencia matemática.`
     },
     en: {
       title: 'Encoding Peruvian Payroll Rules in TypeScript: CAS, D.L. 728, AFP/ONP, and Progressive UIT Tax',
@@ -1209,12 +1214,12 @@ Nuestra lógica separa parámetros oficiales actualizables por ejercicio fiscal 
         'Structuring pure TypeScript calculators for public CAS contracts vs. private D.L. 728 payrolls, pension deductions, and progressive 5ta Categoría income tax brackets.',
       content: `## Comparing public CAS offers against private payroll accurately
 
-Comparing raw gross monthly salaries between a Peruvian public **CAS (D.L. 1057)** tender and a private **D.L. 728** role overlooks major structural differences: 12 monthly payments plus modest holiday stipends versus 14 salaries, **CTS** severance deposits, and extraordinary bonuses.
+Comparing raw gross monthly salaries between a Peruvian public **CAS (D.L. 1057)** tender and a private **D.L. 728** contract overlooks major compensation rules: 12 monthly payments plus modest statutory holiday stipends versus 14 full salaries, **CTS** severance accounts, and extraordinary health bonuses.
 
 ## Modular domain formulas in pure TypeScript
 
-- **Versioned fiscal constants:** Annual **UIT** reference units, **ONP (13%)** vs. **AFP** mandatory/insurance/commission rates, and CAS EsSalud caps live in explicit config tables.
-- **Progressive tax engine:** Annualized compensation deducts the statutory **7 UIT** allowance before applying progressive **8%, 14%, 17%, 20%, and 30%** brackets clearly step by step so candidates see exact monthly net take-home pay.`
+- **Versioned fiscal constants:** Annual **UIT** tax reference units, **ONP (13%)** vs. **AFP** mandatory/insurance/commission rates, and CAS EsSalud caps reside in clean configuration tables updatable each fiscal year.
+- **Progressive 5th-category tax engine:** Annualized compensation deducts the statutory **7 UIT** allowance before applying progressive **8%, 14%, 17%, 20%, and 30%** brackets transparently step by step so candidates understand net monthly take-home pay and real annual compensation before applying.`
     }
   }
 ];
