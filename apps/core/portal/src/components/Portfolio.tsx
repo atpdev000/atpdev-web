@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, X, Download, Eye, Globe, ExternalLink, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import { Project, AIModelData } from "@atpdev/database";
 import { ICONS_MAP } from "@/components/AIModelsSection";
@@ -38,6 +39,9 @@ export default function Portfolio({
   enableGlow?: boolean;
   glowStyle?: string;
 }) {
+  const params = useParams();
+  const lang = (params?.lang as string) || "es";
+  const linkPrefix = lang === "es" ? "" : `/${lang}`;
   const glowClass = "interactive-card";
   const [filter, setFilter] = useState("all");
   const [selectedProject, setSelectedProject] = useState<number | null>(null);
@@ -59,7 +63,7 @@ export default function Portfolio({
 
   return (
     <>
-      <section id="portfolio" className="py-20 relative border-t border-[var(--glass-border)] transition-colors">
+      <section id="portfolio" className="py-20 scroll-mt-20 relative border-t border-[var(--glass-border)] transition-colors">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 text-center">
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 transition-colors" style={{ color: 'var(--text-color)' }}>
@@ -103,7 +107,15 @@ export default function Portfolio({
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
                   key={project.id}
-                  className={`rounded-2xl overflow-hidden border transition-all group cursor-pointer flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:scale-[1.02] ${glowClass}`}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedProject(project.id);
+                    }
+                  }}
+                  className={`rounded-2xl overflow-hidden border transition-all group cursor-pointer flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] ${glowClass}`}
                   style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}
                   onClick={() => setSelectedProject(project.id)}
                 >
@@ -153,7 +165,7 @@ export default function Portfolio({
                       </div>
                       {project.slug && (
                         <Link 
-                          href={`/apps/${project.slug}`}
+                          href={`${linkPrefix}/apps/${project.slug}`}
                           aria-label={`${ui.viewPage || 'Ver Página'} - ${project.title}`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -235,7 +247,7 @@ export default function Portfolio({
                       <div className="flex flex-wrap gap-4 pt-6 border-t" style={{ borderColor: 'var(--glass-border)' }}>
                         {p.slug && (
                           <Link
-                            href={`/apps/${p.slug}`}
+                            href={`${linkPrefix}/apps/${p.slug}`}
                             onClick={() => setNavigatingSlug(p.slug)}
                             className="flex items-center justify-center gap-2.5 text-white px-7 py-3.5 rounded-2xl shadow-lg transition-all duration-300 font-bold hover:scale-[1.03] active:scale-95 group bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 shadow-blue-500/25 neon-border"
                           >

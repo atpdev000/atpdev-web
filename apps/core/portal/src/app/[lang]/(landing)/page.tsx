@@ -10,6 +10,7 @@ import AboutSection from "@/components/AboutSection";
 import ExperienceTimeline from "@/components/ExperienceTimeline";
 import AIModelsSection from "@/components/AIModelsSection";
 import Portfolio from "@/components/Portfolio";
+import LatestArticlesSection from "@/components/LatestArticlesSection";
 import ContactForm from "@/components/ContactForm";
 import Footer from "@/components/Footer";
 import { GlowWrapper } from "@/components/GlowWrapper";
@@ -77,8 +78,9 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
         <ExperienceTimeline initialExperiences={tExperiences} lang={lang} uiDict={ui} enableGlow={enableGlow} glowStyle={glowStyle} />
         <AIModelsSection projects={tProjects} ui={ui} aiModels={tAiModels} enableGlow={enableGlow} glowStyle={glowStyle} />
         <Portfolio projects={tProjects} ui={ui} aiModels={tAiModels} enableGlow={enableGlow} glowStyle={glowStyle} />
+        <LatestArticlesSection lang={lang} />
         <ContactForm config={tConfig} uiDict={ui} />
-        <Footer config={tConfig} ui={ui} />
+        <Footer config={tConfig} ui={ui} lang={lang} />
       </GlowWrapper>
     </main>
   );

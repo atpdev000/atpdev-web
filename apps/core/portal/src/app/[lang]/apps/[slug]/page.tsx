@@ -8,7 +8,6 @@ import { BackToPortfolioLink } from "@/components/BackToPortfolioLink";
 export const revalidate = 60;
 
 import type { Metadata } from "next";
-import Script from "next/script";
 import { GlowWrapper } from "@/components/GlowWrapper";
 
 import { AdSenseBanner } from "@/components/AdSenseBanner";
@@ -299,7 +298,7 @@ export default async function ProjectPage({
         }} />
       )}
       {/* JSON-LD Schema (Pro LEVEL GOD SEO) for Project */}
-      <Script
+      <script
         id={`json-ld-app-${project.id}`}
         type="application/ld+json"
         dangerouslySetInnerHTML={{

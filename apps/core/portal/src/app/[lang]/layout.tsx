@@ -243,7 +243,7 @@ export default async function RootLayout({
         {/* Google AdSense moved to AdSenseInjector component */}
 
         {/* JSON-LD Schema (Pro SEO) - Native script for SSR */}
-        <Script
+        <script
           id="json-ld-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{

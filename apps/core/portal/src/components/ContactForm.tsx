@@ -99,7 +99,7 @@ export default function ContactForm({ config, uiDict }: { config?: SiteConfig | 
   });
 
   return (
-    <section id="contact" className="py-24 relative overflow-hidden transition-colors border-t" style={{ borderColor: 'var(--glass-border)' }}>
+    <section id="contact" className="py-24 scroll-mt-20 relative overflow-hidden transition-colors border-t" style={{ borderColor: 'var(--glass-border)' }}>
       <div className="absolute top-1/2 left-0 -translate-y-1/2 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)' }}></div>
       
       <div className="max-w-6xl mx-auto px-6 relative z-10">

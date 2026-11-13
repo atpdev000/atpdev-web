@@ -65,7 +65,7 @@ export default function AboutSection({ initialSkills = [], initialCredlyUrl = ""
   }, [avatarUrl]);
 
   return (
-    <section id="about" className="py-24 relative overflow-hidden">
+    <section id="about" className="py-24 scroll-mt-20 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1000px] pointer-events-none">
         <div className="absolute top-[20%] left-[-10%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--primary) 18%, transparent) 0%, transparent 70%)' }}></div>
         <div className="absolute bottom-[10%] right-[-10%] w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--tertiary) 18%, transparent) 0%, transparent 70%)' }}></div>

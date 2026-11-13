@@ -3,11 +3,16 @@ import { SiteConfig } from "@atpdev/database";
 
 export default function Footer({
   config,
-  ui
+  ui,
+  lang = "es"
 }: {
   config: SiteConfig | null;
   ui: Record<string, string>;
+  lang?: string;
 }) {
+  const linkPrefix = lang === "es" ? "" : `/${lang}`;
+  const isEn = lang !== "es" && lang !== "pt";
+
   return (
     <footer className="pt-16 pb-8 border-t transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)' }}>
       <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
@@ -18,18 +23,18 @@ export default function Footer({
         <div>
           <h4 className="font-bold mb-4 uppercase tracking-widest text-xs" style={{ color: 'var(--text-color)' }}>{ui.footerLinks}</h4>
           <ul className="space-y-3">
-            <li><a href="#about" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkAbout}</a></li>
-            <li><Link href="/sobre-mi" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>ATP Dev Perfil</Link></li>
-            <li><Link href="/blog" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>Artículos Técnicos</Link></li>
-            <li><a href="#experience" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
-            <li><a href="#portfolio" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
+            <li><a href={`${linkPrefix}/#about`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkAbout}</a></li>
+            <li><Link href={`${linkPrefix}/sobre-mi`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "ATP Dev Profile" : "ATP Dev Perfil"}</Link></li>
+            <li><Link href={`${linkPrefix}/blog`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Technical Articles" : "Artículos Técnicos"}</Link></li>
+            <li><a href={`${linkPrefix}/#experience`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
+            <li><a href={`${linkPrefix}/#portfolio`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
           </ul>
         </div>
         <div>
           <h4 className="font-bold mb-4 uppercase tracking-widest text-xs" style={{ color: 'var(--text-color)' }}>{ui.footerLegal}</h4>
           <ul className="space-y-3">
-            <li><Link href="/privacy" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkPrivacy}</Link></li>
-            <li><Link href="/terms" prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkTerms}</Link></li>
+            <li><Link href={`${linkPrefix}/privacy`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkPrivacy}</Link></li>
+            <li><Link href={`${linkPrefix}/terms`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkTerms}</Link></li>
           </ul>
         </div>
       </div>

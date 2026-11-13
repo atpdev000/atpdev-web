@@ -8,7 +8,7 @@ import { getUiDictionary } from "@/utils/i18n-ui";
 import ThemeToggle from "./ThemeToggle";
 import MagneticEffect from "./MagneticEffect";
 
-const SECTION_IDS = ["about", "experience", "portfolio", "contact"] as const;
+const SECTION_IDS = ["about", "experience", "portfolio", "articles", "contact"] as const;
 type SectionId = (typeof SECTION_IDS)[number];
 
 function normalizePath(pathname: string): string {
@@ -90,17 +90,17 @@ export default function Navbar() {
   }, [isHome, pathname]);
 
   const links: Array<{
-    id: SectionId | "blog";
+    id: SectionId;
     href: string;
     label: string;
     routePrefixes: string[];
   }> = [
-    { id: "about",      href: `${linkPrefix}/#about`,      label: tSobreMi,     routePrefixes: ["/sobre-mi"] },
-    { id: "experience", href: `${linkPrefix}/#experience`, label: tExperiencia, routePrefixes: [] },
-    { id: "portfolio",  href: `${linkPrefix}/#portfolio`,  label: tProyectos,   routePrefixes: ["/apps"] },
-    { id: "blog",       href: `${linkPrefix}/blog`,       label: dict.linkBlog, routePrefixes: ["/blog"] },
-    { id: "contact",    href: `${linkPrefix}/#contact`,    label: tContacto,    routePrefixes: ["/contact"] },
-  ];
+      { id: "about", href: `${linkPrefix}/#about`, label: tSobreMi, routePrefixes: ["/sobre-mi"] },
+      { id: "experience", href: `${linkPrefix}/#experience`, label: tExperiencia, routePrefixes: [] },
+      { id: "portfolio", href: `${linkPrefix}/#portfolio`, label: tProyectos, routePrefixes: ["/apps"] },
+      { id: "articles", href: `${linkPrefix}/blog`, label: dict.linkBlog, routePrefixes: ["/blog"] },
+      { id: "contact", href: `${linkPrefix}/#contact`, label: tContacto, routePrefixes: ["/contact"] },
+    ];
 
   const isItemActive = (item: (typeof links)[number]): boolean => {
     if (isHome) {
@@ -132,7 +132,7 @@ export default function Navbar() {
                 key={l.href}
                 href={l.href}
                 onClick={() => {
-                  if (isHome && l.id !== "blog") setActiveSection(l.id);
+                  if (isHome && l.id !== "articles") setActiveSection(l.id);
                 }}
                 aria-current={active ? (isHome ? "true" : "page") : undefined}
                 className="group relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-[1.05]"
@@ -193,14 +193,14 @@ export default function Navbar() {
             style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(20px)' }}
             onClick={e => e.stopPropagation()}
           >
-            {links.map(l => {
+            {links.slice(0, 4).map(l => {
               const active = isItemActive(l);
               return (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => {
-                    if (isHome && l.id !== "blog") setActiveSection(l.id);
+                    if (isHome && l.id !== "articles") setActiveSection(l.id);
                     setIsOpen(false);
                   }}
                   aria-current={active ? (isHome ? "true" : "page") : undefined}
