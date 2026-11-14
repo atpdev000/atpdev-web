@@ -1,4 +1,4 @@
-﻿import { registerPlugin, Capacitor } from '@capacitor/core';
+import { registerPlugin, Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export interface WhatsAppStatusPluginInterface {
@@ -29,6 +29,7 @@ export interface WhatsAppStatusPluginInterface {
   openMedia(options: { filePath: string }): Promise<{ success: boolean }>;
   shareFile(options: { filePath: string; title?: string }): Promise<{ success: boolean }>;
   getClipboard(): Promise<{ text: string }>;
+  extractYoutubeInfo?(options: { videoId: string }): Promise<{ success: boolean; clientUsed: string; payloadJson: string }>;
 }
 
 export const NativeWhatsAppStatus = registerPlugin<WhatsAppStatusPluginInterface>('WhatsAppStatus');

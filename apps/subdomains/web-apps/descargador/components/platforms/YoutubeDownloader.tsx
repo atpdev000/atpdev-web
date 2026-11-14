@@ -19,7 +19,7 @@ import { useI18n } from '@/lib/i18n/context';
 import { Music, Film } from 'lucide-react';
 import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative, readNativeClipboard } from '@/lib/nativeBridge';
 import { extractUrlFromText } from '@/lib/clipboardDetector';
-import { extractYoutubeNative } from '@/lib/nativeYoutubeExtractor';
+import { extractYoutubeNativeWithDiagnostics } from '@/lib/nativeYoutubeExtractor';
 
 interface VideoFormat {
   quality: string
@@ -147,16 +147,20 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     setDownloadProgress(0)
 
     try {
+      let nativeDebugError: string | undefined
+
       // 📱 Plan A (Móvil): Extraer directo desde el dispositivo para usar la IP del usuario
       if (isNative) {
         try {
-          const nativeData = await extractYoutubeNative(cleanTargetUrl)
+          const { result: nativeData, debugError } = await extractYoutubeNativeWithDiagnostics(cleanTargetUrl)
+          nativeDebugError = debugError
           if (nativeData && nativeData.formats && nativeData.formats.length > 0) {
             setVideoInfo(nativeData)
             setOriginalUrl(cleanTargetUrl)
             return
           }
-        } catch (nativeExtractErr) {
+        } catch (nativeExtractErr: any) {
+          nativeDebugError = nativeExtractErr?.message || 'Error en extracción nativa'
           console.warn('⚠️ Extracción nativa falló, recurriendo al servidor...', nativeExtractErr)
         }
       }
@@ -173,7 +177,8 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error al procesar el video')
+        const baseError = data.error || 'Error al procesar el video'
+        throw new Error(nativeDebugError ? `${baseError}\n\n[Diagnóstico Móvil: ${nativeDebugError}]` : baseError)
       }
 
       if (data.status === 'success') {

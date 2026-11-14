@@ -30,15 +30,18 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,6 +50,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 @CapacitorPlugin(name = "WhatsAppStatus")
 public class WhatsAppStatusPlugin extends Plugin {
@@ -831,5 +838,202 @@ public class WhatsAppStatusPlugin extends Plugin {
         int exp = (int) (Math.log(bytes) / Math.log(1024));
         String pre = "KMGTPE".charAt(exp - 1) + "";
         return String.format(Locale.US, "%.1f %sB", bytes / Math.pow(1024, exp), pre);
+    }
+
+    @PluginMethod
+    public void extractYoutubeInfo(PluginCall call) {
+        String videoId = call.getString("videoId");
+        if (videoId == null || videoId.trim().isEmpty()) {
+            call.reject("videoId es requerido");
+            return;
+        }
+        final String cleanVideoId = videoId.trim();
+
+        new Thread(() -> {
+            StringBuilder diagnostics = new StringBuilder();
+            String visitorData = fetchYoutubeVisitorData(cleanVideoId);
+
+            String[][] clientProfiles = new String[][] {
+                {
+                    "ANDROID",
+                    "20.10.38",
+                    "com.google.android.youtube/20.10.38 (Linux; U; Android 15) gzip",
+                    "Google",
+                    "Pixel 8",
+                    "Android",
+                    "15",
+                    "35"
+                },
+                {
+                    "IOS",
+                    "20.10.4",
+                    "com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)",
+                    "Apple",
+                    "iPhone16,2",
+                    "iPhone",
+                    "18.3.2.22D82",
+                    "0"
+                },
+                {
+                    "ANDROID_VR",
+                    "1.60.19",
+                    "com.google.android.apps.youtube.vr.oculus/1.60.19 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip",
+                    "Oculus",
+                    "Quest 3",
+                    "Android",
+                    "12L",
+                    "32"
+                }
+            };
+
+            for (String[] profile : clientProfiles) {
+                String clientName = profile[0];
+                String clientVersion = profile[1];
+                String userAgent = profile[2];
+                String deviceMake = profile[3];
+                String deviceModel = profile[4];
+                String osName = profile[5];
+                String osVersion = profile[6];
+                int sdkVersion = Integer.parseInt(profile[7]);
+
+                HttpURLConnection conn = null;
+                try {
+                    JSONObject clientObj = new JSONObject();
+                    clientObj.put("clientName", clientName);
+                    clientObj.put("clientVersion", clientVersion);
+                    clientObj.put("deviceMake", deviceMake);
+                    clientObj.put("deviceModel", deviceModel);
+                    clientObj.put("osName", osName);
+                    clientObj.put("osVersion", osVersion);
+                    if (sdkVersion > 0) {
+                        clientObj.put("androidSdkVersion", sdkVersion);
+                    }
+                    clientObj.put("hl", "es");
+                    clientObj.put("gl", "US");
+                    if (visitorData != null && !visitorData.isEmpty()) {
+                        clientObj.put("visitorData", visitorData);
+                    }
+
+                    JSONObject contextObj = new JSONObject();
+                    contextObj.put("client", clientObj);
+
+                    JSONObject bodyObj = new JSONObject();
+                    bodyObj.put("videoId", cleanVideoId);
+                    bodyObj.put("context", contextObj);
+                    bodyObj.put("contentCheckOk", true);
+                    bodyObj.put("racyCheckOk", true);
+
+                    URL url = new URL("https://www.youtube.com/youtubei/v1/player?prettyPrint=false");
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setConnectTimeout(12000);
+                    conn.setReadTimeout(15000);
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setRequestProperty("User-Agent", userAgent);
+                    if (visitorData != null && !visitorData.isEmpty()) {
+                        conn.setRequestProperty("X-Goog-Visitor-Id", visitorData);
+                    }
+
+                    byte[] bytes = bodyObj.toString().getBytes(StandardCharsets.UTF_8);
+                    try (OutputStream os = conn.getOutputStream()) {
+                        os.write(bytes);
+                        os.flush();
+                    }
+
+                    int code = conn.getResponseCode();
+                    InputStream stream = code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream();
+                    String responseText = readAllStream(stream);
+
+                    if (code < 200 || code >= 300) {
+                        diagnostics.append(clientName).append(":HTTP ").append(code).append("; ");
+                        continue;
+                    }
+
+                    JSONObject payload = new JSONObject(responseText);
+                    JSONObject playability = payload.optJSONObject("playabilityStatus");
+                    String status = playability != null ? playability.optString("status", "") : "";
+                    if (!"OK".equals(status)) {
+                        String reason = playability != null ? playability.optString("reason", "") : "";
+                        diagnostics.append(clientName).append(":").append(status).append("(").append(reason).append("); ");
+                        continue;
+                    }
+
+                    JSONObject streaming = payload.optJSONObject("streamingData");
+                    int directUrls = countDirectFormatUrls(streaming != null ? streaming.optJSONArray("formats") : null)
+                        + countDirectFormatUrls(streaming != null ? streaming.optJSONArray("adaptiveFormats") : null);
+                    if (directUrls == 0) {
+                        diagnostics.append(clientName).append(":0_urls; ");
+                        continue;
+                    }
+
+                    JSObject ret = new JSObject();
+                    ret.put("success", true);
+                    ret.put("clientUsed", clientName);
+                    ret.put("payloadJson", responseText);
+                    call.resolve(ret);
+                    return;
+                } catch (Exception e) {
+                    diagnostics.append(clientName).append(":ERR(").append(e.getMessage()).append("); ");
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+                }
+            }
+
+            call.reject("Extracción nativa falló: " + diagnostics.toString());
+        }).start();
+    }
+
+    private String fetchYoutubeVisitorData(String videoId) {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL("https://www.youtube.com/embed/" + videoId);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setConnectTimeout(8000);
+            conn.setReadTimeout(8000);
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+            if (conn.getResponseCode() == 200) {
+                String html = readAllStream(conn.getInputStream());
+                Matcher m = Pattern.compile("\"visitorData\":\"([^\"]+)\"").matcher(html);
+                if (m.find()) {
+                    return m.group(1);
+                }
+            }
+        } catch (Exception ignored) {
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return null;
+    }
+
+    private int countDirectFormatUrls(JSONArray arr) {
+        if (arr == null) return 0;
+        int count = 0;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject obj = arr.optJSONObject(i);
+            if (obj != null) {
+                String u = obj.optString("url", "");
+                if (u.startsWith("http")) count++;
+            }
+        }
+        return count;
+    }
+
+    private String readAllStream(InputStream is) throws Exception {
+        if (is == null) return "";
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+            char[] buf = new char[8192];
+            int len;
+            while ((len = reader.read(buf)) != -1) {
+                sb.append(buf, 0, len);
+            }
+        }
+        return sb.toString();
     }
 }
