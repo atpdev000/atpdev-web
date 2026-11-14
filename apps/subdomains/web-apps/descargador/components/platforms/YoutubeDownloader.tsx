@@ -51,6 +51,7 @@ interface DownloadResponse {
   width?: number
   height?: number
   method: string
+  userAgent?: string
   formats?: VideoFormat[]
   channel?: string
   viewCount?: number
@@ -75,6 +76,9 @@ const predefinedQualities: { value: string, label: string, ext?: string, isPro?:
 
 function formatUserFriendlyError(rawMsg: string): string {
   if (!rawMsg) return 'Error al procesar la descarga'
+  if (rawMsg.includes('Error en descarga nativa')) {
+    return rawMsg.length > 220 ? rawMsg.substring(0, 220) + '...' : rawMsg
+  }
   if (rawMsg.includes('403') || rawMsg.includes('Forbidden') || rawMsg.includes('access denied')) {
     return 'YouTube restringió temporalmente este formato. Por favor selecciona otra calidad (como 720p o 480p) o vuelve a intentar en unos segundos.'
   }
@@ -313,19 +317,25 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
 
         // 📱 PRIORIDAD 1 (MÓVIL): Combinador nativo si la URL se extrajo en el dispositivo o no está atada a IP del servidor
+        const runningNative = isNative || detectNativePlatform()
         const isDeviceExtracted = videoInfo?.method === 'native_device'
         const isIpBound = !isDeviceExtracted && format.url && format.url.includes('googlevideo.com')
-        if (isNative && format.url && format.url.startsWith('http') && !isIpBound) {
+        if (runningNative && format.url && format.url.startsWith('http') && !isIpBound) {
           console.log('📱 [Android] Descargando y combinando nativamente con MediaMuxer...')
           pollActive = false
-          setDownloadDetails('Descargando y combinando en tu dispositivo...')
-          setDownloadProgress(35)
+          setDownloadDetails('Preparando descarga nativa...')
+          setDownloadProgress(10)
           try {
             const nativeRes = await downloadAndCombineNative(
               format.url,
               isProgressiveWithAudio ? undefined : (audioCandidate?.url || undefined),
               defaultFilename,
-              false
+              false,
+              videoInfo?.userAgent,
+              (pct, details) => {
+                setDownloadProgress(pct)
+                if (details) setDownloadDetails(details)
+              }
             )
             setDownloadProgress(100)
             setDownloadDetails('¡Guardado en la Galería!')
@@ -352,7 +362,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             setTimeout(() => setDownloadCompletedInfo(null), 8000)
             return
           } catch (nativeErr: any) {
-            console.warn('⚠️ Combinador nativo falló, recurriendo al servidor...', nativeErr)
+            console.error('⚠️ Combinador nativo falló:', nativeErr)
+            if (isDeviceExtracted) {
+              throw new Error(nativeErr?.message || 'Error en descarga nativa en el dispositivo')
+            }
             pollActive = true
             pollProgress()
           }
@@ -548,20 +561,26 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         console.log('📥 Iniciando descarga simple...', quality)
 
         // 🚀 PRIORIDAD 1: Si tenemos la URL directa del stream en el cliente (extraída en dispositivo o no atada a IP del servidor)
+        const runningNative = isNative || detectNativePlatform()
         const isDeviceExtracted = videoInfo?.method === 'native_device'
         const isIpBound = !isDeviceExtracted && format.url && format.url.includes('googlevideo.com')
         if (format.url && format.url.startsWith('http') && !isIpBound) {
-          if (isNative) {
+          if (runningNative) {
             try {
               console.log('📱 [Android] Descargando flujo directo nativamente...')
               pollActive = false
               setDownloadDetails('Descargando archivo directamente...')
-              setDownloadProgress(35)
+              setDownloadProgress(10)
               const nativeRes = await downloadAndCombineNative(
                 format.url,
                 undefined,
                 defaultFilename,
-                false
+                false,
+                videoInfo?.userAgent,
+                (pct, details) => {
+                  setDownloadProgress(pct)
+                  if (details) setDownloadDetails(details)
+                }
               )
               setDownloadProgress(100)
               setDownloadDetails('¡Guardado en la Galería!')
@@ -587,8 +606,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               })
               setTimeout(() => setDownloadCompletedInfo(null), 8000)
               return
-            } catch (nativeErr) {
-              console.warn('⚠️ Descarga directa nativa falló, intentando fetch stream...', nativeErr)
+            } catch (nativeErr: any) {
+              console.error('⚠️ Descarga directa nativa falló:', nativeErr)
+              if (isDeviceExtracted) {
+                throw new Error(nativeErr?.message || 'Error en descarga directa nativa')
+              }
             }
 
             try {
@@ -1085,19 +1107,25 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         console.log('🎵 Descargando audio:', audioFormat.itag)
 
         // 📱 PRIORIDAD 1 (MÓVIL): Descarga directa nativa a biblioteca de Música si se extrajo en dispositivo o no está atada a IP del servidor
+        const runningNative = isNative || detectNativePlatform()
         const isDeviceExtracted = videoInfo?.method === 'native_device'
         const isIpBound = !isDeviceExtracted && audioFormat.url && audioFormat.url.includes('googlevideo.com')
-        if (isNative && audioFormat.url && audioFormat.url.startsWith('http') && !isIpBound) {
+        if (runningNative && audioFormat.url && audioFormat.url.startsWith('http') && !isIpBound) {
           console.log('📱 [Android] Descargando audio directamente en el dispositivo...')
           pollActive = false
           setDownloadDetails('Descargando archivo de audio...')
-          setDownloadProgress(35)
+          setDownloadProgress(10)
           try {
             const nativeRes = await downloadAndCombineNative(
               undefined,
               audioFormat.url,
               defaultFilename,
-              true
+              true,
+              videoInfo?.userAgent,
+              (pct, details) => {
+                setDownloadProgress(pct)
+                if (details) setDownloadDetails(details)
+              }
             )
             setDownloadProgress(100)
             setDownloadDetails('¡Guardado en Música!')
@@ -1114,17 +1142,20 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               status: 'completed',
               format: 'AUDIO',
               filePath: nativeRes.uri,
-              mimeType: 'audio/mpeg'
+              mimeType: 'audio/mp4'
             })
             setDownloadCompletedInfo({
               title: videoInfo?.title || defaultFilename,
-              filename: defaultFilename,
+              filename: nativeRes.fileName || defaultFilename,
               filePath: nativeRes.uri
             })
             setTimeout(() => setDownloadCompletedInfo(null), 8000)
             return
-          } catch (nativeErr) {
-            console.warn('⚠️ Descarga nativa de audio falló, intentando servidor...', nativeErr)
+          } catch (nativeErr: any) {
+            console.error('⚠️ Descarga nativa de audio falló:', nativeErr)
+            if (isDeviceExtracted) {
+              throw new Error(nativeErr?.message || 'Error en descarga nativa de audio')
+            }
           }
         }
 

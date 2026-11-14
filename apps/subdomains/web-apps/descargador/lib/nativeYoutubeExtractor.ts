@@ -36,6 +36,7 @@ export interface NativeYoutubeResult {
   channel?: string
   viewCount?: number
   method: 'native_device'
+  userAgent?: string
   formats: NativeYoutubeFormat[]
   statistics: {
     combined_formats: number
@@ -305,9 +306,230 @@ async function fetchEmbedVisitorData(videoId: string): Promise<string | undefine
   }
 }
 
+type CachedPoSession = {
+  visitorData: string
+  poSession: string
+  userAgent: string
+  expiresAt: number
+}
+
+let cachedPoSession: CachedPoSession | null = null
+
+function createNativeFetchFn(overrideUa?: string): typeof fetch {
+  return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url
+    const method = (init?.method || (typeof input !== 'string' && !(input instanceof URL) ? input.method : 'GET') || 'GET').toUpperCase()
+
+    const hdrs: Record<string, string> = {}
+    const appendHeaders = (src?: HeadersInit) => {
+      if (!src) return
+      if (src instanceof Headers) {
+        src.forEach((v, k) => { hdrs[k] = v })
+      } else if (Array.isArray(src)) {
+        for (const [k, v] of src) hdrs[k] = v
+      } else {
+        Object.assign(hdrs, src)
+      }
+    }
+    if (typeof input !== 'string' && !(input instanceof URL)) {
+      appendHeaders(input.headers)
+    }
+    appendHeaders(init?.headers)
+
+    if (overrideUa && !Object.keys(hdrs).some((k) => k.toLowerCase() === 'user-agent')) {
+      hdrs['User-Agent'] = overrideUa
+    }
+    if (url.includes('youtube.com')) {
+      if (!Object.keys(hdrs).some((k) => k.toLowerCase() === 'origin')) hdrs['Origin'] = 'https://www.youtube.com'
+      if (!Object.keys(hdrs).some((k) => k.toLowerCase() === 'referer')) hdrs['Referer'] = 'https://www.youtube.com/'
+    }
+
+    let bodyStr: string | undefined
+    if (init?.body != null) {
+      if (typeof init.body === 'string') {
+        bodyStr = init.body
+      } else if (init.body instanceof URLSearchParams) {
+        bodyStr = init.body.toString()
+      } else if (ArrayBuffer.isView(init.body) || init.body instanceof ArrayBuffer) {
+        bodyStr = new TextDecoder().decode(init.body as ArrayBuffer)
+      } else {
+        bodyStr = String(init.body)
+      }
+    }
+
+    if (typeof NativeWhatsAppStatus?.nativeFetch === 'function') {
+      const res = await NativeWhatsAppStatus.nativeFetch({
+        url,
+        method,
+        headers: hdrs,
+        ...(bodyStr !== undefined ? { body: bodyStr } : {}),
+      })
+      const cleanHeaders = new Headers()
+      if (res.headers) {
+        for (const [k, v] of Object.entries(res.headers)) {
+          if (k.toLowerCase() === 'content-encoding' || k.toLowerCase() === 'content-length') continue
+          try {
+            cleanHeaders.set(k, v)
+          } catch {}
+        }
+      }
+      const noBodyStatus = res.status === 204 || res.status === 205 || res.status === 304
+      return new Response(noBodyStatus ? null : res.body, {
+        status: res.status || 200,
+        headers: cleanHeaders,
+      })
+    }
+
+    const capRes = await CapacitorHttp.request({
+      url,
+      method,
+      headers: hdrs,
+      data: bodyStr,
+      responseType: 'text',
+    })
+    return new Response(typeof capRes.data === 'string' ? capRes.data : JSON.stringify(capRes.data ?? ''), {
+      status: capRes.status || 200,
+      headers: capRes.headers as Record<string, string>,
+    })
+  }
+}
+
+async function extractWithPoSession(
+  videoId: string,
+  reasons: string[]
+): Promise<NativeYoutubeResult | null> {
+  if (
+    typeof NativeWhatsAppStatus?.mintYoutubePoToken !== 'function' ||
+    typeof NativeWhatsAppStatus?.nativeFetch !== 'function'
+  ) {
+    reasons.push('PoMinter: método nativo no disponible en APK actual')
+    return null
+  }
+
+  const ytMod = await import('youtubei.js/web')
+  ytMod.Platform.shim.eval = async (data: any, env: Record<string, any>) => {
+    const properties: string[] = []
+    if (env.n) properties.push(`n: exportedVars.nFunction(${JSON.stringify(env.n)})`)
+    if (env.sig) properties.push(`sig: exportedVars.sigFunction(${JSON.stringify(env.sig)})`)
+    const code = `${data.output}\nreturn { ${properties.join(', ')} };`
+    return new Function(code)()
+  }
+
+  const nativeFetch = createNativeFetchFn()
+  let sessionInfo = cachedPoSession && Date.now() < cachedPoSession.expiresAt ? cachedPoSession : null
+
+  if (!sessionInfo) {
+    const baseYt = await ytMod.Innertube.create({
+      retrieve_player: false,
+      fetch: nativeFetch,
+    })
+    const visitorData = baseYt.session.context.client.visitorData || ''
+    if (!visitorData) {
+      throw new Error('No se obtuvo visitorData de InnerTube')
+    }
+    const minted = await NativeWhatsAppStatus.mintYoutubePoToken({ visitorData, videoId })
+    if (!minted?.poSession) {
+      throw new Error('mintYoutubePoToken devolvió poSession vacío')
+    }
+    const ttlMs = Math.max(60000, Math.min((minted.ttlRemainingSec || 14400) * 1000, 4 * 3600 * 1000))
+    sessionInfo = {
+      visitorData,
+      poSession: minted.poSession,
+      userAgent: minted.userAgent || (typeof navigator !== 'undefined' ? navigator.userAgent : ''),
+      expiresAt: Date.now() + ttlMs,
+    }
+    cachedPoSession = sessionInfo
+  }
+
+  const ytPo = await ytMod.Innertube.create({
+    retrieve_player: true,
+    visitor_data: sessionInfo.visitorData,
+    po_token: sessionInfo.poSession,
+    user_agent: sessionInfo.userAgent,
+    fetch: createNativeFetchFn(sessionInfo.userAgent),
+  })
+
+  for (const clientName of ['TV_SIMPLY', 'MWEB', 'WEB'] as const) {
+    try {
+      const info = await ytPo.getBasicInfo(videoId, { client: clientName })
+      const sd = info?.streaming_data
+      if (!sd) {
+        reasons.push(`Po-${clientName}: sin streaming_data`)
+        continue
+      }
+
+      const decipherList = async (list: any[] = []) => {
+        const out: any[] = []
+        for (const f of list) {
+          try {
+            let finalUrl = typeof f.decipher === 'function'
+              ? await f.decipher(ytPo.session.player)
+              : f.url
+            if (finalUrl && finalUrl.startsWith('http')) {
+              const u = new URL(finalUrl)
+              if (!u.searchParams.has('pot')) {
+                u.searchParams.set('pot', sessionInfo!.poSession)
+                finalUrl = u.toString()
+              }
+              out.push({
+                itag: f.itag,
+                url: finalUrl,
+                mimeType: f.mime_type,
+                width: f.width,
+                height: f.height,
+                fps: f.fps,
+                bitrate: f.bitrate,
+                averageBitrate: f.average_bitrate,
+                qualityLabel: f.quality_label,
+                contentLength: f.content_length ? String(f.content_length) : undefined,
+              })
+            }
+          } catch {
+            // ignore format that cannot decipher
+          }
+        }
+        return out
+      }
+
+      const rawFormats = await decipherList(sd.formats)
+      const rawAdaptive = await decipherList(sd.adaptive_formats)
+
+      const bi = info.basic_info as any
+      const thumbs = Array.isArray(bi?.thumbnail)
+        ? bi.thumbnail.map((t: any) => ({ url: t.url, width: t.width || 0, height: t.height || 0 }))
+        : []
+
+      const syntheticPayload = {
+        videoDetails: {
+          title: bi?.title,
+          lengthSeconds: bi?.duration,
+          author: bi?.author || bi?.channel?.name,
+          viewCount: bi?.view_count,
+          thumbnail: { thumbnails: thumbs },
+        },
+        streamingData: {
+          formats: rawFormats,
+          adaptiveFormats: rawAdaptive,
+        },
+      }
+
+      const mapped = mapInnerTubePayload(syntheticPayload, videoId, `Po-${clientName}`)
+      if (mapped) {
+        mapped.userAgent = sessionInfo.userAgent
+        return mapped
+      }
+      reasons.push(`Po-${clientName}: 0_urls`)
+    } catch (cErr: any) {
+      reasons.push(`Po-${clientName}: ${cErr?.message || String(cErr)}`)
+    }
+  }
+
+  return null
+}
+
 /**
- * Attempts device-side YouTube extraction via the native Java plugin first, then
- * falls back to CapacitorHttp with visitorData, returning diagnostics on failure.
+ * Attempts device-side YouTube extraction using BotGuard WebPO + InnerTube first,
+ * then falls back to native Java ANDROID/IOS clients and CapacitorHttp.
  */
 export async function extractYoutubeNativeWithDiagnostics(
   inputUrl: string
@@ -319,7 +541,18 @@ export async function extractYoutubeNativeWithDiagnostics(
 
   const reasons: string[] = []
 
-  // 1. Native Java plugin (raw HttpURLConnection on Android JVM)
+  // 1. Authenticated WebPO extraction (unlocks 100% HD & M4A adaptive streams past 1-4MB limits)
+  try {
+    const poResult = await extractWithPoSession(videoId, reasons)
+    if (poResult) {
+      return { result: poResult }
+    }
+  } catch (poErr: any) {
+    cachedPoSession = null
+    reasons.push(`PoExtractor: ${poErr?.message || String(poErr)}`)
+  }
+
+  // 2. Native Java plugin fallback (raw HttpURLConnection on Android JVM - great for 360p progressive)
   try {
     if (typeof NativeWhatsAppStatus?.extractYoutubeInfo === 'function') {
       const nativeRes = await NativeWhatsAppStatus.extractYoutubeInfo({ videoId })

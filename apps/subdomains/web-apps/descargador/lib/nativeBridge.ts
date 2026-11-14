@@ -24,12 +24,28 @@ export interface WhatsAppStatusPluginInterface {
     audioUrl?: string;
     filename: string;
     isAudio?: boolean;
+    userAgent?: string;
   }): Promise<{ success: boolean; uri: string; fileName: string }>;
   openWhatsApp(options?: { target?: 'whatsapp' | 'business' }): Promise<{ success: boolean; package?: string }>;
   openMedia(options: { filePath: string }): Promise<{ success: boolean }>;
   shareFile(options: { filePath: string; title?: string }): Promise<{ success: boolean }>;
   getClipboard(): Promise<{ text: string }>;
   extractYoutubeInfo?(options: { videoId: string }): Promise<{ success: boolean; clientUsed: string; payloadJson: string }>;
+  nativeFetch?(options: {
+    url: string;
+    method?: string;
+    headers?: Record<string, string>;
+    body?: string;
+  }): Promise<{ status: number; url: string; headers: Record<string, string>; body: string }>;
+  mintYoutubePoToken?(options: {
+    visitorData: string;
+    videoId?: string;
+    helperUrl?: string;
+  }): Promise<{ poSession: string; poVid: string; userAgent: string; ttlRemainingSec?: number }>;
+  addListener?(
+    eventName: 'youtubeDownloadProgress',
+    listenerFunc: (data: { percent: number; details: string }) => void
+  ): Promise<{ remove: () => Promise<void> }>;
 }
 
 export const NativeWhatsAppStatus = registerPlugin<WhatsAppStatusPluginInterface>('WhatsAppStatus');
@@ -222,13 +238,35 @@ export async function downloadAndCombineNative(
   videoUrl?: string,
   audioUrl?: string,
   filename?: string,
-  isAudio: boolean = false
+  isAudio: boolean = false,
+  userAgent?: string,
+  onProgress?: (percent: number, details: string) => void
 ): Promise<{ success: boolean; uri: string; fileName: string }> {
-  return await NativeWhatsAppStatus.downloadAndCombineMedia({
-    videoUrl: videoUrl || '',
-    audioUrl: audioUrl || '',
-    filename: filename || `media_${Date.now()}.${isAudio ? 'mp3' : 'mp4'}`,
-    isAudio
-  });
+  let listenerHandle: { remove: () => Promise<void> } | null = null;
+  if (onProgress && typeof NativeWhatsAppStatus.addListener === 'function') {
+    try {
+      listenerHandle = await NativeWhatsAppStatus.addListener('youtubeDownloadProgress', (ev) => {
+        if (typeof ev?.percent === 'number') {
+          onProgress(ev.percent, ev.details || '');
+        }
+      });
+    } catch {
+      listenerHandle = null;
+    }
+  }
+
+  try {
+    return await NativeWhatsAppStatus.downloadAndCombineMedia({
+      videoUrl: videoUrl || '',
+      audioUrl: audioUrl || '',
+      filename: filename || `media_${Date.now()}.${isAudio ? 'm4a' : 'mp4'}`,
+      isAudio,
+      ...(userAgent ? { userAgent } : {})
+    });
+  } finally {
+    if (listenerHandle) {
+      await listenerHandle.remove().catch(() => {});
+    }
+  }
 }
 

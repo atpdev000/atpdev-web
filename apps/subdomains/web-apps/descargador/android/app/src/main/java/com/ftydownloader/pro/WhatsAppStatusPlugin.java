@@ -20,6 +20,13 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Base64;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
@@ -48,8 +55,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
@@ -57,6 +68,11 @@ import org.json.JSONObject;
 
 @CapacitorPlugin(name = "WhatsAppStatus")
 public class WhatsAppStatusPlugin extends Plugin {
+
+    private WebView ytPoWebView;
+    private boolean ytPoWebViewLoaded = false;
+    private String cachedBgHelperJs = null;
+    private final ConcurrentHashMap<String, PluginCall> pendingPoCalls = new ConcurrentHashMap<>();
 
     @PluginMethod
     public void checkPermission(PluginCall call) {
@@ -255,7 +271,32 @@ public class WhatsAppStatusPlugin extends Plugin {
         if (sourceFile == null || !sourceFile.exists()) return null;
 
         try {
-            String lower = displayName.toLowerCase();
+            String safeDisplayName = (displayName == null || displayName.isEmpty()
+                    ? "media_" + System.currentTimeMillis()
+                    : displayName).replaceAll("[\\\\/:*?\"<>|\\r\\n]+", "_").trim();
+            if (safeDisplayName.isEmpty()) {
+                safeDisplayName = "media_" + System.currentTimeMillis();
+            }
+
+            boolean hasM4aHeader = false;
+            if (isAudio) {
+                try (InputStream headIn = new FileInputStream(sourceFile)) {
+                    byte[] header = new byte[12];
+                    int n = headIn.read(header);
+                    if (n >= 8) {
+                        String box = new String(header, 4, 4, StandardCharsets.US_ASCII);
+                        if ("ftyp".equals(box)) {
+                            hasM4aHeader = true;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (isAudio && hasM4aHeader && safeDisplayName.toLowerCase().endsWith(".mp3")) {
+                safeDisplayName = safeDisplayName.substring(0, safeDisplayName.length() - 4) + ".m4a";
+            }
+
+            String lower = safeDisplayName.toLowerCase();
             boolean isVideo = !isAudio && (lower.endsWith(".mp4") || lower.endsWith(".3gp") || lower.endsWith(".mov") || lower.endsWith(".mkv"));
 
             String mimeType = "video/mp4";
@@ -267,7 +308,7 @@ public class WhatsAppStatusPlugin extends Plugin {
                 collection = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                 relativeSubDir = Environment.DIRECTORY_MOVIES + "/FTY Downloader Pro";
             } else if (isAudio) {
-                mimeType = lower.endsWith(".m4a") ? "audio/mp4" : "audio/mpeg";
+                mimeType = (lower.endsWith(".m4a") || hasM4aHeader) ? "audio/mp4" : "audio/mpeg";
                 collection = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 relativeSubDir = Environment.DIRECTORY_MUSIC + "/FTY Downloader Pro";
             } else if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp")) {
@@ -284,7 +325,7 @@ public class WhatsAppStatusPlugin extends Plugin {
             }
 
             ContentValues values = new ContentValues();
-            String finalDisplayName = displayName.startsWith("FTY_") ? displayName : ("FTY_" + displayName);
+            String finalDisplayName = safeDisplayName.startsWith("FTY_") ? safeDisplayName : ("FTY_" + safeDisplayName);
             values.put(MediaStore.MediaColumns.DISPLAY_NAME, finalDisplayName);
             values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
 
@@ -294,6 +335,10 @@ public class WhatsAppStatusPlugin extends Plugin {
             }
 
             Uri itemUri = getContext().getContentResolver().insert(collection, values);
+            if (itemUri == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/FTY Downloader Pro");
+                itemUri = getContext().getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+            }
             if (itemUri == null) return null;
 
             try (InputStream in = new FileInputStream(sourceFile);
@@ -352,11 +397,19 @@ public class WhatsAppStatusPlugin extends Plugin {
         }
     }
 
+    private void emitDownloadProgress(int percent, String details) {
+        JSObject data = new JSObject();
+        data.put("percent", Math.max(0, Math.min(100, percent)));
+        data.put("details", details);
+        notifyListeners("youtubeDownloadProgress", data);
+    }
+
     @PluginMethod
     public void downloadAndCombineMedia(PluginCall call) {
         String videoUrl = call.getString("videoUrl");
         String audioUrl = call.getString("audioUrl");
         String filename = call.getString("filename", "video_" + System.currentTimeMillis() + ".mp4");
+        String userAgent = call.getString("userAgent");
         boolean isAudio = Boolean.TRUE.equals(call.getBoolean("isAudio", false));
 
         if ((videoUrl == null || videoUrl.isEmpty()) && (audioUrl == null || audioUrl.isEmpty())) {
@@ -375,28 +428,32 @@ public class WhatsAppStatusPlugin extends Plugin {
                 File fileToSave = null;
 
                 if (isAudio && audioUrl != null && !audioUrl.isEmpty()) {
-                    downloadHttpStream(audioUrl, tempAudio);
+                    emitDownloadProgress(10, "Descargando audio en tu dispositivo...");
+                    downloadHttpStream(audioUrl, tempAudio, userAgent, 10, 92, "Descargando audio");
                     fileToSave = tempAudio;
                 } else if (videoUrl != null && !videoUrl.isEmpty()) {
-                    downloadHttpStream(videoUrl, tempVideo);
+                    boolean hasSeparateAudio = (audioUrl != null && !audioUrl.isEmpty());
+                    emitDownloadProgress(10, "Descargando video en tu dispositivo...");
+                    downloadHttpStream(videoUrl, tempVideo, userAgent, 10, hasSeparateAudio ? 68 : 92, "Descargando video");
                     fileToSave = tempVideo;
 
-                    if (audioUrl != null && !audioUrl.isEmpty()) {
-                        try {
-                            downloadHttpStream(audioUrl, tempAudio);
-                            boolean muxSuccess = muxMediaTracks(tempVideo, tempAudio, tempCombined);
-                            if (muxSuccess && tempCombined.exists() && tempCombined.length() > 0) {
-                                fileToSave = tempCombined;
-                            }
-                        } catch (Exception e) {
-                            android.util.Log.w("FTYCombiner", "Audio mux falló, guardando solo video: " + e.getMessage());
+                    if (hasSeparateAudio) {
+                        emitDownloadProgress(70, "Descargando pista de audio...");
+                        downloadHttpStream(audioUrl, tempAudio, userAgent, 70, 88, "Descargando audio");
+                        emitDownloadProgress(90, "Combinando video y audio HD...");
+                        boolean muxSuccess = muxMediaTracks(tempVideo, tempAudio, tempCombined);
+                        if (!muxSuccess || !tempCombined.exists() || tempCombined.length() <= 0) {
+                            throw new Exception("No se pudo combinar el video y audio en el dispositivo (MediaMuxer)");
                         }
+                        fileToSave = tempCombined;
                     }
                 }
 
                 if (fileToSave != null && fileToSave.exists() && fileToSave.length() > 0) {
+                    emitDownloadProgress(96, "Guardando en tu dispositivo...");
                     Uri savedUri = saveFileToMediaStore(fileToSave, filename, isAudio);
                     if (savedUri != null) {
+                        emitDownloadProgress(100, "¡Descarga completada!");
                         JSObject ret = new JSObject();
                         ret.put("success", true);
                         ret.put("uri", savedUri.toString());
@@ -409,7 +466,7 @@ public class WhatsAppStatusPlugin extends Plugin {
                     call.reject("El archivo descargado está vacío o no se pudo generar");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                android.util.Log.e("FTYCombiner", "downloadAndCombineMedia failed: " + e.getMessage(), e);
                 call.reject("Error en descarga nativa: " + e.getMessage());
             } finally {
                 try { tempVideo.delete(); } catch (Exception ignored) {}
@@ -419,20 +476,74 @@ public class WhatsAppStatusPlugin extends Plugin {
         }).start();
     }
 
-    private void downloadHttpStream(String fileUrl, File destFile) throws Exception {
+    private String resolveStreamUserAgent(String fileUrl, String overrideUserAgent) {
+        if (fileUrl != null) {
+            if (fileUrl.contains("c=ANDROID_VR")) {
+                return "com.google.android.apps.youtube.vr.oculus/1.56.21 (Linux; U; Android 12L; eureka-user Build/SQ3A.220605.009.A1) gzip";
+            }
+            if (fileUrl.contains("c=ANDROID")) {
+                return "com.google.android.youtube/20.10.38 (Linux; U; Android 14) gzip";
+            }
+            if (fileUrl.contains("c=IOS")) {
+                return "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)";
+            }
+        }
+        if (overrideUserAgent != null && !overrideUserAgent.isEmpty()) {
+            return overrideUserAgent;
+        }
+        try {
+            return WebSettings.getDefaultUserAgent(getContext());
+        } catch (Exception e) {
+            return "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36";
+        }
+    }
+
+    private long extractClenFromUrl(String fileUrl) {
+        if (fileUrl == null) return -1L;
+        Matcher m = Pattern.compile("[?&]clen=(\\d+)").matcher(fileUrl);
+        if (m.find()) {
+            try {
+                return Long.parseLong(m.group(1));
+            } catch (Exception ignored) {}
+        }
+        return -1L;
+    }
+
+    private long parseTotalFromContentRange(String contentRange) {
+        if (contentRange == null) return -1L;
+        int slash = contentRange.lastIndexOf('/');
+        if (slash >= 0 && slash + 1 < contentRange.length()) {
+            String totalStr = contentRange.substring(slash + 1).trim();
+            if (!"*".equals(totalStr)) {
+                try {
+                    return Long.parseLong(totalStr);
+                } catch (Exception ignored) {}
+            }
+        }
+        return -1L;
+    }
+
+    private HttpURLConnection openStreamConnection(String fileUrl, String userAgent, String rangeHeader) throws Exception {
         String currentUrl = fileUrl;
         int redirects = 0;
-        HttpURLConnection conn = null;
+        boolean sendYoutubeOrigin = fileUrl.contains("googlevideo.com") && !fileUrl.contains("c=ANDROID") && !fileUrl.contains("c=IOS");
 
         while (redirects < 6) {
             URL url = new URL(currentUrl);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", userAgent);
             conn.setRequestProperty("Accept", "*/*");
-            conn.setRequestProperty("Range", "bytes=0-");
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(120000);
-            conn.setInstanceFollowRedirects(true);
+            conn.setRequestProperty("Accept-Encoding", "identity");
+            if (sendYoutubeOrigin) {
+                conn.setRequestProperty("Origin", "https://www.youtube.com");
+                conn.setRequestProperty("Referer", "https://www.youtube.com/");
+            }
+            if (rangeHeader != null && !rangeHeader.isEmpty()) {
+                conn.setRequestProperty("Range", rangeHeader);
+            }
+            conn.setConnectTimeout(25000);
+            conn.setReadTimeout(45000);
+            conn.setInstanceFollowRedirects(false);
             conn.connect();
 
             int code = conn.getResponseCode();
@@ -445,29 +556,171 @@ public class WhatsAppStatusPlugin extends Plugin {
                     continue;
                 }
             }
+            return conn;
+        }
+        throw new Exception("Demasiados redireccionamientos al descargar stream");
+    }
 
-            if (code != 200 && code != 206) {
+    private void downloadHttpStream(String fileUrl, File destFile, String overrideUserAgent, double progressStart, double progressEnd, String label) throws Exception {
+        String ua = resolveStreamUserAgent(fileUrl, overrideUserAgent);
+        long expectedTotal = extractClenFromUrl(fileUrl);
+        boolean useChunkedRange = fileUrl.contains("googlevideo.com") || expectedTotal > 0;
+        final long chunkSize = 1048576L; // 1MB chunks avoid YouTube long-socket drops/throttling
+
+        android.util.Log.i("FTYCombiner", "Starting stream (" + label + ") expectedTotal=" + expectedTotal + " chunked=" + useChunkedRange);
+
+        if (!useChunkedRange) {
+            HttpURLConnection conn = openStreamConnection(fileUrl, ua, null);
+            try {
+                int code = conn.getResponseCode();
+                if (code != 200 && code != 206) {
+                    throw new Exception("HTTP " + code + " (" + label + ")");
+                }
+                long cl = conn.getContentLengthLong();
+                long downloaded = 0;
+                try (InputStream in = conn.getInputStream();
+                     OutputStream out = new FileOutputStream(destFile)) {
+                    byte[] buf = new byte[32768];
+                    int read;
+                    while ((read = in.read(buf)) != -1) {
+                        out.write(buf, 0, read);
+                        downloaded += read;
+                        if (cl > 0) {
+                            double frac = Math.min(1.0, (double) downloaded / cl);
+                            emitDownloadProgress((int) Math.round(progressStart + frac * (progressEnd - progressStart)),
+                                    label + " (" + formatFileSize(downloaded) + " / " + formatFileSize(cl) + ")");
+                        }
+                    }
+                }
+                if (downloaded <= 0) {
+                    throw new Exception("Archivo vacío (0 bytes) en " + label);
+                }
+                return;
+            } finally {
                 conn.disconnect();
-                throw new Exception("HTTP " + code + " descargando stream multimedia");
             }
-
-            break;
         }
 
-        if (conn == null) {
-            throw new Exception("No se pudo iniciar la conexión HTTP");
-        }
+        long offset = 0;
+        long totalKnown = expectedTotal;
+        int chunkIndex = 0;
+        long lastProgressEmit = 0;
 
-        try (InputStream in = conn.getInputStream();
-             OutputStream out = new FileOutputStream(destFile)) {
-            byte[] buf = new byte[32768];
-            int read;
-            while ((read = in.read(buf)) != -1) {
-                out.write(buf, 0, read);
+        try (OutputStream out = new FileOutputStream(destFile)) {
+            while (totalKnown <= 0 || offset < totalKnown) {
+                long end = (totalKnown > 0) ? Math.min(offset + chunkSize - 1, totalKnown - 1) : (offset + chunkSize - 1);
+                String rangeHeader = "bytes=" + offset + "-" + end;
+                Exception lastErr = null;
+                boolean chunkOk = false;
+
+                for (int attempt = 1; attempt <= 3; attempt++) {
+                    HttpURLConnection conn = null;
+                    try {
+                        conn = openStreamConnection(fileUrl, ua, rangeHeader);
+                        int code = conn.getResponseCode();
+                        if (code == 416 && offset > 0) {
+                            chunkOk = true;
+                            totalKnown = offset;
+                            break;
+                        }
+                        if (code != 200 && code != 206) {
+                            throw new Exception("HTTP " + code + " en rango " + offset + "-" + end + (totalKnown > 0 ? "/" + totalKnown : ""));
+                        }
+
+                        if (code == 200) {
+                            // Server ignored Range and returned the full payload from offset 0
+                            long cl = conn.getContentLengthLong();
+                            if (offset > 0) {
+                                // Restart cleanly from offset 0 is unexpected mid-file; abort or skip
+                                throw new Exception("Servidor devolvió HTTP 200 sin Content-Range en offset " + offset);
+                            }
+                            try (InputStream in = conn.getInputStream()) {
+                                byte[] buf = new byte[32768];
+                                int read;
+                                while ((read = in.read(buf)) != -1) {
+                                    out.write(buf, 0, read);
+                                    offset += read;
+                                    long nowMs = System.currentTimeMillis();
+                                    if (cl > 0 && nowMs - lastProgressEmit > 350) {
+                                        lastProgressEmit = nowMs;
+                                        double frac = Math.min(1.0, (double) offset / cl);
+                                        emitDownloadProgress((int) Math.round(progressStart + frac * (progressEnd - progressStart)),
+                                                label + " (" + formatFileSize(offset) + " / " + formatFileSize(cl) + ")");
+                                    }
+                                }
+                            }
+                            totalKnown = offset;
+                            chunkOk = true;
+                            break;
+                        }
+
+                        long crTotal = parseTotalFromContentRange(conn.getHeaderField("Content-Range"));
+                        if (crTotal > 0) {
+                            totalKnown = crTotal;
+                        }
+
+                        ByteArrayOutputStream chunkBuf = new ByteArrayOutputStream((int) (end - offset + 1));
+                        try (InputStream in = conn.getInputStream()) {
+                            byte[] buf = new byte[32768];
+                            int read;
+                            while ((read = in.read(buf)) != -1) {
+                                chunkBuf.write(buf, 0, read);
+                            }
+                        }
+
+                        byte[] chunkBytes = chunkBuf.toByteArray();
+                        if (chunkBytes.length == 0) {
+                            if (offset > 0 && totalKnown <= 0) {
+                                totalKnown = offset;
+                                chunkOk = true;
+                                break;
+                            }
+                            throw new Exception("Chunk vacío en offset " + offset);
+                        }
+
+                        out.write(chunkBytes);
+                        offset += chunkBytes.length;
+                        chunkIndex++;
+                        chunkOk = true;
+
+                        long nowMs = System.currentTimeMillis();
+                        if (nowMs - lastProgressEmit > 300 || (totalKnown > 0 && offset >= totalKnown)) {
+                            lastProgressEmit = nowMs;
+                            double frac = (totalKnown > 0) ? Math.min(1.0, (double) offset / totalKnown) : Math.min(0.9, chunkIndex * 0.08);
+                            String sizeInfo = totalKnown > 0
+                                    ? (formatFileSize(offset) + " / " + formatFileSize(totalKnown))
+                                    : formatFileSize(offset);
+                            emitDownloadProgress((int) Math.round(progressStart + frac * (progressEnd - progressStart)),
+                                    label + " (" + sizeInfo + ")");
+                        }
+
+                        // If server returned fewer bytes than requested when totalKnown was unknown, we reached EOF
+                        if (totalKnown <= 0 && chunkBytes.length < chunkSize) {
+                            totalKnown = offset;
+                        }
+                        break;
+                    } catch (Exception e) {
+                        lastErr = e;
+                        android.util.Log.w("FTYCombiner", label + " chunk attempt " + attempt + " failed at " + offset + ": " + e.getMessage());
+                        if (attempt < 3) {
+                            try { Thread.sleep(350L * attempt); } catch (InterruptedException ignored) {}
+                        }
+                    } finally {
+                        if (conn != null) conn.disconnect();
+                    }
+                }
+
+                if (!chunkOk) {
+                    throw (lastErr != null ? lastErr : new Exception("Error descargando chunk en offset " + offset));
+                }
             }
-        } finally {
-            conn.disconnect();
         }
+
+        if (offset <= 0 || (totalKnown > 0 && offset < totalKnown)) {
+            try { destFile.delete(); } catch (Exception ignored) {}
+            throw new Exception("Descarga incompleta (" + offset + "/" + totalKnown + " bytes) en " + label);
+        }
+        android.util.Log.i("FTYCombiner", label + " completed: " + offset + " bytes");
     }
 
     private boolean muxMediaTracks(File videoFile, File audioFile, File outputFile) {
@@ -1030,6 +1283,238 @@ public class WhatsAppStatusPlugin extends Plugin {
             }
         }
         return count;
+    }
+
+    @PluginMethod
+    public void nativeFetch(PluginCall call) {
+        String targetUrl = call.getString("url");
+        if (targetUrl == null || targetUrl.isEmpty()) {
+            call.reject("url es requerida");
+            return;
+        }
+        String method = call.getString("method", "GET");
+        JSObject reqHeaders = call.getObject("headers");
+        String body = call.getString("body");
+
+        new Thread(() -> {
+            HttpURLConnection conn = null;
+            try {
+                String currentUrl = targetUrl;
+                String currentMethod = (method != null ? method.toUpperCase(Locale.US) : "GET");
+                int redirects = 0;
+
+                while (redirects < 6) {
+                    URL url = new URL(currentUrl);
+                    conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod(currentMethod);
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(25000);
+                    conn.setInstanceFollowRedirects(false);
+
+                    boolean hasUa = false;
+                    if (reqHeaders != null) {
+                        Iterator<String> keys = reqHeaders.keys();
+                        while (keys.hasNext()) {
+                            String k = keys.next();
+                            String v = reqHeaders.getString(k);
+                            if (v != null) {
+                                if ("user-agent".equalsIgnoreCase(k)) hasUa = true;
+                                conn.setRequestProperty(k, v);
+                            }
+                        }
+                    }
+                    if (!hasUa) {
+                        try {
+                            conn.setRequestProperty("User-Agent", WebSettings.getDefaultUserAgent(getContext()));
+                        } catch (Exception ignored) {}
+                    }
+
+                    if (body != null && ("POST".equals(currentMethod) || "PUT".equals(currentMethod) || "PATCH".equals(currentMethod))) {
+                        conn.setDoOutput(true);
+                        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                        conn.setFixedLengthStreamingMode(bytes.length);
+                        try (OutputStream os = conn.getOutputStream()) {
+                            os.write(bytes);
+                        }
+                    }
+
+                    int code = conn.getResponseCode();
+                    if (code == HttpURLConnection.HTTP_MOVED_PERM || code == HttpURLConnection.HTTP_MOVED_TEMP || code == 307 || code == 308) {
+                        String loc = conn.getHeaderField("Location");
+                        conn.disconnect();
+                        if (loc != null && !loc.isEmpty()) {
+                            if (loc.startsWith("/")) {
+                                loc = url.getProtocol() + "://" + url.getHost() + (url.getPort() > 0 ? ":" + url.getPort() : "") + loc;
+                            }
+                            currentUrl = loc;
+                            if (code != 307 && code != 308) {
+                                currentMethod = "GET";
+                            }
+                            redirects++;
+                            continue;
+                        }
+                    }
+
+                    InputStream is = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                    String respBody = readAllStream(is);
+
+                    JSObject respHeaders = new JSObject();
+                    Map<String, List<String>> headerFields = conn.getHeaderFields();
+                    if (headerFields != null) {
+                        for (Map.Entry<String, List<String>> entry : headerFields.entrySet()) {
+                            if (entry.getKey() != null && entry.getValue() != null && !entry.getValue().isEmpty()) {
+                                respHeaders.put(entry.getKey().toLowerCase(Locale.US), String.join(", ", entry.getValue()));
+                            }
+                        }
+                    }
+
+                    JSObject ret = new JSObject();
+                    ret.put("status", code);
+                    ret.put("url", currentUrl);
+                    ret.put("headers", respHeaders);
+                    ret.put("body", respBody);
+                    call.resolve(ret);
+                    return;
+                }
+                call.reject("Demasiados redireccionamientos en nativeFetch");
+            } catch (Exception e) {
+                android.util.Log.e("FTYYoutube", "nativeFetch failed: " + targetUrl, e);
+                call.reject("nativeFetch error: " + e.getMessage());
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+        }).start();
+    }
+
+    private class FTYPoBridge {
+        @JavascriptInterface
+        public void onPoSuccess(String callId, String jsonStr) {
+            PluginCall pending = pendingPoCalls.remove(callId);
+            if (pending == null) return;
+            try {
+                JSObject obj = new JSObject(jsonStr);
+                pending.resolve(obj);
+            } catch (Exception e) {
+                pending.reject("Error parseando PO token: " + e.getMessage());
+            }
+        }
+
+        @JavascriptInterface
+        public void onPoError(String callId, String errMsg) {
+            PluginCall pending = pendingPoCalls.remove(callId);
+            if (pending == null) return;
+            pending.reject("Error generando PO token: " + errMsg);
+        }
+    }
+
+    @PluginMethod
+    public void mintYoutubePoToken(PluginCall call) {
+        String visitorData = call.getString("visitorData", "");
+        String videoId = call.getString("videoId", "");
+        String helperUrl = call.getString("helperUrl", "https://descargador.atpdev.dev/vendor/yt-bg-helper.js");
+
+        new Thread(() -> {
+            try {
+                if (cachedBgHelperJs == null || cachedBgHelperJs.isEmpty()) {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(helperUrl).openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(15000);
+                    conn.setReadTimeout(20000);
+                    int code = conn.getResponseCode();
+                    if (code != 200) {
+                        conn.disconnect();
+                        call.reject("No se pudo descargar yt-bg-helper.js (HTTP " + code + ")");
+                        return;
+                    }
+                    cachedBgHelperJs = readAllStream(conn.getInputStream());
+                    conn.disconnect();
+                }
+
+                String helperJs = cachedBgHelperJs;
+                String callId = UUID.randomUUID().toString();
+                pendingPoCalls.put(callId, call);
+
+                // Safety timeout (18s)
+                new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                    PluginCall timedOut = pendingPoCalls.remove(callId);
+                    if (timedOut != null) {
+                        timedOut.reject("Timeout generando PO token en WebView");
+                    }
+                }, 18000);
+
+                Runnable runEval = () -> {
+                    if (ytPoWebView == null) {
+                        PluginCall c = pendingPoCalls.remove(callId);
+                        if (c != null) c.reject("poWebView no disponible");
+                        return;
+                    }
+                    String invokeJs =
+                            "(async function(){"
+                                    + "try{"
+                                    + "if(!window.__FTY_mintPoToken){" + helperJs + "}"
+                                    + "const res=await window.__FTY_mintPoToken("
+                                    + JSONObject.quote(visitorData) + "," + JSONObject.quote(videoId) + ");"
+                                    + "window.FTYPoBridge.onPoSuccess(" + JSONObject.quote(callId) + ",JSON.stringify(res));"
+                                    + "}catch(err){"
+                                    + "window.FTYPoBridge.onPoError(" + JSONObject.quote(callId) + ",String(err&&err.stack||err&&err.message||err));"
+                                    + "}"
+                                    + "})();";
+                    ytPoWebView.evaluateJavascript(invokeJs, null);
+                };
+
+                getActivity().runOnUiThread(() -> {
+                    try {
+                        if (ytPoWebView == null) {
+                            ytPoWebView = new WebView(getContext());
+                            WebSettings settings = ytPoWebView.getSettings();
+                            settings.setJavaScriptEnabled(true);
+                            settings.setDomStorageEnabled(true);
+                            settings.setDatabaseEnabled(true);
+                            ytPoWebView.setAlpha(0f);
+                            ytPoWebView.setTranslationX(-10000f);
+                            ytPoWebView.addJavascriptInterface(new FTYPoBridge(), "FTYPoBridge");
+
+                            ViewGroup root = getActivity().findViewById(android.R.id.content);
+                            if (root != null) {
+                                root.addView(ytPoWebView, new FrameLayout.LayoutParams(1, 1));
+                            }
+
+                            ytPoWebView.setWebViewClient(new WebViewClient() {
+                                @Override
+                                public void onPageFinished(WebView view, String url) {
+                                    super.onPageFinished(view, url);
+                                    if (!ytPoWebViewLoaded && url != null && url.contains("youtube.com")) {
+                                        ytPoWebViewLoaded = true;
+                                        runEval.run();
+                                    }
+                                }
+                            });
+                            ytPoWebView.loadUrl("https://www.youtube.com/robots.txt");
+                        } else if (!ytPoWebViewLoaded) {
+                            // Wait briefly until initial robots.txt finishes loading
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                if (ytPoWebViewLoaded) {
+                                    runEval.run();
+                                } else {
+                                    ytPoWebViewLoaded = true;
+                                    runEval.run();
+                                }
+                            }, 1200);
+                        } else {
+                            runEval.run();
+                        }
+                    } catch (Exception uiErr) {
+                        PluginCall c = pendingPoCalls.remove(callId);
+                        if (c != null) c.reject("Error UI thread poWebView: " + uiErr.getMessage());
+                    }
+                });
+            } catch (Exception e) {
+                android.util.Log.e("FTYYoutube", "mintYoutubePoToken error", e);
+                call.reject("mintYoutubePoToken error: " + e.getMessage());
+            }
+        }).start();
     }
 
     private String readAllStream(InputStream is) throws Exception {
