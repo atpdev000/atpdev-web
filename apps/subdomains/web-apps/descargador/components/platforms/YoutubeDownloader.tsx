@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 import { formatBytes } from '@/lib/utils';
-import { usePlatform } from '@/hooks/usePlatform';
+import { usePlatform, detectNativePlatform } from '@/hooks/usePlatform';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { useAdMobInterstitial } from '@/hooks/useAdMobInterstitial';
@@ -148,15 +148,21 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
     try {
       let nativeDebugError: string | undefined
+      const runningNative = isNative || detectNativePlatform()
       const capObj = typeof window !== 'undefined' ? (window as any).Capacitor : undefined
-      console.info('[FTYYoutube] processUrl start', {
-        cleanTargetUrl,
-        isNative,
-        platform: capObj?.getPlatform?.(),
-      })
+      console.info(
+        '[FTYYoutube] processUrl start ' +
+          JSON.stringify({
+            cleanTargetUrl,
+            isNativeState: isNative,
+            runningNative,
+            platform: capObj?.getPlatform?.() || 'unknown',
+            hasAndroidBridge: typeof window !== 'undefined' && Boolean((window as any).androidBridge),
+          })
+      )
 
       // 📱 Plan A (Móvil): Extraer directo desde el dispositivo para usar la IP del usuario
-      if (isNative) {
+      if (runningNative) {
         try {
           const { result: nativeData, debugError } = await extractYoutubeNativeWithDiagnostics(cleanTargetUrl)
           nativeDebugError = debugError
@@ -181,7 +187,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         },
         body: JSON.stringify({
           url: cleanTargetUrl,
-          clientIsNative: isNative,
+          clientIsNative: runningNative,
           clientDiagnostic: nativeDebugError || null,
         })
       })
