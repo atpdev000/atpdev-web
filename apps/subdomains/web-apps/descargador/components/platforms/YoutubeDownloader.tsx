@@ -148,6 +148,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
     try {
       let nativeDebugError: string | undefined
+      const capObj = typeof window !== 'undefined' ? (window as any).Capacitor : undefined
+      console.info('[FTYYoutube] processUrl start', {
+        cleanTargetUrl,
+        isNative,
+        platform: capObj?.getPlatform?.(),
+      })
 
       // 📱 Plan A (Móvil): Extraer directo desde el dispositivo para usar la IP del usuario
       if (isNative) {
@@ -155,13 +161,15 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           const { result: nativeData, debugError } = await extractYoutubeNativeWithDiagnostics(cleanTargetUrl)
           nativeDebugError = debugError
           if (nativeData && nativeData.formats && nativeData.formats.length > 0) {
+            console.info('[FTYYoutube] Native extraction OK:', nativeData.formats.length)
             setVideoInfo(nativeData)
             setOriginalUrl(cleanTargetUrl)
             return
           }
+          console.warn('[FTYYoutube] Native extraction empty/failed:', debugError)
         } catch (nativeExtractErr: any) {
           nativeDebugError = nativeExtractErr?.message || 'Error en extracción nativa'
-          console.warn('⚠️ Extracción nativa falló, recurriendo al servidor...', nativeExtractErr)
+          console.warn('⚠️ [FTYYoutube] Extracción nativa falló, recurriendo al servidor...', nativeExtractErr)
         }
       }
 
@@ -171,14 +179,18 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: cleanTargetUrl })
+        body: JSON.stringify({
+          url: cleanTargetUrl,
+          clientIsNative: isNative,
+          clientDiagnostic: nativeDebugError || null,
+        })
       })
 
       const data = await response.json()
 
       if (!response.ok) {
         const baseError = data.error || 'Error al procesar el video'
-        throw new Error(nativeDebugError ? `${baseError}\n\n[Diagnóstico Móvil: ${nativeDebugError}]` : baseError)
+        throw new Error(nativeDebugError ? `[Diagnóstico Móvil: ${nativeDebugError}]\n\n${baseError}` : baseError)
       }
 
       if (data.status === 'success') {

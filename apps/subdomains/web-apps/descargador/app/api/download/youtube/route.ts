@@ -327,6 +327,11 @@ export async function POST(request: NextRequest) {
 
     const cleanedUrl = cleanYoutubeUrl(url)
     console.log('🎬 [YouTube Serverless] Procesando URL:', cleanedUrl)
+    if (body.clientIsNative !== undefined || body.clientDiagnostic) {
+      console.warn(
+        `📱 [YouTube ClientFallback] isNative=${Boolean(body.clientIsNative)} diag=${String(body.clientDiagnostic || 'none')}`
+      )
+    }
 
     const bin = findYtDlpBinary()
     const backendInfo = getBackendEndpoint()

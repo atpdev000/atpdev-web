@@ -848,10 +848,12 @@ public class WhatsAppStatusPlugin extends Plugin {
             return;
         }
         final String cleanVideoId = videoId.trim();
+        android.util.Log.i("FTYYoutube", "extractYoutubeInfo start videoId=" + cleanVideoId);
 
         new Thread(() -> {
             StringBuilder diagnostics = new StringBuilder();
             String visitorData = fetchYoutubeVisitorData(cleanVideoId);
+            android.util.Log.i("FTYYoutube", "visitorData=" + (visitorData != null ? visitorData.substring(0, Math.min(20, visitorData.length())) + "..." : "NULL"));
 
             String[][] clientProfiles = new String[][] {
                 {
@@ -946,6 +948,7 @@ public class WhatsAppStatusPlugin extends Plugin {
                     String responseText = readAllStream(stream);
 
                     if (code < 200 || code >= 300) {
+                        android.util.Log.w("FTYYoutube", clientName + " HTTP " + code);
                         diagnostics.append(clientName).append(":HTTP ").append(code).append("; ");
                         continue;
                     }
@@ -955,6 +958,7 @@ public class WhatsAppStatusPlugin extends Plugin {
                     String status = playability != null ? playability.optString("status", "") : "";
                     if (!"OK".equals(status)) {
                         String reason = playability != null ? playability.optString("reason", "") : "";
+                        android.util.Log.w("FTYYoutube", clientName + " status=" + status + " reason=" + reason);
                         diagnostics.append(clientName).append(":").append(status).append("(").append(reason).append("); ");
                         continue;
                     }
@@ -963,10 +967,12 @@ public class WhatsAppStatusPlugin extends Plugin {
                     int directUrls = countDirectFormatUrls(streaming != null ? streaming.optJSONArray("formats") : null)
                         + countDirectFormatUrls(streaming != null ? streaming.optJSONArray("adaptiveFormats") : null);
                     if (directUrls == 0) {
+                        android.util.Log.w("FTYYoutube", clientName + " OK but 0 direct URLs");
                         diagnostics.append(clientName).append(":0_urls; ");
                         continue;
                     }
 
+                    android.util.Log.i("FTYYoutube", clientName + " SUCCESS directUrls=" + directUrls);
                     JSObject ret = new JSObject();
                     ret.put("success", true);
                     ret.put("clientUsed", clientName);
@@ -974,6 +980,7 @@ public class WhatsAppStatusPlugin extends Plugin {
                     call.resolve(ret);
                     return;
                 } catch (Exception e) {
+                    android.util.Log.e("FTYYoutube", clientName + " exception", e);
                     diagnostics.append(clientName).append(":ERR(").append(e.getMessage()).append("); ");
                 } finally {
                     if (conn != null) {
@@ -982,6 +989,7 @@ public class WhatsAppStatusPlugin extends Plugin {
                 }
             }
 
+            android.util.Log.e("FTYYoutube", "ALL CLIENTS FAILED: " + diagnostics.toString());
             call.reject("Extracción nativa falló: " + diagnostics.toString());
         }).start();
     }
