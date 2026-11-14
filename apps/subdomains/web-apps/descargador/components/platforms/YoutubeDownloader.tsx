@@ -8,7 +8,6 @@ import { usePlatform, detectNativePlatform } from '@/hooks/usePlatform';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { useAdMobInterstitial } from '@/hooks/useAdMobInterstitial';
-import { useAdMobRewarded } from '@/hooks/useAdMobRewarded';
 import { useProPlan } from '@/hooks/useProPlan';
 import ProModal from '@/components/ProModal';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -105,7 +104,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
   const { scheduleNotification } = useNotifications()
   const { addToHistory } = useDownloadHistory()
   const { showInterstitial } = useAdMobInterstitial()
-  const { showRewarded } = useAdMobRewarded()
   const { plan, isPro } = useProPlan()
 
   const [url, setUrl] = useState(initialUrl || '')
@@ -128,6 +126,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
   const [activeTab, setActiveTab] = useState<'simple' | 'combined'>('simple');
 
   const isProQuality = (quality: string) => ['1080p', '1440p', '2160p'].includes(quality)
+
+  // 📺 Anuncio DESPUÉS de completar y guardar la descarga (mejor UX y evita caducidad de URLs)
+  const triggerPostDownloadAd = () => {
+    const runningNative = isNative || detectNativePlatform()
+    if (runningNative && !isPro) {
+      showInterstitial().catch(() => {})
+    }
+  }
 
   // 🔄 CAMBIAR TAB + ANUNCIO
   const handleTabChange = async (tab: 'simple' | 'combined') => {
@@ -171,7 +177,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
           const { result: nativeData, debugError } = await extractYoutubeNativeWithDiagnostics(cleanTargetUrl)
           nativeDebugError = debugError
           if (nativeData && nativeData.formats && nativeData.formats.length > 0) {
-            console.info('[FTYYoutube] Native extraction OK:', nativeData.formats.length)
+            console.info('[FTYYoutube] Native extraction OK:', nativeData.formats.length, (nativeData as any).clientUsed || '')
+            if (debugError) {
+              ;(nativeData as any).poFallbackReason = debugError
+            }
             setVideoInfo(nativeData)
             setOriginalUrl(cleanTargetUrl)
             return
@@ -360,11 +369,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               filePath: nativeRes.uri
             })
             setTimeout(() => setDownloadCompletedInfo(null), 8000)
+            triggerPostDownloadAd()
             return
           } catch (nativeErr: any) {
             console.error('⚠️ Combinador nativo falló:', nativeErr)
             if (isDeviceExtracted) {
-              throw new Error(nativeErr?.message || 'Error en descarga nativa en el dispositivo')
+              const baseErr = nativeErr?.message || 'Error en descarga nativa en el dispositivo'
+              const poWarn = (videoInfo as any)?.poFallbackReason
+              throw new Error(poWarn ? `${baseErr} | WebPO: ${poWarn}` : baseErr)
             }
             pollActive = true
             pollProgress()
@@ -462,14 +474,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     }
   }
 
-  if (isNative && !isPro) {
-    Toast.show({ text: `Preparando descarga de ${quality}...`, duration: 'short' }).catch(() => {})
-    showRewarded(startDownload).catch(() => {
-      startDownload()
-    })
-  } else {
-    startDownload()
+  if (isNative) {
+    Toast.show({ text: `Descargando ${quality}...`, duration: 'short' }).catch(() => {})
   }
+  startDownload()
 }
 
   // ✅ FUNCIÓN PARA COMBINACIÓN CON PROXY (FALLBACK)
@@ -605,11 +613,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                 filePath: nativeRes.uri
               })
               setTimeout(() => setDownloadCompletedInfo(null), 8000)
+              triggerPostDownloadAd()
               return
             } catch (nativeErr: any) {
               console.error('⚠️ Descarga directa nativa falló:', nativeErr)
               if (isDeviceExtracted) {
-                throw new Error(nativeErr?.message || 'Error en descarga directa nativa')
+                const baseErr = nativeErr?.message || 'Error en descarga directa nativa'
+                const poWarn = (videoInfo as any)?.poFallbackReason
+                throw new Error(poWarn ? `${baseErr} | WebPO: ${poWarn}` : baseErr)
               }
             }
 
@@ -727,14 +738,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       }
     }
 
-    if (isNative && !isPro) {
-      Toast.show({ text: `Preparando descarga de ${quality}...`, duration: 'short' }).catch(() => {})
-      showRewarded(startSimpleDownload).catch(() => {
-        startSimpleDownload()
-      })
-    } else {
-      startSimpleDownload()
+    if (isNative) {
+      Toast.show({ text: `Descargando ${quality}...`, duration: 'short' }).catch(() => {})
     }
+    startSimpleDownload()
   }
 
 
@@ -833,6 +840,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
         setDownloading(null);
         setDownloadProgress(0);
+        triggerPostDownloadAd();
       } catch (error: any) {
         console.error('Error en guardado nativo:', error);
         setDownloading(null);
@@ -887,8 +895,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     quality?: string,
     isAudio: boolean = false
   ) => {
-    // 📺 ANUNCIO BONIFICADO para descargas combinadas (Backend)
-    showRewarded(async () => {
       try {
         setDownloading(quality || (isAudio ? 'audio' : 'video'))
         setDownloadProgress(0)
@@ -996,6 +1002,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               filePath: savedUri
             });
             setTimeout(() => setDownloadCompletedInfo(null), 8000);
+            triggerPostDownloadAd();
 
           } catch (writeError: any) {
             console.error('Error guardando archivo nativo:', writeError);
@@ -1055,7 +1062,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
         setDownloading(null)
         setDownloadProgress(0)
       }
-    });
   }
 
   // ✅ DESCARGA DE AUDIO - USANDO STREAMING ROBUSTO
@@ -1150,11 +1156,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               filePath: nativeRes.uri
             })
             setTimeout(() => setDownloadCompletedInfo(null), 8000)
+            triggerPostDownloadAd()
             return
           } catch (nativeErr: any) {
             console.error('⚠️ Descarga nativa de audio falló:', nativeErr)
             if (isDeviceExtracted) {
-              throw new Error(nativeErr?.message || 'Error en descarga nativa de audio')
+              const baseErr = nativeErr?.message || 'Error en descarga nativa de audio'
+              const poWarn = (videoInfo as any)?.poFallbackReason
+              throw new Error(poWarn ? `${baseErr} | WebPO: ${poWarn}` : baseErr)
             }
           }
         }
@@ -1243,14 +1252,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       }
     }
 
-    if (isNative && !isPro) {
-      Toast.show({ text: 'Preparando descarga de audio...', duration: 'short' }).catch(() => {})
-      showRewarded(startAudioDownload).catch(() => {
-        startAudioDownload()
-      })
-    } else {
-      startAudioDownload()
+    if (isNative) {
+      Toast.show({ text: 'Descargando audio...', duration: 'short' }).catch(() => {})
     }
+    startAudioDownload()
   }
 
   // ✅ FUNCIONES AUXILIARES

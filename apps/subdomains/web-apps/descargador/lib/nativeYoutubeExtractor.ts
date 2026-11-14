@@ -421,6 +421,7 @@ async function extractWithPoSession(
   if (!sessionInfo) {
     const baseYt = await ytMod.Innertube.create({
       retrieve_player: false,
+      enable_session_cache: false,
       fetch: nativeFetch,
     })
     const visitorData = baseYt.session.context.client.visitorData || ''
@@ -443,13 +444,15 @@ async function extractWithPoSession(
 
   const ytPo = await ytMod.Innertube.create({
     retrieve_player: true,
+    enable_session_cache: false,
     visitor_data: sessionInfo.visitorData,
     po_token: sessionInfo.poSession,
     user_agent: sessionInfo.userAgent,
     fetch: createNativeFetchFn(sessionInfo.userAgent),
   })
 
-  for (const clientName of ['TV_SIMPLY', 'MWEB', 'WEB'] as const) {
+  // Only TV_SIMPLY (proven 0->80+ MB with WebPO) and WEB. MWEB caps at ~9-10 MB even with pot.
+  for (const clientName of ['TV_SIMPLY', 'WEB'] as const) {
     try {
       const info = await ytPo.getBasicInfo(videoId, { client: clientName })
       const sd = info?.streaming_data
@@ -516,6 +519,8 @@ async function extractWithPoSession(
       const mapped = mapInnerTubePayload(syntheticPayload, videoId, `Po-${clientName}`)
       if (mapped) {
         mapped.userAgent = sessionInfo.userAgent
+        ;(mapped as any).clientUsed = `Po-${clientName}`
+        console.info(`[FTYYoutube] extractWithPoSession OK: Po-${clientName} formats=${mapped.formats.length}`)
         return mapped
       }
       reasons.push(`Po-${clientName}: 0_urls`)
@@ -541,16 +546,20 @@ export async function extractYoutubeNativeWithDiagnostics(
 
   const reasons: string[] = []
 
-  // 1. Authenticated WebPO extraction (unlocks 100% HD & M4A adaptive streams past 1-4MB limits)
-  try {
-    const poResult = await extractWithPoSession(videoId, reasons)
-    if (poResult) {
-      return { result: poResult }
+  // 1. Authenticated WebPO extraction (unlocks 100% HD & M4A adaptive streams past 1-10MB limits)
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const poResult = await extractWithPoSession(videoId, reasons)
+      if (poResult) {
+        return { result: poResult }
+      }
+      cachedPoSession = null
+    } catch (poErr: any) {
+      cachedPoSession = null
+      reasons.push(`PoExtractor#${attempt}: ${poErr?.message || String(poErr)}`)
     }
-  } catch (poErr: any) {
-    cachedPoSession = null
-    reasons.push(`PoExtractor: ${poErr?.message || String(poErr)}`)
   }
+  console.warn('[FTYYoutube] WebPO failed, falling back:', reasons.join(' | '))
 
   // 2. Native Java plugin fallback (raw HttpURLConnection on Android JVM - great for 360p progressive)
   try {
@@ -560,7 +569,9 @@ export async function extractYoutubeNativeWithDiagnostics(
         const parsed = JSON.parse(nativeRes.payloadJson)
         const mapped = mapInnerTubePayload(parsed, videoId, `Java-${nativeRes.clientUsed || 'native'}`)
         if (mapped) {
-          return { result: mapped }
+          ;(mapped as any).clientUsed = `Java-${nativeRes.clientUsed || 'native'}`
+          ;(mapped as any).poFallbackReason = reasons.join(' | ')
+          return { result: mapped, debugError: reasons.join(' | ') }
         }
         reasons.push(`Java(${nativeRes.clientUsed}): sin formatos válidos`)
       }

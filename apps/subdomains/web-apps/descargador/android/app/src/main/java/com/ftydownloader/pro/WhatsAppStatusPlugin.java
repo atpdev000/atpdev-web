@@ -72,6 +72,7 @@ public class WhatsAppStatusPlugin extends Plugin {
     private WebView ytPoWebView;
     private boolean ytPoWebViewLoaded = false;
     private String cachedBgHelperJs = null;
+    private final List<Runnable> pendingPoEvals = new ArrayList<>();
     private final ConcurrentHashMap<String, PluginCall> pendingPoCalls = new ConcurrentHashMap<>();
 
     @PluginMethod
@@ -561,13 +562,21 @@ public class WhatsAppStatusPlugin extends Plugin {
         throw new Exception("Demasiados redireccionamientos al descargar stream");
     }
 
+    private String extractQueryParam(String fileUrl, String paramName) {
+        if (fileUrl == null || paramName == null) return "";
+        Matcher m = Pattern.compile("[?&]" + Pattern.quote(paramName) + "=([^&]+)").matcher(fileUrl);
+        return m.find() ? m.group(1) : "";
+    }
+
     private void downloadHttpStream(String fileUrl, File destFile, String overrideUserAgent, double progressStart, double progressEnd, String label) throws Exception {
         String ua = resolveStreamUserAgent(fileUrl, overrideUserAgent);
         long expectedTotal = extractClenFromUrl(fileUrl);
+        String streamClient = extractQueryParam(fileUrl, "c");
+        boolean hasPot = !extractQueryParam(fileUrl, "pot").isEmpty();
         boolean useChunkedRange = fileUrl.contains("googlevideo.com") || expectedTotal > 0;
         final long chunkSize = 1048576L; // 1MB chunks avoid YouTube long-socket drops/throttling
 
-        android.util.Log.i("FTYCombiner", "Starting stream (" + label + ") expectedTotal=" + expectedTotal + " chunked=" + useChunkedRange);
+        android.util.Log.i("FTYCombiner", "Starting stream (" + label + ") client=" + streamClient + " pot=" + hasPot + " expectedTotal=" + expectedTotal + " chunked=" + useChunkedRange);
 
         if (!useChunkedRange) {
             HttpURLConnection conn = openStreamConnection(fileUrl, ua, null);
@@ -624,7 +633,8 @@ public class WhatsAppStatusPlugin extends Plugin {
                             break;
                         }
                         if (code != 200 && code != 206) {
-                            throw new Exception("HTTP " + code + " en rango " + offset + "-" + end + (totalKnown > 0 ? "/" + totalKnown : ""));
+                            String meta = (streamClient.isEmpty() ? "" : " c=" + streamClient) + " pot=" + (hasPot ? "1" : "0");
+                            throw new Exception("HTTP " + code + " en rango " + offset + "-" + end + (totalKnown > 0 ? "/" + totalKnown : "") + " [" + meta.trim() + "]");
                         }
 
                         if (code == 200) {
@@ -1395,14 +1405,17 @@ public class WhatsAppStatusPlugin extends Plugin {
             if (pending == null) return;
             try {
                 JSObject obj = new JSObject(jsonStr);
+                android.util.Log.i("FTYYoutube", "mintYoutubePoToken OK callId=" + callId);
                 pending.resolve(obj);
             } catch (Exception e) {
+                android.util.Log.e("FTYYoutube", "mintYoutubePoToken parse error", e);
                 pending.reject("Error parseando PO token: " + e.getMessage());
             }
         }
 
         @JavascriptInterface
         public void onPoError(String callId, String errMsg) {
+            android.util.Log.e("FTYYoutube", "mintYoutubePoToken JS error: " + errMsg);
             PluginCall pending = pendingPoCalls.remove(callId);
             if (pending == null) return;
             pending.reject("Error generando PO token: " + errMsg);
@@ -1436,13 +1449,14 @@ public class WhatsAppStatusPlugin extends Plugin {
                 String callId = UUID.randomUUID().toString();
                 pendingPoCalls.put(callId, call);
 
-                // Safety timeout (18s)
+                // Safety timeout (25s)
                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                     PluginCall timedOut = pendingPoCalls.remove(callId);
                     if (timedOut != null) {
+                        android.util.Log.e("FTYYoutube", "mintYoutubePoToken timeout callId=" + callId + " loaded=" + ytPoWebViewLoaded);
                         timedOut.reject("Timeout generando PO token en WebView");
                     }
-                }, 18000);
+                }, 25000);
 
                 Runnable runEval = () -> {
                     if (ytPoWebView == null) {
@@ -1472,6 +1486,10 @@ public class WhatsAppStatusPlugin extends Plugin {
                             settings.setJavaScriptEnabled(true);
                             settings.setDomStorageEnabled(true);
                             settings.setDatabaseEnabled(true);
+                            try {
+                                android.webkit.CookieManager.getInstance().setAcceptCookie(true);
+                                android.webkit.CookieManager.getInstance().setAcceptThirdPartyCookies(ytPoWebView, true);
+                            } catch (Exception ignored) {}
                             ytPoWebView.setAlpha(0f);
                             ytPoWebView.setTranslationX(-10000f);
                             ytPoWebView.addJavascriptInterface(new FTYPoBridge(), "FTYPoBridge");
@@ -1481,27 +1499,25 @@ public class WhatsAppStatusPlugin extends Plugin {
                                 root.addView(ytPoWebView, new FrameLayout.LayoutParams(1, 1));
                             }
 
+                            pendingPoEvals.add(runEval);
                             ytPoWebView.setWebViewClient(new WebViewClient() {
                                 @Override
                                 public void onPageFinished(WebView view, String url) {
                                     super.onPageFinished(view, url);
                                     if (!ytPoWebViewLoaded && url != null && url.contains("youtube.com")) {
                                         ytPoWebViewLoaded = true;
-                                        runEval.run();
+                                        android.util.Log.i("FTYYoutube", "poWebView ready url=" + url + " queued=" + pendingPoEvals.size());
+                                        List<Runnable> toRun = new ArrayList<>(pendingPoEvals);
+                                        pendingPoEvals.clear();
+                                        for (Runnable r : toRun) {
+                                            r.run();
+                                        }
                                     }
                                 }
                             });
                             ytPoWebView.loadUrl("https://www.youtube.com/robots.txt");
                         } else if (!ytPoWebViewLoaded) {
-                            // Wait briefly until initial robots.txt finishes loading
-                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                                if (ytPoWebViewLoaded) {
-                                    runEval.run();
-                                } else {
-                                    ytPoWebViewLoaded = true;
-                                    runEval.run();
-                                }
-                            }, 1200);
+                            pendingPoEvals.add(runEval);
                         } else {
                             runEval.run();
                         }
