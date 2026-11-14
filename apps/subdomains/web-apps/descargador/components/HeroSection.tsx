@@ -1,7 +1,8 @@
 'use client'
 
-import { FEATURES } from '@/lib/featureFlags'
+import { isYoutubeVisible } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
+import { usePlatform } from '@/hooks/usePlatform'
 import { Platform } from './PlatformTabs'
 
 interface HeroSectionProps {
@@ -17,6 +18,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ onSelectPlatform, modules, branding }: HeroSectionProps) {
   const { t } = useI18n()
+  const { isNative } = usePlatform()
 
   const heroBadge = branding?.hero_badge || t.hero.verifiedBadge
   const heroPrefix = branding?.hero_title_prefix || t.hero.titlePrefix
@@ -161,7 +163,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
           </button>
         )}
 
-        {(modules && typeof modules.youtube_enabled === 'boolean' ? modules.youtube_enabled : FEATURES.YOUTUBE_ENABLED) && (
+        {isYoutubeVisible(modules, isNative) && (
           <button
             type="button"
             onClick={() => handlePlatformClick('youtube')}

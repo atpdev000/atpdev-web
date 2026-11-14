@@ -1,9 +1,10 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { FEATURES } from '@/lib/featureFlags'
+import { isYoutubeVisible } from '@/lib/featureFlags'
 import { Platform } from '@/components/PlatformTabs'
 import { useI18n } from '@/lib/i18n/context'
+import { usePlatform } from '@/hooks/usePlatform'
 
 interface TopNavProps {
     activePlatform: Platform
@@ -13,6 +14,7 @@ interface TopNavProps {
 
 export default function TopNav({ activePlatform, onPlatformChange, modules }: TopNavProps) {
     const { t } = useI18n()
+    const { isNative } = usePlatform()
 
     const allTabs = [
         {
@@ -80,9 +82,9 @@ export default function TopNav({ activePlatform, onPlatformChange, modules }: To
                 </svg>
             )
         },
-        ...(FEATURES.YOUTUBE_ENABLED ? [{
+        {
             id: 'youtube' as Platform,
-            label: t.platforms.multimedia,
+            label: (t.platforms as any).youtube || t.platforms.multimedia,
             color: 'bg-red-600',
             activeClass: 'bg-red-600 text-white shadow-md ring-2 ring-red-400 font-bold',
             icon: (
@@ -91,10 +93,13 @@ export default function TopNav({ activePlatform, onPlatformChange, modules }: To
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             )
-        }] : [])
+        }
     ]
 
     const tabs = allTabs.filter(tab => {
+        if (tab.id === 'youtube') {
+            return isYoutubeVisible(modules, isNative)
+        }
         if (!modules) return true
         const key = `${tab.id}_enabled`
         return modules[key] !== false

@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles, Zap, Shield, Layers } from 'lucide-react'
-import { FEATURES } from '@/lib/featureFlags'
+import { isYoutubeVisible } from '@/lib/featureFlags'
+import { usePlatform } from '@/hooks/usePlatform'
 import PlatformTabs, { Platform } from '@/components/PlatformTabs'
 import FacebookDownloader from '@/components/platforms/FacebookDownloader'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
@@ -14,6 +15,7 @@ import TwitterDownloader from '@/components/platforms/TwitterDownloader'
 import WhatsappStatusDownloader from '@/components/platforms/WhatsappStatusDownloader'
 
 export default function ToolsPage() {
+  const { isNative } = usePlatform()
   const [activePlatform, setActivePlatform] = useState<Platform>('facebook')
   const [modules, setModules] = useState<Record<string, boolean>>({
     youtube_enabled: false,
@@ -137,7 +139,7 @@ export default function ToolsPage() {
               <Link href="/tools/whatsapp" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
                 WhatsApp Estados →
               </Link>
-              {modules.youtube_enabled && (
+              {isYoutubeVisible(modules, isNative) && (
                 <Link href="/tools/youtube" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
                   YouTube 4K & MP3 →
                 </Link>

@@ -19,6 +19,7 @@ import { useI18n } from '@/lib/i18n/context';
 import { Music, Film } from 'lucide-react';
 import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative, readNativeClipboard } from '@/lib/nativeBridge';
 import { extractUrlFromText } from '@/lib/clipboardDetector';
+import { extractYoutubeNative } from '@/lib/nativeYoutubeExtractor';
 
 interface VideoFormat {
   quality: string
@@ -146,6 +147,21 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     setDownloadProgress(0)
 
     try {
+      // 📱 Plan A (Móvil): Extraer directo desde el dispositivo para usar la IP del usuario
+      if (isNative) {
+        try {
+          const nativeData = await extractYoutubeNative(cleanTargetUrl)
+          if (nativeData && nativeData.formats && nativeData.formats.length > 0) {
+            setVideoInfo(nativeData)
+            setOriginalUrl(cleanTargetUrl)
+            return
+          }
+        } catch (nativeExtractErr) {
+          console.warn('⚠️ Extracción nativa falló, recurriendo al servidor...', nativeExtractErr)
+        }
+      }
+
+      // 🌐 Plan B (Web o fallback desde móvil): Servidor Hetzner
       const response = await fetch('/api/download/youtube', {
         method: 'POST',
         headers: {
@@ -273,20 +289,21 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('🎬 Iniciando descarga combinada con streaming binario real...', quality)
 
-        // 📱 PRIORIDAD 1 (MÓVIL): Combinador nativo para flujos no encriptados por IP de YouTube
-        const isIpBound = format.url && format.url.includes('googlevideo.com')
+        // 📱 PRIORIDAD 1 (MÓVIL): Combinador nativo si la URL se extrajo en el dispositivo o no está atada a IP del servidor
+        const isDeviceExtracted = videoInfo?.method === 'native_device'
+        const isIpBound = !isDeviceExtracted && format.url && format.url.includes('googlevideo.com')
         if (isNative && format.url && format.url.startsWith('http') && !isIpBound) {
           console.log('📱 [Android] Descargando y combinando nativamente con MediaMuxer...')
-          setDownloadDetails('Descargando y combinando con aceleración nativa...')
+          pollActive = false
+          setDownloadDetails('Descargando y combinando en tu dispositivo...')
           setDownloadProgress(35)
           try {
             const nativeRes = await downloadAndCombineNative(
               format.url,
-              audioCandidate?.url || undefined,
+              isProgressiveWithAudio ? undefined : (audioCandidate?.url || undefined),
               defaultFilename,
               false
             )
-            pollActive = false
             setDownloadProgress(100)
             setDownloadDetails('¡Guardado en la Galería!')
             scheduleNotification('Descarga Completada', `Guardado en Galería (${defaultFilename})`)
@@ -312,7 +329,9 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             setTimeout(() => setDownloadCompletedInfo(null), 8000)
             return
           } catch (nativeErr: any) {
-            console.warn('⚠️ Combinador nativo no disponible o falló, recurriendo al servidor...', nativeErr)
+            console.warn('⚠️ Combinador nativo falló, recurriendo al servidor...', nativeErr)
+            pollActive = true
+            pollProgress()
           }
         }
 
@@ -505,12 +524,14 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('📥 Iniciando descarga simple...', quality)
 
-        // 🚀 PRIORIDAD 1: Si tenemos la URL directa del stream en el cliente (que no esté atada a la IP del servidor)
-        const isIpBound = format.url && format.url.includes('googlevideo.com')
+        // 🚀 PRIORIDAD 1: Si tenemos la URL directa del stream en el cliente (extraída en dispositivo o no atada a IP del servidor)
+        const isDeviceExtracted = videoInfo?.method === 'native_device'
+        const isIpBound = !isDeviceExtracted && format.url && format.url.includes('googlevideo.com')
         if (format.url && format.url.startsWith('http') && !isIpBound) {
           if (isNative) {
             try {
               console.log('📱 [Android] Descargando flujo directo nativamente...')
+              pollActive = false
               setDownloadDetails('Descargando archivo directamente...')
               setDownloadProgress(35)
               const nativeRes = await downloadAndCombineNative(
@@ -519,7 +540,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                 defaultFilename,
                 false
               )
-              pollActive = false
               setDownloadProgress(100)
               setDownloadDetails('¡Guardado en la Galería!')
               scheduleNotification('Descarga Completada', `Guardado en Galería (${defaultFilename})`)
@@ -1041,10 +1061,12 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       try {
         console.log('🎵 Descargando audio:', audioFormat.itag)
 
-        // 📱 PRIORIDAD 1 (MÓVIL): Descarga directa nativa a biblioteca de Música (solo si no es googlevideo.com IP-bound)
-        const isIpBound = audioFormat.url && audioFormat.url.includes('googlevideo.com')
+        // 📱 PRIORIDAD 1 (MÓVIL): Descarga directa nativa a biblioteca de Música si se extrajo en dispositivo o no está atada a IP del servidor
+        const isDeviceExtracted = videoInfo?.method === 'native_device'
+        const isIpBound = !isDeviceExtracted && audioFormat.url && audioFormat.url.includes('googlevideo.com')
         if (isNative && audioFormat.url && audioFormat.url.startsWith('http') && !isIpBound) {
           console.log('📱 [Android] Descargando audio directamente en el dispositivo...')
+          pollActive = false
           setDownloadDetails('Descargando archivo de audio...')
           setDownloadProgress(35)
           try {
@@ -1054,7 +1076,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               defaultFilename,
               true
             )
-            pollActive = false
             setDownloadProgress(100)
             setDownloadDetails('¡Guardado en Música!')
             scheduleNotification('Descarga Completada', `Guardado en Música (${defaultFilename})`)
@@ -1230,6 +1251,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       let score = 0;
       if (!isHls(f)) score += 100;
       if ((f.format || '').toLowerCase() === 'mp4') score += 50;
+      if ((f.codec || '').toLowerCase().includes('avc1')) score += 30;
       if (preferVideoOnly ? !f.hasAudio : !!f.hasAudio) score += 25;
       if (preferVideoOnly && !f.hasAudio && !isHls(f)) score += 20;
       if (!preferVideoOnly && !isHls(f) && !f.hasAudio) score += 10;
@@ -1259,8 +1281,15 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
     )
 
     audioFormats.sort((a, b) => {
-      const getV = (q: string) => parseInt(q.match(/\d+/)?.[0] || '0')
-      return getV(b.quality) - getV(a.quality)
+      const score = (f: VideoFormat) => {
+        let s = 0
+        if (String(f.itag) === '140') s += 1000
+        if (f.format?.toLowerCase() === 'm4a') s += 500
+        if (f.format?.toLowerCase() === 'mp3') s += 400
+        const kbps = parseInt(f.quality.match(/\d+/)?.[0] || '0')
+        return s + kbps
+      }
+      return score(b) - score(a)
     })
 
     return audioFormats[0] || null

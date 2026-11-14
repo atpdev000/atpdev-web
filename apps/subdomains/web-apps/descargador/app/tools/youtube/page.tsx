@@ -1,28 +1,31 @@
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { FEATURES } from '@/lib/featureFlags'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
+import YoutubeToolGate from '@/components/YoutubeToolGate'
 import { getSubdomainConfig } from '@atpdev/database'
 
-export const metadata: Metadata = {
-    title: 'Descargar Videos de YouTube en HD y MP3 | Descargador Pro',
-    description: 'Gestiona y respalda videos de YouTube en la mejor calidad disponible (1080p, 4K y MP3). Rápido, seguro y profesional.',
+function isServerYoutubeEnabled(): boolean {
+    try {
+        const config = getSubdomainConfig('descargador')
+        return config?.modules?.youtube_enabled ?? FEATURES.YOUTUBE_ENABLED
+    } catch {
+        return FEATURES.YOUTUBE_ENABLED
+    }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    const enabled = isServerYoutubeEnabled()
+    return {
+        title: 'Descargar Videos de YouTube en HD y MP3 | Descargador Pro',
+        description: 'Gestiona y respalda videos de YouTube en la mejor calidad disponible (1080p, 4K y MP3). Rápido, seguro y profesional.',
+        ...(!enabled ? { robots: { index: false, follow: false } } : {}),
+    }
 }
 
 export default function YoutubeToolPage() {
-    let isEnabled = false
-    try {
-        const config = getSubdomainConfig('descargador')
-        isEnabled = config?.modules?.youtube_enabled ?? FEATURES.YOUTUBE_ENABLED
-    } catch {
-        isEnabled = FEATURES.YOUTUBE_ENABLED
-    }
-
-    if (!isEnabled) {
-        redirect('/')
-    }
+    const isEnabled = isServerYoutubeEnabled()
 
     const howToSchema = {
         "@context": "https://schema.org",
@@ -49,7 +52,8 @@ export default function YoutubeToolPage() {
     }
 
     return (
-        <div className="container mx-auto px-4 max-w-5xl">
+        <YoutubeToolGate serverEnabled={isEnabled}>
+            <div className="container mx-auto px-4 max-w-5xl">
             <script
                 id="youtube-howto-schema"
                 key="youtube-howto-schema"
@@ -128,6 +132,7 @@ export default function YoutubeToolPage() {
                 </div>
             </div>
         </div>
+        </YoutubeToolGate>
     )
 }
 

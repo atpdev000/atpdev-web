@@ -1,7 +1,8 @@
 'use client'
 
-import { FEATURES } from '@/lib/featureFlags'
+import { isYoutubeVisible } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
+import { usePlatform } from '@/hooks/usePlatform'
 
 export type Platform = 'facebook' | 'tiktok' | 'instagram' | 'twitter' | 'threads' | 'youtube' | 'whatsapp'
 
@@ -13,6 +14,7 @@ interface PlatformTabsProps {
 
 export default function PlatformTabs({ activePlatform, onPlatformChange, modules }: PlatformTabsProps) {
   const { t } = useI18n()
+  const { isNative } = usePlatform()
 
   const allPlatforms = [
     {
@@ -87,10 +89,7 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
 
   const platforms = allPlatforms.filter(p => {
     if (p.id === 'youtube') {
-      if (modules && typeof modules.youtube_enabled === 'boolean') {
-        return modules.youtube_enabled;
-      }
-      return FEATURES.YOUTUBE_ENABLED;
+      return isYoutubeVisible(modules, isNative);
     }
     if (!modules) return true;
     const key = `${p.id}_enabled`;

@@ -39,6 +39,28 @@ export function isPlayStoreBuild(): boolean {
 }
 
 /**
+ * Determine whether YouTube UI/routes should be visible on the current client.
+ * - Play Store builds always keep YouTube disabled.
+ * - Native APK/Capacitor builds enable YouTube using on-device extraction.
+ * - Public web respects CMS modules.youtube_enabled (AdSense compliance).
+ */
+export function isYoutubeVisible(
+    modules?: Record<string, boolean>,
+    isNative: boolean = false
+): boolean {
+    if (isPlayStoreBuild()) {
+        return false
+    }
+    if (isNative) {
+        return true
+    }
+    if (modules && typeof modules.youtube_enabled === 'boolean') {
+        return modules.youtube_enabled
+    }
+    return FEATURES.YOUTUBE_ENABLED
+}
+
+/**
  * Get available platforms based on feature flags
  */
 export function getAvailablePlatforms() {

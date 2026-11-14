@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { FEATURES } from '@/lib/featureFlags'
+import { isYoutubeVisible } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
+import { usePlatform } from '@/hooks/usePlatform'
 
 const CURRENT_YEAR = 2026;
 
@@ -13,23 +14,20 @@ interface FooterProps {
 
 export default function Footer({ modules }: FooterProps) {
   const { t } = useI18n()
-  const [isYoutubeActive, setIsYoutubeActive] = useState<boolean>(
-    modules && typeof modules.youtube_enabled === 'boolean'
-      ? modules.youtube_enabled
-      : false
-  )
+  const { isNative } = usePlatform()
+  const [resolvedModules, setResolvedModules] = useState<Record<string, boolean> | undefined>(modules)
 
   useEffect(() => {
-    if (modules && typeof modules.youtube_enabled === 'boolean') {
-      setIsYoutubeActive(modules.youtube_enabled)
+    if (modules) {
+      setResolvedModules(modules)
       return
     }
 
     fetch('/api/theme')
       .then(res => res.json())
       .then(data => {
-        if (data?.modules?.youtube_enabled !== undefined) {
-          setIsYoutubeActive(data.modules.youtube_enabled)
+        if (data?.modules) {
+          setResolvedModules(data.modules)
         }
       })
       .catch(() => {})
@@ -37,16 +35,18 @@ export default function Footer({ modules }: FooterProps) {
     try {
       const channel = new BroadcastChannel('descargador_theme_channel')
       channel.onmessage = (event) => {
-        if (event.data?.modules?.youtube_enabled !== undefined) {
-          setIsYoutubeActive(event.data.modules.youtube_enabled)
+        if (event.data?.modules) {
+          setResolvedModules(event.data.modules)
         }
-        if (event.data?.payload?.modules?.youtube_enabled !== undefined) {
-          setIsYoutubeActive(event.data.payload.modules.youtube_enabled)
+        if (event.data?.payload?.modules) {
+          setResolvedModules(event.data.payload.modules)
         }
       }
       return () => channel.close()
     } catch (e) {}
   }, [modules])
+
+  const isYoutubeActive = isYoutubeVisible(resolvedModules, isNative)
 
   const scrollToTools = () => {
     if (typeof window !== 'undefined') {
