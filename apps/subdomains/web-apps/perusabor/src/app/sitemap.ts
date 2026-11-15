@@ -12,6 +12,8 @@ const ROUTES = [
   '/inventario',
   '/restaurante',
   '/chef-ia',
+  '/sobre-nosotros',
+  '/contacto',
   '/privacidad',
   '/terminos',
 ];

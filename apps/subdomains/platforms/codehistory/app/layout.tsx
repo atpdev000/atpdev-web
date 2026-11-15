@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
 import AdSenseInjector from '@/components/AdSenseInjector'
+import CookieBanner from '@/components/CookieBanner'
 
 const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137'
 
@@ -39,6 +40,7 @@ export default function RootLayout({
         <AnalyticsTracker />
         <AdSenseInjector adsenseId={adsenseId} />
         {children}
+        <CookieBanner />
       </body>
     </html>
   )

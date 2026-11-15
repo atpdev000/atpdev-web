@@ -79,6 +79,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/calculadora-sueldo',
     '/comparador-regimenes',
     '/crear-cv-cas',
+    '/plantillas-anexos',
     '/preguntas-entrevista-cas',
     '/simulador-entrevista-ia',
     '/organizaciones',

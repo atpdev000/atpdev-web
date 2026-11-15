@@ -150,6 +150,12 @@ export default function HomePage() {
               </a>
             </div>
             <nav aria-label="Enlaces legales y ecosistema" className="flex flex-wrap gap-5">
+              <Link href="/about" className="text-slate-300 hover:text-emerald-300">
+                Sobre Nosotros
+              </Link>
+              <Link href="/contact" className="text-slate-300 hover:text-emerald-300">
+                Contacto
+              </Link>
               <Link href="/privacy" className="text-slate-300 hover:text-emerald-300">
                 Política de Privacidad
               </Link>

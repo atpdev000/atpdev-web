@@ -3,6 +3,7 @@ import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { AdSenseInjector } from '@/components/AdSenseInjector';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://perusabor.atpdev.dev'),
@@ -45,6 +46,7 @@ export default function RootLayout({
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <CookieConsentBanner />
       </body>
     </html>
   );

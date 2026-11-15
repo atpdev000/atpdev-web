@@ -135,15 +135,18 @@ export const Footer = () => {
                 <div className="mt-12 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted">
                     <p>© {currentYear} MasterAtPDF · Diseñado con precisión por ATP DEV Ecosystem.</p>
                     <div className="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+                        <Link href="/sobre-nosotros" className="hover:text-brand transition-colors">
+                            Sobre Nosotros
+                        </Link>
                         <Link href="/privacidad" className="hover:text-brand transition-colors">
                             Privacidad
                         </Link>
                         <Link href="/terminos" className="hover:text-brand transition-colors">
                             Términos de Uso
                         </Link>
-                        <a href="https://www.atpdev.dev/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">
+                        <Link href="/contacto" className="hover:text-brand transition-colors">
                             Contacto
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

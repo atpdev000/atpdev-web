@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AdSenseInjector } from "@/components/AdSenseInjector";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -46,6 +47,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <CookieConsentBanner />
       </body>
     </html>
   );
