@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Crown } from 'lucide-react'
+import { Crown, AtSign } from 'lucide-react'
 import { isYoutubeVisible } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
 import { usePlatform } from '@/hooks/usePlatform'
@@ -61,9 +61,7 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
       id: 'threads' as Platform,
       name: t.platforms.threads,
       icon: (
-        <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12.186 24h-.007C5.462 24 0 18.538 0 11.814 0 5.09 5.462 0 12.179 0c6.643 0 11.821 5.09 11.821 11.664 0 .61-.044 1.222-.132 1.819h-3.864c.05-.38.077-.768.077-1.164 0-4.664-3.64-8.318-8.23-8.318-4.59 0-8.23 3.654-8.23 8.318 0 4.664 3.64 8.319 8.23 8.319 2.502 0 4.697-1.077 6.136-2.825l2.673 2.164C16.942 22.384 14.717 24 12.186 24z" />
-        </svg>
+        <AtSign className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 stroke-[2.5]" />
       ),
       activeClass: 'bg-zinc-900 dark:bg-black text-white shadow-xl shadow-zinc-500/30 ring-2 ring-zinc-400 border border-zinc-600 font-bold scale-[1.02]'
     },

@@ -80,7 +80,7 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = "" }
 
   if (!mounted) {
     return (
-      <div className={`w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse ${className}`} />
+      <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse shrink-0 ${className}`} />
     );
   }
 
@@ -92,7 +92,7 @@ export const ThemeToggle: React.FC<{ className?: string }> = ({ className = "" }
       onClick={toggleTheme}
       title={isLight ? "Cambiar a Modo Oscuro" : "Cambiar a Modo Claro"}
       aria-label={isLight ? "Cambiar a Modo Oscuro" : "Cambiar a Modo Claro"}
-      className={`relative group p-2 rounded-xl border transition-all duration-300 flex items-center justify-center cursor-pointer shadow-xs active:scale-95 ${
+      className={`relative group w-8 h-8 sm:w-9 sm:h-9 rounded-xl border transition-all duration-300 flex items-center justify-center cursor-pointer shadow-xs active:scale-95 shrink-0 ${
         isLight
           ? "bg-slate-100 hover:bg-slate-200 border-slate-300 text-amber-600 hover:text-amber-700 shadow-slate-200/50"
           : "bg-slate-800/80 hover:bg-slate-700 border-slate-700 text-blue-400 hover:text-blue-300 hover:border-blue-500/30 shadow-black/40"

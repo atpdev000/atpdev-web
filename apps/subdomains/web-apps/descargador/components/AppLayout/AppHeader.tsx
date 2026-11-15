@@ -63,34 +63,34 @@ export default function AppHeader() {
 
     return (
         <>
-            <div className="py-2 px-3 sm:px-4 flex items-center justify-between transition-colors border-b border-gray-100 dark:border-slate-800/80 max-w-full relative z-50">
+            <div className="py-2 px-2.5 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-2 transition-colors border-b border-gray-100 dark:border-slate-800/80 w-full max-w-full relative z-50">
                 <Link
                     href="/"
                     onClick={handleLogoClick}
-                    className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer group"
+                    className="flex items-center gap-1.5 sm:gap-2 hover:opacity-85 transition-opacity cursor-pointer group min-w-0 shrink"
                     title="Ir al inicio de Descargador Pro"
                 >
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-1.5 rounded-lg shadow-sm shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-1.5 rounded-lg shadow-sm shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
                         <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                         </svg>
                     </div>
-                    <h1 className="text-base sm:text-lg font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate min-w-0 mr-1 sm:mr-2">
+                    <h1 className="text-[15px] sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate min-w-0">
                         Descargador Pro
                     </h1>
                 </Link>
 
-                <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
+                <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     <LanguageSelector />
                     <ThemeToggle />
 
                     <button
                         onClick={handleShareApp}
-                        className="p-1.5 sm:p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors shrink-0 cursor-pointer active:scale-95"
+                        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800/80 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors shrink-0 cursor-pointer active:scale-95"
                         title="Compartir Descargador Pro"
                         aria-label="Compartir Descargador Pro"
                     >
-                        <Share2 className="w-5 h-5" />
+                        <Share2 className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                     </button>
 
                     <button
@@ -98,11 +98,11 @@ export default function AppHeader() {
                             markAllAsRead()
                             setIsHistoryOpen(true)
                         }}
-                        className="p-1.5 sm:p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative shrink-0 cursor-pointer active:scale-95"
+                        className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-800/80 text-gray-600 dark:text-slate-300 hover:bg-gray-200/70 dark:hover:bg-slate-700 transition-colors relative shrink-0 cursor-pointer active:scale-95"
                         title="Historial de Descargas"
                         aria-label="Historial de Descargas"
                     >
-                        <Clock className="w-5 h-5" />
+                        <Clock className="w-4 h-4 sm:w-[18px] sm:h-[18px]" />
                         {unreadCount > 0 && (
                             <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm">
                                 {unreadCount > 9 ? '9+' : unreadCount}

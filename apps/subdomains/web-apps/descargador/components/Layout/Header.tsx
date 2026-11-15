@@ -81,25 +81,25 @@ export default function Header() {
   return (
     <>
       <header className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 sticky top-0 z-50 transition-colors duration-200" suppressHydrationWarning>
-        <div className="container mx-auto px-4 py-3.5">
-          <div className="flex items-center justify-between">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-3.5">
+          <div className="flex items-center justify-between gap-2">
             {/* Logo y nombre con enlace a Home */}
             <Link 
               href="/" 
               onClick={handleLogoClick}
-              className="flex items-center space-x-3 hover:opacity-85 transition-opacity cursor-pointer group"
+              className="flex items-center gap-2 sm:gap-3 hover:opacity-85 transition-opacity cursor-pointer group min-w-0 shrink"
               title="Ir al inicio de Descargador Pro"
             >
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2.5 rounded-xl shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 sm:p-2.5 rounded-xl shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
+                <svg className="h-4 w-4 sm:h-5 sm:w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
                 </svg>
               </div>
-              <div>
-                <span className="block text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+              <div className="min-w-0">
+                <span className="block text-[15px] sm:text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight truncate">
                   Descargador <span className="text-blue-600 dark:text-blue-400">Pro</span>
                 </span>
-                <p className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block">
+                <p className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block truncate">
                   {t.nav.subtitle}
                 </p>
               </div>
@@ -157,7 +157,7 @@ export default function Header() {
             </nav>
 
             {/* Controles de Idioma, Tema, Historial y Contacto */}
-            <div className="flex items-center space-x-2 sm:space-x-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               {/* Selector de Idiomas */}
               <LanguageSelector />
 
@@ -167,20 +167,20 @@ export default function Header() {
               {/* Planes en móvil */}
               <Link
                 href="/planes"
-                className={`lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-white font-bold text-xs shadow-xs ${
+                className={`lg:hidden h-8 sm:h-9 inline-flex items-center gap-1 px-2 sm:px-2.5 rounded-xl text-white font-bold text-[11px] sm:text-xs shadow-xs shrink-0 ${
                   mounted && isPro ? 'bg-emerald-600 ring-1 ring-emerald-400/50' : 'bg-amber-500'
                 }`}
               >
-                👑 {mounted && isPro ? 'Eres PRO' : 'PRO'}
+                👑 <span>{mounted && isPro ? 'PRO' : 'PRO'}</span>
               </Link>
 
-              {/* APK en móvil */}
+              {/* APK en móvil (visible desde 420px, ya está en el Hero principal) */}
               {mounted && apkConfig?.enabled && (
                 <a
                   href={apkConfig.file_url || '/downloads/DescargadorPro.apk'}
                   download
                   suppressHydrationWarning
-                  className="lg:hidden inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-xs"
+                  className="hidden min-[420px]:inline-flex lg:hidden h-8 sm:h-9 items-center gap-1 px-2 sm:px-2.5 rounded-xl bg-emerald-600 text-white font-bold text-[11px] sm:text-xs shadow-xs shrink-0"
                   title="Descargar APK"
                 >
                   📲 APK

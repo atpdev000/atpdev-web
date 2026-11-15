@@ -323,7 +323,7 @@ export default function ThreadsDownloader({ initialUrl, autoSearch }: Downloader
               }
             }}
             placeholder={t.downloader.placeholderThreads}
-            className="w-full px-4 py-3.5 pl-11 pr-24 rounded-xl border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-zinc-800 dark:focus:ring-zinc-400 focus:border-transparent transition-all outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-sm font-medium"
+            className="w-full px-4 py-3.5 pl-10 pr-20 rounded-xl border border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-zinc-800 dark:focus:ring-zinc-400 focus:border-transparent transition-all outline-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white text-sm placeholder:text-xs sm:placeholder:text-sm placeholder:text-gray-400 dark:placeholder:text-slate-500 shadow-sm font-medium"
             required
           />
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-700 dark:text-gray-300">

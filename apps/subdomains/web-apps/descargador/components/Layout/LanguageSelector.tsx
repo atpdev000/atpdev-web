@@ -34,13 +34,13 @@ export const LanguageSelector: React.FC<{ className?: string }> = ({ className =
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all duration-200 cursor-pointer shadow-xs active:scale-95"
+        className="h-8 sm:h-9 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] sm:text-xs font-semibold transition-all duration-200 cursor-pointer shadow-xs active:scale-95 shrink-0"
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        <span className="text-base leading-none">{currentLocaleInfo.flag}</span>
+        <span className="text-sm sm:text-base leading-none">{currentLocaleInfo.flag}</span>
         <span className="uppercase tracking-wider font-bold">{currentLocaleInfo.code}</span>
-        <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown size={13} className={`text-slate-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (
