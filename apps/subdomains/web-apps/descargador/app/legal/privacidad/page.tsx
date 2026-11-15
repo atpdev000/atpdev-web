@@ -6,6 +6,7 @@ export function generateMetadata(): Metadata {
   const config = getSubdomainConfig('descargador')
   const siteTitle = config?.branding?.site_title || 'Descargador Pro'
   return {
+    alternates: { canonical: '/legal/privacidad' },
     title: `Política de Privacidad | ${siteTitle}`,
     description: `Conoce cómo protegemos tu privacidad, nuestra política de cookies y el tratamiento seguro de datos en ${siteTitle} conforme a RGPD y Google AdSense.`,
   }

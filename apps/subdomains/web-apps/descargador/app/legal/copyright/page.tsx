@@ -6,6 +6,7 @@ export function generateMetadata(): Metadata {
   const config = getSubdomainConfig('descargador')
   const siteTitle = config?.branding?.site_title || 'Descargador Pro'
   return {
+    alternates: { canonical: '/legal/copyright' },
     title: `Política de Copyright y DMCA | ${siteTitle}`,
     description: `Información sobre derechos de autor, procedimiento de notificación DMCA y uso legítimo en ${siteTitle}.`,
   }

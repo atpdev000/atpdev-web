@@ -6,6 +6,7 @@ export function generateMetadata(): Metadata {
   const config = getSubdomainConfig('descargador')
   const siteTitle = config?.branding?.site_title || 'Descargador Pro'
   return {
+    alternates: { canonical: '/legal/cookies' },
     title: `Política de Cookies | ${siteTitle}`,
     description: `Conoce en detalle cómo ${siteTitle} utiliza cookies técnicas y almacenamiento local para brindarte la mejor experiencia.`,
   }

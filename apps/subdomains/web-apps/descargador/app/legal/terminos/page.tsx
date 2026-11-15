@@ -6,6 +6,7 @@ export function generateMetadata(): Metadata {
   const config = getSubdomainConfig('descargador')
   const siteTitle = config?.branding?.site_title || 'Descargador Pro'
   return {
+    alternates: { canonical: '/legal/terminos' },
     title: `Términos de Servicio | ${siteTitle}`,
     description: `Términos y condiciones de uso de ${siteTitle}. Normas de uso aceptable, limitaciones de responsabilidad y doctrina de uso justo.`,
   }
