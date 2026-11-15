@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { FEATURES } from '@/lib/featureFlags'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
@@ -18,14 +19,20 @@ function isServerYoutubeEnabled(): boolean {
 export async function generateMetadata(): Promise<Metadata> {
     const enabled = isServerYoutubeEnabled()
     return {
-        title: 'Descargar Videos de YouTube en HD y MP3 | Descargador Pro',
-        description: 'Gestiona y respalda videos de YouTube en la mejor calidad disponible (1080p, 4K y MP3). Rápido, seguro y profesional.',
+        title: 'Herramienta Multimedia | Descargador Pro',
+        description: 'Suite de respaldo multimedia para redes sociales en alta definición.',
+        alternates: {
+            canonical: enabled ? '/tools/youtube' : '/',
+        },
         ...(!enabled ? { robots: { index: false, follow: false } } : {}),
     }
 }
 
 export default function YoutubeToolPage() {
     const isEnabled = isServerYoutubeEnabled()
+    if (!isEnabled) {
+        redirect('/')
+    }
 
     const howToSchema = {
         "@context": "https://schema.org",

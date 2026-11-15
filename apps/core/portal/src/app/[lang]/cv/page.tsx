@@ -24,9 +24,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang = "es" } = await params;
   const isEn = lang !== "es" && lang !== "pt";
+  const prefix = lang === "es" ? "" : `/${lang}`;
   return {
     title: isEn ? "Resume (CV) — Percy Acha Taipe" : "Currículum Vitae (CV) — Percy Acha Taipe",
     robots: { index: false, follow: true },
+    alternates: {
+      canonical: `https://www.atpdev.dev${prefix}/cv`,
+    },
   };
 }
 

@@ -16,16 +16,21 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
   const BASE_URL = "https://www.atpdev.dev";
   const path = "/sobre-mi";
-  const supportedLocales = ["es", "en", "ru", "hi", "zh", "fr", "de", "pt", "ja"];
+  const indexableLocales = ["es", "en"];
+  const shouldIndex = indexableLocales.includes(lang);
 
   return {
     title,
     description,
+    robots: {
+      index: shouldIndex,
+      follow: true,
+    },
     alternates: {
       canonical: `${BASE_URL}${lang === "es" ? "" : "/" + lang}${path}`,
       languages: {
         "x-default": `${BASE_URL}${path}`,
-        ...Object.fromEntries(supportedLocales.map((l) => [l, `${BASE_URL}${l === "es" ? "" : "/" + l}${path}`])),
+        ...Object.fromEntries(indexableLocales.map((l) => [l, `${BASE_URL}${l === "es" ? "" : "/" + l}${path}`])),
       },
     },
     openGraph: {

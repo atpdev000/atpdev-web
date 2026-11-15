@@ -82,11 +82,13 @@ export async function generateMetadata(
   const description = lang === 'es' ? descBase : await translateText(descBase, lang);
 
   const path = lang === 'es' ? '' : `/${lang}`;
+  const indexableLocales = ['es', 'en'];
+  const shouldIndex = indexableLocales.includes(lang);
   
   const languages: Record<string, string> = {
     'x-default': BASE_URL,
   };
-  supportedLocales.forEach(loc => {
+  indexableLocales.forEach(loc => {
     languages[loc] = `${BASE_URL}${loc === 'es' ? '' : '/' + loc}`;
   });
 
@@ -109,10 +111,10 @@ export async function generateMetadata(
       languages,
     },
     robots: {
-      index: true,
+      index: shouldIndex,
       follow: true,
       googleBot: {
-        index: true,
+        index: shouldIndex,
         follow: true,
         "max-image-preview": "large",
         "max-snippet": -1,

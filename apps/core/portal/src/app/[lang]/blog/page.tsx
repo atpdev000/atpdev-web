@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { permanentRedirect } from 'next/navigation';
 import { BookOpen, Clock, ArrowRight, Code2, UserCheck } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { BLOG_POSTS, getLocalizedBlogPost } from '@/data/blog-posts';
@@ -56,7 +57,10 @@ export default async function BlogIndexPage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const isEn = lang !== 'es' && lang !== 'pt';
+  if (lang !== 'es' && lang !== 'en') {
+    permanentRedirect(lang === 'pt' ? '/blog' : '/en/blog');
+  }
+  const isEn = lang === 'en';
   const prefix = lang === 'es' ? '' : `/${lang}`;
 
   const posts = BLOG_POSTS.map((post) => getLocalizedBlogPost(post, lang));
@@ -216,6 +220,7 @@ export default async function BlogIndexPage({
           <div className="flex flex-wrap items-center gap-5">
             <Link href={`${prefix}/`} className="hover:underline">{isEn ? 'Home' : 'Inicio'}</Link>
             <Link href={`${prefix}/sobre-mi`} className="hover:underline">{isEn ? 'About' : 'Sobre Mí'}</Link>
+            <Link href={`${prefix}/#contact`} className="hover:underline">{isEn ? 'Contact' : 'Contacto'}</Link>
             <Link href={`${prefix}/privacy`} className="hover:underline">{isEn ? 'Privacy' : 'Privacidad'}</Link>
             <Link href={`${prefix}/terms`} className="hover:underline">{isEn ? 'Terms' : 'Términos'}</Link>
           </div>

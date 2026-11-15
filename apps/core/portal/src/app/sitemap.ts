@@ -41,6 +41,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
       alternates: buildAlternates('/blog'),
     },
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.4,
+      alternates: buildAlternates('/privacy'),
+    },
+    {
+      url: `${BASE_URL}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.4,
+      alternates: buildAlternates('/terms'),
+    },
   ];
 
   const langRoutes: MetadataRoute.Sitemap = langs.flatMap(lang => [
@@ -64,6 +78,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.8,
       alternates: buildAlternates('/blog'),
+    },
+    {
+      url: `${BASE_URL}/${lang}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.4,
+      alternates: buildAlternates('/privacy'),
+    },
+    {
+      url: `${BASE_URL}/${lang}/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.4,
+      alternates: buildAlternates('/terms'),
     },
   ]);
 

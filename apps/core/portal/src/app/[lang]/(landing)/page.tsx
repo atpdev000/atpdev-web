@@ -21,15 +21,20 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   const { lang } = await params;
   const BASE_URL = "https://www.atpdev.dev";
   const path = lang === 'es' ? '' : `/${lang}`;
-  const supportedLocales = ['es', 'en', 'ru', 'hi', 'zh', 'fr', 'de', 'pt', 'ja'];
+  const indexableLocales = ['es', 'en'];
+  const shouldIndex = indexableLocales.includes(lang);
   
   return {
+    robots: {
+      index: shouldIndex,
+      follow: true,
+    },
     alternates: {
       canonical: `${BASE_URL}${path}`,
       languages: {
         "x-default": `${BASE_URL}`,
         ...Object.fromEntries(
-          supportedLocales.map(l => [l, `${BASE_URL}${l === 'es' ? '' : '/' + l}`])
+          indexableLocales.map(l => [l, `${BASE_URL}${l === 'es' ? '' : '/' + l}`])
         )
       },
     },

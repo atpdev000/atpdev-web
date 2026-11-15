@@ -6,6 +6,9 @@ import { ArrowLeft, Sparkles, CheckCircle2, ShieldCheck, Zap, HelpCircle } from 
 export const metadata: Metadata = {
   title: 'Descargar Reels y Videos de Instagram en HD Online | Descargador Pro',
   description: 'Descarga videos, Reels, Stories públicas y audios de Instagram en alta definición (1080p Full HD). Rápido, 100% gratuito y sin necesidad de instalar apps.',
+  alternates: {
+    canonical: '/tools/instagram',
+  },
 }
 
 export default function InstagramToolPage() {

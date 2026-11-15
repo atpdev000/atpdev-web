@@ -6,6 +6,9 @@ import { ArrowLeft, Sparkles, CheckCircle2, ShieldCheck, Zap, HelpCircle } from 
 export const metadata: Metadata = {
   title: 'Descargar Videos de Twitter / X en MP4 y GIF Online | Descargador Pro',
   description: 'Descarga videos de Twitter (X) y convierte GIFs a MP4 en alta resolución. Compatible con calidades 1080p, 720p y 480p. Rápido, gratis y sin registro.',
+  alternates: {
+    canonical: '/tools/twitter',
+  },
 }
 
 export default function TwitterToolPage() {

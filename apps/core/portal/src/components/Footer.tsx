@@ -28,6 +28,7 @@ export default function Footer({
             <li><Link href={`${linkPrefix}/blog`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Technical Articles" : "Artículos Técnicos"}</Link></li>
             <li><a href={`${linkPrefix}/#experience`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
             <li><a href={`${linkPrefix}/#portfolio`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
+            <li><a href={`${linkPrefix}/#contact`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkContact || (isEn ? "Contact" : "Contacto")}</a></li>
           </ul>
         </div>
         <div>
@@ -35,6 +36,7 @@ export default function Footer({
           <ul className="space-y-3">
             <li><Link href={`${linkPrefix}/privacy`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkPrivacy}</Link></li>
             <li><Link href={`${linkPrefix}/terms`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkTerms}</Link></li>
+            <li><Link href={`${linkPrefix}/sobre-mi`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "About Author" : "Sobre el Autor"}</Link></li>
           </ul>
         </div>
       </div>

@@ -96,9 +96,9 @@ export default function Header() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                <span className="block text-lg md:text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                   Descargador <span className="text-blue-600 dark:text-blue-400">Pro</span>
-                </h1>
+                </span>
                 <p className="text-xs text-gray-500 dark:text-slate-400 hidden sm:block">
                   {t.nav.subtitle}
                 </p>
@@ -125,6 +125,9 @@ export default function Header() {
               </button>
               <Link href="/faq" className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 <span className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.faq}</span>
+              </Link>
+              <Link href="/about" className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <span className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Nosotros</span>
               </Link>
               <Link
                 href="/planes"

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { ArrowLeft, Calendar, Clock, Layers, User, ArrowRight } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { BlogArticleContent } from '@/components/BlogArticleContent';
@@ -73,7 +73,11 @@ export default async function BlogArticlePage({
   const rawPost = getBlogPostBySlug(slug);
   if (!rawPost) notFound();
 
-  const isEn = lang !== 'es' && lang !== 'pt';
+  if (lang !== 'es' && lang !== 'en') {
+    permanentRedirect(lang === 'pt' ? `/blog/${slug}` : `/en/blog/${slug}`);
+  }
+
+  const isEn = lang === 'en';
   const prefix = lang === 'es' ? '' : `/${lang}`;
   const post = getLocalizedBlogPost(rawPost, lang);
   const canonicalUrl = `${BASE_URL}${prefix}/blog/${slug}`;
@@ -283,6 +287,7 @@ export default async function BlogArticlePage({
             <Link href={`${prefix}/`} className="hover:underline">{isEn ? 'Home' : 'Inicio'}</Link>
             <Link href={`${prefix}/blog`} className="hover:underline">{isEn ? 'Articles' : 'Artículos'}</Link>
             <Link href={`${prefix}/sobre-mi`} className="hover:underline">{isEn ? 'About' : 'Sobre Mí'}</Link>
+            <Link href={`${prefix}/#contact`} className="hover:underline">{isEn ? 'Contact' : 'Contacto'}</Link>
             <Link href={`${prefix}/privacy`} className="hover:underline">{isEn ? 'Privacy' : 'Privacidad'}</Link>
             <Link href={`${prefix}/terms`} className="hover:underline">{isEn ? 'Terms' : 'Términos'}</Link>
           </div>

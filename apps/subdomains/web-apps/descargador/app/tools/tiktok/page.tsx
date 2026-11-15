@@ -6,6 +6,9 @@ import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
 export const metadata: Metadata = {
     title: 'Descargar Videos de TikTok Sin Marca de Agua | Online Gratis',
     description: 'Descarga videos de TikTok en HD sin marcas de agua ni logos. Rápido, fácil y totalmente online. Guarda tus TikToks favoritos en MP4 o MP3.',
+  alternates: {
+    canonical: '/tools/tiktok',
+  },
 }
 
 export default function TiktokToolPage() {

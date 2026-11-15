@@ -14,6 +14,7 @@ import { AdSenseBanner } from "@/components/AdSenseBanner";
 import { ProjectArticleViewer } from "@/components/ProjectArticleViewer";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { AnimatedDownloadButton } from "@/components/AnimatedDownloadButton";
+import Navbar from "@/components/Navbar";
 
 const GooglePlay2022Icon = ({ size = 24 }: { size?: number }) => (
   <svg viewBox="0 0 512 512" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
@@ -62,7 +63,8 @@ export async function generateMetadata(
     : await translateText(project.description, lang);
 
   const BASE_URL = "https://www.atpdev.dev";
-  const supportedLocales = ['es', 'en', 'ru', 'hi', 'zh', 'fr', 'de', 'pt', 'ja'];
+  const indexableLocales = ['es', 'en'];
+  const shouldIndex = !project || project.status === 'Privado' ? false : indexableLocales.includes(lang);
   const path = `/apps/${slug}`;
   const ogImage = (project.image && project.image.trim() !== "") ? project.image : `${BASE_URL}/og-image.png`;
 
@@ -71,13 +73,16 @@ export async function generateMetadata(
   return {
     title,
     description,
-    ...(isPrivate ? { robots: { index: false, follow: false } } : {}),
+    robots: {
+      index: shouldIndex,
+      follow: !isPrivate,
+    },
     alternates: {
       canonical: `${BASE_URL}${lang === 'es' ? '' : '/' + lang}${path}`,
       languages: {
         "x-default": `${BASE_URL}${path}`,
         ...Object.fromEntries(
-          supportedLocales.map(l => [l, `${BASE_URL}${l === 'es' ? '' : '/' + l}${path}`])
+          indexableLocales.map(l => [l, `${BASE_URL}${l === 'es' ? '' : '/' + l}${path}`])
         )
       },
     },
@@ -241,8 +246,13 @@ export default async function ProjectPage({
         }))
       );
 
+  const isEn = lang !== "es" && lang !== "pt";
+  const prefix = lang === "es" ? "" : `/${lang}`;
+
   return (
-    <main className="main">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)", color: "var(--text-color)" }}>
+      <Navbar />
+      <main className="main flex-1 pt-8">
       <GlowWrapper enabled={enableGlow} className="w-full text-[var(--text-color)] transition-colors duration-500 min-h-screen py-16 px-6 relative overflow-hidden">
       {localTheme && (
         <style dangerouslySetInnerHTML={{
@@ -543,5 +553,19 @@ export default async function ProjectPage({
       </div>
     </GlowWrapper>
     </main>
+    <footer className="border-t py-8 px-4 sm:px-6 text-sm" style={{ borderColor: "var(--glass-border)", color: "var(--text-muted)" }}>
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p>© {new Date().getFullYear()} ATP Dev — Percy Acha Taipe.</p>
+        <div className="flex flex-wrap items-center gap-5">
+          <Link href={`${prefix}/`} className="hover:underline">{isEn ? "Home" : "Inicio"}</Link>
+          <Link href={`${prefix}/blog`} className="hover:underline">{isEn ? "Articles" : "Artículos"}</Link>
+          <Link href={`${prefix}/sobre-mi`} className="hover:underline">{isEn ? "About" : "Sobre Mí"}</Link>
+          <Link href={`${prefix}/#contact`} className="hover:underline">{isEn ? "Contact" : "Contacto"}</Link>
+          <Link href={`${prefix}/privacy`} className="hover:underline">{isEn ? "Privacy" : "Privacidad"}</Link>
+          <Link href={`${prefix}/terms`} className="hover:underline">{isEn ? "Terms" : "Términos"}</Link>
+        </div>
+      </div>
+    </footer>
+    </div>
   );
 }

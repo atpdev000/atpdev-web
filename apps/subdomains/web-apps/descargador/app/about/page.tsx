@@ -3,8 +3,11 @@ import Link from 'next/link'
 import { ArrowLeft, Target, Rocket, Shield, Sparkles, CheckCircle2 } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Sobre Nosotros | Descargador Pro - Misión y Ecosistema',
-  description: 'Conoce la visión de Descargador Pro. Especialistas en procesamiento multimedia dedicados a garantizar la accesibilidad y respaldo legítimo de contenidos digitales.',
+  title: 'Sobre Nosotros | Descargador Pro — ATP DEV (Ing. Percy Acha Taipe)',
+  description: 'Conoce la visión técnica, equipo de ingeniería y compromiso de privacidad detrás de Descargador Pro, desarrollado por ATP DEV (Ing. Percy Acha Taipe).',
+  alternates: {
+    canonical: '/about',
+  },
 }
 
 export default function AboutPage() {
@@ -93,6 +96,34 @@ export default function AboutPage() {
               <p className="text-xs text-slate-600 dark:text-slate-400">
                 Sin registros obligatorios, sin rastreo de actividad y con historial guardado exclusivamente en tu equipo.
               </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Responsable Editorial y Dirección de Ingeniería */}
+        <section className="bg-white dark:bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider">
+            <Shield className="w-4 h-4" />
+            <span>Transparencia Institucional & Autoría</span>
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+            Desarrollado y Operado por ATP DEV — Ing. Percy Acha Taipe
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            <strong>Descargador Pro</strong> (<code className="text-xs">descargador.atpdev.dev</code>) es un producto de ingeniería web y móvil desarrollado por <strong>ATP DEV</strong> bajo la dirección técnica del <strong>Ing. Percy Acha Taipe</strong>, Ingeniero de Sistemas y Desarrollador Fullstack &amp; Mobile con sede en Perú (<a href="https://www.atpdev.dev/sobre-mi" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 underline font-semibold">ver perfil profesional verificado en atpdev.dev</a>).
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4 pt-2 text-xs text-slate-600 dark:text-slate-300">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+              <strong className="block text-slate-900 dark:text-white mb-1">Titular y Editor Responsable</strong>
+              ATP DEV — Percy Acha Taipe (Ingeniería de Sistemas y Software).
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+              <strong className="block text-slate-900 dark:text-white mb-1">Contacto Oficial y Soporte</strong>
+              <a href="mailto:soporte@atpdev.dev" className="text-blue-600 dark:text-blue-400 underline">soporte@atpdev.dev</a> / <a href="mailto:contacto@atpdev.dev" className="text-blue-600 dark:text-blue-400 underline">contacto@atpdev.dev</a>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80">
+              <strong className="block text-slate-900 dark:text-white mb-1">Jurisdicción y Cumplimiento</strong>
+              Operación desde Perú bajo Ley N.° 29733 de Protección de Datos Personales y estándares internacionales GDPR / DMCA.
             </div>
           </div>
         </section>

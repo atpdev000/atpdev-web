@@ -6,6 +6,9 @@ import { ArrowLeft, Sparkles, CheckCircle2, ShieldCheck, Zap, HelpCircle, Smartp
 export const metadata: Metadata = {
   title: 'Guardar Estados de WhatsApp en HD | Fotos y Videos | Descargador Pro',
   description: 'Guarda fotos y videos de estados de WhatsApp en alta definición sin capturas de pantalla borrosas. Guía completa y herramienta online y para app Android.',
+  alternates: {
+    canonical: '/tools/whatsapp',
+  },
 }
 
 export default function WhatsappToolPage() {

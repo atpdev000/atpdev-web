@@ -6,6 +6,9 @@ import { ArrowLeft, Sparkles, CheckCircle2 } from 'lucide-react'
 export const metadata: Metadata = {
     title: 'Descargar Videos de Facebook HD Online | Gratis y Rápido',
     description: 'La mejor herramienta para descargar videos de Facebook, Reels y videos públicos en alta definición (1080p HD). Rápido, gratuito y sin registro.',
+  alternates: {
+    canonical: '/tools/facebook',
+  },
 }
 
 export default function FacebookToolPage() {

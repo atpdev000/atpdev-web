@@ -1,14 +1,13 @@
-'use client'
+import type { Metadata } from 'next'
 
-import Header from '@/components/Layout/MainHeader'
-import Footer from '@/components/Layout/Footer'
+export const metadata: Metadata = {
+  title: 'Herramientas Multimedia de Respaldo | Descargador Pro',
+  description: 'Explora nuestras utilidades especializadas para respaldar videos y audios públicos de Facebook, TikTok, Instagram, Twitter/X, Threads y WhatsApp en HD.',
+  alternates: {
+    canonical: '/tools',
+  },
+}
 
 export default function ToolsLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 flex flex-col transition-colors duration-200">
-      <Header />
-      <main className="flex-1 py-8 sm:py-12">{children}</main>
-      <Footer />
-    </div>
-  )
+  return <>{children}</>
 }

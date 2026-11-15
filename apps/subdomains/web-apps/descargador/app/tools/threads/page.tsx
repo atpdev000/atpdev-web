@@ -6,6 +6,9 @@ import { ArrowLeft, Sparkles, CheckCircle2, ShieldCheck, Zap, HelpCircle } from 
 export const metadata: Metadata = {
   title: 'Descargar Videos de Threads de Meta en HD Online | Descargador Pro',
   description: 'Descarga videos, clips y fotos de Meta Threads en alta definición (1080p). Rápido, seguro, gratuito y sin necesidad de instalar programas adicionales.',
+  alternates: {
+    canonical: '/tools/threads',
+  },
 }
 
 export default function ThreadsToolPage() {

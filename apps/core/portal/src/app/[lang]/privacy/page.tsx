@@ -4,6 +4,7 @@ import { translateText, getSiteConfig } from "@atpdev/database";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { GlowWrapper } from "@/components/GlowWrapper";
+import Navbar from "@/components/Navbar";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
@@ -12,17 +13,22 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
   
   const BASE_URL = "https://www.atpdev.dev";
   const path = "/privacy";
-  const supportedLocales = ['es', 'en', 'ru', 'hi', 'zh', 'fr', 'de', 'pt', 'ja'];
+  const indexableLocales = ['es', 'en'];
+  const shouldIndex = indexableLocales.includes(lang);
   
   return {
     title,
     description,
+    robots: {
+      index: shouldIndex,
+      follow: true,
+    },
     alternates: {
       canonical: `${BASE_URL}${lang === 'es' ? '' : '/' + lang}${path}`,
       languages: {
         "x-default": `${BASE_URL}${path}`,
         ...Object.fromEntries(
-          supportedLocales.map(l => [l, `${BASE_URL}${l === 'es' ? '' : '/' + l}${path}`])
+          indexableLocales.map(l => [l, `${BASE_URL}${l === 'es' ? '' : '/' + l}${path}`])
         )
       },
     },
@@ -74,10 +80,14 @@ export default async function PrivacyPolicy({
   };
 
   const linkPath = lang === "es" ? "/" : `/${lang}`;
+  const prefix = lang === "es" ? "" : `/${lang}`;
+  const isEn = lang !== "es" && lang !== "pt";
   const enableGlow = config?.enable_glow_effect !== false;
 
   return (
-    <main className="main">
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--background)", color: "var(--text-color)" }}>
+    <Navbar />
+    <main className="main flex-1 pt-8">
     <GlowWrapper enabled={enableGlow} className="w-full text-[var(--text-color)] transition-colors duration-500 min-h-screen py-16 px-6 relative overflow-hidden">
       {/* Glow Effects */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[var(--primary)] opacity-10 blur-[120px] rounded-full pointer-events-none"></div>
@@ -144,5 +154,19 @@ export default async function PrivacyPolicy({
       </div>
     </GlowWrapper>
     </main>
+    <footer className="border-t py-8 px-4 sm:px-6 text-sm" style={{ borderColor: "var(--glass-border)", color: "var(--text-muted)" }}>
+      <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p>© {new Date().getFullYear()} ATP Dev — Percy Acha Taipe.</p>
+        <div className="flex flex-wrap items-center gap-5">
+          <Link href={`${prefix}/`} className="hover:underline">{isEn ? "Home" : "Inicio"}</Link>
+          <Link href={`${prefix}/blog`} className="hover:underline">{isEn ? "Articles" : "Artículos"}</Link>
+          <Link href={`${prefix}/sobre-mi`} className="hover:underline">{isEn ? "About" : "Sobre Mí"}</Link>
+          <Link href={`${prefix}/#contact`} className="hover:underline">{isEn ? "Contact" : "Contacto"}</Link>
+          <Link href={`${prefix}/privacy`} className="hover:underline">{isEn ? "Privacy" : "Privacidad"}</Link>
+          <Link href={`${prefix}/terms`} className="hover:underline">{isEn ? "Terms" : "Términos"}</Link>
+        </div>
+      </div>
+    </footer>
+    </div>
   );
 }

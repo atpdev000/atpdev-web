@@ -5,6 +5,9 @@ import { HelpCircle, ArrowLeft, MessageSquare, ExternalLink } from 'lucide-react
 export const metadata: Metadata = {
   title: 'Preguntas Frecuentes (FAQ) - Descargador Pro',
   description: 'Resuelve tus dudas sobre cómo descargar videos de redes sociales, formatos compatibles, calidad 1080p, audio MP3 y seguridad.',
+  alternates: {
+    canonical: '/faq',
+  },
 }
 
 export default function FAQPage() {
@@ -15,7 +18,7 @@ export default function FAQPage() {
     },
     {
       question: "¿Qué plataformas y redes sociales son compatibles?",
-      answer: "Nuestra suite es totalmente compatible con Facebook (incluyendo Reels y videos 1080p), TikTok (sin marca de agua y audio MP3), YouTube (video HD y extracción de música), Instagram (Reels y videos), Threads, Twitter / 𝕏 y estados de WhatsApp. Monitoreamos continuamente las plataformas para que las descargas nunca se interrumpan."
+      answer: "Nuestra suite es totalmente compatible con Facebook (incluyendo Reels y videos 1080p), TikTok (sin marca de agua y audio MP3), Instagram (Reels y videos públicos), Threads, Twitter / 𝕏 y estados de WhatsApp. Monitoreamos continuamente las plataformas para que las descargas nunca se interrumpan."
     },
     {
       question: "¿Cómo garantizan la calidad de los videos descargados?",
@@ -23,7 +26,7 @@ export default function FAQPage() {
     },
     {
       question: "¿Puedo extraer audio MP3 de cualquier video?",
-      answer: "Sí. Contamos con un motor nativo de extracción de audio. Al procesar un enlace en YouTube, TikTok o Facebook, puedes seleccionar 'Sólo Audio' para obtener el archivo MP3 o M4A directamente en tu biblioteca de música."
+      answer: "Sí. Contamos con un motor nativo de extracción de audio. Al procesar un enlace en TikTok, Facebook o Instagram, puedes seleccionar 'Sólo Audio' para obtener el archivo MP3 o M4A directamente en tu biblioteca de música."
     },
     {
       question: "¿Es seguro para mi dispositivo usar este sitio o la app?",

@@ -15,8 +15,8 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [contactInfo, setContactInfo] = useState({
-    email: 'contacto@atpdev.dev',
-    whatsapp: '+51 987 654 321',
+    email: 'soporte@atpdev.dev',
+    whatsapp: '',
     support_url: 'https://descargador.atpdev.dev/contact'
   })
 
@@ -25,9 +25,11 @@ export default function ContactPage() {
       .then(res => res.json())
       .then(data => {
         if (data?.contact) {
+          const cleanWhatsapp = data.contact.whatsapp === '+51 987 654 321' ? '' : (data.contact.whatsapp || '')
           setContactInfo(prev => ({
             ...prev,
-            ...data.contact
+            ...data.contact,
+            whatsapp: cleanWhatsapp,
           }))
         }
       })
