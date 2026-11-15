@@ -298,8 +298,14 @@ function App() {
       )}
 
       {/* Footer */}
-      <footer className="p-4 text-center text-slate-600 text-xs">
-        DNI Master Scanner • Recorte Cuadrilátero & Filtros Pro
+      <footer className="p-4 text-center text-slate-500 text-xs space-y-2 border-t border-slate-900">
+        <div>DNI Master Scanner • Recorte Cuadrilátero &amp; Filtros Pro</div>
+        <nav aria-label="Enlaces legales" className="flex flex-wrap justify-center gap-4 text-[11px] text-slate-400">
+          <a href="/sobre-nosotros.html" className="hover:text-blue-400 transition-colors">Sobre Nosotros</a>
+          <a href="/privacidad.html" className="hover:text-blue-400 transition-colors">Privacidad</a>
+          <a href="/terminos.html" className="hover:text-blue-400 transition-colors">Términos de Uso</a>
+          <a href="/contacto.html" className="hover:text-blue-400 transition-colors">Contacto</a>
+        </nav>
       </footer>
     </div>
   );

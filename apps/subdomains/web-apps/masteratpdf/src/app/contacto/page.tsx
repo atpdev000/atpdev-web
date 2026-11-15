@@ -55,8 +55,32 @@ export default function ContactoPdfPage() {
             <li><strong>Responsable:</strong> Percy Acha Taipe — ATP DEV</li>
             <li><strong>Sede operativa:</strong> Lima, Perú</li>
             <li><strong>Tiempo de respuesta:</strong> 24 a 48 horas hábiles</li>
-            <li><strong>Portal principal:</strong> <a href="https://www.atpdev.dev/#contact" className="text-brand underline font-semibold">www.atpdev.dev/#contact</a></li>
+            <li><strong>Portal principal:</strong> <a href="https://www.atpdev.dev/contacto" className="text-brand underline font-semibold">www.atpdev.dev/contacto</a></li>
           </ul>
+        </div>
+      </section>
+
+      <section className="p-6 sm:p-8 rounded-2xl bg-surface border border-line space-y-4 text-sm leading-relaxed text-ink-2">
+        <div className="flex items-center gap-2 text-ink font-bold text-base">
+          <ShieldCheck className="w-4 h-4 text-brand" />
+          <h2>Alcance de Soporte y Garantía de Procesamiento Local</h2>
+        </div>
+        <p>
+          MasterAtPDF Pro ejecuta el ensamblaje, división, compresión y protección de archivos PDF íntegramente en la memoria del navegador mediante WebAssembly y PDF-lib sin subir tus documentos confidenciales a servidores externos. Si algún archivo presenta particularidades estructurales (como tablas XRef dañadas o fuentes embebidas no estándar), puedes escribirnos indicando el navegador y versión de sistema operativo.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
+          <div className="p-4 rounded-xl bg-bg border border-line space-y-1.5">
+            <h3 className="font-bold text-ink">Herramientas principales disponibles</h3>
+            <p>
+              Accede directamente a las utilidades para <Link href="/unir" className="text-brand font-semibold underline">Unir PDF</Link>, <Link href="/dividir" className="text-brand font-semibold underline">Dividir páginas</Link>, <Link href="/comprimir" className="text-brand font-semibold underline">Comprimir tamaño</Link> o <Link href="/proteger" className="text-brand font-semibold underline">Proteger con contraseña</Link>.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-bg border border-line space-y-1.5">
+            <h3 className="font-bold text-ink">Documentación legal y privacidad</h3>
+            <p>
+              Para solicitudes relacionadas con privacidad, publicidad o cumplimiento de licencias, consulta nuestra <Link href="/privacidad" className="text-brand font-semibold underline">Política de Privacidad</Link> y nuestros <Link href="/terminos" className="text-brand font-semibold underline">Términos de Uso</Link>.
+            </p>
+          </div>
         </div>
       </section>
     </div>

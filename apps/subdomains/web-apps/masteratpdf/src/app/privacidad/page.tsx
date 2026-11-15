@@ -67,6 +67,24 @@ export default function PrivacidadPage() {
             >
               políticas de publicidad de Google
             </a>
+            , gestionar cookies de terceros en{' '}
+            <a
+              href="https://www.aboutads.info/choices/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand font-semibold underline"
+            >
+              aboutads.info/choices
+            </a>{' '}
+            y conocer cómo Google usa los datos de sitios web que emplean sus servicios en{' '}
+            <a
+              href="https://policies.google.com/technologies/partner-sites"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-brand font-semibold underline"
+            >
+              policies.google.com/technologies/partner-sites
+            </a>
             .
           </p>
         </div>

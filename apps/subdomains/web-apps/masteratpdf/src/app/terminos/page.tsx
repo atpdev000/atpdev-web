@@ -33,32 +33,54 @@ export default function TerminosPage() {
         <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
           <div className="flex items-center gap-2 text-ink font-bold">
             <FileText className="w-4 h-4 text-brand" />
-            <h2>1. Alcance del servicio</h2>
+            <h2>1. Alcance del servicio y procesamiento en cliente</h2>
           </div>
           <p>
-            MasterAtPDF Pro pone a disposición herramientas web gratuitas para manipular archivos PDF en el dispositivo del usuario. Recomendamos conservar respaldo de tus documentos originales antes de realizar compresiones o conversiones.
+            MasterAtPDF Pro pone a disposición herramientas web gratuitas para manipular archivos PDF en el dispositivo del usuario mediante tecnologías modernas del navegador (WebAssembly y procesamiento local de memoria). Al no transferir documentos hacia servidores remotos de procesamiento, el usuario mantiene en todo momento la custodia física y lógica de sus archivos.
+          </p>
+          <p>
+            Recomendamos encarecidamente conservar una copia de respaldo de los documentos originales antes de ejecutar compresiones, reducciones de DPI o eliminaciones de páginas.
           </p>
         </div>
 
         <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
           <div className="flex items-center gap-2 text-ink font-bold">
             <Scale className="w-4 h-4 text-brand" />
-            <h2>2. Uso responsable y contacto</h2>
+            <h2>2. Uso responsable y propiedad intelectual</h2>
           </div>
           <p>
-            El usuario es responsable de los documentos que procesa y de contar con los derechos necesarios sobre su contenido. Para consultas técnicas o soporte puedes escribir a{' '}
+            El usuario es único responsable de los documentos que procesa y garantiza contar con los derechos de autor o licencias necesarias para unir, dividir, firmar o cifrar dichos archivos. Queda prohibido el uso de la plataforma para vulnerar protecciones legales de terceros sin autorización del titular.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
+          <div className="flex items-center gap-2 text-ink font-bold">
+            <FileText className="w-4 h-4 text-brand" />
+            <h2>3. Límites técnicos y compatibilidad</h2>
+          </div>
+          <p>
+            Dado que el renderizado se ejecuta dentro de la memoria RAM asignada a la pestaña de tu navegador, el tamaño máximo recomendable para documentos con cientos de imágenes de alta resolución oscila entre 100 MB y 300 MB en escritorio. ATP DEV no garantiza compatibilidad con archivos PDF corruptos o cifrados con algoritmos propietarios fuera del estándar ISO 32000.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
+          <div className="flex items-center gap-2 text-ink font-bold">
+            <Scale className="w-4 h-4 text-brand" />
+            <h2>4. Publicidad, privacidad y contacto oficial</h2>
+          </div>
+          <p>
+            Para financiar la gratuidad de la suite sin muros de pago ni marcas de agua en los documentos resultantes, las vistas principales muestran anuncios gestionados con Google AdSense según lo descrito en nuestra{' '}
+            <Link href="/privacidad" className="text-brand font-semibold underline">Política de Privacidad</Link>.
+          </p>
+          <p>
+            Para consultas técnicas, reporte de incidencias o soporte puedes escribir a{' '}
             <a href="mailto:contacto@atpdev.dev" className="text-brand font-semibold underline">
               contacto@atpdev.dev
             </a>{' '}
-            o en{' '}
-            <a
-              href="https://www.atpdev.dev/#contact"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand font-semibold underline"
-            >
-              www.atpdev.dev/#contact
-            </a>
+            o usar nuestra{' '}
+            <Link href="/contacto" className="text-brand font-semibold underline">
+              página de Contacto
+            </Link>
             .
           </p>
         </div>

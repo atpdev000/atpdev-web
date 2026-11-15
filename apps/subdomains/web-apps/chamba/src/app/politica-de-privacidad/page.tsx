@@ -121,6 +121,15 @@ export default function PoliticaPrivacidadPage() {
                     className="text-emerald-600 dark:text-emerald-400 hover:underline font-mono inline-flex items-center gap-1 font-semibold"
                   >
                     aboutads.info/choices <ExternalLink size={11} />
+                  </a>
+                  . Asimismo, puedes consultar cómo Google utiliza los datos cuando usas sitios o aplicaciones de sus socios en{' '}
+                  <a
+                    href="https://policies.google.com/technologies/partner-sites"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-600 dark:text-emerald-400 hover:underline font-mono inline-flex items-center gap-1 font-semibold"
+                  >
+                    policies.google.com/technologies/partner-sites <ExternalLink size={11} />
                   </a>.
                 </li>
               </ul>
@@ -171,7 +180,13 @@ export default function PoliticaPrivacidadPage() {
               <Link href="/contacto" className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
                 Contacto Oficial
               </Link>{' '}
-              o escribir a <code>legal@atpdev.dev</code>.
+              o escribir a{' '}
+              <a
+                href="mailto:contacto@atpdev.dev"
+                className="text-emerald-600 dark:text-emerald-400 hover:underline font-mono font-semibold"
+              >
+                contacto@atpdev.dev
+              </a>.
             </p>
           </section>
 

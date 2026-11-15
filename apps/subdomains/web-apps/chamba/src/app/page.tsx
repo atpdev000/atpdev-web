@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300; // Cache ISR 5 min para TTFB ultrarrápido y convocatorias frescas
 
 export default async function HomePage() {
   const [jobs, config] = await Promise.all([

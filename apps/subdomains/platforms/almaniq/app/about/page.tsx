@@ -31,18 +31,38 @@ export default function AboutPage() {
           <section className="space-y-2">
             <h2 className="text-xl font-semibold text-white">2. Proceso de Verificación Documental</h2>
             <p>
-              Cada entrada publicada pasa por tres controles editoriales: contraste de fecha exacta frente a fuentes primarias, redacción de contexto técnico/histórico en español claro y exclusión estricta de rumores o contenido automatizado sin supervisión humana.
+              Cada efeméride y dossier mensual publicado en nuestro <a href="/archivo" className="text-emerald-400 underline">Archivo Histórico Anual</a> atraviesa tres niveles de control antes de llegar a los lectores:
+            </p>
+            <ul className="list-disc list-inside space-y-1.5 text-slate-300 mt-2">
+              <li>
+                <strong>Contraste cronológico primario:</strong> Validación de fechas exactas (ajustadas por transición juliano-gregoriana cuando corresponde), ubicaciones geográficas y nombres históricos frente a archivos universitarios, actas oficiales y registros enciclopédicos reconocidos.
+              </li>
+              <li>
+                <strong>Contextualización comprensible:</strong> Cada hecho se acompaña de antecedentes causales y consecuencias verificables en la historia de la ciencia, la cultura o la sociedad, evitando titulares sensacionalistas o anacronismos.
+              </li>
+              <li>
+                <strong>Revisión editorial continua:</strong> Ninguna síntesis automatizada se incorpora al índice permanente sin supervisión humana, curación de estilo en español neutro y trazabilidad bibliográfica.
+              </li>
+            </ul>
+          </section>
+          <section className="space-y-2">
+            <h2 className="text-xl font-semibold text-white">3. Cobertura Temática y Valor Educativo</h2>
+            <p>
+              El almanaque organiza el conocimiento en grandes ejes transversales: descubrimientos astronómicos y físicos, avances médicos que transformaron la salud pública, hitos cívicos y derechos humanos, inventos de comunicación y patrimonio cultural iberoamericano y universal. Estudiantes de secundaria, docentes e investigadores pueden recorrer el calendario mes a mes desde el índice de{' '}
+              <a href="/archivo" className="text-emerald-400 underline">efemérides mensuales</a> o consultar la edición interactiva del día en portada.
             </p>
           </section>
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold text-white">3. Autoría y Transparencia (E-E-A-T)</h2>
+            <h2 className="text-xl font-semibold text-white">4. Autoría, Sostenibilidad y Transparencia (E-E-A-T)</h2>
             <p>
-              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Nuestro archivo prioriza fechas contrastadas en enciclopedias técnicas, archivos históricos universitarios y hemerotecas públicas para aportar contexto claro y educativo a estudiantes, docentes y curiosos de la historia universal.
+              Este sitio forma parte del ecosistema editorial y de ingeniería de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Nuestro archivo prioriza fechas contrastadas en enciclopedias técnicas, archivos históricos universitarios y hemerotecas públicas para aportar contexto claro y educativo sin barreras de pago.
             </p>
             <p className="mt-2">
-              La operación gratuita de Almaniq Web se financia de manera transparente sin suscripciones cerradas. Para consultas editoriales, sugerencias de fuentes o correcciones históricas puedes escribirnos directamente a{' '}
+              La operación gratuita de Almaniq Web se sostiene de manera transparente mediante publicidad responsable y controles de privacidad compatibles con Consent Mode v2. Si detectas alguna imprecisión cronológica o deseas proponer un hito histórico documentado, escríbenos a{' '}
               <a href="mailto:contacto@atpdev.dev" className="text-emerald-400 underline">contacto@atpdev.dev</a>{' '}
-              o visitar nuestra página de <a href="/contact" className="text-emerald-400 underline">Contacto</a> y nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a>.
+              o consulta nuestras páginas de <a href="/contact" className="text-emerald-400 underline">Contacto</a>,{' '}
+              <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a> y{' '}
+              <a href="/terms" className="text-emerald-400 underline">Términos de Servicio</a>.
             </p>
           </section>
         </div>

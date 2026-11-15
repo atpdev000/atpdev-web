@@ -114,6 +114,22 @@ export default function FacebookToolPage() {
                         <p className="text-xs text-slate-600 dark:text-slate-400">Compatible con Android, iPhone, Windows y Mac.</p>
                     </div>
                 </div>
+
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                        Calidades Soportadas y Preguntas Frecuentes de Facebook
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Facebook distribuye sus videos públicos en flujos adaptativos DASH (480p SD, 720p HD y 1080p Full HD). Cuando seleccionas máxima calidad en nuestra herramienta, el servidor combina la pista de video limpia con el audio AAC estéreo original sin reducir la tasa de bits ni insertar marcas de agua. Solo es posible respaldar publicaciones y Reels con privacidad pública.
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                        ¿Necesitas más detalles sobre tasas de bits y respaldo digital? Lee nuestra guía técnica:{' '}
+                        <Link href="/blog/descarga-facebook-hd-4k" className="text-blue-600 dark:text-blue-400 font-semibold underline">
+                            Cómo descargar videos y Reels de Facebook en HD y 4K
+                        </Link>{' '}
+                        o revisa las <Link href="/faq" className="text-blue-600 dark:text-blue-400 font-semibold underline">Preguntas Frecuentes</Link>.
+                    </p>
+                </div>
             </div>
         </div>
     )

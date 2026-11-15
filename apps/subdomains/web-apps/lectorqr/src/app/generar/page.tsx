@@ -58,46 +58,46 @@ export default function GenerarStudioPage() {
 
   // ===================== PASO 1: CONTENIDO =====================
   const [activeType, setActiveType] = useState<CodeType>('url');
-  const [url, setUrl] = useState('https://atpdev.pe');
+  const [url, setUrl] = useState('https://www.atpdev.dev');
   const [textVal, setTextVal] = useState('Texto de ejemplo en código QR profesional.');
-  const [emailTo, setEmailTo] = useState('contacto@atpdev.pe');
-  const [emailSubject, setEmailSubject] = useState('Consulta Comercial');
+  const [emailTo, setEmailTo] = useState('contacto@atpdev.dev');
+  const [emailSubject, setEmailSubject] = useState('Consulta Técnica');
   const [emailBody, setEmailBody] = useState('Hola, quisiera más información sobre sus servicios.');
 
   // Llamada & SMS con selector internacional
   const [selectedCountry, setSelectedCountry] = useState<CountryItem>(COUNTRIES[0]); // Perú +51
-  const [phoneNumber, setPhoneNumber] = useState('987654321');
+  const [phoneNumber, setPhoneNumber] = useState('900000000');
   const [smsMessage, setSmsMessage] = useState('Hola, solicito información.');
 
   // V-Card
-  const [vcardName, setVcardName] = useState('Carlos Mendoza');
+  const [vcardName, setVcardName] = useState('Percy Acha Taipe');
   const [vcardOrg, setVcardOrg] = useState('ATP DEV Perú');
-  const [vcardTitle, setVcardTitle] = useState('Director de Tecnología');
-  const [vcardPhone, setVcardPhone] = useState('987654321');
-  const [vcardEmail, setVcardEmail] = useState('carlos@atpdev.pe');
-  const [vcardWebsite, setVcardWebsite] = useState('https://atpdev.pe');
+  const [vcardTitle, setVcardTitle] = useState('Ingeniería de Software');
+  const [vcardPhone, setVcardPhone] = useState('900000000');
+  const [vcardEmail, setVcardEmail] = useState('contacto@atpdev.dev');
+  const [vcardWebsite, setVcardWebsite] = useState('https://www.atpdev.dev');
   const [vcardAddress, setVcardAddress] = useState('Lima, Perú');
-  const [vcardNote, setVcardNote] = useState('Contacto comercial prioritario');
+  const [vcardNote, setVcardNote] = useState('Contacto profesional');
 
   // WhatsApp
   const [waCountry, setWaCountry] = useState<CountryItem>(COUNTRIES[0]);
-  const [waPhone, setWaPhone] = useState('987654321');
+  const [waPhone, setWaPhone] = useState('900000000');
   const [waMessage, setWaMessage] = useState('¡Hola! Me contacto a través del código QR.');
 
   // Wi-Fi
-  const [wifiSsid, setWifiSsid] = useState('Oficina_ATP_5G');
-  const [wifiPass, setWifiPass] = useState('ClaveSegura2026');
+  const [wifiSsid, setWifiSsid] = useState('Invitados_WiFi');
+  const [wifiPass, setWifiPass] = useState('ClaveDemo2026');
   const [wifiAuth, setWifiAuth] = useState<'WPA' | 'WEP' | 'nopass'>('WPA');
   const [wifiHidden, setWifiHidden] = useState(false);
 
   // PDF & Apps & Redes
-  const [pdfUrl, setPdfUrl] = useState('https://atpdev.pe/docs/brochure.pdf');
+  const [pdfUrl, setPdfUrl] = useState('https://www.atpdev.dev/blog');
   const [appName, setAppName] = useState('Mi App Pro');
-  const [appIosUrl, setAppIosUrl] = useState('https://apps.apple.com/app/id123456789');
-  const [appAndroidUrl, setAppAndroidUrl] = useState('https://play.google.com/store/apps/details?id=com.atpdev.app');
-  const [imagesUrl, setImagesUrl] = useState('https://photos.app.goo.gl/album-demo');
-  const [videoUrl, setVideoUrl] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-  const [socialHandle, setSocialHandle] = useState('atpdev.oficial');
+  const [appIosUrl, setAppIosUrl] = useState('https://apps.apple.com/app/example');
+  const [appAndroidUrl, setAppAndroidUrl] = useState('https://play.google.com/store/apps/details?id=dev.atpdev.app');
+  const [imagesUrl, setImagesUrl] = useState('https://www.atpdev.dev');
+  const [videoUrl, setVideoUrl] = useState('https://www.atpdev.dev/blog');
+  const [socialHandle, setSocialHandle] = useState('atpdev');
   const [socialNetwork, setSocialNetwork] = useState<'tiktok' | 'instagram' | 'facebook' | 'youtube' | 'linkedin'>('tiktok');
   const [eventTitle, setEventTitle] = useState('Conferencia Tech 2026');
   const [eventLocation, setEventLocation] = useState('Lima Convention Center');

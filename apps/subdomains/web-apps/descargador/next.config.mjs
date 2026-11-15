@@ -100,6 +100,11 @@ const nextConfig = {
         destination: '/legal/copyright',
         permanent: true,
       },
+      {
+        source: '/blog/post-1-volument-guia-pro',
+        destination: '/blog/post-1-respaldo-digital-guia-pro',
+        permanent: true,
+      },
     ]
   },
 }

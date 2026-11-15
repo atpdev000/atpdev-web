@@ -272,6 +272,20 @@ export default function ChefIAPage() {
               <p>Conecta directamente la conversación con las fichas del <Link href="/recetas" className="text-[#c22929] font-bold underline">Recetario Peruano</Link> y el <Link href="/escalador" className="text-[#c22929] font-bold underline">Escalador de Porciones</Link>.</p>
             </div>
           </div>
+          <div className="pt-4 border-t border-stone-200 dark:border-stone-800 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
+            <div className="space-y-1.5">
+              <h3 className="font-bold text-stone-900 dark:text-white">Cómo aprovechar las respuestas determinísticas</h3>
+              <p>
+                A diferencia de los chats genéricos, nuestro asistente combina reglas culinarias verificadas sobre tiempos de maceración en leche de tigre, puntos de emulsión en pastas con queso fresco y temperaturas de salteado en cocina criolla con fórmulas exactas de conversión por peso bruto y merma.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="font-bold text-stone-900 dark:text-white">Privacidad y trabajo sin conexión de cuentas</h3>
+              <p>
+                Las preguntas que realizas en esta consola se resuelven directamente sobre nuestra base de conocimiento culinario en el navegador sin exigir registro ni almacenar historiales personales en la nube. Si deseas sugerir nuevos platos regionales, escríbenos desde <Link href="/contacto" className="text-[#c22929] font-bold underline">Contacto</Link>.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
     </div>

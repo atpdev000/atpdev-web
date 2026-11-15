@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Política de Privacidad — DNI Master Scanner</title>
+  <meta name="description" content="Política de privacidad oficial de DNI Master Scanner (dni.atpdev.dev): procesamiento fotográfico 100% local en tu navegador, cero almacenamiento en servidores, Google AdSense y derechos del usuario." />
   <link rel="canonical" href="https://dni.atpdev.dev/privacidad.html" />
   <meta name="robots" content="index, follow" />
   <style>
@@ -11,43 +12,86 @@
       margin: 0;
       background: #090d16;
       color: #cbd5e1;
-      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-      line-height: 1.7;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.75;
       padding: 3rem 1.25rem;
     }
-    main { max-width: 48rem; margin: 0 auto; }
-    h1 { color: #ffffff; font-size: 2rem; margin-bottom: 0.5rem; }
-    h2 { color: #93c5fd; font-size: 1.2rem; margin-top: 2rem; }
+    main { max-width: 52rem; margin: 0 auto; }
+    nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem; font-size: 0.9rem; }
+    nav a { color: #94a3b8; text-decoration: none; }
+    nav a.primary { color: #93c5fd; font-weight: 600; }
+    nav a:hover { color: #bfdbfe; text-decoration: underline; }
+    h1 { color: #ffffff; font-size: 2.1rem; margin: 0 0 0.4rem; }
+    h2 { color: #93c5fd; font-size: 1.25rem; margin-top: 2.25rem; border-left: 3px solid #3b82f6; padding-left: 0.85rem; }
     a { color: #93c5fd; }
+    .meta { color: #94a3b8; font-size: 0.9rem; margin-bottom: 2rem; }
+    .box { background: #0f172a; border: 1px solid rgba(147, 197, 253, 0.2); border-radius: 12px; padding: 1.25rem; margin: 1.5rem 0; }
+    footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.88rem; color: #94a3b8; }
   </style>
 </head>
 <body>
   <main>
-    <p><a href="/">← Volver a DNI Master Scanner</a></p>
-    <h1>Política de Privacidad y Uso</h1>
-    <p>Última actualización: 13 de noviembre de 2026 · Operado por ATP Dev.</p>
+    <nav aria-label="Navegación del sitio">
+      <a href="/" class="primary">← Volver a DNI Master Scanner</a>
+      <a href="/sobre-nosotros.html">Sobre Nosotros</a>
+      <a href="/terminos.html">Términos de Uso</a>
+      <a href="/contacto.html">Contacto</a>
+    </nav>
 
-    <h2>1. Procesamiento local de documentos</h2>
+    <h1>Política de Privacidad y Tratamiento de Datos</h1>
+    <p class="meta">Última actualización: 15 de noviembre de 2026 · Responsable: <strong>Percy Acha Taipe (ATP Dev)</strong></p>
+
+    <div class="box">
+      <strong>Principio fundamental de Privacidad por Diseño:</strong>
+      DNI Master Scanner procesa las fotografías del anverso y reverso de documentos estrictamente dentro de la memoria local de tu navegador web. Tus imágenes nunca se transmiten a servidores de ATP Dev, APIs externas ni servicios de almacenamiento en la nube.
+    </div>
+
+    <h2>1. Identidad del Responsable y Contacto</h2>
     <p>
-      DNI Master Scanner procesa las fotografías del anverso y reverso exclusivamente dentro del navegador web del usuario.
-      Las imágenes no se cargan a servidores externos, bases de datos ni servicios de almacenamiento en la nube.
+      El sitio web <a href="https://dni.atpdev.dev">dni.atpdev.dev</a> es operado por <strong>ATP Dev</strong> bajo la dirección técnica de <strong>Percy Acha Taipe</strong> en Lima, Perú. Para ejercer tus derechos de privacidad o resolver cualquier inquietud técnica puedes escribir directamente a <a href="mailto:contacto@atpdev.dev">contacto@atpdev.dev</a> o visitar nuestro canal institucional en <a href="https://www.atpdev.dev/contacto">www.atpdev.dev/contacto</a>.
     </p>
 
-    <h2>2. Permisos de cámara y archivos</h2>
+    <h2>2. Procesamiento Local en Memoria del Dispositivo</h2>
     <p>
-      El acceso a la cámara web o selector de archivos locales se utiliza únicamente cuando el usuario lo autoriza
-      explícitamente para capturar o importar una imagen a recortar y exportar localmente en PNG, PDF o Word (.docx).
+      Al capturar una fotografía o cargar una imagen local para ajustar esquinas cuadriláteras, corregir perspectiva homográfica o aplicar filtros de contraste y nitidez, todas las operaciones matemáticas se ejecutan mediante HTML5 Canvas y JavaScript del lado del cliente. Tampoco generamos copias ocultas en servidor al exportar tus archivos en PNG, PDF en formato A4 oficial (medida estándar ISO/IEC 7810 ID-1 de 85,60 × 53,98 mm) o documento Word (.docx).
+    </p>
+    <p>
+      En consecuencia, ATP Dev no recopila, indexa, analiza ni almacena números de documento, nombres, huellas, firmas, códigos MRZ ni fotografías personales de quienes utilizan la aplicación.
     </p>
 
-    <h2>3. Cookies y publicidad</h2>
+    <h2>3. Permisos de Cámara Web y Selector de Archivos</h2>
     <p>
-      En la versión web pública pueden utilizarse servicios de medición y publicidad de Google AdSense conforme a las
-      políticas aplicables. Esta página legal no muestra anuncios invasivos.
+      Si decides utilizar la captura en directo, tu navegador solicitará explícitamente permiso mediante la API estándar <code>MediaDevices.getUserMedia</code>. El flujo de vídeo permanece confinado dentro de la pestaña activa y se detiene automáticamente al capturar, cancelar o salir de la vista de escáner. Si prefieres no otorgar acceso a cámara, puedes cargar archivos locales ya guardados en tu teléfono o computadora.
     </p>
 
-    <h2>4. Contacto</h2>
-    <p>Para consultas sobre privacidad o funcionamiento técnico, visita <a href="https://www.atpdev.dev">www.atpdev.dev</a> o escribe a <a href="mailto:contacto@atpdev.dev">contacto@atpdev.dev</a>.</p>
+    <h2>4. Almacenamiento Temporal y Seguridad Recomendada</h2>
+    <p>
+      La sesión de recorte vive únicamente en la memoria RAM volátil de la pestaña abierta: cuando recargas o cierras el navegador, los buffers de imagen se liberan de inmediato. Por precaución adicional al manipular copias digitales de identificación personal, recomendamos utilizar DNI Master Scanner únicamente desde dispositivos de confianza y evitar dejar exportaciones PDF o Word guardadas en computadoras públicas o compartidas.
+    </p>
+
+    <h2>5. Cookies, Google AdSense y Consent Mode v2</h2>
+    <p>
+      La página principal pública de la herramienta web se mantiene gratuita gracias a espacios publicitarios operados mediante <strong>Google AdSense</strong>, implementando controles de consentimiento compatibles con <strong>Google Consent Mode v2</strong> (las señales publicitarias y analíticas permanecen denegadas por defecto hasta que configures o aceptes tus preferencias). Las páginas legales y de políticas no ejecutan bloques publicitarios invasivos.
+    </p>
+    <p>
+      Google y sus socios pueden utilizar cookies o identificadores de publicidad para mostrar anuncios relevantes o no personalizados según tu consentimiento. Puedes revisar información detallada sobre{' '}
+      <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">cómo utiliza Google los datos cuando usas sitios o aplicaciones de nuestros socios</a>, ajustar la personalización en <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Configuración de Anuncios de Google</a> o gestionar opciones de exclusión globales en <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">www.aboutads.info/choices/</a>.
+    </p>
+
+    <h2>6. Derechos del Usuario y Normativa Aplicable</h2>
+    <p>
+      De acuerdo con la Ley N.º 29733 de Protección de Datos Personales del Perú, el Reglamento General de Protección de Datos (GDPR) europeo y regulaciones equivalentes, puedes solicitar información, aclaraciones sobre consentimiento de cookies, oposición al tratamiento publicitario o eliminación de cualquier correspondencia enviada por correo electrónico escribiendo a <a href="mailto:contacto@atpdev.dev">contacto@atpdev.dev</a>.
+    </p>
+
+    <h2>7. Actualizaciones de esta Política</h2>
+    <p>
+      Esta política podrá actualizarse para incorporar mejoras técnicas de seguridad o adaptaciones regulatorias manteniendo siempre el principio de procesamiento local sin servidores de documentos.
+    </p>
+
+    <footer>
+      <p>© 2026 DNI Master Scanner · Desarrollado por <a href="https://www.atpdev.dev">ATP Dev</a> (Lima, Perú)</p>
+      <p><a href="/">Escáner Web</a> · <a href="/sobre-nosotros.html">Sobre Nosotros</a> · <a href="/terminos.html">Términos de Uso</a> · <a href="/contacto.html">Contacto</a></p>
+    </footer>
   </main>
 </body>
 </html>
-

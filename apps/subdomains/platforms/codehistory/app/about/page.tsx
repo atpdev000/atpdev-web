@@ -31,18 +31,35 @@ export default function AboutPage() {
           <section className="space-y-2">
             <h2 className="text-xl font-semibold text-white">2. Proceso de Verificación Documental</h2>
             <p>
-              Cada entrada publicada pasa por tres controles editoriales: contraste de fecha exacta frente a fuentes primarias, redacción de contexto técnico/histórico en español claro y exclusión estricta de rumores o contenido automatizado sin supervisión humana.
+              Cada entrada cronológica y cada dossier de nuestro <a href="/archivo" className="text-emerald-400 underline">Archivo Computacional Anual</a> atraviesa tres filtros técnicos de validación antes de incorporarse al catálogo permanente:
+            </p>
+            <ul className="list-disc list-inside space-y-1.5 text-slate-300 mt-2">
+              <li>
+                <strong>Fuentes primarias de ingeniería:</strong> Cotejo de fechas exactas contra memorandos RFC del IETF, anuncios originales en grupos históricos de Usenet (<code>comp.os.minix</code>, <code>alt.sources</code>, <code>alt.hypertext</code>), notas de lanzamiento oficiales y documentación de laboratorios pioneros.
+              </li>
+              <li>
+                <strong>Rigor en decisiones de arquitectura:</strong> Explicación clara de por qué surgió cada lenguaje, compilador, protocolo o sistema operativo, describiendo las limitaciones técnicas previas que resolvieron.
+              </li>
+              <li>
+                <strong>Curación humana continua:</strong> Revisión técnica por ingenieros de software para evitar atribuciones erróneas, mitos repetidos en blogs genéricos o imprecisiones entre versiones alfa y lanzamientos estables.
+              </li>
+            </ul>
+          </section>
+          <section className="space-y-2">
+            <h2 className="text-xl font-semibold text-white">3. Alcance del Archivo Tecnológico</h2>
+            <p>
+              Documentamos doce grandes etapas anuales en nuestro índice de <a href="/archivo" className="text-emerald-400 underline">hitos de computación por mes</a>, abarcando pioneros de la computabilidad como Ada Lovelace y Alan Turing, el nacimiento de Unix y TCP/IP, la apertura de la World Wide Web, el auge del software libre, navegadores, lenguajes modernos (Python, Java, JavaScript, Ruby, Go, TypeScript) y estándares abiertos del W3C.
             </p>
           </section>
           <section className="space-y-2">
-            <h2 className="text-xl font-semibold text-white">3. Autoría y Transparencia (E-E-A-T)</h2>
+            <h2 className="text-xl font-semibold text-white">4. Autoría y Transparencia (E-E-A-T)</h2>
             <p>
-              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Cada crónica técnica reconstruye lanzamientos de compiladores, protocolos web, arquitectura hardware y decisiones históricas de diseño de software útiles para desarrolladores e investigadores.
+              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Cada crónica técnica reconstruye lanzamientos de compiladores, protocolos web, arquitectura hardware y decisiones históricas de diseño de software útiles para desarrolladores, estudiantes de informática e investigadores.
             </p>
             <p className="mt-2">
-              El acceso al archivo diario es totalmente abierto y gratuito. Para proponer efemérides documentadas, reportar erratas de fechas o consultar aspectos editoriales puedes escribir a{' '}
+              El acceso al archivo diario y mensual es totalmente abierto y se financia mediante publicidad responsable transparente bajo Google Consent Mode v2. Para proponer efemérides documentadas, reportar erratas o realizar consultas legales puedes escribir a{' '}
               <a href="mailto:contacto@atpdev.dev" className="text-emerald-400 underline">contacto@atpdev.dev</a>{' '}
-              o visitar <a href="/contact" className="text-emerald-400 underline">Contacto</a> y nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a>.
+              o visitar <a href="/contact" className="text-emerald-400 underline">Contacto</a>, nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a> y los <a href="/terms" className="text-emerald-400 underline">Términos de Servicio</a>.
             </p>
           </section>
         </div>

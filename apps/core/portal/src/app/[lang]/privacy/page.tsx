@@ -72,7 +72,7 @@ export default async function PrivacyPolicy({
     p3: await t("Este sitio web y sus plataformas asociadas utilizan cookies y tecnologías de seguimiento de terceros, incluido Google AdSense, para publicar anuncios basados en las visitas anteriores del usuario a este sitio web o a otros sitios web de Internet."),
     li3_1: await t("Proveedores externos: Proveedores de terceros, incluido Google, utilizan cookies para publicar anuncios cuando visitas nuestro sitio web."),
     li3_2: await t("Cookie de DoubleClick / DART: El uso de cookies de publicidad permite a Google y a sus socios publicar anuncios basados en tus visitas a este y otros sitios de Internet."),
-    li3_3: await t("Inhabilitación voluntaria: Puedes inhabilitar la publicidad personalizada en cualquier momento visitando la Configuración de Anuncios de Google (https://adssettings.google.com/) o mediante el portal de la Digital Advertising Alliance (https://www.aboutads.info/choices/)."),
+    li3_3: await t("Inhabilitación voluntaria y uso de datos por Google: Puedes inhabilitar la publicidad personalizada en cualquier momento visitando la Configuración de Anuncios de Google (https://adssettings.google.com/) o mediante el portal de la Digital Advertising Alliance (https://www.aboutads.info/choices/). Asimismo, puedes consultar cómo utiliza Google la información de sitios web que usan sus servicios en https://policies.google.com/technologies/partner-sites."),
     h4: await t("4. Seguridad de tus datos y Normativa Aplicable"),
     p4: await t("Operamos bajo los principios de licitud, consentimiento y finalidad conforme a la Ley N° 29733 (Ley de Protección de Datos Personales) y estándares internacionales como el RGPD. Tus datos personales jamás serán comercializados ni transferidos a terceros no autorizados."),
     h5: await t("5. Contacto y Derechos ARCO"),
@@ -147,7 +147,17 @@ export default async function PrivacyPolicy({
 
           <section>
             <h2 className="text-xl font-bold mb-4 border-b border-[var(--glass-border)] pb-2">{texts.h5}</h2>
-            <p>{texts.p5} <a href={`mailto:${config?.email || 'hello@atpdev.dev'}`} className="text-[var(--primary)] hover:underline font-semibold magnetic-element inline-block px-2">{config?.email || 'hello@atpdev.dev'}</a></p>
+            <p>
+              {texts.p5}{" "}
+              <a href="mailto:contacto@atpdev.dev" className="text-[var(--primary)] hover:underline font-semibold magnetic-element inline-block px-1">
+                contacto@atpdev.dev
+              </a>{" "}
+              ({isEn ? "or via our" : "o a través de nuestro"}{" "}
+              <Link href={`${prefix}/${isEn ? "contact" : "contacto"}`} className="text-[var(--primary)] hover:underline font-semibold">
+                {isEn ? "contact page" : "formulario de contacto"}
+              </Link>
+              ).
+            </p>
           </section>
 
         </div>
@@ -161,7 +171,7 @@ export default async function PrivacyPolicy({
           <Link href={`${prefix}/`} className="hover:underline">{isEn ? "Home" : "Inicio"}</Link>
           <Link href={`${prefix}/blog`} className="hover:underline">{isEn ? "Articles" : "Artículos"}</Link>
           <Link href={`${prefix}/sobre-mi`} className="hover:underline">{isEn ? "About" : "Sobre Mí"}</Link>
-          <Link href={`${prefix}/#contact`} className="hover:underline">{isEn ? "Contact" : "Contacto"}</Link>
+          <Link href={`${prefix}/${isEn ? "contact" : "contacto"}`} className="hover:underline">{isEn ? "Contact" : "Contacto"}</Link>
           <Link href={`${prefix}/privacy`} className="hover:underline">{isEn ? "Privacy" : "Privacidad"}</Link>
           <Link href={`${prefix}/terms`} className="hover:underline">{isEn ? "Terms" : "Términos"}</Link>
         </div>

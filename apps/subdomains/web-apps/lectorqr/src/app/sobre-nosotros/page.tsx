@@ -61,6 +61,31 @@ export default function SobreNosotrosQrPage() {
             </p>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+            <div className="flex items-center gap-2 text-white font-bold">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <h2>4. Casos de Uso Profesionales y Educativos</h2>
+            </div>
+            <p>
+              Nuestro <Link href="/" className="text-cyan-400 underline font-semibold">Escáner QR en vivo</Link> y nuestro{' '}
+              <Link href="/generar" className="text-cyan-400 underline font-semibold">Generador de Códigos QR Personalizados</Link>{' '}
+              son utilizados a diario por restaurantes que digitalizan cartas sin comisiones, docentes que comparten recursos en aula, comercios que generan credenciales Wi-Fi seguras para invitados y profesionales que distribuyen tarjetas vCard en eventos corporativos.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
+            <div className="flex items-center gap-2 text-white font-bold">
+              <QrCode className="w-4 h-4 text-purple-400" />
+              <h2>5. Compromiso Técnico y Publicidad Responsable</h2>
+            </div>
+            <p>
+              Mantenemos la herramienta gratuita, rápida y libre de registros forzados mediante publicidad contextual supervisada con Google AdSense únicamente en páginas con contenido editorial y herramientas públicas. El historial local de escaneos y los ajustes de cámara se excluyen estrictamente de anuncios y quedan bajo control exclusivo del usuario conforme a nuestra{' '}
+              <Link href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</Link>.
+            </p>
+          </div>
+        </div>
       </section>
     </div>
   );

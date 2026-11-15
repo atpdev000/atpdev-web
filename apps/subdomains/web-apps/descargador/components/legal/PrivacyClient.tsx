@@ -119,6 +119,17 @@ export default function PrivacyClient({ siteTitle, contactEmail }: { siteTitle: 
                     {t.dartCookieLink2}
                   </a>.
                 </li>
+                <li>
+                  {t.dartCookieItem5}{' '}
+                  <a 
+                    href="https://policies.google.com/technologies/partner-sites" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                  >
+                    {t.dartCookieLink3}
+                  </a>.
+                </li>
               </ul>
             </div>
           </div>

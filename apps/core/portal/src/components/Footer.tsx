@@ -28,7 +28,7 @@ export default function Footer({
             <li><Link href={`${linkPrefix}/blog`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Technical Articles" : "Artículos Técnicos"}</Link></li>
             <li><a href={`${linkPrefix}/#experience`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
             <li><a href={`${linkPrefix}/#portfolio`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
-            <li><a href={`${linkPrefix}/#contact`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkContact || (isEn ? "Contact" : "Contacto")}</a></li>
+            <li><Link href={`${linkPrefix}/${isEn ? 'contact' : 'contacto'}`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkContact || (isEn ? "Contact" : "Contacto")}</Link></li>
           </ul>
         </div>
         <div>

@@ -13,8 +13,8 @@ export function AdSenseInjector({
     const pathname = usePathname() || ''
     const resolvedId = (adsenseId || clientId || 'ca-pub-5414009811868137').trim()
 
-    // Políticas de Google AdSense: No inyectar scripts publicitarios en pantallas puramente legales o sin contenido editorial (ej. Política de Privacidad, Términos, Créditos, CV imprimible).
-    const isExcludedUtilityPage = /(?:^|\/)(?:privacy|terms|credits|cv)\/?$/i.test(pathname)
+    // Políticas de Google AdSense: No inyectar scripts publicitarios en pantallas puramente legales, de contacto o sin contenido editorial (ej. Política de Privacidad, Términos, Contacto, Créditos, CV imprimible).
+    const isExcludedUtilityPage = /(?:^|\/)(?:privacy|terms|contacto|contact|credits|cv)\/?$/i.test(pathname)
 
     if (isExcludedUtilityPage || !resolvedId) {
         return null

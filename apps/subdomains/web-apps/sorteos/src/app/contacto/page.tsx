@@ -198,11 +198,21 @@ export default function ContactoPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-zinc-400">
           <div className="p-4 rounded-xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5">
             <p className="font-bold text-slate-900 dark:text-white">¿Las herramientas como la Ruleta y Dados tienen costo?</p>
-            <p>No. Todas las herramientas independientes (Ruleta, Dados, Moneda, Lista, Equipos y Números) son 100% gratuitas e ilimitadas.</p>
+            <p>No. Todas las herramientas independientes (Ruleta Aleatoria, Dados 3D, Cara o Cruz, Lista Aleatoria, Generador de Equipos y Generador de Números) son 100% gratuitas e ilimitadas sin necesidad de suscripción.</p>
           </div>
           <div className="p-4 rounded-xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5">
             <p className="font-bold text-slate-900 dark:text-white">¿Cómo se valida la transparencia de un sorteo?</p>
-            <p>Cada sorteo genera un Certificado Digital único con hash criptográfico SHA-256 generado mediante el motor Web Crypto CSPRNG del navegador.</p>
+            <p>Cada sorteo genera un Certificado Digital único con huella criptográfica SHA-256 calculada mediante el motor Web Crypto CSPRNG del navegador y verificable públicamente en nuestra sección Verificar.</p>
+          </div>
+          <div className="p-4 rounded-xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5">
+            <p className="font-bold text-slate-900 dark:text-white">¿Cómo reportar un problema con una URL de Instagram, TikTok o X?</p>
+            <p>Incluye en tu mensaje el enlace de la publicación pública (sin cuentas privadas) y el navegador utilizado. Nuestro equipo responde en un plazo de 24 a 48 horas hábiles al correo oficial contacto@atpdev.dev.</p>
+          </div>
+          <div className="p-4 rounded-xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5">
+            <p className="font-bold text-slate-900 dark:text-white">¿Dónde consultar el uso de cookies y términos legales?</p>
+            <p>
+              Puedes revisar nuestra <Link href="/politica-de-privacidad" className="text-pink-500 underline font-semibold">Política de Privacidad</Link> y los <Link href="/terminos-y-condiciones" className="text-pink-500 underline font-semibold">Términos y Condiciones</Link> aplicables en todo el ecosistema ATP DEV.
+            </p>
           </div>
         </div>
       </div>

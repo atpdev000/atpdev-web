@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { ADSENSE_CLIENT_ID } from '@/lib/siteConfig';
 
-const EXCLUDED_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|login|registro|recuperar-password|restablecer-password|dashboard|admin|auth|contacto)(?:\/|$)/i;
+const EXCLUDED_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|login|registro|recuperar-password|restablecer-password|dashboard|admin|auth|contacto|verificar|sorteos\/extension-install)(?:\/|$)/i;
 
 /**
  * Componente oficial de Google AdSense para Sorteos Pro.

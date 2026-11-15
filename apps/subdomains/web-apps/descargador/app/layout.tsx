@@ -214,16 +214,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           id="descargador-ads-config"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `window.__DESCARGADOR_ADS_CONFIG__ = ${JSON.stringify({
-              enabled: config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_enabled !== false,
-              clientId: config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137',
-              slots: {
-                leaderboard: config?.monetization?.adsense_slot_header || process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER || '4095225502',
-                'in-feed': config?.monetization?.adsense_slot_incontent || process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT || '9155980495',
-                sidebar: config?.monetization?.adsense_slot_sidebar || process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || '4095225502',
-                billboard: config?.monetization?.adsense_slot_footer || process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER || '4095225502',
-              }
-            })};`
+            __html: `window.__DESCARGADOR_ADS_CONFIG__ = ${JSON.stringify(
+              config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_enabled !== false
+                ? {
+                    enabled: true,
+                    clientId: config?.monetization?.adsense_client_id || '',
+                    slots: {
+                      leaderboard: config?.monetization?.adsense_slot_header || process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER || '',
+                      'in-feed': config?.monetization?.adsense_slot_incontent || process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT || '',
+                      sidebar: config?.monetization?.adsense_slot_sidebar || process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || '',
+                      billboard: config?.monetization?.adsense_slot_footer || process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER || '',
+                    },
+                  }
+                : { enabled: false, clientId: '', slots: {} }
+            )};`
           }}
         />
         <DescargadorThemeListener />

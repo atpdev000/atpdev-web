@@ -56,7 +56,7 @@ export default async function SobreMiPage({ params }: { params: Promise<{ lang: 
   const avatarSrc = config?.avatar_url && !config.avatar_url.startsWith("data:") ? config.avatar_url : "/og-image.png";
   const bioShort = await t(config?.bio_short || "Ingeniero de Sistemas especializado en desarrollo Android nativo, plataformas web Next.js e integración de IA aplicada.");
   const bioLong = await t(config?.bio_long || "Ingeniero de Sistemas de la Universidad Nacional José María Arguedas (UNAJMA).");
-  const contactEmail = config?.email || "contacto@atpdev.dev";
+  const contactEmail = "contacto@atpdev.dev";
   const prefix = lang === "es" ? "" : `/${lang}`;
 
   return (

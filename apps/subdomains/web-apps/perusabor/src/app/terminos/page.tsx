@@ -52,19 +52,40 @@ export default function TerminosPage() {
             El diseño de interfaz, compilación editorial, calculadoras y código fuente pertenecen a ATP DEV. Se autoriza el uso libre para consulta personal, aprendizaje culinario y planificación de cocina; queda prohibida la redistribución automatizada masiva o scraping comercial del catálogo.
           </p>
           <p>
+            Los usuarios pueden exportar fichas y presupuestos calculados localmente para la operación interna de sus restaurantes o formación gastronómica, respetando siempre los avisos de atribución cuando compartan guías técnicas completas.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-3">
+          <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
+            <FileText className="w-4 h-4 text-[#c22929]" />
+            <h2>3. Inocuidad alimentaria y restricciones dietéticas</h2>
+          </div>
+          <p>
+            Las sustituciones de insumos sugeridas en el recetario o en{' '}
+            <Link href="/chef-ia" className="text-[#c22929] font-semibold underline">Chef IA Perú</Link>{' '}
+            tienen carácter técnico orientativo. El cocinero o responsable de cocina debe verificar alérgenos (crustáceos, lácteos, frutos secos, gluten o sulfitos) y temperaturas internas seguras según las normas sanitarias vigentes de su país antes de servir preparaciones al público.
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-3">
+          <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
+            <Scale className="w-4 h-4 text-[#c22929]" />
+            <h2>4. Publicidad, privacidad y contacto oficial</h2>
+          </div>
+          <p>
+            El acceso abierto a Perú Sabor Inteligente se financia mediante publicidad gestionada con Google AdSense en sus secciones editoriales y culinarias. El tratamiento de cookies se rige estrictamente por nuestra{' '}
+            <Link href="/privacidad" className="text-[#c22929] font-semibold underline">Política de Privacidad</Link>.
+          </p>
+          <p>
             Para consultas editoriales, correcciones o soporte técnico puedes comunicarte mediante{' '}
             <a href="mailto:contacto@atpdev.dev" className="text-[#c22929] font-semibold underline">
               contacto@atpdev.dev
             </a>{' '}
-            o en{' '}
-            <a
-              href="https://www.atpdev.dev/#contact"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#c22929] font-semibold underline"
-            >
-              www.atpdev.dev/#contact
-            </a>
+            o mediante nuestra{' '}
+            <Link href="/contacto" className="text-[#c22929] font-semibold underline">
+              página de Contacto
+            </Link>
             .
           </p>
         </div>

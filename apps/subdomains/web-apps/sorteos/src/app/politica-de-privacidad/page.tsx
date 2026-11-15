@@ -81,6 +81,14 @@ export default function PrivacidadPage() {
                   className="text-pink-400 hover:underline font-mono inline-flex items-center gap-1 font-bold"
                 >
                   aboutads.info/choices <ExternalLink className="w-3 h-3" />
+                </a>. Asimismo, puedes revisar cómo utiliza Google los datos cuando visitas sitios o aplicaciones de socios en{' '}
+                <a
+                  href="https://policies.google.com/technologies/partner-sites"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-pink-400 hover:underline font-mono inline-flex items-center gap-1 font-bold"
+                >
+                  policies.google.com/technologies/partner-sites <ExternalLink className="w-3 h-3" />
                 </a>.
               </li>
             </ul>

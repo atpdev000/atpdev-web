@@ -34,28 +34,21 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">2. Descripción del Servicio</h2>
             <p>
-              Almaniq Web es una plataforma de gestión automatizada y generación de contenido
-              educativo, efemérides y tendencias digitales. El contenido se distribuye a través de plataformas
-              digitales como YouTube, TikTok y Facebook en formato de video corto.
+              Almaniq Web es una publicación digital y archivo cronológico dedicado a la divulgación histórica, científica y cultural mediante efemérides verificadas y dossiers mensuales de acceso libre. Complementariamente, parte de nuestro material divulgativo se difunde en canales audiovisuales oficiales operados por ATP Dev.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">3. Uso del Contenido</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">3. Uso del Contenido y Propiedad Intelectual</h2>
             <p>
-              Todo el contenido publicado por Almaniq Web es de carácter educativo e
-              informativo. Queda prohibida la reproducción total o parcial sin autorización expresa
-              del titular del proyecto.
+              Las crónicas, reseñas históricas y compilaciones editoriales de Almaniq Web tienen finalidad estrictamente educativa e informativa. Puedes citar fragmentos con atribución expresa y enlace a la fuente original en almaniq.atpdev.dev; queda prohibida la redistribución masiva o automatizada con fines comerciales sin autorización previa por escrito.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">4. Integración con Terceros</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">4. Integraciones Técnicas y Publicidad</h2>
             <p>
-              Almaniq Web utiliza APIs de terceros (YouTube Data API, TikTok Content Posting
-              API, Facebook Graph API) exclusivamente para la publicación automatizada de contenido
-              educativo en sus canales oficiales. No se recopilan datos de usuarios de dichas
-              plataformas más allá de lo strictly necesario para la publicación.
+              Almaniq Web emplea interfaces de programación autorizadas exclusivamente para la gestión y publicación de contenido editorial propio en sus cuentas oficiales, sin recolectar información personal de terceros. El sostenimiento gratuito del portal se financia mediante publicidad contextual o personalizada de Google AdSense conforme a nuestras políticas de privacidad y consentimiento.
             </p>
           </section>
 

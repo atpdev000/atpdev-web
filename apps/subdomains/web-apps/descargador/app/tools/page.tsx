@@ -185,6 +185,27 @@ export default function ToolsPage() {
         </div>
       </div>
 
+      {/* Especificaciones Técnicas y Buenas Prácticas */}
+      <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900/90 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-xs mb-8 space-y-4">
+        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+          Especificaciones Técnicas de Conversión y Compatibilidad
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">Contenedor MP4 Universal (H.264 + AAC)</h3>
+            <p>
+              Todos los módulos web entregan archivos en formato estándar ISO BMFF (<code>.mp4</code>) con índice de arranque rápido (<em>faststart</em>) para reproducirse de inmediato en iPhone (iOS Safari/Archivos), Android, televisores Smart TV y editores como CapCut o DaVinci Resolve.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100">Procesamiento Efímero Sin Registro</h3>
+            <p>
+              No requerimos cuentas de usuario ni contraseñas de tus redes sociales. Únicamente consultamos flujos públicos al vuelo y no almacenamos historial en servidores externos; consulta nuestra guía en el <Link href="/blog" className="text-blue-600 dark:text-blue-400 underline font-semibold">Blog Técnico</Link> o lee la <Link href="/legal/privacidad" className="text-blue-600 dark:text-blue-400 underline font-semibold">Política de Privacidad</Link>.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Aviso legal */}
       <div className="max-w-4xl mx-auto p-5 sm:p-6 bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 rounded-2xl mb-8">
         <p className="text-xs sm:text-sm text-amber-800 dark:text-amber-200 text-center leading-relaxed">

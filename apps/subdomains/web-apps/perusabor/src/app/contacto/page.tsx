@@ -55,8 +55,33 @@ export default function ContactoPage() {
             <li><strong>Titular del sitio:</strong> Percy Acha Taipe — Ecosistema ATP DEV</li>
             <li><strong>Ubicación operativa:</strong> Lima, Perú (GMT-5)</li>
             <li><strong>Tiempo de respuesta habitual:</strong> 24 a 48 horas hábiles</li>
-            <li><strong>Portal corporativo:</strong> <a href="https://www.atpdev.dev/#contact" className="text-[#c22929] underline font-semibold">www.atpdev.dev/#contact</a></li>
+            <li><strong>Portal corporativo:</strong> <a href="https://www.atpdev.dev/contacto" className="text-[#c22929] underline font-semibold">www.atpdev.dev/contacto</a></li>
           </ul>
+        </div>
+      </section>
+
+      <section className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-4 text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+        <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold text-base">
+          <ShieldCheck className="w-4 h-4 text-[#c22929]" />
+          <h2>Motivos Frecuentes de Contacto y Guías Disponibles</h2>
+        </div>
+        <p>
+          Antes de enviar tu consulta, puedes explorar nuestras herramientas y documentación técnica especializada en gastronomía peruana para resolver dudas inmediatas de rendimiento, gramajes y costos:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-950/60 border border-stone-200/80 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-stone-100">Correcciones de recetas regionales o mermas</h3>
+            <p>
+              Si detectas un ajuste necesario en factores de merma bruta/neta, temperaturas de cocción o fichas técnicas de nuestro{' '}
+              <Link href="/recetas" className="text-[#c22929] font-semibold underline">Recetario Oficial</Link>, indícanos el plato exacto y tu referencia culinaria.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-950/60 border border-stone-200/80 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-stone-100">Uso de calculadoras y transparencia legal</h3>
+            <p>
+              Para soporte del <Link href="/escalador" className="text-[#c22929] font-semibold underline">Escalador de Porciones</Link>, la calculadora de <Link href="/costeo" className="text-[#c22929] font-semibold underline">Food Cost</Link> o consultas sobre cookies y datos personales, revisa también nuestra <Link href="/privacidad" className="text-[#c22929] font-semibold underline">Política de Privacidad</Link> y <Link href="/terminos" className="text-[#c22929] font-semibold underline">Términos de Uso</Link>.
+            </p>
+          </div>
         </div>
       </section>
     </main>

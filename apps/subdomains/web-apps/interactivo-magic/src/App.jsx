@@ -4011,15 +4011,18 @@ function App() {
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <li><a href="#plantillas" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Plantillas</a></li>
                     <li><a href="#como-funciona" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Cómo funciona</a></li>
+                    <li><a href="/guia.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Guía Práctica</a></li>
                     <li><a href="https://www.atpdev.dev/apps/interactivo-magic" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Ficha Técnica</a></li>
                   </ul>
                 </div>
 
                 <div>
-                  <h4 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Legal</h4>
+                  <h4 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Legal y Ayuda</h4>
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    <li><a href="/sobre-nosotros.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Sobre Nosotros</a></li>
                     <li><a href="/politica-privacidad.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Política de Privacidad</a></li>
-                    <li><a href="#" onClick={(e) => { e.preventDefault(); setLegalModal('terms'); }} style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Términos de Uso</a></li>
+                    <li><a href="/terminos.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Términos de Uso</a></li>
+                    <li><a href="/contacto.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Contacto</a></li>
                     <li><a href="https://www.atpdev.dev" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>ATP Dev Portal</a></li>
                   </ul>
                 </div>

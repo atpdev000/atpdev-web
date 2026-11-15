@@ -72,6 +72,12 @@ export default function PoliticaPrivacidadPage() {
                 AboutAds.info
               </a>.
             </li>
+            <li>
+              Para conocer en detalle cómo Google trata la información cuando utilizas sitios o aplicaciones de socios, consulta{' '}
+              <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline">
+                policies.google.com/technologies/partner-sites
+              </a>.
+            </li>
           </ul>
         </section>
 

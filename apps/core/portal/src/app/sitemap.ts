@@ -42,6 +42,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: buildAlternates('/blog'),
     },
     {
+      url: `${BASE_URL}/contacto`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+      alternates: {
+        languages: {
+          "x-default": `${BASE_URL}/contacto`,
+          es: `${BASE_URL}/contacto`,
+          en: `${BASE_URL}/en/contact`,
+        },
+      },
+    },
+    {
       url: `${BASE_URL}/privacy`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
@@ -78,6 +91,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.8,
       alternates: buildAlternates('/blog'),
+    },
+    {
+      url: `${BASE_URL}/${lang}/${lang === 'en' ? 'contact' : 'contacto'}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+      alternates: {
+        languages: {
+          "x-default": `${BASE_URL}/contacto`,
+          es: `${BASE_URL}/contacto`,
+          en: `${BASE_URL}/en/contact`,
+        },
+      },
     },
     {
       url: `${BASE_URL}/${lang}/privacy`,

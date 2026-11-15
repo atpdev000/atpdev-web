@@ -34,28 +34,21 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">2. Descripción del Servicio</h2>
             <p>
-              Code History Daily es un proyecto educativo que publica contenido sobre la historia
-              de la programación y la tecnología. El contenido se distribuye a través de plataformas
-              digitales como YouTube, TikTok y Facebook en formato de video corto.
+              Code History Daily es una publicación técnica y archivo cronológico dedicado a documentar la historia de la programación, los lenguajes, las arquitecturas de hardware y los estándares abiertos de Internet. Complementariamente, parte de nuestro material divulgativo se difunde en canales audiovisuales oficiales de ATP Dev.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">3. Uso del Contenido</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">3. Uso del Contenido y Atribución Académica</h2>
             <p>
-              Todo el contenido publicado por Code History Daily es de carácter educativo e
-              informativo. Queda prohibida la reproducción total o parcial sin autorización expresa
-              del titular del proyecto.
+              Todo el material cronológico y técnico publicado por Code History Daily posee carácter estrictamente educativo. Se autoriza la cita de reseñas históricas con atribución expresa y enlace a codehistory.atpdev.dev; queda prohibida la copia sistemática o automatizada con fines comerciales sin autorización previa por escrito.
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">4. Integración con Terceros</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">4. Integraciones Técnicas y Publicidad</h2>
             <p>
-              Code History Daily utiliza APIs de terceros (YouTube Data API, TikTok Content Posting
-              API, Facebook Graph API) exclusivamente para la publicación automatizada de contenido
-              educativo en sus canales oficiales. No se recopilan datos de usuarios de dichas
-              plataformas más allá de lo estrictamente necesario para la publicación.
+              Code History Daily emplea interfaces de programación autorizadas exclusivamente para publicar cápsulas educativas en sus cuentas oficiales, sin recolectar datos personales de terceros. El acceso libre y sin muros de pago se financia mediante publicidad responsable operada con Google AdSense bajo Consent Mode v2.
             </p>
           </section>
 

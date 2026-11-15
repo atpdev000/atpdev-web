@@ -114,6 +114,22 @@ export default function TiktokToolPage() {
                         <p className="text-xs text-slate-600 dark:text-slate-400">Sin extensiones dudosas ni registros obligatorios.</p>
                     </div>
                 </div>
+
+                <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                        Compatibilidad con enlaces cortos y preservación de audio
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Nuestro analizador reconoce tanto enlaces completos de escritorio como enlaces acortados móviles (<code>vm.tiktok.com</code> y <code>vt.tiktok.com</code>). Al optar por el flujo limpio sin marca de agua conservas la relación 9:16 íntegra de tus creaciones para respaldos en SSD/NAS o reedición en alta fidelidad sin recortes artificiales en los bordes.
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Explora más detalles en nuestra{' '}
+                        <Link href="/blog/tiktok-sin-marca-de-agua" className="text-pink-600 dark:text-pink-400 font-semibold underline">
+                            Guía técnica para conservar TikTok sin marca de agua
+                        </Link>{' '}
+                        y consulta la <Link href="/legal/copyright" className="text-pink-600 dark:text-pink-400 font-semibold underline">Política de Derechos de Autor</Link>.
+                    </p>
+                </div>
             </div>
         </div>
     )

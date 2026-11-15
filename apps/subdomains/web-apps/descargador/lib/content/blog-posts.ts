@@ -4,7 +4,7 @@ export const blogPosts: BlogPost[] = [
   {
     "id": 1,
     "title": "La Guía Definitiva de Respaldo Digital y Preservación Multimedia en 2026",
-    "slug": "post-1-volument-guia-pro",
+    "slug": "post-1-respaldo-digital-guia-pro",
     "category": "Mega Guía",
     "date": "2026-03-06",
     "readTime": "7 min de lectura",

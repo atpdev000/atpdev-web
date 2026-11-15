@@ -11,7 +11,7 @@ export interface LocalizedBlogItem {
 
 export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedBlogItem>> = {
   en: {
-    'post-1-volument-guia-pro': {
+    'post-1-respaldo-digital-guia-pro': {
       title: 'The Ultimate Digital Backup Guide',
       excerpt: 'Complete guide on how to safeguard your most valuable files against technical failures and cyber threats in 2026.',
       category: 'Mega Guide',
@@ -221,7 +221,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
     }
   },
   pt: {
-    'post-1-volument-guia-pro': {
+    'post-1-respaldo-digital-guia-pro': {
       title: 'O Guia Definitivo de Backup Digital',
       excerpt: 'Guia completo sobre como proteger seus arquivos mais valiosos contra falhas técnicas e ataques virtuais em 2026.',
       category: 'Mega Guia',

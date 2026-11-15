@@ -163,6 +163,35 @@ export default function ContactoPage() {
 
       </div>
 
+      {/* Alcance de Soporte y Preguntas Frecuentes */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-300 leading-relaxed pt-2">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
+          <h2 className="text-base font-bold text-white font-display">
+            Qué consultas atendemos prioritariamente
+          </h2>
+          <p>
+            Brindamos soporte gratuito sobre compatibilidad de cámaras WebRTC en Android e iOS, exportación vectorial SVG en el{' '}
+            <a href="/generar" className="text-cyan-400 underline font-semibold">Generador de Códigos QR</a>, corrección de errores Reed-Solomon y avisos de privacidad o publicidad.
+          </p>
+          <p className="text-slate-400">
+            Si reportas un error de lectura, por favor especifica el navegador utilizado y el formato del código (QR, DataMatrix, EAN-13 o Aztec) para reproducirlo con precisión.
+          </p>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
+          <h2 className="text-base font-bold text-white font-display">
+            Documentación Legal y Recursos Rápidos
+          </h2>
+          <p>
+            El escaneo óptico y la creación de códigos QR se procesan íntegramente en el navegador del usuario sin almacenar capturas ni credenciales Wi-Fi en servidores externos.
+          </p>
+          <ul className="space-y-1.5 text-xs text-slate-400">
+            <li>• Revisa nuestra <a href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</a> y <a href="/politica-de-cookies" className="text-cyan-400 underline font-semibold">Política de Cookies</a>.</li>
+            <li>• Consulta las condiciones en <a href="/terminos-y-condiciones" className="text-cyan-400 underline font-semibold">Términos y Condiciones</a> o explora las <a href="/guias" className="text-cyan-400 underline font-semibold">Guías de Uso Seguro</a>.</li>
+          </ul>
+        </div>
+      </section>
+
     </div>
   );
 }

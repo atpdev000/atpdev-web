@@ -139,6 +139,53 @@ export default function HomePage() {
             </div>
           </section>
 
+          <section className="rounded-2xl border border-emerald-500/25 bg-slate-900/50 p-6 sm:p-8 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="font-mono text-xs font-bold uppercase tracking-wider text-emerald-400">
+                  Archivo Cronológico Completo
+                </p>
+                <h2 className="mt-1 text-xl sm:text-2xl font-bold text-white">
+                  Explora nuestros dossiers mensuales de historia y ciencia
+                </h2>
+              </div>
+              <Link
+                href="/archivo"
+                className="inline-flex items-center justify-center rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-4 py-2 text-xs font-semibold text-emerald-200 hover:bg-emerald-500/25 transition-colors"
+              >
+                Abrir Archivo Anual (12 meses) →
+              </Link>
+            </div>
+            <p className="text-sm leading-relaxed text-slate-300">
+              Además de la edición diaria interactiva, nuestro archivo documental organiza 60 hitos
+              históricos verificados en doce entregas mensuales con contexto y legado:
+            </p>
+            <div className="flex flex-wrap gap-2 text-xs">
+              {[
+                ['enero', 'Enero'],
+                ['febrero', 'Febrero'],
+                ['marzo', 'Marzo'],
+                ['abril', 'Abril'],
+                ['mayo', 'Mayo'],
+                ['junio', 'Junio'],
+                ['julio', 'Julio'],
+                ['agosto', 'Agosto'],
+                ['septiembre', 'Septiembre'],
+                ['octubre', 'Octubre'],
+                ['noviembre', 'Noviembre'],
+                ['diciembre', 'Diciembre'],
+              ].map(([slug, label]) => (
+                <Link
+                  key={slug}
+                  href={`/archivo/${slug}`}
+                  className="rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-1.5 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-300 transition-colors"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </section>
+
           <footer className="flex flex-col justify-between gap-4 border-t border-slate-800 pt-8 text-xs text-slate-400 sm:flex-row sm:items-center">
             <div>
               © 2026 Almaniq · Curiosidades e Historia por{' '}
@@ -150,6 +197,9 @@ export default function HomePage() {
               </a>
             </div>
             <nav aria-label="Enlaces legales y ecosistema" className="flex flex-wrap gap-5">
+              <Link href="/archivo" className="text-slate-300 hover:text-emerald-300">
+                Archivo Anual
+              </Link>
               <Link href="/about" className="text-slate-300 hover:text-emerald-300">
                 Sobre Nosotros
               </Link>

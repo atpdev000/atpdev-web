@@ -296,23 +296,48 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Enlace de FAQ */}
-      <div className="mt-12 text-center p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto mb-3">
-          <HelpCircle className="w-5 h-5" />
+      {/* Enlace de FAQ y Alcance de Soporte */}
+      <div className="mt-12 grid md:grid-cols-2 gap-6">
+        <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <HelpCircle className="w-5 h-5" />
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            ¿Tienes dudas rápidas sobre el uso de la herramienta?
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            Revisa nuestras Preguntas Frecuentes y guías técnicas sobre formatos MP4/MP3, compatibilidad con móviles iOS/Android y funcionamiento sin registro previo.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Link
+              href="/faq"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors"
+            >
+              <span>Consultar Preguntas Frecuentes</span>
+            </Link>
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold text-xs transition-colors"
+            >
+              <span>Explorar Herramientas</span>
+            </Link>
+          </div>
         </div>
-        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-1">
-          ¿Tienes dudas rápidas sobre el uso del descargador?
-        </h3>
-        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-4 max-w-md mx-auto">
-          Revisa nuestras Preguntas Frecuentes para conocer resoluciones inmediatas sobre formatos compatibles, calidad y descargas en móvil.
-        </p>
-        <Link
-          href="/faq"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs transition-colors"
-        >
-          <span>Consultar Preguntas Frecuentes (FAQ)</span>
-        </Link>
+
+        <div className="p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            Reportes Técnicos, Derechos de Autor y Transparencia
+          </h3>
+          <p>
+            Si necesitas reportar un enlace público que falla al extraer audio o video, adjunta la URL de origen y el navegador utilizado. Atendemos exclusivamente consultas sobre respaldos personales legítimos, dominio público y contenido propio.
+          </p>
+          <p>
+            Para notificaciones de propiedad intelectual (DMCA) o solicitudes legales de privacidad, consulta nuestras secciones de{' '}
+            <Link href="/legal/copyright" className="text-blue-600 dark:text-blue-400 underline font-semibold">Copyright y DMCA</Link>,{' '}
+            <Link href="/legal/terminos" className="text-blue-600 dark:text-blue-400 underline font-semibold">Términos de Servicio</Link> y{' '}
+            <Link href="/legal/privacidad" className="text-blue-600 dark:text-blue-400 underline font-semibold">Privacidad</Link>.
+          </p>
+        </div>
       </div>
     </div>
   )

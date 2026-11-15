@@ -30,3 +30,4 @@ export function ChambaAdSense({ clientId }: { clientId: string }) {
 }
 
 export default ChambaAdSense;
+

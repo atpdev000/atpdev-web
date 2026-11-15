@@ -1,4 +1,4 @@
-﻿import { Locale } from '@/lib/i18n/config';
+import { Locale } from '@/lib/i18n/config';
 
 export interface CookiesTranslations {
   backToDownloader: string;
@@ -57,6 +57,8 @@ export interface PrivacyTranslations {
   dartCookieLink1: string;
   dartCookieItem4: string;
   dartCookieLink2: string;
+  dartCookieItem5: string;
+  dartCookieLink3: string;
   sec3Title: string;
   thCategory: string;
   thPurpose: string;
@@ -251,6 +253,8 @@ export const privacyTranslations: Record<Locale, PrivacyTranslations> = {
     dartCookieLink1: 'Configuración de Anuncios de Google',
     dartCookieItem4: 'Asimismo, puedes informarte sobre cómo gestionar cookies publicitarias globales visitando',
     dartCookieLink2: 'www.aboutads.info',
+    dartCookieItem5: 'Para conocer cómo Google utiliza la información cuando visitas sitios o aplicaciones que usan sus servicios, consulta la página oficial sobre',
+    dartCookieLink3: 'cómo utiliza Google los datos en sitios web de socios',
     sec3Title: '3. Tecnologías de Almacenamiento y Cookies Utilizadas',
     thCategory: 'Categoría',
     thPurpose: 'Propósito',
@@ -316,6 +320,8 @@ export const privacyTranslations: Record<Locale, PrivacyTranslations> = {
     dartCookieLink1: 'Google Ads Settings',
     dartCookieItem4: 'You can also learn how to manage global advertising cookies by visiting',
     dartCookieLink2: 'www.aboutads.info',
+    dartCookieItem5: 'To understand how Google uses data when you use partner sites or apps, please review Google’s official disclosure on',
+    dartCookieLink3: 'how Google uses information from sites or apps that use our services',
     sec3Title: '3. Storage Technologies & Cookies Deployed',
     thCategory: 'Category',
     thPurpose: 'Purpose',
@@ -381,6 +387,8 @@ export const privacyTranslations: Record<Locale, PrivacyTranslations> = {
     dartCookieLink1: 'Configurações de Anúncios do Google',
     dartCookieItem4: 'Você também pode saber mais sobre o gerenciamento de cookies publicitários em',
     dartCookieLink2: 'www.aboutads.info',
+    dartCookieItem5: 'Para saber como o Google utiliza informações quando você visita sites ou aplicativos parceiros, consulte o aviso oficial sobre',
+    dartCookieLink3: 'como o Google usa informações de sites ou aplicativos que usam nossos serviços',
     sec3Title: '3. Tecnologias de Armazenamento e Cookies Utilizados',
     thCategory: 'Categoria',
     thPurpose: 'Finalidade',
