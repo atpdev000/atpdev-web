@@ -57,6 +57,13 @@ export default function ContactPage() {
             <li><strong>Privacidad y Consent Mode:</strong> Consultas sobre tratamiento de datos, preferencias publicitarias o derechos de acceso descritos en nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a>.</li>
             <li><strong>Uso docente y citas técnicas:</strong> Autorizaciones de reproducción parcial para syllabus universitarios o material didáctico según nuestros <a href="/terms" className="text-emerald-400 underline">Términos de Servicio</a>.</li>
           </ul>
+          <h3 className="text-base font-semibold text-white pt-2">Proceso de Revisión Técnica y Citas Bibliográficas</h3>
+          <p>
+            Cada reporte recibido pasa por una revisión documental frente a memorandos RFC del IETF, actas académicas de la ACM e IEEE y anuncios originales de lanzamiento publicados por universidades o laboratorios de ingeniería. Diferenciamos explícitamente entre borradores internos de laboratorio, versiones públicas iniciales y especificaciones estándar definitivas para preservar el rigor histórico.
+          </p>
+          <p>
+            Si utilizas las fichas mensuales en cursos introductorios de ciencias de la computación o bootcamps técnicos, te invitamos a citar la ruta del mes específico y escribirnos ante cualquier duda de licenciamiento o accesibilidad.
+          </p>
           <div className="pt-3 border-t border-slate-800 flex flex-wrap gap-4 text-xs text-slate-400">
             <a href="/archivo" className="text-emerald-400 hover:underline">Explorar Archivo Anual</a>
             <a href="/about" className="text-emerald-400 hover:underline">Sobre Nosotros y Metodología</a>

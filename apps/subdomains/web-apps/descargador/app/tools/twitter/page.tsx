@@ -189,6 +189,14 @@ export default function TwitterToolPage() {
                 No. Nuestro motor procesa los flujos en tiempo real y el archivo se transmite directamente de los servidores de origen a tu navegador sin persistencia en nuestros discos.
               </p>
             </div>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-xs sm:text-sm mb-1">
+                ¿Cómo descargo los GIFs animados publicados en X?
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                En Twitter / X los archivos GIF animados se sirven internamente como bucles MP4 altamente comprimidos. Nuestra herramienta detecta automáticamente esa pista y la entrega como video MP4 universal compatible con iPhone, Android y editores de escritorio.
+              </p>
+            </div>
           </div>
         </div>
 

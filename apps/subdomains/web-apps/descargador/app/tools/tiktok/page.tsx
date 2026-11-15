@@ -122,6 +122,9 @@ export default function TiktokToolPage() {
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         Nuestro analizador reconoce tanto enlaces completos de escritorio como enlaces acortados móviles (<code>vm.tiktok.com</code> y <code>vt.tiktok.com</code>). Al optar por el flujo limpio sin marca de agua conservas la relación 9:16 íntegra de tus creaciones para respaldos en SSD/NAS o reedición en alta fidelidad sin recortes artificiales en los bordes.
                     </p>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Si creas recopilaciones, podcasts o contenido educativo, recuerda utilizar las descargas exclusivamente bajo permiso del titular original o dentro de límites legales de copia privada. La plataforma también permite extraer la pista sonora en formato MP3 sin instalar aplicaciones de terceros ni otorgar acceso a tu cuenta personal de TikTok.
+                    </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                         Explora más detalles en nuestra{' '}
                         <Link href="/blog/tiktok-sin-marca-de-agua" className="text-pink-600 dark:text-pink-400 font-semibold underline">

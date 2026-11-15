@@ -62,11 +62,12 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">6. Modificaciones</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">6. Referencias Técnicas y Modificaciones</h2>
+            <p className="mb-3">
+              CodeHistory puede enlazar a especificaciones RFC, archivos de estándares W3C, repositorios históricos o documentales del ecosistema ATP Dev sobre cuya disponibilidad externa no ejercemos control permanente. Dichos enlaces tienen un propósito estrictamente documental y académico dentro de nuestras fichas diarias.
+            </p>
             <p>
-              Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios
-              serán efectivos al ser publicados en esta página. El uso continuado del Servicio
-              implica la aceptación de los términos modificados.
+              Nos reservamos el derecho de modificar estos términos en cualquier momento para adaptarlos a nuevas secciones del archivo cronológico o requisitos legales vigentes. Los cambios serán efectivos desde su publicación en esta página y el uso continuado del Servicio implica su aceptación.
             </p>
           </section>
 

@@ -57,6 +57,13 @@ export default function ContactPage() {
             <li><strong>Privacidad y derechos del usuario:</strong> Solicitudes sobre tratamiento de datos, preferencias de cookies y publicidad responsable conforme a nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a>.</li>
             <li><strong>Autorizaciones de uso educativo:</strong> Consultas sobre atribución académica en aulas, bibliotecas o boletines institucionales de acuerdo con nuestros <a href="/terms" className="text-emerald-400 underline">Términos de Servicio</a>.</li>
           </ul>
+          <h3 className="text-base font-semibold text-white pt-2">Criterios de Verificación y Citación Académica</h3>
+          <p>
+            Antes de incorporar una corrección o ampliar una efeméride del archivo histórico anual, nuestro equipo editorial contrasta las fechas en al menos dos fuentes documentales independientes, considerando la transición histórica del calendario juliano al calendario gregoriano en registros anteriores al siglo XVIII. Si preparas material escolar o presentaciones culturales usando nuestras fichas, agradecemos incluir el enlace directo al mes correspondiente dentro del archivo público.
+          </p>
+          <p>
+            Las consultas sobre colaboraciones editoriales o derechos de reproducción comercial se derivan al portal principal de ATP Dev tras validar la identidad del remitente por correo electrónico.
+          </p>
           <div className="pt-3 border-t border-slate-800 flex flex-wrap gap-4 text-xs text-slate-400">
             <a href="/archivo" className="text-emerald-400 hover:underline">Explorar Archivo Anual</a>
             <a href="/about" className="text-emerald-400 hover:underline">Sobre Nosotros y Metodología</a>

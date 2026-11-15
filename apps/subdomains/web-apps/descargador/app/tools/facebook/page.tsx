@@ -122,6 +122,9 @@ export default function FacebookToolPage() {
                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         Facebook distribuye sus videos públicos en flujos adaptativos DASH (480p SD, 720p HD y 1080p Full HD). Cuando seleccionas máxima calidad en nuestra herramienta, el servidor combina la pista de video limpia con el audio AAC estéreo original sin reducir la tasa de bits ni insertar marcas de agua. Solo es posible respaldar publicaciones y Reels con privacidad pública.
                     </p>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        El procesamiento funciona desde cualquier navegador moderno en Android, iOS, Windows y macOS sin requerir cuentas ni extensiones externas. Si únicamente necesitas extraer la banda sonora, notas de voz o audio de una transmisión grabada, también puedes guardar el flujo convertido en archivo MP3 listo para reproducción sin conexión.
+                    </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                         ¿Necesitas más detalles sobre tasas de bits y respaldo digital? Lee nuestra guía técnica:{' '}
                         <Link href="/blog/descarga-facebook-hd-4k" className="text-blue-600 dark:text-blue-400 font-semibold underline">

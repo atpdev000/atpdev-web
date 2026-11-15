@@ -339,6 +339,33 @@ export default function ContactPage() {
           </p>
         </div>
       </div>
+
+      {/* Guías Rápidas de Resolución antes de Enviar un Ticket */}
+      <div className="mt-6 p-6 sm:p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+        <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+          Recomendaciones Técnicas Antes de Contactarnos
+        </h3>
+        <div className="grid md:grid-cols-3 gap-4 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5">
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">Enlaces Públicos Verificados</h4>
+            <p>
+              Nuestro motor solo analiza publicaciones de acceso abierto sin restricción por sesión ni grupos cerrados. Si el enlace requiere iniciar sesión en la red social de origen, el servidor no podrá procesarlo por seguridad.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5">
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">Privacidad sin Registros</h4>
+            <p>
+              No guardamos historial de URLs analizadas ni almacenamos copias de audio o video en disco. Por eso no es necesario solicitar borrado de archivos descargados ni cancelación de cuentas inexistentes.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 space-y-1.5">
+            <h4 className="font-bold text-slate-900 dark:text-slate-100">Soporte Móvil Android e iOS</h4>
+            <p>
+              En Safari de iPhone o Chrome en Android, verifica que tu navegador tenga permiso de escritura en la carpeta Descargas y espacio libre disponible antes de reportar archivos incompletos en pantalla.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

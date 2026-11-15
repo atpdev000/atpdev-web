@@ -80,6 +80,15 @@ export default async function ContactPageView({ lang = "es" }: { lang?: string }
     interactiveDesc: await t(
       "Si prefieres enviarnos un mensaje detallado o cotización mediante el formulario web interactivo, puedes hacerlo desde la sección de contacto de la página principal."
     ),
+    faqTitle: await t("Información Útil Antes de Escribir"),
+    faqQ1: await t("¿Qué datos incluir al reportar un error técnico?"),
+    faqA1: await t(
+      "Indica el subdominio exacto o nombre de la aplicación móvil, el sistema operativo o navegador web utilizado (Chrome, Safari, Edge o Firefox) y los pasos previos al inconveniente. De ese modo podemos reproducirlo y corregirlo más rápido."
+    ),
+    faqQ2: await t("¿Cómo ejercer derechos de privacidad o retiro de contenidos?"),
+    faqA2: await t(
+      "Si deseas solicitar aclaraciones sobre tratamiento de datos personales, preferencias de consentimiento publicitario, avisos DMCA o correcciones editoriales, utiliza el asunto correspondiente en tu mensaje dirigido al correo oficial."
+    ),
     interactiveCta: await t("Ir al formulario interactivo"),
     privacyCta: await t("Leer Política de Privacidad"),
     aboutCta: await t("Conocer Sobre Mí"),
@@ -181,6 +190,23 @@ export default async function ContactPageView({ lang = "es" }: { lang?: string }
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
                 {copy.interactiveDesc}
               </p>
+              <div className="pt-3 border-t space-y-3" style={{ borderColor: "var(--glass-border)" }}>
+                <h2 className="text-lg font-bold">{copy.faqTitle}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-1">
+                    <h3 className="font-bold">{copy.faqQ1}</h3>
+                    <p className="leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                      {copy.faqA1}
+                    </p>
+                  </div>
+                  <div className="space-y-1">
+                    <h3 className="font-bold">{copy.faqQ2}</h3>
+                    <p className="leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                      {copy.faqA2}
+                    </p>
+                  </div>
+                </div>
+              </div>
               <div className="flex flex-wrap gap-3 pt-2">
                 <a
                   href={`${prefix}/#contact`}

@@ -170,24 +170,24 @@ export default function ContactoPage() {
             Qué consultas atendemos prioritariamente
           </h2>
           <p>
-            Brindamos soporte gratuito sobre compatibilidad de cámaras WebRTC en Android e iOS, exportación vectorial SVG en el{' '}
-            <a href="/generar" className="text-cyan-400 underline font-semibold">Generador de Códigos QR</a>, corrección de errores Reed-Solomon y avisos de privacidad o publicidad.
+            Brindamos soporte gratuito sobre compatibilidad de cámaras WebRTC en Android e iOS, exportación vectorial SVG y PNG en el{' '}
+            <a href="/generar" className="text-cyan-400 underline font-semibold">Generador de Códigos QR</a>, niveles de corrección de errores Reed-Solomon (L, M, Q, H) y avisos de privacidad o publicidad.
           </p>
           <p className="text-slate-400">
-            Si reportas un error de lectura, por favor especifica el navegador utilizado y el formato del código (QR, DataMatrix, EAN-13 o Aztec) para reproducirlo con precisión.
+            Si reportas un error de lectura óptica, por favor especifica el navegador utilizado, el tipo de enfoque de tu cámara y el formato del código (QR, DataMatrix, EAN-13, UPC-A, Code 128 o Aztec) para reproducirlo con precisión. Respondemos normalmente entre 24 y 48 horas hábiles.
           </p>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
           <h2 className="text-base font-bold text-white font-display">
-            Documentación Legal y Recursos Rápidos
+            Documentación Legal y Privacidad Local
           </h2>
           <p>
-            El escaneo óptico y la creación de códigos QR se procesan íntegramente en el navegador del usuario sin almacenar capturas ni credenciales Wi-Fi en servidores externos.
+            El escaneo óptico desde cámara o archivo local y la creación de códigos QR (enlaces URL, acceso Wi-Fi, vCard y texto plano) se procesan íntegramente en la memoria de tu navegador sin almacenar capturas ni credenciales en servidores externos.
           </p>
           <ul className="space-y-1.5 text-xs text-slate-400">
             <li>• Revisa nuestra <a href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</a> y <a href="/politica-de-cookies" className="text-cyan-400 underline font-semibold">Política de Cookies</a>.</li>
-            <li>• Consulta las condiciones en <a href="/terminos-y-condiciones" className="text-cyan-400 underline font-semibold">Términos y Condiciones</a> o explora las <a href="/guias" className="text-cyan-400 underline font-semibold">Guías de Uso Seguro</a>.</li>
+            <li>• Consulta las condiciones en <a href="/terminos-y-condiciones" className="text-cyan-400 underline font-semibold">Términos y Condiciones</a> o explora nuestras <a href="/guias" className="text-cyan-400 underline font-semibold">Guías de Uso Seguro</a> y <a href="/sobre-nosotros" className="text-cyan-400 underline font-semibold">Sobre Nosotros</a>.</li>
           </ul>
         </div>
       </section>

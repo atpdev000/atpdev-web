@@ -62,11 +62,12 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">6. Modificaciones</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">6. Enlaces Externos y Modificaciones</h2>
+            <p className="mb-3">
+              Almaniq puede incluir enlaces hacia recursos académicos, hemerotecas o portales del ecosistema ATP Dev sobre cuya disponibilidad permanente no ejercemos control editorial directo. La inclusión de referencias externas cumple fines exclusivamente informativos y bibliográficos para profundizar en cada efeméride consultada.
+            </p>
             <p>
-              Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios
-              serán efectivos al ser publicados en esta página. El uso continuado del Servicio
-              implica la aceptación de los términos modificados.
+              Nos reservamos el derecho de modificar estos términos en cualquier momento para reflejar mejoras del archivo histórico o cambios normativos aplicables. Las actualizaciones serán efectivas al ser publicadas en esta página y el uso continuado del Servicio implica su aceptación vigente.
             </p>
           </section>
 

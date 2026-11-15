@@ -166,6 +166,32 @@ export default function ThreadsToolPage() {
           </div>
         </div>
 
+        {/* Preguntas Frecuentes */}
+        <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-2">
+            <HelpCircle className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Preguntas Frecuentes sobre Meta Threads</h3>
+          </div>
+          <div className="space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-xs sm:text-sm mb-1">
+                ¿Es compatible con los nuevos enlaces de threads.net y threads.com?
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Sí, nuestro procesador está adaptado a la infraestructura actual de Meta Threads y analiza publicaciones públicas, hilos con múltiples clips y respuestas en video sin requerir inicio de sesión.
+              </p>
+            </div>
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-xs sm:text-sm mb-1">
+                ¿Se descargan los videos de Threads con audio incluido?
+              </h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                Por supuesto. Todos los videos públicos de Threads se guardan como archivos MP4 completos con pista de audio estéreo AAC perfectamente sincronizada y conservando la relación de aspecto original (vertical o panorámica) para reproducción sin conexión en móviles o PC.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Enlace a otras herramientas */}
         <div className="pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Descubre nuestras otras herramientas profesionales:</p>

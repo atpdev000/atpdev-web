@@ -403,6 +403,34 @@ export default function HistorialPage() {
         </div>
       )}
 
+      {/* Guía informativa del Historial y Privacidad */}
+      <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-white font-display">
+          Cómo Funciona tu Historial Local de Códigos Escaneados
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400">
+          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+            <h3 className="text-white font-bold">Clasificación Inteligente</h3>
+            <p>
+              Cada código QR o de barras decodificado (EAN-13, UPC, Code 128, DataMatrix o QR vCard/Wi-Fi) se organiza cronológicamente y se etiqueta según su esquema de datos para facilitar búsquedas posteriores.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+            <h3 className="text-white font-bold">Exportación CSV y Reutilización</h3>
+            <p>
+              Cuando registras códigos en inventario o eventos, puedes exportar toda la tabla a formato CSV compatible con Excel y Google Sheets, o reabrir cualquier entrada directamente en el{' '}
+              <Link href="/generar" className="text-cyan-400 underline font-semibold">Generador QR</Link>.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
+            <h3 className="text-white font-bold">Privacidad Sin Servidores</h3>
+            <p>
+              El historial vive únicamente dentro del almacenamiento local de tu dispositivo. Ninguna URL ni clave Wi-Fi se sincroniza en la nube. Si deseas limpiar los registros, utiliza las acciones de borrado individual o limpieza total desde <Link href="/ajustes" className="text-cyan-400 underline font-semibold">Ajustes</Link>.
+            </p>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

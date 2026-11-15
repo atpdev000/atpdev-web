@@ -248,6 +248,27 @@ export default function AjustesPage() {
           </span>
         </div>
 
+        {/* Guía Técnica de Ajustes y Seguridad */}
+        <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-4">
+          <h2 className="text-base font-bold text-white font-display">
+            Recomendaciones sobre Persistencia Local y Apertura Segura
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-400 leading-relaxed">
+            <div className="space-y-1.5">
+              <h3 className="text-white font-bold">¿Dónde se guardan mis preferencias?</h3>
+              <p>
+                Cada interruptor de sonido, vibración háptica y copiado al portapapeles se almacena exclusivamente en el objeto <code>localStorage</code> de tu navegador actual. Si utilizas ventanas privadas o limpias los datos del sitio, la configuración regresará a sus valores predeterminados.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-white font-bold">Buenas prácticas antes de activar apertura automática</h3>
+              <p>
+                Cuando escaneas códigos QR en carteles públicos, menús o paquetes desconocidos, recomendamos mantener desactivada la apertura automática de enlaces para inspeccionar primero el dominio HTTPS de destino en pantalla y prevenir sitios fraudulentos (quishing).
+              </p>
+            </div>
+          </div>
+        </section>
+
       </div>
 
     </div>
