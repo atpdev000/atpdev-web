@@ -7,6 +7,7 @@ export const revalidate = 0;
 export async function GET() {
   try {
     const config = getSubdomainConfig('descargador');
+    const { license_keys: _hiddenKeys, ...publicPayments } = (config.payments || {}) as Record<string, any>;
     return NextResponse.json({
       success: true,
       theme: config.theme,
@@ -17,7 +18,7 @@ export async function GET() {
       apk: config.apk,
       monetization: config.monetization,
       backend: config.backend,
-      payments: config.payments,
+      payments: publicPayments,
       updated_at: config.updated_at,
     });
   } catch (error) {

@@ -1772,14 +1772,23 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
 
           {/* Gestor de Códigos de Licencia Pro */}
           <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400">
                   <KeyRound className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Códigos de Activación y Licencias Válidas</h3>
-                  <p className="text-xs text-slate-400">Códigos que los clientes pueden ingresar en /planes para desbloquear PRO de inmediato</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-white">Códigos de Activación y Licencias Válidas</h3>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      config.payments?.demo_mode_enabled
+                        ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
+                        : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                    }`}>
+                      {config.payments?.demo_mode_enabled ? '🧪 Modo Pruebas (Visible en Web)' : '🔒 Producción Estricta (Oculto)'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">Solo los códigos listados aquí pueden activar PRO en /planes (no se exponen en el navegador)</p>
                 </div>
               </div>
 
@@ -1787,7 +1796,9 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                 type="button"
                 onClick={() => {
                   const randomCode = `PRO-ATP-${Math.floor(1000 + Math.random() * 9000)}`;
-                  const currentKeys = config.payments?.license_keys || ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP'];
+                  const currentKeys = Array.isArray(config.payments?.license_keys)
+                    ? config.payments.license_keys
+                    : ['VIP-ATP-2026', 'DESCARGADOR-PRO-VIP'];
                   if (!currentKeys.includes(randomCode)) {
                     setConfig({
                       ...config,
@@ -1802,13 +1813,59 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
               </button>
             </div>
 
+            {/* Control de Modo Pruebas / Demo Code */}
+            <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="space-y-0.5">
+                <div className="text-xs font-bold text-white flex items-center gap-2">
+                  <span>Habilitar Código de Prueba Rápido en /planes (Solo para Testing)</span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  {config.payments?.demo_mode_enabled
+                    ? '⚠️ ACTIVO: El código de prueba se muestra en /planes para testear el flujo. Desactívalo para producción.'
+                    : '✅ DESACTIVADO (Recomendado en Producción): No se muestra ningún código de prueba en la web ni se acepta PRO-ATP-2026.'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {config.payments?.demo_mode_enabled && (
+                  <input
+                    type="text"
+                    value={config.payments?.demo_license_code || 'PRO-ATP-2026'}
+                    onChange={(e) => setConfig({
+                      ...config,
+                      payments: { ...(config.payments || {}), demo_license_code: e.target.value.toUpperCase() }
+                    })}
+                    className="w-36 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-amber-500/40 text-amber-300 text-xs font-mono uppercase outline-none"
+                    placeholder="PRO-ATP-2026"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => setConfig({
+                    ...config,
+                    payments: {
+                      ...(config.payments || {}),
+                      demo_mode_enabled: !config.payments?.demo_mode_enabled,
+                      demo_license_code: config.payments?.demo_license_code || 'PRO-ATP-2026',
+                    }
+                  })}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                    config.payments?.demo_mode_enabled
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                      : 'bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700'
+                  }`}
+                >
+                  {config.payments?.demo_mode_enabled ? 'Desactivar Modo Prueba' : 'Activar para Pruebas'}
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label className="text-xs font-medium text-slate-300">
-                Lista de Códigos Activos (separados por coma o salto de línea):
+                Lista de Códigos Activos para Clientes (separados por coma o salto de línea):
               </label>
               <textarea
                 rows={3}
-                value={(config.payments?.license_keys || ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']).join(', ')}
+                value={(Array.isArray(config.payments?.license_keys) ? config.payments.license_keys : ['VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']).join(', ')}
                 onChange={(e) => {
                   const keys = e.target.value.split(/[,;\n]+/).map(k => k.trim()).filter(Boolean);
                   setConfig({
@@ -1817,25 +1874,35 @@ export default function DescargadorAdminClient({ initialConfig }: Props) {
                   });
                 }}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-purple-300 text-xs font-mono outline-none focus:border-purple-500"
-                placeholder="PRO-ATP-2026, VIP-ATP-2026, DESCARGADOR-PRO-VIP"
+                placeholder="VIP-ATP-2026, DESCARGADOR-PRO-VIP, PRO-ATP-9805"
               />
               <div className="flex flex-wrap gap-1.5 pt-1">
-                {(config.payments?.license_keys || ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']).map((code, idx) => (
+                {(Array.isArray(config.payments?.license_keys) ? config.payments.license_keys : ['VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']).map((code, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono text-[11px]"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 font-mono text-[11px]"
                   >
                     <span>{code}</span>
                     <button
                       type="button"
+                      onClick={() => navigator.clipboard?.writeText(code)}
+                      title="Copiar código para enviar al cliente"
+                      className="text-slate-400 hover:text-emerald-400 text-[10px] px-1"
+                    >
+                      Copiar
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => {
-                        const filtered = (config.payments?.license_keys || []).filter(k => k !== code);
+                        const current = Array.isArray(config.payments?.license_keys) ? config.payments.license_keys : [];
+                        const filtered = current.filter(k => k !== code);
                         setConfig({
                           ...config,
                           payments: { ...(config.payments || {}), license_keys: filtered }
                         });
                       }}
-                      className="text-slate-400 hover:text-red-400 ml-1"
+                      title="Eliminar código"
+                      className="text-slate-400 hover:text-red-400 ml-0.5"
                     >
                       ×
                     </button>

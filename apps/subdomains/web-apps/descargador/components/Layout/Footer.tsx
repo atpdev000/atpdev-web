@@ -78,14 +78,14 @@ export default function Footer({ modules }: FooterProps) {
               {t.footer.linksTitle}
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link href="/tools/facebook" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video Facebook HD</Link></li>
-              <li><Link href="/tools/tiktok" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">TikTok Sin Marca</Link></li>
-              <li><Link href="/tools/instagram" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Instagram Reels & Video</Link></li>
-              <li><Link href="/tools/twitter" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Twitter / X & GIFs</Link></li>
-              <li><Link href="/tools/threads" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Meta Threads</Link></li>
-              <li><Link href="/tools/whatsapp" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Estados de WhatsApp</Link></li>
+              <li><Link href="/tools/facebook" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video Facebook HD</span></Link></li>
+              <li><Link href="/tools/tiktok" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">TikTok Sin Marca</span></Link></li>
+              <li><Link href="/tools/instagram" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Instagram Reels & Video</span></Link></li>
+              <li><Link href="/tools/twitter" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Twitter / X & GIFs</span></Link></li>
+              <li><Link href="/tools/threads" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Meta Threads</span></Link></li>
+              <li><Link href="/tools/whatsapp" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Estados de WhatsApp</span></Link></li>
               {isYoutubeActive && (
-                <li><Link href="/tools/youtube" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video YouTube 4K</Link></li>
+                <li><Link href="/tools/youtube" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video YouTube 4K</span></Link></li>
               )}
             </ul>
           </div>
@@ -95,10 +95,10 @@ export default function Footer({ modules }: FooterProps) {
               Sitemap
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link href="/" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.home}</Link></li>
-              <li><Link href="/blog" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.blog}</Link></li>
-              <li><Link href="/planes" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.plans}</Link></li>
-              <li><Link href="/contact" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.contact}</Link></li>
+              <li><Link href="/" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.home}</span></Link></li>
+              <li><Link href="/blog" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.blog}</span></Link></li>
+              <li><Link href="/planes" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.plans}</span></Link></li>
+              <li><Link href="/contact" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.contact}</span></Link></li>
             </ul>
           </div>
 
@@ -107,11 +107,11 @@ export default function Footer({ modules }: FooterProps) {
               {t.footer.legalTitle}
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
-              <li><Link href="/faq" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.faq}</Link></li>
-              <li><Link href="/legal/privacidad" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.footer.privacy}</Link></li>
-              <li><Link href="/legal/terminos" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.footer.terms}</Link></li>
-              <li><Link href="/legal/cookies" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Cookies</Link></li>
-              <li><Link href="/legal/copyright" className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Copyright / DMCA</Link></li>
+              <li><Link href="/faq" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.faq}</span></Link></li>
+              <li><Link href="/legal/privacidad" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.footer.privacy}</span></Link></li>
+              <li><Link href="/legal/terminos" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.footer.terms}</span></Link></li>
+              <li><Link href="/legal/cookies" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Cookies</span></Link></li>
+              <li><Link href="/legal/copyright" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Copyright / DMCA</span></Link></li>
             </ul>
           </div>
         </div>

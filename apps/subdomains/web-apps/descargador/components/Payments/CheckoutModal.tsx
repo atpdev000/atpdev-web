@@ -44,6 +44,8 @@ export interface PaymentConfig {
   whatsapp_number?: string
   whatsapp_message_pro?: string
   whatsapp_message_business?: string
+  demo_mode_enabled?: boolean
+  demo_license_code?: string
 }
 
 interface CheckoutModalProps {
@@ -430,7 +432,7 @@ export default function CheckoutModal({
               <div className="space-y-1">
                 <input
                   type="text"
-                  placeholder="Ej: PRO-ATP-2026"
+                  placeholder="Ingresa tu clave (ej: ATP-XXXX-XXXX)"
                   value={licenseCode}
                   onChange={(e) => {
                     setLicenseCode(e.target.value)
@@ -440,6 +442,23 @@ export default function CheckoutModal({
                 />
                 {errorCode && (
                   <p className="text-[11px] text-red-500 font-medium">{errorCode}</p>
+                )}
+                {paymentConfig?.demo_mode_enabled === true && paymentConfig?.demo_license_code && (
+                  <p className="text-[10px] text-amber-500 flex items-center justify-between bg-amber-500/10 border border-amber-500/20 rounded-lg px-2 py-1 mt-1">
+                    <span>
+                      Demo Admin: <code className="font-bold">{paymentConfig.demo_license_code}</code>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLicenseCode(paymentConfig.demo_license_code || '')
+                        setErrorCode(null)
+                      }}
+                      className="underline font-bold cursor-pointer"
+                    >
+                      Probar
+                    </button>
+                  </p>
                 )}
               </div>
 

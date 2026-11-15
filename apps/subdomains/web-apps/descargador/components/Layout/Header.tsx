@@ -110,21 +110,21 @@ export default function Header() {
               <Link 
                 href="/" 
                 onClick={handleLogoClick}
-                className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
               >
-                {t.nav.home}
+                <span className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.home}</span>
               </Link>
-              <Link href="/blog" className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                {t.nav.blog}
+              <Link href="/blog" className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <span className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.blog}</span>
               </Link>
               <button
                 onClick={scrollToTools}
-                className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
               >
                 {t.nav.download}
               </button>
-              <Link href="/faq" className="text-gray-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                {t.nav.faq}
+              <Link href="/faq" className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <span className="text-gray-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.faq}</span>
               </Link>
               <Link
                 href="/planes"
@@ -135,7 +135,7 @@ export default function Header() {
                 }`}
               >
                 <Crown className={`w-3.5 h-3.5 ${mounted && isPro ? 'text-amber-300' : 'text-white'}`} />
-                <span>{mounted && isPro ? 'Mi Membresía PRO' : t.nav.plans}</span>
+                <span className="text-white">{mounted && isPro ? 'Mi Membresía PRO' : t.nav.plans}</span>
               </Link>
               {mounted && apkConfig?.enabled && (
                 <a
@@ -145,10 +145,10 @@ export default function Header() {
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-xs transition-all hover:scale-105"
                   title="Descargar App Android APK"
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <svg className="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.996-3.4572c.1084-.188.0438-.429-.1442-.5374-.188-.1085-.429-.0439-.5374.1442l-2.0227 3.5033c-1.4827-.6786-3.1384-1.0583-4.9232-1.0583-1.7848 0-3.4405.3797-4.9232 1.0583L5.3032 5.4713c-.1084-.188-.3494-.2527-.5374-.1442-.188.1084-.2526.3494-.1442.5374l1.996 3.4572C3.0645 11.2384 1 14.8329 1 19h22c0-4.1671-2.0645-7.7616-5.1185-9.6786"/>
                   </svg>
-                  <span>APK {apkConfig.version || 'v1.2.0'}</span>
+                  <span className="text-white">APK {apkConfig.version || 'v1.2.0'}</span>
                 </a>
               )}
             </nav>

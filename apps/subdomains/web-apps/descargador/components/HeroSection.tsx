@@ -193,12 +193,12 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
 
         <a
           href="/blog"
-          className="flex items-center justify-center gap-2 bg-white/90 dark:bg-slate-900/90 text-gray-800 dark:text-slate-200 border border-gray-200 dark:border-slate-800 px-8 py-3.5 rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-800 font-semibold transition-all shadow-xs text-base backdrop-blur-sm"
+          className="flex items-center justify-center gap-2 bg-white/90 dark:bg-slate-800/90 text-gray-800 dark:text-slate-200 border border-gray-200 dark:border-slate-700 px-8 py-3.5 rounded-2xl hover:bg-gray-50 dark:hover:bg-slate-700 font-semibold transition-all shadow-xs text-base backdrop-blur-sm"
         >
           <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
           </svg>
-          {t.hero.ctaFeatures}
+          <span className="text-gray-800 dark:text-white font-semibold">{t.hero.ctaFeatures}</span>
         </a>
       </div>
 
@@ -214,14 +214,14 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
             href="https://play.google.com/store/apps/details?id=com.ftydownloader.pro&pcampaignid=web_share"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-black text-white px-6 py-2.5 rounded-xl hover:scale-105 transition-transform shadow-md"
+            className="flex items-center gap-3 bg-slate-950 border border-slate-700 text-white px-6 py-2.5 rounded-xl hover:bg-slate-900 hover:scale-105 transition-all shadow-md"
           >
-            <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3.609 1.814L13.792 12 3.61 22.186a2.156 2.156 0 0 1-.41-.708V2.522a2.156 2.156 0 0 1 .41-.708zm1.066-.341a2.13 2.13 0 0 1 1.763.15l13.064 7.625c.983.573.983 1.506 0 2.079L6.438 19.336a2.13 2.13 0 0 1-1.763.15L14.858 12 4.675 1.473zm-.11 20.31s-.001 0 0 0z" />
             </svg>
             <div className="text-left">
               <p className="text-[10px] uppercase leading-none font-medium text-slate-200">Disponible en</p>
-              <p className="text-lg font-bold leading-tight">Google Play</p>
+              <p className="text-lg font-bold leading-tight text-white">Google Play</p>
             </div>
           </a>
 
@@ -230,12 +230,12 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
             download
             className="flex items-center gap-3 bg-emerald-600 text-white px-6 py-2.5 rounded-xl hover:bg-emerald-700 hover:scale-105 transition-all shadow-md group"
           >
-            <svg className="w-6 h-6 animate-bounce group-hover:animate-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-white animate-bounce group-hover:animate-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             <div className="text-left">
               <p className="text-[10px] uppercase leading-none font-medium text-emerald-100">Descarga Directa</p>
-              <p className="text-lg font-bold leading-tight">Archivo APK</p>
+              <p className="text-lg font-bold leading-tight text-white">Archivo APK</p>
             </div>
           </a>
         </div>

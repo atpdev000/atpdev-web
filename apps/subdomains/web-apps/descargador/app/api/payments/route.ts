@@ -36,13 +36,21 @@ export async function GET(req: Request) {
       whatsapp_number: defaultWhatsapp,
     };
 
+    const { license_keys: _hiddenKeys, ...publicPaymentsConfig } = (paymentsConfig || {}) as Record<string, any>;
+    const demoModeEnabled = Boolean(paymentsConfig && (paymentsConfig as any).demo_mode_enabled === true);
+    const demoLicenseCode = demoModeEnabled
+      ? String((paymentsConfig as any)?.demo_license_code || 'PRO-ATP-2026').trim().toUpperCase()
+      : undefined;
+
     return NextResponse.json({
       success: true,
       detectedCountry: rawCountry || null,
       detectedCurrency,
       payments: {
-        ...paymentsConfig,
+        ...publicPaymentsConfig,
         whatsapp_number: paymentsConfig.whatsapp_number || defaultWhatsapp,
+        demo_mode_enabled: demoModeEnabled,
+        ...(demoLicenseCode ? { demo_license_code: demoLicenseCode } : {}),
       },
       contact: config.contact,
     });
@@ -69,14 +77,16 @@ export async function POST(req: Request) {
 
     const cleanCode = code.trim().toUpperCase();
     const config = getSubdomainConfig('descargador');
+    const configuredKeys = Array.isArray(config.payments?.license_keys)
+      ? config.payments.license_keys
+      : [];
+    const demoModeEnabled = Boolean((config.payments as any)?.demo_mode_enabled === true);
+    const demoCode = String((config.payments as any)?.demo_license_code || 'PRO-ATP-2026').trim().toUpperCase();
+
     const allowedKeys: string[] = [
-      ...(config.payments?.license_keys || []),
-      'PRO-ATP-2026',
-      'VIP-ATP-2026',
-      'DESCARGADOR-PRO-VIP',
-      'ATPDEV-PRO-UNLIMITED',
-      'CREADOR-VIP-2026'
-    ].map(k => k.trim().toUpperCase());
+      ...configuredKeys,
+      ...(demoModeEnabled && demoCode ? [demoCode] : []),
+    ].map(k => k.trim().toUpperCase()).filter(Boolean);
 
     const isMatch = allowedKeys.includes(cleanCode);
 

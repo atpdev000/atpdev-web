@@ -346,7 +346,7 @@ export default function PlanesPage() {
                   <div className="space-y-0.5">
                     <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-semibold">Código de Licencia:</span>
                     <span className="font-mono text-base sm:text-lg font-black text-blue-600 dark:text-blue-400 tracking-wider select-all">
-                      {showLicenseKey ? (planDetails.licenseCode || 'PRO-ATP-2026') : '•••• - •••• - ••••'}
+                      {showLicenseKey ? (planDetails.licenseCode || 'ATP-PRO-ACTIVE') : '•••• - •••• - ••••'}
                     </span>
                   </div>
                 </div>
@@ -354,7 +354,7 @@ export default function PlanesPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(planDetails.licenseCode || 'PRO-ATP-2026')
+                    navigator.clipboard.writeText(planDetails.licenseCode || 'ATP-PRO-ACTIVE')
                     setCopiedCode(true)
                     setTimeout(() => setCopiedCode(false), 2500)
                   }}
@@ -686,7 +686,7 @@ export default function PlanesPage() {
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej: PRO-ATP-2026"
+                    placeholder="Ingresa tu clave (ej: ATP-XXXX-XXXX)"
                     value={licenseCode}
                     onChange={(e) => {
                       setLicenseCode(e.target.value)
@@ -697,9 +697,23 @@ export default function PlanesPage() {
                   {licenseError && (
                     <p className="text-xs text-red-500 font-medium">{licenseError}</p>
                   )}
-                  <p className="text-[10px] text-slate-400">
-                    Código de prueba rápido: <code className="text-purple-500 font-bold">PRO-ATP-2026</code>
-                  </p>
+                  {paymentConfig?.demo_mode_enabled === true && paymentConfig?.demo_license_code && (
+                    <p className="text-[10px] text-amber-500 flex items-center justify-between bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1">
+                      <span>
+                        Modo Pruebas Admin: <code className="text-amber-400 font-bold">{paymentConfig.demo_license_code}</code>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLicenseCode(paymentConfig.demo_license_code || '')
+                          setLicenseError(null)
+                        }}
+                        className="underline font-bold hover:text-amber-300 cursor-pointer"
+                      >
+                        Usar código
+                      </button>
+                    </p>
+                  )}
                 </div>
 
                 <button

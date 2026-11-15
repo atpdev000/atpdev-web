@@ -134,6 +134,8 @@ export interface SubdomainPayments {
   mercadopago_account_email?: string;
   // Licencias / Códigos de activación
   license_keys?: string[];
+  demo_mode_enabled?: boolean;
+  demo_license_code?: string;
 }
 
 export interface SubdomainConfig {
@@ -481,7 +483,9 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     whatsapp_number: '+51987654321',
     whatsapp_message_pro: 'Hola ATP Dev, deseo activar el Plan Pro Creador para Descargador Pro. ¿Me brindas los datos de pago por Yape o Tarjeta?',
     whatsapp_message_business: 'Hola ATP Dev, deseo contratar el Plan Business VIP para mi agencia. ¿Me brindas la información de activación?',
-    license_keys: ['PRO-ATP-2026', 'VIP-ATP-2026', 'DESCARGADOR-PRO-VIP']
+    license_keys: ['VIP-ATP-2026', 'DESCARGADOR-PRO-VIP'],
+    demo_mode_enabled: false,
+    demo_license_code: 'PRO-ATP-2026'
   },
   updated_at: new Date().toISOString()
 };
