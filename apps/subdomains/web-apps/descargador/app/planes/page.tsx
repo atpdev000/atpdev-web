@@ -27,6 +27,7 @@ import {
   Zap
 } from 'lucide-react'
 import { useProPlan } from '@/hooks/useProPlan'
+import { usePlatform } from '@/hooks/usePlatform'
 import Header from '@/components/Layout/Header'
 import Footer from '@/components/Layout/Footer'
 import { PaymentConfig } from '@/components/Payments/CheckoutModal'
@@ -38,6 +39,7 @@ import {
 } from '@/lib/currency'
 
 export default function PlanesPage() {
+  const { isNative } = usePlatform()
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'yape' | 'code'>('card')
   const [currentCurrency, setCurrentCurrency] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES.PEN)
@@ -771,6 +773,19 @@ export default function PlanesPage() {
                 <span>SSL 256-BIT</span>
               </div>
             </div>
+
+            {isNative && (
+              <div className="pt-4 text-center border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => window.open('https://descargador.atpdev.dev/planes', '_blank')}
+                  className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-500 hover:underline cursor-pointer font-medium"
+                >
+                  <Globe className="w-3.5 h-3.5" />
+                  <span>¿Prefieres pagar o gestionar desde la Web Oficial? Abrir en navegador</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

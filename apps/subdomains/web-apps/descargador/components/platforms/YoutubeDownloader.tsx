@@ -123,7 +123,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
   const [targetProQuality, setTargetProQuality] = useState('1080p')
 
   const [originalUrl, setOriginalUrl] = useState('');
-  const [activeTab, setActiveTab] = useState<'simple' | 'combined'>('simple');
+  const [activeTab, setActiveTab] = useState<'simple' | 'combined'>('combined');
 
   const isProQuality = (quality: string) => ['1080p', '1440p', '2160p'].includes(quality)
 
@@ -137,10 +137,10 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
   // 🔄 CAMBIAR TAB + ANUNCIO
   const handleTabChange = async (tab: 'simple' | 'combined') => {
-    if (isNative) {
-      await showInterstitial()
-    }
     setActiveTab(tab)
+    if (isNative) {
+      showInterstitial().catch(() => {})
+    }
   }
 
   const processUrl = async (urlToFetch: string) => {
@@ -1461,24 +1461,6 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
 
 
 
-  // ✅ COMPONENTE DE PESTAÑAS
-  const TabButton = ({ active, onClick, children }: {
-    active: boolean;
-    onClick: () => void;
-    children: React.ReactNode
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-t-xl transition-colors cursor-pointer ${active
-        ? 'bg-red-600 text-white border-b-2 border-red-700 shadow-sm'
-        : 'bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-slate-200 hover:bg-gray-300 dark:hover:bg-slate-700 border border-transparent dark:border-slate-700/70'
-        }`}
-    >
-      {children}
-    </button>
-  )
-
   return (
     <>
 
@@ -1658,20 +1640,63 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
                 <span>Descargar Video con Audio</span>
               </h4>
 
-              {/* NAVEGACIÓN DE PESTAÑAS */}
-              <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-slate-700">
-                <TabButton
-                  active={activeTab === 'simple'}
-                  onClick={() => handleTabChange('simple')}
-                >
-                  🎬 Solo Video (Sin Combinar)
-                </TabButton>
-                <TabButton
-                  active={activeTab === 'combined'}
+              {/* SELECTOR DE MODO DE VIDEO (AUDIO COMBINADO VS SOLO VIDEO) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5 p-1.5 bg-slate-100/90 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/70">
+                {/* Botón 1: Video con Audio (Combinado) - DESTACADO EN VERDE / RECOMENDADO */}
+                <button
+                  type="button"
                   onClick={() => handleTabChange('combined')}
+                  className={`flex items-center justify-between px-3.5 py-3 rounded-xl transition-all duration-200 cursor-pointer text-left ${
+                    activeTab === 'combined'
+                      ? 'bg-gradient-to-r from-emerald-600 to-green-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400 font-bold scale-[1.01]'
+                      : 'bg-white/80 dark:bg-slate-900/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+                  }`}
                 >
-                  🎵 Video con Audio (Combinado)
-                </TabButton>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-xl shrink-0">🎵</span>
+                    <div>
+                      <p className="text-xs sm:text-sm font-bold leading-tight">Video con Audio</p>
+                      <p className={`text-[10px] leading-tight mt-0.5 ${activeTab === 'combined' ? 'text-emerald-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                        MP4 Completo con sonido integrado
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full shrink-0 shadow-xs ${
+                    activeTab === 'combined'
+                      ? 'bg-white text-emerald-800'
+                      : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300'
+                  }`}>
+                    ⭐ Recomendado
+                  </span>
+                </button>
+
+                {/* Botón 2: Solo Video (Sin Audio) - Secundario */}
+                <button
+                  type="button"
+                  onClick={() => handleTabChange('simple')}
+                  className={`flex items-center justify-between px-3.5 py-3 rounded-xl transition-all duration-200 cursor-pointer text-left ${
+                    activeTab === 'simple'
+                      ? 'bg-slate-900 dark:bg-slate-700 text-white shadow-md ring-2 ring-slate-400 font-bold scale-[1.01]'
+                      : 'bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-xl shrink-0">🎬</span>
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold leading-tight">Solo Video</p>
+                      <p className={`text-[10px] leading-tight mt-0.5 ${activeTab === 'simple' ? 'text-slate-200' : 'text-slate-500 dark:text-slate-400'}`}>
+                        Sin pista de audio (Mudo original)
+                      </p>
+                    </div>
+                  </div>
+                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                    activeTab === 'simple'
+                      ? 'bg-slate-800 text-slate-200'
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+                  }`}>
+                    Mudo
+                  </span>
+                </button>
               </div>
 
               {/* CONTENIDO DE PESTAÑAS */}

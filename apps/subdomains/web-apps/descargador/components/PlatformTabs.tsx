@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+import { Crown } from 'lucide-react'
 import { isYoutubeVisible } from '@/lib/featureFlags'
 import { useI18n } from '@/lib/i18n/context'
 import { usePlatform } from '@/hooks/usePlatform'
@@ -96,19 +98,20 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
     return modules[key] !== false;
   })
 
+  // Total de elementos = plataformas activas + botón promocional PRO (7 + 1 = 8 cuadrícula perfecta 2x4)
+  const totalItems = platforms.length + 1;
+  const isProOdd = totalItems % 2 !== 0;
+
   return (
     <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200/80 dark:border-slate-800 p-2.5 transition-colors">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2">
-        {platforms.map((platform, index) => {
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:flex md:flex-row gap-2">
+        {platforms.map((platform) => {
           const isActive = activePlatform === platform.id;
-          const isLastOdd = platforms.length % 2 !== 0 && index === platforms.length - 1;
           return (
             <button
               key={platform.id}
               onClick={() => onPlatformChange(platform.id)}
               className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 justify-center w-full min-w-0 md:flex-1 cursor-pointer active:scale-95 ${
-                isLastOdd ? 'col-span-2 sm:col-span-1' : ''
-              } ${
                 isActive
                   ? platform.activeClass
                   : 'bg-gray-100/80 dark:bg-slate-800/80 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white border border-gray-200/60 dark:border-slate-700/60'
@@ -122,6 +125,19 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
             </button>
           );
         })}
+
+        {/* 👑 Botón PRO / Web Oficial (Completa la cuadrícula 2x4 en móvil al lado de YouTube y maximiza conversión) */}
+        <Link
+          href="/planes"
+          className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 justify-center w-full min-w-0 md:flex-1 cursor-pointer active:scale-95 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-white shadow-lg shadow-amber-500/30 ring-2 ring-amber-400/60 hover:shadow-amber-500/50 border border-amber-300/40 ${
+            isProOdd ? 'col-span-2 sm:col-span-1' : ''
+          }`}
+          title="Ver Planes PRO y Beneficios VIP"
+        >
+          <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200 shrink-0 animate-bounce" />
+          <span className="truncate">{t.nav.plans.replace('👑 ', '')}</span>
+          <span className="text-[9px] sm:text-[10px] bg-white/20 text-white uppercase px-1 sm:px-1.5 py-0.5 rounded-full font-extrabold hidden sm:inline-block">VIP</span>
+        </Link>
       </div>
     </div>
   )
