@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { FileCheck, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/terminos-y-condiciones' },
   title: 'Términos y Condiciones de Uso • Lector QR Pro',
   description: 'Términos y condiciones legales que regulan el uso del escáner y generador de códigos QR en línea Lector QR Pro.',
 };

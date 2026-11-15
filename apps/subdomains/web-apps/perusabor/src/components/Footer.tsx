@@ -117,7 +117,7 @@ export const Footer: React.FC = () => {
             <Link href="/terminos" className="hover:text-[#c22929] transition-colors">
               Términos de Uso
             </Link>
-            <a href="https://www.atpdev.dev/contacto" target="_blank" rel="noopener noreferrer" className="hover:text-[#c22929] transition-colors">
+            <a href="https://www.atpdev.dev/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-[#c22929] transition-colors">
               Contacto
             </a>
             <span className="text-stone-300 dark:text-stone-700">•</span>

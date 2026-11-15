@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   title: 'Política de Privacidad — Perú Sabor Inteligente',
   description:
     'Política de privacidad, uso de almacenamiento local, cookies publicitarias de Google AdSense y protección de datos en Perú Sabor Inteligente.',
-  robots: { index: false, follow: true },
+  alternates: { canonical: '/privacidad' },
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacidadPage() {
@@ -85,12 +86,12 @@ export default function PrivacidadPage() {
             </a>{' '}
             o mediante el portal oficial en{' '}
             <a
-              href="https://www.atpdev.dev/contacto"
+              href="https://www.atpdev.dev/#contact"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#c22929] font-semibold underline"
             >
-              www.atpdev.dev/contacto
+              www.atpdev.dev/#contact
             </a>
             .
           </p>
@@ -99,3 +100,4 @@ export default function PrivacidadPage() {
     </div>
   );
 }
+

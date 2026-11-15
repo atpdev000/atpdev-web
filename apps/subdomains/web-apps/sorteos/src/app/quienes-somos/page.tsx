@@ -7,6 +7,7 @@ import {
 import { SITE_NAME, CONTACT_EMAIL } from '@/lib/siteConfig';
 
 export const metadata = {
+  alternates: { canonical: '/quienes-somos' },
   title: `Quiénes Somos y Manifiesto de Transparencia | ${SITE_NAME}`,
   description: `Conoce Sorteos Pro, la plataforma SaaS desarrollada por ATP DEV para realizar sorteos limpios, seguros y verificables con criptografía CSPRNG.`,
 };

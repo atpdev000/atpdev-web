@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://pdf.atpdev.dev';
+const BASE_URL = 'https://masteratpdf.atpdev.dev';
 
 const TOOL_SLUGS = [
   'merge',
@@ -32,6 +32,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
+    },
+    {
+      url: `${BASE_URL}/privacidad`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
+      url: `${BASE_URL}/terminos`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
     },
     ...TOOL_SLUGS.map((slug) => ({
       url: `${BASE_URL}/tools/${slug}`,

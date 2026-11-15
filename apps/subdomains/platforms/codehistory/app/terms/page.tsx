@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/terms' },
   title: 'Términos de Servicio — Code History Daily',
   description: 'Términos de uso y condiciones del servicio de Code History Daily.',
 }

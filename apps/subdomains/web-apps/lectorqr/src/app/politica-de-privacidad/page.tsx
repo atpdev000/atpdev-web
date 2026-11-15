@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { ShieldCheck, Lock, Eye, Server, RefreshCw } from 'lucide-react';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/politica-de-privacidad' },
   title: 'Política de Privacidad • Lector QR Pro',
   description: 'Conoce cómo protegemos tu privacidad, el procesamiento local de imágenes de cámara y el uso de cookies y publicidad de Google AdSense.',
 };

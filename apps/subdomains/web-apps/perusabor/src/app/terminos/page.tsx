@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   title: 'Términos de Uso — Perú Sabor Inteligente',
   description:
     'Condiciones de uso de las herramientas gastronómicas, costeo de recetas y contenido editorial de Perú Sabor Inteligente.',
-  robots: { index: false, follow: true },
+  alternates: { canonical: '/terminos' },
+  robots: { index: true, follow: true },
 };
 
 export default function TerminosPage() {
@@ -57,12 +58,12 @@ export default function TerminosPage() {
             </a>{' '}
             o en{' '}
             <a
-              href="https://www.atpdev.dev/contacto"
+              href="https://www.atpdev.dev/#contact"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#c22929] font-semibold underline"
             >
-              www.atpdev.dev/contacto
+              www.atpdev.dev/#contact
             </a>
             .
           </p>
@@ -71,3 +72,4 @@ export default function TerminosPage() {
     </div>
   );
 }
+

@@ -1,40 +1,35 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { usePathname } from 'next/navigation';
+import Script from 'next/script';
+import { ADSENSE_CLIENT_ID } from '@/lib/siteConfig';
 
-interface GoogleAdSenseProps {
-  clientId?: string;
-}
+const EXCLUDED_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|login|registro|recuperar-password|restablecer-password|dashboard|admin|auth|contacto)(?:\/|$)/i;
 
 /**
- * Google AdSense Script Loader
- * 
- * Injects Google AdSense client script in useEffect without the `data-nscript` attribute
- * that Next.js `<Script>` injects, preventing the Google AdSense warning:
- * "AdSense head tag doesn't support data-nscript attribute."
- * Also ensures 0 SSR hydration mismatches.
+ * Componente oficial de Google AdSense para Sorteos Pro.
+ * Excluye páginas legales, de autenticación y paneles privados para cumplir las políticas de Google AdSense.
  */
-export function GoogleAdSense({ clientId }: GoogleAdSenseProps) {
-  useEffect(() => {
-    if (!clientId || typeof window === "undefined") return;
+export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
+  const pathname = usePathname() || '';
+  const rawId = clientId || ADSENSE_CLIENT_ID;
+  if (!rawId || EXCLUDED_ROUTES.test(pathname)) {
+    return null;
+  }
 
-    const cleanClientId = clientId.startsWith("ca-") ? clientId : `ca-${clientId}`;
+  const cleanClientId = rawId.startsWith('ca-')
+    ? rawId
+    : `ca-${rawId}`;
 
-    // Prevent duplicate script injection
-    const existing = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
-    if (existing) return;
-
-    try {
-      const script = document.createElement("script");
-      script.id = "google-adsense-script";
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanClientId}`;
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      document.head.appendChild(script);
-    } catch {
-      // Ignore if document is unavailable or blocked by adblockers
-    }
-  }, [clientId]);
-
-  return null;
+  return (
+    <Script
+      id="google-adsense-script"
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanClientId}`}
+      crossOrigin="anonymous"
+      strategy="afterInteractive"
+    />
+  );
 }
+
+export default GoogleAdSense;

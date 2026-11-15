@@ -113,3 +113,4 @@ export default function LatestArticlesSection({ lang }: { lang: string }) {
     </section>
   );
 }
+

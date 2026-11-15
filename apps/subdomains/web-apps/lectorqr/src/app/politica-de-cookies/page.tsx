@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Cookie, Settings, ShieldCheck } from 'lucide-react';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/politica-de-cookies' },
   title: 'Política de Cookies • Lector QR Pro',
   description: 'Información detallada sobre las cookies utilizadas en Lector QR Pro, cookies de Google AdSense y cómo configurarlas en tu navegador.',
 };

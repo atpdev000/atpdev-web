@@ -12,3 +12,4 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: 'https://almaniq.atpdev.dev/sitemap.xml',
   };
 }
+

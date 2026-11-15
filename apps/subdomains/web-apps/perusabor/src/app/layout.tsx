@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+import { AdSenseInjector } from '@/components/AdSenseInjector';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://perusabor.atpdev.dev'),
@@ -38,11 +39,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5414009811868137"
-          crossOrigin="anonymous"
-        />
+        <AdSenseInjector />
       </head>
       <body className="bg-[#faf9f6] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 min-h-screen flex flex-col antialiased selection:bg-red-500 selection:text-white">
         <Navbar />

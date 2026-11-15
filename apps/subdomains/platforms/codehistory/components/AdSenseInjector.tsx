@@ -23,3 +23,4 @@ export default function AdSenseInjector({ adsenseId }: { adsenseId: string | nul
     />
   );
 }
+

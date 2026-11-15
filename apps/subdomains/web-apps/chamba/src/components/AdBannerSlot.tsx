@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export type AdSlotType = 'leaderboard' | 'in-feed' | 'sidebar' | 'billboard';
 
@@ -10,7 +11,11 @@ interface AdBannerSlotProps {
   className?: string;
 }
 
+const EXCLUDED_AD_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|admin|contacto|publicar-empleo)(?:\/|$)/i;
+
 export function AdBannerSlot({ type, slotId, className = '' }: AdBannerSlotProps) {
+  const pathname = usePathname() || '';
+  const isExcludedRoute = EXCLUDED_AD_ROUTES.test(pathname);
   const adRef = useRef<HTMLDivElement>(null);
   const [resolvedConfig, setResolvedConfig] = useState<{
     enabled: boolean;
@@ -63,8 +68,8 @@ export function AdBannerSlot({ type, slotId, className = '' }: AdBannerSlotProps
     }
   }, [resolvedConfig, isRendered]);
 
-  // Si AdSense está desactivado en el Admin o no hay slotId configurado, no renderizar contenedor vacío (Auto Ads opera sin penalización de CLS)
-  if (!resolvedConfig.enabled || !resolvedConfig.activeSlotId) {
+  // Si AdSense está desactivado en el Admin o no hay slotId configurado o es ruta excluida, no renderizar contenedor vacío (Auto Ads opera sin penalización de CLS)
+  if (isExcludedRoute || !resolvedConfig.enabled || !resolvedConfig.activeSlotId) {
     return null;
   }
 

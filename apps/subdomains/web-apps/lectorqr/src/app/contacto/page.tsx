@@ -67,8 +67,8 @@ export default function ContactoPage() {
                 </div>
                 <div>
                   <span className="text-slate-400 font-semibold block">Portal Corporativo:</span>
-                  <a href="https://www.atpdev.dev/contacto" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:underline">
-                    www.atpdev.dev/contacto
+                  <a href="https://www.atpdev.dev/#contact" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:underline">
+                    www.atpdev.dev/#contact
                   </a>
                   <p className="text-[11px] text-slate-500">Lunes a Viernes de 9:00 a 18:00 (GMT-5)</p>
                 </div>

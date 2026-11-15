@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/privacy' },
   title: 'Política de Privacidad — Almaniq Web',
   description: 'Política de privacidad y tratamiento de datos de Almaniq Web.',
 }

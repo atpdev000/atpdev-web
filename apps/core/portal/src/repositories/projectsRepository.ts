@@ -69,7 +69,7 @@ const projectsMock: Project[] = [
     stack: ["Next.js", "pdf-lib", "pdfjs-dist", "FastAPI", "Python"],
     metrics: "100% Client/API Pro",
     status: "En producción",
-    demoLink: "https://pdf.atpdev.dev",
+    demoLink: "https://masteratpdf.atpdev.dev",
   },
 ];
 

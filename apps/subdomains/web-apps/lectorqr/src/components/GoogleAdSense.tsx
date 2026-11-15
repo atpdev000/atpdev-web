@@ -1,37 +1,31 @@
 'use client';
 
-import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import Script from 'next/script';
 
-interface GoogleAdSenseProps {
-  clientId?: string;
-}
+const ADSENSE_CLIENT_ID = 'ca-pub-5414009811868137';
+const EXCLUDED_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|politica-de-cookies|ajustes|historial|contacto)(?:\/|$)/i;
 
 /**
- * Google AdSense Script Loader
- * Inyecta el script de AdSense en el cliente sin causar advertencias de data-nscript en Next.js
+ * Carga oficial de Google AdSense para Lector QR Pro (lectorqr.atpdev.dev).
+ * Excluye páginas legales y de configuración local para cumplir las políticas de Google AdSense.
  */
-export function GoogleAdSense({ clientId = 'pub-5414009811868137' }: GoogleAdSenseProps) {
-  useEffect(() => {
-    if (!clientId || typeof window === 'undefined') return;
+export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
+  const pathname = usePathname() || '';
+  const resolvedId = clientId || ADSENSE_CLIENT_ID;
+  if (EXCLUDED_ROUTES.test(pathname)) {
+    return null;
+  }
 
-    const cleanClientId = clientId.startsWith('ca-') ? clientId : `ca-${clientId}`;
-
-    const existing = document.querySelector('script[src*="pagead2.googlesyndication.com"]');
-    if (existing) return;
-
-    try {
-      const script = document.createElement('script');
-      script.id = 'google-adsense-script';
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanClientId}`;
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    } catch {
-      // Ignorar si hay bloqueadores de anuncios
-    }
-  }, [clientId]);
-
-  return null;
+  return (
+    <Script
+      id="google-adsense-script"
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${resolvedId}`}
+      crossOrigin="anonymous"
+      strategy="afterInteractive"
+    />
+  );
 }
-export default GoogleAdSense;
 
+export default GoogleAdSense;

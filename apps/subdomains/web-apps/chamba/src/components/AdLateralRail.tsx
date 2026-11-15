@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface AdLateralRailProps {
   leftSlotId?: string;
   rightSlotId?: string;
 }
 
+const EXCLUDED_AD_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|admin|contacto|publicar-empleo)(?:\/|$)/i;
+
 export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
+  const pathname = usePathname() || '';
+  const isExcludedRoute = EXCLUDED_AD_ROUTES.test(pathname);
   const [railState, setRailState] = useState<{
     show: boolean;
     clientId: string;
@@ -47,7 +52,7 @@ export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
     }
   }, [leftSlotId, rightSlotId]);
 
-  if (!railState.show || (!railState.left && !railState.right)) {
+  if (isExcludedRoute || !railState.show || (!railState.left && !railState.right)) {
     return null;
   }
 

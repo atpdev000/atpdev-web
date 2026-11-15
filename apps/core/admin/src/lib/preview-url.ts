@@ -11,7 +11,7 @@ export const OFFICIAL_APP_URLS = {
   perusabor: 'https://perusabor.atpdev.dev',
   lectorqr: 'https://lectorqr.atpdev.dev',
   dni: 'https://dni.atpdev.dev',
-  pdf: 'https://pdf.atpdev.dev',
+  pdf: 'https://masteratpdf.atpdev.dev',
   almaniq: 'https://almaniq.atpdev.dev',
   codehistory: 'https://codehistory.atpdev.dev',
 } as const;

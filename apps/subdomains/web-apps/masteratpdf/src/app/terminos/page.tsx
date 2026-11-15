@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   title: 'Términos de Uso — MasterAtPDF Pro',
   description:
     'Términos y condiciones de uso de las herramientas PDF locales de MasterAtPDF Pro.',
-  robots: { index: false, follow: true },
+  alternates: { canonical: '/terminos' },
+  robots: { index: true, follow: true },
 };
 
 export default function TerminosPage() {
@@ -51,12 +52,12 @@ export default function TerminosPage() {
             </a>{' '}
             o en{' '}
             <a
-              href="https://www.atpdev.dev/contacto"
+              href="https://www.atpdev.dev/#contact"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand font-semibold underline"
             >
-              www.atpdev.dev/contacto
+              www.atpdev.dev/#contact
             </a>
             .
           </p>
@@ -65,3 +66,4 @@ export default function TerminosPage() {
     </div>
   );
 }
+

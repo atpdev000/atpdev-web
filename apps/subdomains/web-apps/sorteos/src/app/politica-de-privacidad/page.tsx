@@ -4,6 +4,7 @@ import { Lock, ArrowLeft, ShieldCheck, Cookie, ExternalLink } from 'lucide-react
 import { SITE_NAME, CONTACT_EMAIL } from '@/lib/siteConfig';
 
 export const metadata = {
+  alternates: { canonical: '/politica-de-privacidad' },
   title: `Política de Privacidad | ${SITE_NAME}`,
   description: `Política de privacidad y protección de datos personales de ${SITE_NAME} conforme a la Ley 29733, RGPD y directrices de Google AdSense.`,
 };

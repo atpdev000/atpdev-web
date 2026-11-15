@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/'],
       },
     ],
-    sitemap: 'https://pdf.atpdev.dev/sitemap.xml',
+    sitemap: 'https://masteratpdf.atpdev.dev/sitemap.xml',
   };
 }
 

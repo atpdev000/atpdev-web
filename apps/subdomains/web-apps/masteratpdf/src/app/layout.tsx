@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AdSenseInjector } from "@/components/AdSenseInjector";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -11,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pdf.atpdev.dev"),
+  metadataBase: new URL("https://masteratpdf.atpdev.dev"),
   alternates: {
     canonical: "/",
   },
@@ -37,11 +38,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5414009811868137"
-          crossOrigin="anonymous"
-        />
+        <AdSenseInjector />
       </head>
       <body className={`${inter.variable} antialiased min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)] selection:bg-indigo-500 selection:text-white`}>
         <Header />

@@ -141,7 +141,7 @@ export const Footer = () => {
                         <Link href="/terminos" className="hover:text-brand transition-colors">
                             Términos de Uso
                         </Link>
-                        <a href="https://www.atpdev.dev/contacto" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">
+                        <a href="https://www.atpdev.dev/#contact" target="_blank" rel="noopener noreferrer" className="hover:text-brand transition-colors">
                             Contacto
                         </a>
                     </div>

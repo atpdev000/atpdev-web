@@ -409,7 +409,7 @@ export default function RootLayout({
                 'ad_storage': 'denied',
                 'ad_user_data': 'denied',
                 'ad_personalization': 'denied',
-                'analytics_storage': 'granted',
+                'analytics_storage': 'denied',
                 'wait_for_update': 500
               });
             `
@@ -472,6 +472,10 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{
               __html: `
                 (function() {
+                  var p = window.location.pathname || '';
+                  if (/^\/(?:politica-de-privacidad|terminos-y-condiciones|admin|contacto|publicar-empleo)(?:\/|$)/i.test(p)) {
+                    return;
+                  }
                   if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
                     var s = document.createElement('script');
                     s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}';

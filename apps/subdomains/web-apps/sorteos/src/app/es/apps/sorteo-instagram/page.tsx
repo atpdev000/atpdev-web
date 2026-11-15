@@ -1,5 +1,5 @@
-import SorteoInstagramPage from '@/app/apps/sorteo-instagram/page';
+import { permanentRedirect } from 'next/navigation';
 
 export default function EsSorteoInstagramPage() {
-  return <SorteoInstagramPage />;
+  permanentRedirect('/apps/sorteo-instagram');
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/terms' },
   title: 'Términos de Servicio — Almaniq Web',
   description: 'Términos de uso y condiciones del servicio de Almaniq Web.',
 }

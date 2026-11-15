@@ -5,6 +5,7 @@ import { ShieldCheck, ArrowLeft } from 'lucide-react';
 import { SITE_NAME, CONTACT_EMAIL } from '@/lib/siteConfig';
 
 export const metadata = {
+  alternates: { canonical: '/terminos-y-condiciones' },
   title: `Términos y Condiciones | ${SITE_NAME}`,
   description: `Términos y condiciones legales de uso de la plataforma ${SITE_NAME} y cumplimiento con directrices de plataformas y comercio digital.`
 };

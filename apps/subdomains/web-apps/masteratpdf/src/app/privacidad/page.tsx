@@ -6,7 +6,8 @@ export const metadata: Metadata = {
   title: 'Política de Privacidad — MasterAtPDF Pro',
   description:
     'Política de privacidad, procesamiento local de documentos PDF en el navegador y uso de cookies publicitarias de Google AdSense en MasterAtPDF Pro.',
-  robots: { index: false, follow: true },
+  alternates: { canonical: '/privacidad' },
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacidadPage() {
@@ -24,7 +25,7 @@ export default function PrivacidadPage() {
           Política de Privacidad
         </h1>
         <p className="text-xs sm:text-sm text-muted">
-          Última actualización: Noviembre 2026 • Titular: ATP DEV (pdf.atpdev.dev)
+          Última actualización: Noviembre 2026 • Titular: ATP DEV (masteratpdf.atpdev.dev)
         </p>
       </div>
 
@@ -82,12 +83,12 @@ export default function PrivacidadPage() {
             </a>{' '}
             o mediante{' '}
             <a
-              href="https://www.atpdev.dev/contacto"
+              href="https://www.atpdev.dev/#contact"
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand font-semibold underline"
             >
-              www.atpdev.dev/contacto
+              www.atpdev.dev/#contact
             </a>
             .
           </p>
@@ -96,3 +97,4 @@ export default function PrivacidadPage() {
     </div>
   );
 }
+
