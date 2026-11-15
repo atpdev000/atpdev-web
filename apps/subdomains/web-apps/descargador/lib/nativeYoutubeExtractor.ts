@@ -461,6 +461,7 @@ async function extractWithPoSession(
         continue
       }
 
+      let firstDecErr = ''
       const decipherList = async (list: any[] = []) => {
         const out: any[] = []
         for (const f of list) {
@@ -483,12 +484,13 @@ async function extractWithPoSession(
                 fps: f.fps,
                 bitrate: f.bitrate,
                 averageBitrate: f.average_bitrate,
+                audioQuality: f.audio_quality,
                 qualityLabel: f.quality_label,
                 contentLength: f.content_length ? String(f.content_length) : undefined,
               })
             }
-          } catch {
-            // ignore format that cannot decipher
+          } catch (dErr: any) {
+            if (!firstDecErr) firstDecErr = dErr?.message || String(dErr)
           }
         }
         return out
@@ -496,6 +498,11 @@ async function extractWithPoSession(
 
       const rawFormats = await decipherList(sd.formats)
       const rawAdaptive = await decipherList(sd.adaptive_formats)
+      if (rawFormats.length === 0 && rawAdaptive.length === 0) {
+        const sdCount = `${sd.formats?.length || 0}+${sd.adaptive_formats?.length || 0}`
+        reasons.push(`Po-${clientName}: 0_urls(sd=${sdCount}${firstDecErr ? ',err=' + firstDecErr : ''})`)
+        continue
+      }
 
       const bi = info.basic_info as any
       const thumbs = Array.isArray(bi?.thumbnail)
@@ -503,6 +510,7 @@ async function extractWithPoSession(
         : []
 
       const syntheticPayload = {
+        playabilityStatus: { status: 'OK' },
         videoDetails: {
           title: bi?.title,
           lengthSeconds: bi?.duration,
@@ -523,7 +531,7 @@ async function extractWithPoSession(
         console.info(`[FTYYoutube] extractWithPoSession OK: Po-${clientName} formats=${mapped.formats.length}`)
         return mapped
       }
-      reasons.push(`Po-${clientName}: 0_urls`)
+      reasons.push(`Po-${clientName}: 0_urls(mapNull=${rawFormats.length}+${rawAdaptive.length})`)
     } catch (cErr: any) {
       reasons.push(`Po-${clientName}: ${cErr?.message || String(cErr)}`)
     }
