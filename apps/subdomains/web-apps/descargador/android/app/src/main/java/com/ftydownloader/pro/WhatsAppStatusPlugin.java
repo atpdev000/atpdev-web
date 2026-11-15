@@ -129,6 +129,27 @@ public class WhatsAppStatusPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void checkInstalledApps(PluginCall call) {
+        PackageManager pm = getContext().getPackageManager();
+        boolean wa = false;
+        boolean wb = false;
+        try {
+            pm.getPackageInfo("com.whatsapp", PackageManager.GET_ACTIVITIES);
+            wa = true;
+        } catch (Exception ignored) {}
+        try {
+            pm.getPackageInfo("com.whatsapp.w4b", PackageManager.GET_ACTIVITIES);
+            wb = true;
+        } catch (Exception ignored) {}
+
+        JSObject ret = new JSObject();
+        ret.put("whatsappInstalled", wa);
+        ret.put("businessInstalled", wb);
+        ret.put("anyInstalled", wa || wb);
+        call.resolve(ret);
+    }
+
+    @PluginMethod
     public void getStatuses(PluginCall call) {
         String appType = call.getString("appType", "all"); // "all", "whatsapp", "business"
         JSArray statusArray = new JSArray();

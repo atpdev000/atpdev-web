@@ -48,10 +48,20 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
     
-    <!-- Permisos para leer media en Android 13+ (Aprobados por Google Play) -->
+    <!-- Permiso esencial para acceder a los estados de WhatsApp en Android 11+ -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+    
+    <!-- Permisos para leer media en Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Visibilidad de paquetes para detectar WhatsApp y WhatsApp Business en Android 11+ -->
+    <queries>
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+    </queries>
 </manifest>

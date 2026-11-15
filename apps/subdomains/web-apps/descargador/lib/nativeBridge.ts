@@ -4,6 +4,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 export interface WhatsAppStatusPluginInterface {
   checkPermission(): Promise<{ granted: boolean; isAllFiles: boolean; sdkVersion: number }>;
   requestPermission(): Promise<{ openedSettings?: boolean; type?: string }>;
+  checkInstalledApps?(): Promise<{ whatsappInstalled: boolean; businessInstalled: boolean; anyInstalled: boolean }>;
   getStatuses(options?: { appType?: 'all' | 'whatsapp' | 'business' }): Promise<{
     statuses: Array<{
       id: string;

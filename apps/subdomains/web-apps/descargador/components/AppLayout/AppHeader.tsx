@@ -2,7 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Clock } from 'lucide-react'
+import { Clock, Share2 } from 'lucide-react'
+import { Share } from '@capacitor/share'
+import { Capacitor } from '@capacitor/core'
 import HistoryModal from '@/components/HistoryModal'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
 import { ThemeToggle } from '@/components/Layout/ThemeToggle'
@@ -11,6 +13,43 @@ import { LanguageSelector } from '@/components/Layout/LanguageSelector'
 export default function AppHeader() {
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
     const { history, unreadCount, markAllAsRead, clearHistory, deleteItem } = useDownloadHistory()
+
+    const handleShareApp = async () => {
+        const shareData = {
+            title: 'Descargador Pro',
+            text: '¡Descarga videos y fotos en HD/4K de Facebook, TikTok, Instagram, WhatsApp y más sin marcas de agua con Descargador Pro! 🚀',
+            url: 'https://descargador.atpdev.dev',
+            dialogTitle: 'Compartir Descargador Pro'
+        }
+
+        if (Capacitor.isNativePlatform()) {
+            try {
+                await Share.share(shareData)
+                return
+            } catch (err) {
+                console.warn('Error al compartir nativo o diálogo cancelado:', err)
+                return
+            }
+        }
+
+        if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+            try {
+                await navigator.share(shareData)
+                return
+            } catch (err) {
+                return
+            }
+        }
+
+        if (typeof navigator !== 'undefined' && navigator.clipboard) {
+            try {
+                await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`)
+                alert('¡Enlace de Descargador Pro copiado al portapapeles!')
+            } catch (err) {
+                console.error('Error al copiar:', err)
+            }
+        }
+    }
 
     const handleLogoClick = (e: React.MouseEvent) => {
         if (typeof window !== 'undefined' && window.location.pathname === '/') {
@@ -41,16 +80,25 @@ export default function AppHeader() {
                     </h1>
                 </Link>
 
-                <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+                <div className="flex items-center space-x-1 sm:space-x-1.5 shrink-0">
                     <LanguageSelector />
                     <ThemeToggle />
+
+                    <button
+                        onClick={handleShareApp}
+                        className="p-1.5 sm:p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-xl transition-colors shrink-0 cursor-pointer active:scale-95"
+                        title="Compartir Descargador Pro"
+                        aria-label="Compartir Descargador Pro"
+                    >
+                        <Share2 className="w-5 h-5" />
+                    </button>
 
                     <button
                         onClick={() => {
                             markAllAsRead()
                             setIsHistoryOpen(true)
                         }}
-                        className="p-1.5 sm:p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative shrink-0 cursor-pointer"
+                        className="p-1.5 sm:p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-xl transition-colors relative shrink-0 cursor-pointer active:scale-95"
                         title="Historial de Descargas"
                         aria-label="Historial de Descargas"
                     >

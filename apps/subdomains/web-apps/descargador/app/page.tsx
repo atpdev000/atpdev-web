@@ -204,7 +204,7 @@ export default function Home() {
   if (isNative) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe transition-colors">
-        <SmartClipboardDetector onDetected={handleClipboardDetected} />
+        <SmartClipboardDetector activePlatform={activePlatform} onDetected={handleClipboardDetected} />
         
         {/* 📱 HEADER NATIVO LIMPIO Y STICKY */}
         <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-gray-200/80 dark:border-slate-800 transition-colors">
@@ -238,7 +238,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200 relative">
       <AnnouncementBar initialText={branding.announcement_text} initialEnabled={branding.announcement_enabled} />
-      <SmartClipboardDetector onDetected={handleClipboardDetected} />
+      <SmartClipboardDetector activePlatform={activePlatform} onDetected={handleClipboardDetected} />
       <Header />
 
       {/* Rieles Panorámicos en Pantallas Anchas (Widescreen >= 1440px) */}

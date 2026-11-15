@@ -80,6 +80,31 @@ export default function WhatsappStatusDownloader() {
   const [permissionGranted, setPermissionGranted] = useState(true)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [selectedPreview, setSelectedPreview] = useState<StatusItem | null>(null)
+  const [installedApps, setInstalledApps] = useState<{
+    whatsapp: boolean
+    business: boolean
+    checked: boolean
+  }>({ whatsapp: true, business: true, checked: false })
+
+  // Detección automática de apps de WhatsApp instaladas en el dispositivo
+  useEffect(() => {
+    if (isNative && WhatsAppStatus.checkInstalledApps) {
+      WhatsAppStatus.checkInstalledApps()
+        .then(res => {
+          setInstalledApps({
+            whatsapp: res.whatsappInstalled,
+            business: res.businessInstalled,
+            checked: true
+          })
+          if (res.businessInstalled && !res.whatsappInstalled) {
+            setSelectedApp('business')
+          } else if (res.whatsappInstalled && !res.businessInstalled) {
+            setSelectedApp('whatsapp')
+          }
+        })
+        .catch(() => {})
+    }
+  }, [isNative])
 
   // 1. Escanear estados reales usando el plugin nativo
   const scanStatuses = useCallback(async (appTypeToScan = selectedApp) => {
@@ -463,6 +488,18 @@ export default function WhatsappStatusDownloader() {
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Comprobar Permiso</span>
             </button>
+          </div>
+
+          <div className="mt-4 p-3 bg-white/70 dark:bg-slate-900/80 rounded-xl border border-amber-500/20 text-[11px] text-gray-600 dark:text-slate-300 text-left space-y-1">
+            <p className="font-semibold text-gray-800 dark:text-slate-200 flex items-center gap-1">
+              💡 ¿El interruptor aparece inhabilitado o en gris en Android?
+            </p>
+            <p>
+              1. Toca <b>"Conceder Permiso Ahora"</b> y activa el interruptor de Descargador Pro.
+            </p>
+            <p>
+              2. En celulares Xiaomi/Redmi/HyperOS con Android 13/14: Si dice <i>"Ajuste restringido"</i>, ve a <b>Ajustes &gt; Aplicaciones &gt; Descargador Pro</b>, toca los <b>tres puntos (⋮)</b> arriba a la derecha y selecciona <b>"Permitir ajustes restringidos"</b>.
+            </p>
           </div>
         </div>
       ) : loading && statuses.length === 0 ? (

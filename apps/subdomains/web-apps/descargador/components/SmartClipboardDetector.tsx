@@ -3,60 +3,98 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Platform } from './PlatformTabs'
 import { detectPlatformFromUrl, DetectedUrlInfo } from '@/lib/clipboardDetector'
-import { Sparkles, CheckCircle2, ArrowRight, X, ClipboardPaste } from 'lucide-react'
+import { Sparkles, CheckCircle2, ArrowRight, X, Download } from 'lucide-react'
 import { usePlatform } from '@/hooks/usePlatform'
 import { readNativeClipboard } from '@/lib/nativeBridge'
+import { useHistoryStore } from '@/hooks/useDownloadHistory'
 
 interface SmartClipboardDetectorProps {
+  activePlatform?: Platform
   onDetected: (info: DetectedUrlInfo, autoSearch: boolean) => void
 }
 
-export default function SmartClipboardDetector({ onDetected }: SmartClipboardDetectorProps) {
+export default function SmartClipboardDetector({ activePlatform, onDetected }: SmartClipboardDetectorProps) {
   const { isNative } = usePlatform()
   const [detectedToast, setDetectedToast] = useState<{
     info: DetectedUrlInfo
     isAutoSearching: boolean
+    needsUserConfirmation: boolean
   } | null>(null)
   
-  const lastProcessedUrl = useRef<string>('')
-  const lastProcessedTime = useRef<number>(0)
+  // Cache en memoria para URLs ya procesadas o descartadas en la sesión
+  const processedUrls = useRef<Set<string>>(new Set())
+  const lastClipboardRaw = useRef<string>('')
   const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  const showToast = useCallback((info: DetectedUrlInfo, autoSearching: boolean) => {
+  const showToast = useCallback((info: DetectedUrlInfo, autoSearching: boolean, needsConfirmation: boolean) => {
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current)
     }
-    setDetectedToast({ info, isAutoSearching: autoSearching })
+    setDetectedToast({ info, isAutoSearching: autoSearching, needsUserConfirmation: needsConfirmation })
     toastTimeoutRef.current = setTimeout(() => {
       setDetectedToast(null)
-    }, 4500)
+    }, needsConfirmation ? 8000 : 4500)
   }, [])
 
-  const handleDetectedUrl = useCallback((rawText: string, autoSearch = true) => {
+  const handleDetectedUrl = useCallback((rawText: string, isFromAutoCheck = true) => {
     if (!rawText || typeof rawText !== 'string') return false
+    const trimmed = rawText.trim()
+    
+    // Si el contenido del portapapeles es exactamente idéntico al último verificado, ignorar
+    if (lastClipboardRaw.current === trimmed) {
+      return false
+    }
+    
     const info = detectPlatformFromUrl(rawText)
     if (!info) return false
 
-    const now = Date.now()
-    // Evitar re-procesamiento continuo únicamente si es exactamente la misma URL procesada hace menos de 4 segundos
-    if (lastProcessedUrl.current === info.url && now - lastProcessedTime.current < 4000) {
+    // 1. Verificar si la URL ya fue procesada o descartada en esta sesión
+    if (processedUrls.current.has(info.url)) {
       return false
     }
-    lastProcessedUrl.current = info.url
-    lastProcessedTime.current = now
 
-    // Scroll suave hacia la sección de descarga
+    // 2. Control inteligente: Verificar si la URL ya fue descargada anteriormente en el historial
+    const history = useHistoryStore.getState().history
+    const isAlreadyDownloaded = history.some(item => {
+      if (item.status !== 'completed' || !item.originalUrl) return false
+      const hClean = item.originalUrl.trim().toLowerCase()
+      const currentClean = info.url.trim().toLowerCase()
+      return hClean === currentClean || currentClean.includes(hClean) || hClean.includes(currentClean)
+    })
+
+    if (isAlreadyDownloaded) {
+      console.log('⚡ SmartDetect: La URL ya fue descargada previamente, no se recargará automáticamente:', info.url)
+      // Marcar como procesada para no volver a evaluar en cada focus
+      processedUrls.current.add(info.url)
+      lastClipboardRaw.current = trimmed
+      return false
+    }
+
+    // Registrar como evaluado
+    lastClipboardRaw.current = trimmed
+    processedUrls.current.add(info.url)
+
+    // 3. Control de cambio de pestaña: Si el usuario está en otra pestaña (ej. WhatsApp) y el enlace es de Facebook
+    const isDifferentPlatform = activePlatform && activePlatform !== info.platform
+
+    if (isDifferentPlatform && isFromAutoCheck) {
+      // No cambiar de pestaña agresivamente: mostrar sugerencia interactiva con botón
+      showToast(info, false, true)
+      return true
+    }
+
+    // Si coincide con la pestaña actual o el usuario hizo Paste explícito
     const toolsEl = document.getElementById('herramientas')
     if (toolsEl) {
       toolsEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }
 
-    showToast(info, autoSearch)
-    onDetected(info, autoSearch)
+    showToast(info, true, false)
+    onDetected(info, true)
     return true
-  }, [onDetected, showToast])
+  }, [activePlatform, onDetected, showToast])
 
-  // 1. GLOBAL PASTE LISTENER (Ctrl+V en cualquier lugar de la web o app)
+  // 1. GLOBAL PASTE LISTENER (Ctrl+V explícito en cualquier lugar)
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
       const target = e.target as HTMLElement
@@ -69,7 +107,10 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
           if (!isInput) {
             e.preventDefault()
           }
-          handleDetectedUrl(pastedData, true)
+          // En pegado manual explícito, resetear para procesarlo siempre
+          lastClipboardRaw.current = ''
+          processedUrls.current.delete(detected.url)
+          handleDetectedUrl(pastedData, false)
         }
       }
     }
@@ -78,7 +119,7 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
     return () => window.removeEventListener('paste', handlePaste)
   }, [handleDetectedUrl])
 
-  // 2. WINDOW FOCUS / APP RESUME LISTENER (Lectura automática al volver a la app en Android y Web)
+  // 2. WINDOW FOCUS / APP RESUME LISTENER (Lectura silenciosa al volver a la app)
   useEffect(() => {
     const checkClipboardSilently = async () => {
       try {
@@ -104,7 +145,6 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
     window.addEventListener('focus', onFocus)
     document.addEventListener('visibilitychange', onVisibilityChange)
 
-    // Chequeo inicial con ligero delay para asegurar que el WebView nativo esté listo
     const timer = setTimeout(() => {
       checkClipboardSilently()
     }, 600)
@@ -128,7 +168,7 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
-              ⚡ SMART DETECT
+              ⚡ ENLACE DETECTADO
             </span>
             <span className="text-xs font-bold text-white truncate">
               {detectedToast.info.platformName}
@@ -139,10 +179,32 @@ export default function SmartClipboardDetector({ onDetected }: SmartClipboardDet
             {detectedToast.info.url}
           </p>
 
-          <p className="text-[11px] text-emerald-400 font-medium mt-1 flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-            <span>Enlace detectado. Obteniendo opciones de descarga...</span>
-          </p>
+          {detectedToast.needsUserConfirmation ? (
+            <div className="mt-2.5 flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const info = detectedToast.info
+                  setDetectedToast(null)
+                  onDetected(info, true)
+                }}
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Ir y Descargar</span>
+              </button>
+              <button
+                onClick={() => setDetectedToast(null)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-all cursor-pointer"
+              >
+                Ignorar
+              </button>
+            </div>
+          ) : (
+            <p className="text-[11px] text-emerald-400 font-medium mt-1 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+              <span>Enlace detectado. Obteniendo opciones de descarga...</span>
+            </p>
+          )}
         </div>
 
         <button

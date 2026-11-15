@@ -16,7 +16,10 @@ export function detectNativePlatform(): boolean {
 }
 
 export function usePlatform() {
-    const [isNative, setIsNative] = useState(false);
+    const [isNative, setIsNative] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return detectNativePlatform();
+    });
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
