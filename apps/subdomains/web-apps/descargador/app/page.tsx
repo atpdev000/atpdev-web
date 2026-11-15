@@ -43,6 +43,7 @@ export default function Home() {
     platform: Platform
     url: string
     autoSearch: boolean
+    ts?: number
   } | null>(null)
   const { showInterstitial } = useAdMobInterstitial()
   const hasShownInitialAd = useRef(false)
@@ -171,7 +172,8 @@ export default function Home() {
     setAutoSearchPayload({
       platform: info.platform,
       url: info.url,
-      autoSearch: autoSearch
+      autoSearch: autoSearch,
+      ts: Date.now()
     })
   }
 
@@ -179,20 +181,21 @@ export default function Home() {
     const isMatchingAutoSearch = autoSearchPayload?.platform === activePlatform
     const initialUrl = isMatchingAutoSearch ? autoSearchPayload.url : undefined
     const autoSearch = isMatchingAutoSearch ? autoSearchPayload.autoSearch : false
+    const searchKey = isMatchingAutoSearch ? `${initialUrl || 'def'}-${autoSearchPayload?.ts || 0}` : 'def'
 
     switch (activePlatform) {
       case 'facebook':
-        return <FacebookDownloader key={`fb-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return <FacebookDownloader key={`fb-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'tiktok':
-        return <TiktokDownloader key={`tt-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return <TiktokDownloader key={`tt-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'instagram':
-        return <InstagramDownloader key={`ig-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return <InstagramDownloader key={`ig-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'twitter':
-        return <TwitterDownloader key={`tw-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return <TwitterDownloader key={`tw-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'threads':
-        return <ThreadsDownloader key={`th-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return <ThreadsDownloader key={`th-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'youtube':
-        return <YoutubeDownloader key={`yt-${initialUrl || 'def'}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return <YoutubeDownloader key={`yt-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'whatsapp':
         return <WhatsappStatusDownloader key="wa-status" />
       default:

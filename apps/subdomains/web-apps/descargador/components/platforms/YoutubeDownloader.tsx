@@ -17,7 +17,7 @@ import { Toast } from '@capacitor/toast';
 import { useI18n } from '@/lib/i18n/context';
 import { Music, Film } from 'lucide-react';
 import { NativeWhatsAppStatus, saveNativeMediaFile, downloadAndCombineNative, readNativeClipboard } from '@/lib/nativeBridge';
-import { extractUrlFromText } from '@/lib/clipboardDetector';
+import { extractUrlFromText, detectPlatformFromUrl } from '@/lib/clipboardDetector';
 import { extractYoutubeNativeWithDiagnostics } from '@/lib/nativeYoutubeExtractor';
 
 interface VideoFormat {
@@ -231,6 +231,11 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
       const text = await readNativeClipboard()
       if (text) {
         const clean = extractUrlFromText(text) || text.trim()
+        const detected = detectPlatformFromUrl(clean)
+        if (detected && detected.platform !== 'youtube') {
+          window.dispatchEvent(new CustomEvent('smart-clipboard-manual-paste', { detail: { text: clean } }))
+          return
+        }
         setUrl(clean)
         processUrl(clean)
       }
@@ -987,7 +992,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
               title: videoInfo?.title || filename,
               platform: 'youtube',
               thumbnail: videoInfo?.thumbnail || '',
-              originalUrl: downloadUrl,
+              originalUrl: originalUrl || url,
               status: 'completed',
               format: quality,
               fileSize: formatBytes(blob.size),
@@ -1033,7 +1038,7 @@ export default function YoutubeDownloader({ initialUrl, autoSearch }: Downloader
             title: videoInfo?.title || filename,
             platform: 'youtube',
             thumbnail: videoInfo?.thumbnail || '',
-            originalUrl: downloadUrl,
+            originalUrl: originalUrl || url,
             status: 'completed',
             format: quality,
             fileSize: formatBytes(blob.size),

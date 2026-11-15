@@ -6,7 +6,7 @@ import { getFacebookInfo, FacebookVideoInfo } from '@/lib/platforms/facebook';
 import { formatBytes } from '@/lib/utils';
 import { usePlatform } from '@/hooks/usePlatform';
 import { saveNativeMediaFile, readNativeClipboard } from '@/lib/nativeBridge';
-import { extractUrlFromText } from '@/lib/clipboardDetector';
+import { extractUrlFromText, detectPlatformFromUrl } from '@/lib/clipboardDetector';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -91,6 +91,11 @@ export default function FacebookDownloader({ initialUrl, autoSearch }: Downloade
       const text = await readNativeClipboard()
       if (text) {
         const clean = extractUrlFromText(text) || text.trim()
+        const detected = detectPlatformFromUrl(clean)
+        if (detected && detected.platform !== 'facebook') {
+          window.dispatchEvent(new CustomEvent('smart-clipboard-manual-paste', { detail: { text: clean } }))
+          return
+        }
         setUrl(clean)
         processUrl(clean)
       }
