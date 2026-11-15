@@ -43,7 +43,9 @@ export function generateMetadata(): Metadata {
     },
     other: {
       'ezoic-site-verification': config?.monetization?.ezoic_verification_code || 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
-      'google-adsense-account': config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137'
+      ...(adsenseEnabled && (config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137')
+        ? { 'google-adsense-account': config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137' }
+        : {})
     },
     openGraph: {
       title,

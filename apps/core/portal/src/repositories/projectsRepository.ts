@@ -4,15 +4,14 @@ import { Project } from "../domain/projects/entities";
 const projectsMock: Project[] = [
   {
     id: 1,
-    title: "ChannelsTV",
-    description: "Aplicación de streaming y canales de TV con monetización AdSense y modelo Premium.",
-    category: "Android",
-    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=800&auto=format&fit=crop",
-    stack: ["Kotlin", "Android Studio", "Billing Library"],
-    metrics: "+10k Descargas",
+    title: "Chamba Pro",
+    description: "Portal de convocatorias laborales públicas y privadas en Perú con filtros avanzados y herramientas para postulantes.",
+    category: "Web",
+    image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=800&auto=format&fit=crop",
+    stack: ["Next.js", "Supabase", "Tailwind CSS", "Turborepo"],
+    metrics: "Actualización Diaria",
     status: "En producción",
-    demoLink: "https://channelstv.atpdev.dev",
-    playStore: "https://play.google.com/store"
+    demoLink: "https://chamba.atpdev.dev"
   },
   {
     id: 2,

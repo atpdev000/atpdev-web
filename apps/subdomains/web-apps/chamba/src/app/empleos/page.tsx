@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getJobPostings, getSubdomainConfig } from "@atpdev/database";
 import { JobCard } from "@/components/JobCard";
 import { JobFilterClient } from "@/components/JobFilterClient";
@@ -67,6 +68,9 @@ export default async function EmpleosPage({
   const sueldo = params.sueldo || "";
   const sort = params.sort || "ending_soon";
   const hideExpired = params.hide_expired !== "false"; // Por defecto true para no mostrar ofertas vencidas
+  const parsedPage = Number.parseInt(params.page || "1", 10);
+  const currentPageRaw = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const PAGE_SIZE = 24;
 
   const [allJobs, config] = await Promise.all([
     getJobPostings(),
@@ -151,6 +155,26 @@ export default async function EmpleosPage({
     return 0;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE));
+  const currentPage = Math.min(currentPageRaw, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + PAGE_SIZE);
+
+  const buildPageHref = (pageNum: number) => {
+    const sp = new URLSearchParams();
+    if (q) sp.set("q", q);
+    if (region) sp.set("region", region);
+    if (regimen) sp.set("regimen", regimen);
+    if (categoria) sp.set("categoria", categoria);
+    if (educacion) sp.set("educacion", educacion);
+    if (sueldo) sp.set("sueldo", sueldo);
+    if (sort && sort !== "ending_soon") sp.set("sort", sort);
+    if (!hideExpired) sp.set("hide_expired", "false");
+    if (pageNum > 1) sp.set("page", String(pageNum));
+    const qs = sp.toString();
+    return qs ? `/empleos?${qs}` : "/empleos";
+  };
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -234,17 +258,67 @@ export default async function EmpleosPage({
 
         {/* Results Container */}
         <div className="lg:col-span-3 space-y-5">
-          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
-            <span>Mostrando <strong className="text-emerald-600 dark:text-emerald-400 font-bold">{filteredJobs.length}</strong> de {allJobs.length} convocatorias activas</span>
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <span>
+              Mostrando{" "}
+              <strong className="text-emerald-600 dark:text-emerald-400 font-bold">
+                {paginatedJobs.length}
+              </strong>{" "}
+              de <strong className="font-semibold">{filteredJobs.length}</strong> convocatorias vigentes ({allJobs.length} totales)
+            </span>
+            {totalPages > 1 && (
+              <span className="font-semibold text-slate-500 dark:text-slate-400">
+                Página {currentPage} de {totalPages}
+              </span>
+            )}
             {filteredJobs.length === 0 && <span className="text-amber-600 dark:text-amber-400 font-semibold">Sin resultados exactos</span>}
           </div>
 
-          {filteredJobs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {filteredJobs.map((job) => (
-                <JobCard key={job.id || job.slug} job={job} />
-              ))}
-            </div>
+          {paginatedJobs.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {paginatedJobs.map((job) => (
+                  <JobCard key={job.id || job.slug} job={job} />
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <nav
+                  aria-label="Paginación de convocatorias"
+                  className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-slate-800"
+                >
+                  {currentPage > 1 ? (
+                    <Link
+                      href={buildPageHref(currentPage - 1)}
+                      className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:border-emerald-500 transition-colors"
+                    >
+                      ← Página anterior
+                    </Link>
+                  ) : (
+                    <span className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800 text-xs font-semibold text-slate-400">
+                      ← Página anterior
+                    </span>
+                  )}
+
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Página {currentPage} de {totalPages}
+                  </span>
+
+                  {currentPage < totalPages ? (
+                    <Link
+                      href={buildPageHref(currentPage + 1)}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
+                    >
+                      Siguiente página →
+                    </Link>
+                  ) : (
+                    <span className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800 text-xs font-semibold text-slate-400">
+                      Siguiente página →
+                    </span>
+                  )}
+                </nav>
+              )}
+            </>
           ) : (
             <div className="p-10 rounded-2xl text-center space-y-3 border border-dashed border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
               <Search size={36} className="text-slate-400 mx-auto" />

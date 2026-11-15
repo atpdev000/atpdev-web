@@ -37,7 +37,12 @@ export default function AboutPage() {
           <section className="space-y-2">
             <h2 className="text-xl font-semibold text-white">3. Autoría y Transparencia (E-E-A-T)</h2>
             <p>
-              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Para consultas editoriales o correcciones históricas puedes escribirnos desde nuestra página de <a href="/contact" className="text-emerald-400 underline">Contacto</a>.
+              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Nuestro archivo prioriza fechas contrastadas en enciclopedias técnicas, archivos históricos universitarios y hemerotecas públicas para aportar contexto claro y educativo a estudiantes, docentes y curiosos de la historia universal.
+            </p>
+            <p className="mt-2">
+              La operación gratuita de Almaniq Web se financia de manera transparente sin suscripciones cerradas. Para consultas editoriales, sugerencias de fuentes o correcciones históricas puedes escribirnos directamente a{' '}
+              <a href="mailto:contacto@atpdev.dev" className="text-emerald-400 underline">contacto@atpdev.dev</a>{' '}
+              o visitar nuestra página de <a href="/contact" className="text-emerald-400 underline">Contacto</a> y nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a>.
             </p>
           </section>
         </div>

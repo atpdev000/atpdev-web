@@ -96,9 +96,9 @@ function ChefIAChatContent() {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black font-display text-stone-900 dark:text-white">
-                Chef IA Perú
-              </h1>
+              <h2 className="text-xl font-black font-display text-stone-900 dark:text-white">
+                Consola Culinaria Interactiva
+              </h2>
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-extrabold text-[10px] uppercase">
                 Verificado
               </span>
@@ -236,9 +236,45 @@ function ChefIAChatContent() {
 
 export default function ChefIAPage() {
   return (
-    <Suspense fallback={<div className="p-12 text-center text-xs text-stone-500">Cargando Chef IA Perú...</div>}>
-      <ChefIAChatContent />
-    </Suspense>
+    <div className="space-y-6">
+      <header className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 text-[#c22929] dark:text-red-400 text-xs font-extrabold uppercase tracking-wider">
+          Asistente Gastronómico Determinístico
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-black font-display text-stone-900 dark:text-white tracking-tight">
+          Chef IA Perú — Asesor Culinario y Técnico en Cocina Peruana
+        </h1>
+        <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 max-w-3xl leading-relaxed">
+          Resuelve dudas reales de cocina criolla, marina, amazónica y andina: rescata salsas cortadas, ajusta tiempos de cocción al wok, sustituye ajíes fuera del Perú y escala recetas verificadas para hogar o restaurante sin improvisaciones en inocuidad alimentaria.
+        </p>
+      </header>
+
+      <Suspense fallback={<div className="p-12 text-center text-xs text-stone-500">Cargando consola interactiva de Chef IA Perú...</div>}>
+        <ChefIAChatContent />
+      </Suspense>
+
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="rounded-3xl bg-white dark:bg-[#13110f] border border-stone-200 dark:border-stone-800 p-6 sm:p-8 space-y-4">
+          <h2 className="text-xl font-extrabold text-stone-900 dark:text-white">
+            Qué puedes consultar en Chef IA Perú
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm text-stone-600 dark:text-stone-300">
+            <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 space-y-1.5">
+              <strong className="text-stone-900 dark:text-white block">Rescate de preparaciones</strong>
+              <p>Aprende cómo corregir una crema huancaína cortada, neutralizar exceso de acidez en ceviche o equilibrar guisos con exceso de sal sin arruinar el fondo.</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 space-y-1.5">
+              <strong className="text-stone-900 dark:text-white block">Sustitución de insumos</strong>
+              <p>Encuentra equivalencias prácticas de ají amarillo, ají panca, culantro, chicha de jora o huacatay cuando cocinas gastronomía peruana en el extranjero.</p>
+            </div>
+            <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 space-y-1.5">
+              <strong className="text-stone-900 dark:text-white block">Escalado profesional y costos</strong>
+              <p>Conecta directamente la conversación con las fichas del <Link href="/recetas" className="text-[#c22929] font-bold underline">Recetario Peruano</Link> y el <Link href="/escalador" className="text-[#c22929] font-bold underline">Escalador de Porciones</Link>.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 

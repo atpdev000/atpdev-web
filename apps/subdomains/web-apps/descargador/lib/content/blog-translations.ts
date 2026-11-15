@@ -110,7 +110,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
       readTime: '18 min',
       content: `
         <h2>The Creator Tech Stack for 2026</h2>
-        <p>Modern creators need agility, fast media ingestion, and automated workflows to stay ahead of short-form trends across TikTok, YouTube Shorts, and Instagram Reels.</p>
+        <p>Modern creators need agility, fast media ingestion, and automated workflows to stay ahead of short-form trends across TikTok, Threads, and Instagram Reels.</p>
         <h3>Top Recommendations</h3>
         <ul>
           <li><strong>Descargador Pro:</strong> Instant asset extraction and backup without loss of quality.</li>
@@ -121,7 +121,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
     },
     'optimizacion-redes-2026': {
       title: 'Social Media Optimization: Complete 2026 Guide',
-      excerpt: 'How to format, compress, and publish your videos for maximum organic reach on Instagram, TikTok, and YouTube.',
+      excerpt: 'How to format, compress, and publish your videos for maximum organic reach on Instagram, TikTok, and Threads.',
       category: 'Marketing',
       readTime: '25 min',
       content: `
@@ -278,7 +278,7 @@ export const blogPostTranslations: Record<'en' | 'pt', Record<string, LocalizedB
       readTime: '15 min',
       content: `
         <h2>Como Baixar Vídeos do TikTok Sem Marca d'Água em 2026</h2>
-        <p>O TikTok é a principal fonte de conteúdos virais do planeta. Porém, salvar vídeos pelo app insere a marca d'água. Para criadores que fazem repost no Instagram Reels ou YouTube Shorts, o vídeo limpo é fundamental.</p>
+        <p>O TikTok é a principal fonte de conteúdos virais do planeta. Porém, salvar vídeos pelo app insere a marca d'água. Para criadores que fazem repost no Instagram Reels ou Threads, o vídeo limpo é fundamental.</p>
         
         <h3>Passos para Baixar em Alta Definição</h3>
         <ul>

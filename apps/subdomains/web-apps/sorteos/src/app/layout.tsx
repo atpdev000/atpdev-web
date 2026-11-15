@@ -392,14 +392,7 @@ export default function RootLayout({
           />
         )}
 
-        {/* Google AdSense Script Inyección Oficial */}
-        {ADSENSE_CLIENT_ID && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-            crossOrigin="anonymous"
-          />
-        )}
+        {/* Google AdSense gestionado por GoogleAdSense (excluye rutas legales, auth y panel privado) */}
       </head>
       <body
         suppressHydrationWarning

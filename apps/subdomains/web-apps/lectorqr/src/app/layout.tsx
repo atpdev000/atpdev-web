@@ -39,8 +39,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: '#090d16',
 };
 
@@ -59,7 +57,7 @@ export default function RootLayout({
           rel="stylesheet" 
         />
         {/* Google AdSense Script */}
-        <GoogleAdSense clientId="pub-5414009811868137" />
+        <GoogleAdSense clientId="ca-pub-5414009811868137" />
       </head>
       <body className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black antialiased">
         <Navbar />

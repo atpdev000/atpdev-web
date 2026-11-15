@@ -317,9 +317,9 @@ export default function Home() {
         <section id="herramientas" className="max-w-4xl mx-auto mb-16">
           <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-3xl shadow-xl border border-gray-200/80 dark:border-slate-800 p-6 sm:p-8 transition-colors">
             <div className="text-center mb-8">
-              <h1 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
+              <h2 className="text-2xl sm:text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-pink-600 to-purple-600">
                 {t.toolsCard.title}
-              </h1>
+              </h2>
               <p className="text-sm sm:text-base text-gray-600 dark:text-slate-300 max-w-2xl mx-auto mt-2">
                 {t.toolsCard.subtitle}
               </p>

@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useRef } from 'react';
-import { ShieldCheck, Server } from 'lucide-react';
+import Link from 'next/link';
+import { ShieldCheck, Server, CheckCircle2, HelpCircle } from 'lucide-react';
 import type { ToolDef } from '@/lib/tools';
+import { TOOL_GUIDES } from '@/lib/tool-guides';
 import { MAX_FILE_MB } from '@/lib/files';
 import { useWindowFileDrop } from '@/hooks/useWindowFileDrop';
 import { DropOverlay } from './DropOverlay';
@@ -37,9 +39,11 @@ export function ToolUpload({
     const inputRef = useRef<HTMLInputElement>(null);
     const isDragging = useWindowFileDrop(onFiles);
     const Icon = tool.icon;
+    const guide = TOOL_GUIDES[tool.id];
 
     return (
-        <section className="animate-stage min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-16 text-center">
+        <>
+            <section className="animate-stage min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-16 text-center">
             <div
                 className="mb-6 w-14 h-14 rounded-2xl flex items-center justify-center"
                 style={{ backgroundColor: `${tool.color}1a`, color: tool.color }}
@@ -98,5 +102,75 @@ export function ToolUpload({
 
             <DropOverlay show={isDragging} label={multiple ? 'Suelta tus archivos aquí' : 'Suelta tu archivo aquí'} />
         </section>
+
+        {guide && (
+            <article className="border-t border-line bg-surface px-4 py-12 sm:py-14">
+                <div className="max-w-4xl mx-auto space-y-8">
+                    <div className="space-y-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-brand">
+                            Guía Práctica MasterAtPDF
+                        </span>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
+                            {guide.headline}
+                        </h2>
+                        <p className="text-sm sm:text-base text-ink-2 leading-relaxed">
+                            {guide.intro}
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="rounded-2xl border border-line bg-surface-2 p-5 space-y-3">
+                            <h3 className="text-sm font-bold text-ink">Pasos rápidos de uso</h3>
+                            <ol className="space-y-2 text-xs sm:text-sm text-ink-2 list-decimal list-inside">
+                                {guide.steps.map((step, i) => (
+                                    <li key={i} className="leading-relaxed">
+                                        {step}
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+
+                        <div className="rounded-2xl border border-line bg-surface-2 p-5 space-y-3">
+                            <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-ok" />
+                                <span>Ventajas y recomendaciones</span>
+                            </h3>
+                            <ul className="space-y-2 text-xs sm:text-sm text-ink-2 list-disc list-inside">
+                                {guide.tips.map((tip, i) => (
+                                    <li key={i} className="leading-relaxed">
+                                        {tip}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <h3 className="text-sm font-bold text-ink flex items-center gap-2">
+                            <HelpCircle className="w-4 h-4 text-brand" />
+                            <span>Preguntas frecuentes sobre {tool.name}</span>
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {guide.faqs.map((faq, i) => (
+                                <div key={i} className="rounded-2xl border border-line bg-surface-2 p-4 space-y-1.5">
+                                    <div className="text-xs sm:text-sm font-bold text-ink">{faq.q}</div>
+                                    <p className="text-xs text-ink-2 leading-relaxed">{faq.a}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-line flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
+                        <span>Procesamiento orientado a privacidad · ATP DEV</span>
+                        <div className="flex flex-wrap gap-4 font-semibold">
+                            <Link href="/" className="text-brand hover:underline">Todas las herramientas PDF</Link>
+                            <Link href="/privacidad" className="text-ink-2 hover:underline">Privacidad</Link>
+                            <Link href="/terminos" className="text-ink-2 hover:underline">Términos</Link>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        )}
+    </>
     );
 }

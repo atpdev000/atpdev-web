@@ -12,7 +12,8 @@ const EXCLUDED_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|pol
  */
 export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
   const pathname = usePathname() || '';
-  const resolvedId = clientId || ADSENSE_CLIENT_ID;
+  const rawId = clientId || ADSENSE_CLIENT_ID;
+  const resolvedId = rawId.startsWith('ca-') ? rawId : `ca-${rawId}`;
   const isExcluded = EXCLUDED_ROUTES.test(pathname);
 
   return (

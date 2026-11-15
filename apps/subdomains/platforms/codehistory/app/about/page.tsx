@@ -37,7 +37,12 @@ export default function AboutPage() {
           <section className="space-y-2">
             <h2 className="text-xl font-semibold text-white">3. Autoría y Transparencia (E-E-A-T)</h2>
             <p>
-              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Para consultas editoriales o correcciones históricas puedes escribirnos desde nuestra página de <a href="/contact" className="text-emerald-400 underline">Contacto</a>.
+              Este sitio forma parte del ecosistema de proyectos de ingeniería y divulgación de <strong>ATP DEV</strong> (<a href="https://www.atpdev.dev" className="text-emerald-400 underline">www.atpdev.dev</a>), dirigido por el Ing. <strong>Percy Acha Taipe</strong> desde Lima, Perú. Cada crónica técnica reconstruye lanzamientos de compiladores, protocolos web, arquitectura hardware y decisiones históricas de diseño de software útiles para desarrolladores e investigadores.
+            </p>
+            <p className="mt-2">
+              El acceso al archivo diario es totalmente abierto y gratuito. Para proponer efemérides documentadas, reportar erratas de fechas o consultar aspectos editoriales puedes escribir a{' '}
+              <a href="mailto:contacto@atpdev.dev" className="text-emerald-400 underline">contacto@atpdev.dev</a>{' '}
+              o visitar <a href="/contact" className="text-emerald-400 underline">Contacto</a> y nuestra <a href="/privacy" className="text-emerald-400 underline">Política de Privacidad</a>.
             </p>
           </section>
         </div>

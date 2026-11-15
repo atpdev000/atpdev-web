@@ -9,6 +9,10 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: '--font-jetbrai
 export const metadata: Metadata = {
   title: "ATP DEV | Admin CMS",
   description: "Premium Headless CMS Panel",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({

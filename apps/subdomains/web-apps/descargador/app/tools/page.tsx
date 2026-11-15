@@ -161,7 +161,7 @@ export default function ToolsPage() {
             </div>
             <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm mb-1">Copia el enlace</h3>
             <p className="text-slate-600 dark:text-slate-400 text-xs">
-              Copia la URL del video desde Facebook, TikTok, YouTube o Instagram.
+              Copia la URL pública del video desde Facebook, TikTok, Instagram, Threads o X.
             </p>
           </div>
           <div className="text-center p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">

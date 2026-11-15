@@ -17,6 +17,7 @@ import { HeaderNav } from "@/components/HeaderNav";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { ChambaThemeListener } from "@/components/ChambaThemeListener";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
+import { ChambaAdSense } from "@/components/ChambaAdSense";
 import { getSubdomainConfig } from "@atpdev/database";
 import { SITE_URL } from "@/lib/siteConfig";
 import "./globals.css";
@@ -466,27 +467,7 @@ export default function RootLayout({
           }}
         />
         {adsenseEnabled && adsenseId && (
-          <Script
-            id="google-adsense-loader"
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function() {
-                  var p = window.location.pathname || '';
-                  if (/^\/(?:politica-de-privacidad|terminos-y-condiciones|admin|contacto|publicar-empleo)(?:\/|$)/i.test(p)) {
-                    return;
-                  }
-                  if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
-                    var s = document.createElement('script');
-                    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}';
-                    s.async = true;
-                    s.crossOrigin = 'anonymous';
-                    document.head.appendChild(s);
-                  }
-                })();
-              `
-            }}
-          />
+          <ChambaAdSense clientId={adsenseId} />
         )}
 
         <ChambaThemeListener />

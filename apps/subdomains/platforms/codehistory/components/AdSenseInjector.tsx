@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { usePathname } from "next/navigation";
 
-const BLOCKED_PREFIXES = ["/privacy", "/terms", "/contact", "/studio", "/oauth2callback"];
+const BLOCKED_PREFIXES = ["/privacy", "/terms", "/contact", "/about", "/studio", "/oauth2callback"];
 
 export default function AdSenseInjector({ adsenseId }: { adsenseId: string | null }) {
   const pathname = usePathname() || "/";

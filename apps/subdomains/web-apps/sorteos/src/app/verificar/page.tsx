@@ -342,6 +342,37 @@ export default function VerificarPage() {
           )}
         </div>
       </div>
+
+      {/* Editorial Guide: How SHA-256 Verification Works */}
+      <section className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 space-y-5 shadow-xs">
+        <div className="space-y-2">
+          <h2 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
+            ¿Cómo funciona la auditoría criptográfica de Sorteos Pro?
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+            Cuando finalizas un sorteo en <strong>Sorteos Pro</strong>, nuestro motor calcula una huella digital única mediante la función criptográfica estándar <strong>SHA-256 (FIPS PUB 180-4)</strong> a partir de la marca de tiempo exacta, la lista ordenada de ganadores, el número de participantes y el título oficial de la dinámica. Si se alterase una sola letra o un nombre de ganador, el hash resultante cambiaría por completo de forma irreversible.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-600 dark:text-zinc-400">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 space-y-1.5">
+            <h3 className="font-bold text-slate-900 dark:text-white">
+              Qué valida exactamente el código CERT-SP
+            </h3>
+            <p className="leading-relaxed">
+              Permite comprobar que el certificado consultado corresponde a una emisión estructurada con identidad de sorteo, titular vencedor, fecha de emisión y resumen hash comprobable sin depender de capturas manipulables.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 space-y-1.5">
+            <h3 className="font-bold text-slate-900 dark:text-white">
+              Recomendación para marcas y creadores
+            </h3>
+            <p className="leading-relaxed">
+              Publica siempre el código del certificado o el enlace de verificación junto al resultado final en Instagram Stories, TikTok o tu comunidad para evitar reclamos por falta de transparencia.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

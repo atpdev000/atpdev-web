@@ -82,10 +82,10 @@ export default function TermsPage() {
             <p>
               Para consultas relacionadas con estos términos, puedes escribirnos a:{' '}
               <a
-                href="mailto:codehistorydaily@gmail.com"
+                href="mailto:contacto@atpdev.dev"
                 className="text-violet-400 hover:text-violet-300 transition-colors"
               >
-                codehistorydaily@gmail.com
+                contacto@atpdev.dev
               </a>
             </p>
           </section>

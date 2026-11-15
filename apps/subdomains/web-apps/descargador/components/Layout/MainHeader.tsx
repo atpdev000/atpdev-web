@@ -80,9 +80,9 @@ export default function MainHeader() {
               </svg>
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg md:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+              <span className="block text-lg md:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Descargador <span className="text-blue-600 dark:text-blue-400">Pro</span>
-              </h1>
+              </span>
               <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate hidden sm:block">
                 {t.nav.subtitle}
               </p>

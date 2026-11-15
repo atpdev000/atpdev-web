@@ -3,6 +3,7 @@ import './globals.css'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
 import AdSenseInjector from '@/components/AdSenseInjector'
 import CookieBanner from '@/components/CookieBanner'
+import Script from 'next/script'
 
 const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137'
 
@@ -35,6 +36,24 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="shortcut icon" href="/favicon.svg" />
         <link rel="apple-touch-icon" href="/favicon.svg" />
+        <Script
+          id="consent-mode-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'wait_for_update': 500
+              });
+              gtag('set', 'ads_data_redaction', true);
+            `,
+          }}
+        />
       </head>
       <body>
         <AnalyticsTracker />

@@ -28,10 +28,10 @@ export default function PrivacyPage() {
               Almaniq Web, operado por ATP Dev, es el responsable del tratamiento de los datos
               personales. Contacto:{' '}
               <a
-                href="mailto:admin@almaniq.com"
+                href="mailto:contacto@atpdev.dev"
                 className="text-violet-400 hover:text-violet-300 transition-colors"
               >
-                admin@almaniq.com
+                contacto@atpdev.dev
               </a>
             </p>
           </section>
@@ -95,10 +95,29 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">4. Cookies</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">4. Cookies y Google AdSense</h2>
+            <p className="mb-3">
+              Este sitio utiliza cookies técnicas estrictamente necesarias y, sujeto a tus preferencias mediante nuestro banner compatible con Google Consent Mode v2, cookies de terceros proporcionadas por <strong>Google AdSense</strong> para financiar el mantenimiento gratuito del proyecto y mostrar anuncios relevantes o no personalizados.
+            </p>
             <p>
-              Este sitio web no utiliza cookies de seguimiento ni publicidad. Solo se utilizan
-              cookies de sesión estrictamente necesarias para el panel de administración.
+              Puedes revisar cómo utiliza Google la información o desactivar la personalización publicitaria en{' '}
+              <a
+                href="https://adssettings.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-400 hover:text-violet-300 underline"
+              >
+                Configuración de anuncios de Google
+              </a>{' '}
+              o en{' '}
+              <a
+                href="https://www.aboutads.info/choices/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-400 hover:text-violet-300 underline"
+              >
+                aboutads.info
+              </a>.
             </p>
           </section>
 
@@ -108,10 +127,10 @@ export default function PrivacyPage() {
               De conformidad con la normativa vigente, puedes ejercer tus derechos de acceso,
               rectificación, cancelación y oposición enviando un correo a{' '}
               <a
-                href="mailto:admin@almaniq.com"
+                href="mailto:contacto@atpdev.dev"
                 className="text-violet-400 hover:text-violet-300 transition-colors"
               >
-                admin@almaniq.com
+                contacto@atpdev.dev
               </a>
             </p>
           </section>
