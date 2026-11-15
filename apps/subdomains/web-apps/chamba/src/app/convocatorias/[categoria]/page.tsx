@@ -7,7 +7,7 @@ import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { Briefcase, ChevronRight, Scale, ArrowLeft, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { SITE_URL } from "@/lib/siteConfig";
 
-export const revalidate = 3600; // 1 hora de caché en CDN
+export const revalidate = 1800; // Sincronizado con sitemap.ts
 export const dynamicParams = true;
 
 export const CATEGORIAS_MAP: Record<string, { 
@@ -20,7 +20,7 @@ export const CATEGORIAS_MAP: Record<string, {
   "cas": {
     name: "CAS 1057",
     label: "Convocatorias CAS (D.L. 1057)",
-    sector_match: "CAS 1057",
+    sector_match: "cas",
     description: "Convocatorias de trabajo bajo el régimen especial de Contratación Administrativa de Servicios (CAS) en ministerios, municipalidades, gobiernos regionales y organismos autónomos del Estado Peruano.",
     benefits: [
       "Jornada máxima de 48 horas semanales",
@@ -32,7 +32,7 @@ export const CATEGORIAS_MAP: Record<string, {
   "728": {
     name: "D.L. 728",
     label: "Convocatorias D.L. 728 (Planilla Estatal)",
-    sector_match: "D.L. 728",
+    sector_match: "728",
     description: "Plazas de empleo bajo el régimen laboral de la actividad privada (D.L. 728) aplicadas en entidades públicas como EsSalud, BCRP, SUNAT, empresas estatales y el Poder Judicial, con estabilidad y beneficios completos.",
     benefits: [
       "Gratificaciones legales completas (1 sueldo en julio y 1 en diciembre)",
@@ -68,7 +68,7 @@ export const CATEGORIAS_MAP: Record<string, {
   "locacion": {
     name: "Locación de Servicios",
     label: "Locación de Servicios y Fondos de Apoyo Gerencial (FAG)",
-    sector_match: "Locación / FAG",
+    sector_match: "locación",
     description: "Términos de Referencia (TDR) y convocatorias de servicios por terceros, consultorías independientes y Fondo de Apoyo Gerencial para asesores y especialistas del Estado.",
     benefits: [
       "Honorarios competitivos según especialización y mercado",
@@ -96,7 +96,7 @@ export async function generateMetadata({
   const todayIso = new Date().toISOString().split("T")[0];
   const hasMatchedJobs = allJobs.some((job) => {
     if (job.status !== "Vigente") return false;
-    if (job.end_date && job.end_date < todayIso) return false;
+    if (job.end_date && job.end_date.trim() < todayIso) return false;
     const sector = (job.sector_type || "").toLowerCase();
     return sector.includes(catInfo.sector_match.toLowerCase());
   });
@@ -167,7 +167,7 @@ export default async function ConvocatoriaCategoriaPage({
 
   const matchedJobs = allJobs.filter((job) => {
     if (job.status !== "Vigente") return false;
-    if (job.end_date && job.end_date < todayIso) return false;
+    if (job.end_date && job.end_date.trim() < todayIso) return false;
     const sector = (job.sector_type || "").toLowerCase();
     return sector.includes(catInfo.sector_match.toLowerCase());
   });
@@ -179,7 +179,7 @@ export default async function ConvocatoriaCategoriaPage({
       ? allJobs
           .filter((job) => {
             if (job.status !== "Vigente") return false;
-            if (job.end_date && job.end_date < todayIso) return false;
+            if (job.end_date && job.end_date.trim() < todayIso) return false;
             return true;
           })
           .slice(0, 6)

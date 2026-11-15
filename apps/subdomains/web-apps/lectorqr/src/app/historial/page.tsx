@@ -429,6 +429,12 @@ export default function HistorialPage() {
             </p>
           </div>
         </div>
+        <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5 text-xs text-slate-400">
+          <h3 className="text-white font-bold">Búsqueda, Marcado de Favoritos y Prevención de Enlaces Maliciosos</h3>
+          <p>
+            Utiliza los filtros superiores para separar códigos de tipo web (URL), redes inalámbricas, contactos vCard o etiquetas comerciales de un vistazo, y destaca los registros frecuentes con la estrella de favoritos. Antes de abrir enlaces acortados almacenados previamente, verifica siempre que el dominio mostrado comience con protocolo seguro HTTPS y pertenezca a una fuente confiable.
+          </p>
+        </div>
       </section>
 
     </div>

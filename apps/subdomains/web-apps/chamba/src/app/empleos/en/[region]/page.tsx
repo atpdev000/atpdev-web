@@ -7,7 +7,7 @@ import { AdBannerSlot } from "@/components/AdBannerSlot";
 import { MapPin, ChevronRight, Briefcase, ArrowLeft } from "lucide-react";
 import { SITE_URL } from "@/lib/siteConfig";
 
-export const revalidate = 3600; // 1 hora de caché en CDN
+export const revalidate = 1800; // Sincronizado con sitemap.ts
 export const dynamicParams = true;
 
 // Lista canónica de regiones peruanas y sus slugs
@@ -162,7 +162,7 @@ export async function generateMetadata({
   const todayIso = new Date().toISOString().split("T")[0];
   const hasActiveRegionJobs = allJobs.some((job) => {
     if (job.status !== "Vigente") return false;
-    if (job.end_date && job.end_date < todayIso) return false;
+    if (job.end_date && job.end_date.trim() < todayIso) return false;
     const jobRegion = (job.region || "").toLowerCase();
     if (regionKey === "remoto") {
       return jobRegion.includes("remoto") || jobRegion.includes("nacional") || jobRegion.includes("teletrabajo");
@@ -240,7 +240,7 @@ export default async function RegionJobsPage({
   // Filtrar convocatorias vigentes que correspondan a la región
   const regionJobs = allJobs.filter((job) => {
     if (job.status !== "Vigente") return false;
-    if (job.end_date && job.end_date < todayIso) return false;
+    if (job.end_date && job.end_date.trim() < todayIso) return false;
 
     const jobRegion = (job.region || "").toLowerCase();
     if (regionKey === "remoto") {
@@ -260,7 +260,7 @@ export default async function RegionJobsPage({
       ? allJobs
           .filter((job) => {
             if (job.status !== "Vigente") return false;
-            if (job.end_date && job.end_date < todayIso) return false;
+            if (job.end_date && job.end_date.trim() < todayIso) return false;
             return true;
           })
           .slice(0, 6)
