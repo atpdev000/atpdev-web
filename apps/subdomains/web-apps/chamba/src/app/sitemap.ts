@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { getJobPostings } from '@atpdev/database';
 import { SITE_URL } from '@/lib/siteConfig';
 import { getAllGuias } from '@/data/guias';
+import { isEnrichedJobPosting } from '@/lib/jobQuality';
 
 // Render dinámico usando el caché en memoria/disco (~2ms) para reflejar siempre convocatorias vigentes y evitar sitemaps vacíos tras deploy
 export const dynamic = 'force-dynamic';
@@ -50,15 +51,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const todayIso = new Date().toISOString().split('T')[0];
 
-  // Google AdSense & Search Central: Solo indexar en el sitemap ofertas VIGENTES (excluyendo Pendientes y Finalizadas)
-  // Evita el error crítico de Search Console: "La URL enviada está marcada como 'noindex'"
+  // Google AdSense & Search Central: Solo indexar ofertas VIGENTES y con datos únicos reales
+  // (excluye Pendientes, Finalizadas y stubs repetitivos sin requisitos/bases/salario propios)
   const activeJobs = jobs.filter((job) => {
     if (job.status !== 'Vigente') return false;
     const isExpired = Boolean(job.end_date && job.end_date.trim() < todayIso);
     return !isExpired;
   });
 
-  const jobUrls = activeJobs.map((job) => ({
+  const jobUrls = activeJobs.filter(isEnrichedJobPosting).map((job) => ({
     url: `${baseUrl}/empleos/${job.slug}`,
     lastModified: new Date(job.created_at || Date.now()),
     changeFrequency: 'daily' as const,
@@ -86,6 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/publicar-empleo',
     '/quienes-somos',
     '/politica-de-privacidad',
+    '/politica-de-cookies',
     '/terminos-y-condiciones',
     '/contacto',
   ].map((route) => ({

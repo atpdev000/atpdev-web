@@ -221,6 +221,9 @@ export default function HomePage() {
               <Link href="/privacy" className="text-slate-300 hover:text-emerald-300">
                 Política de Privacidad
               </Link>
+              <Link href="/cookies" className="text-slate-300 hover:text-emerald-300">
+                Política de Cookies
+              </Link>
               <Link href="/terms" className="text-slate-300 hover:text-emerald-300">
                 Términos de Servicio
               </Link>

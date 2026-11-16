@@ -31,7 +31,7 @@ export const Footer = () => {
             {/* Main Columns */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
-                    
+
                     {/* Brand Column */}
                     <div className="md:col-span-2 space-y-4 pr-4">
                         <Link href="/" className="flex items-center gap-2.5">
@@ -46,9 +46,9 @@ export const Footer = () => {
                             La suite integral de herramientas PDF client-side con estándar profesional. Une, divide, comprime, rota, convierte y organiza documentos hasta 250MB con total privacidad y velocidad.
                         </p>
                         <div className="pt-2">
-                            <a 
-                                href="https://www.atpdev.dev" 
-                                target="_blank" 
+                            <a
+                                href="https://www.atpdev.dev"
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline"
                             >
@@ -66,8 +66,8 @@ export const Footer = () => {
                         <ul className="space-y-2 text-xs">
                             {organizeTools.map(t => (
                                 <li key={t.id}>
-                                    <Link 
-                                        href={t.href} 
+                                    <Link
+                                        href={t.href}
                                         className="text-ink-2 hover:text-brand transition-colors flex items-center gap-1.5"
                                     >
                                         <span>{t.name}</span>
@@ -90,8 +90,8 @@ export const Footer = () => {
                         <ul className="space-y-2 text-xs">
                             {convertTools.map(t => (
                                 <li key={t.id}>
-                                    <Link 
-                                        href={t.href} 
+                                    <Link
+                                        href={t.href}
                                         className="text-ink-2 hover:text-brand transition-colors flex items-center gap-1.5"
                                     >
                                         <span>{t.name}</span>
@@ -114,8 +114,8 @@ export const Footer = () => {
                         <ul className="space-y-2 text-xs">
                             {optimizeTools.map(t => (
                                 <li key={t.id}>
-                                    <Link 
-                                        href={t.href} 
+                                    <Link
+                                        href={t.href}
                                         className="text-ink-2 hover:text-brand transition-colors flex items-center gap-1.5"
                                     >
                                         <span>{t.name}</span>
@@ -140,6 +140,9 @@ export const Footer = () => {
                         </Link>
                         <Link href="/privacidad" className="hover:text-brand transition-colors">
                             Privacidad
+                        </Link>
+                        <Link href="/politica-de-cookies" className="hover:text-brand transition-colors">
+                            Política de Cookies
                         </Link>
                         <Link href="/terminos" className="hover:text-brand transition-colors">
                             Términos de Uso

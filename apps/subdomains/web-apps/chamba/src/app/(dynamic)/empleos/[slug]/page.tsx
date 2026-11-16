@@ -14,6 +14,7 @@ import { JobCountdownClock } from "@/components/JobCountdownClock";
 import { AiBasesResolver } from "@/components/AiBasesResolver";
 import { ChambaAdSense } from "@/components/ChambaAdSense";
 import { getChambaAdsenseSettings } from "@/lib/adsenseConfig";
+import { isEnrichedJobPosting } from "@/lib/jobQuality";
 import { SITE_URL } from "@/lib/siteConfig";
 
 export const dynamicParams = true;
@@ -61,6 +62,7 @@ export async function generateMetadata({
     job.status === 'Finalizado' ||
     job.status === 'Pendiente' ||
     (job.end_date && job.end_date.trim() < todayIso);
+  const shouldIndexAndMonetize = !isExpired && isEnrichedJobPosting(job);
 
   return {
     title,
@@ -75,7 +77,7 @@ export async function generateMetadata({
       "bases oficiales",
       "chamba pro",
     ],
-    robots: isExpired ? {
+    robots: !shouldIndexAndMonetize ? {
       index: false,
       follow: true,
     } : {
@@ -114,7 +116,7 @@ export async function generateMetadata({
       description,
       images: [ogImage],
     },
-    ...(!isExpired && adsSettings.enabled && adsSettings.clientId
+    ...(shouldIndexAndMonetize && adsSettings.enabled && adsSettings.clientId
       ? {
           other: {
             "google-adsense-account": adsSettings.clientId,
@@ -423,10 +425,16 @@ export default async function JobDetailPage({
   }
 
   const adsSettings = getChambaAdsenseSettings();
+  const canShowAds =
+    !isFinalized &&
+    job.status !== 'Pendiente' &&
+    isEnrichedJobPosting(job) &&
+    adsSettings.enabled &&
+    Boolean(adsSettings.clientId);
 
   return (
     <>
-      {!isFinalized && job.status !== 'Pendiente' && adsSettings.enabled && adsSettings.clientId ? (
+      {canShowAds ? (
         <ChambaAdSense clientId={adsSettings.clientId} />
       ) : null}
       {/* Google for Jobs JSON-LD Direct Server-Side Injection */}
@@ -648,7 +656,7 @@ export default async function JobDetailPage({
         </div>
 
         {/* Top Leaderboard / High Viewability AdSlot */}
-        <AdBannerSlot type="leaderboard" className="my-2" />
+        {canShowAds ? <AdBannerSlot type="leaderboard" className="my-2" /> : null}
 
         {/* Content Section Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -1213,13 +1221,13 @@ export default async function JobDetailPage({
             </div>
 
             {/* Sidebar Ad / Sponsor Slot */}
-            <AdBannerSlot type="sidebar" />
+            {canShowAds ? <AdBannerSlot type="sidebar" /> : null}
 
           </div>
         </div>
 
         {/* Bottom Horizontal Ad Slot */}
-        <AdBannerSlot type="billboard" />
+        {canShowAds ? <AdBannerSlot type="billboard" /> : null}
 
         {/* Other Related Convocatorias Grid */}
         {relatedJobs.length > 0 && (

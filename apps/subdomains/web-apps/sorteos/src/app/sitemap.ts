@@ -28,6 +28,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/contacto', priority: 0.8, freq: 'monthly' as const },
     { path: '/terminos-y-condiciones', priority: 0.5, freq: 'monthly' as const },
     { path: '/politica-de-privacidad', priority: 0.5, freq: 'monthly' as const },
+    { path: '/politica-de-cookies', priority: 0.5, freq: 'monthly' as const },
   ];
 
   const staticEntries: MetadataRoute.Sitemap = routes.map((r) => ({

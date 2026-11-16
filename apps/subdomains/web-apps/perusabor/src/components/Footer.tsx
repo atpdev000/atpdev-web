@@ -6,7 +6,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="border-t-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-[#0c0a09] transition-colors py-12 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand Col */}
           <div className="space-y-4 md:col-span-1">
@@ -116,6 +116,9 @@ export const Footer: React.FC = () => {
             </Link>
             <Link href="/privacidad" className="hover:text-[#c22929] transition-colors">
               Privacidad
+            </Link>
+            <Link href="/politica-de-cookies" className="hover:text-[#c22929] transition-colors">
+              Política de Cookies
             </Link>
             <Link href="/terminos" className="hover:text-[#c22929] transition-colors">
               Términos de Uso

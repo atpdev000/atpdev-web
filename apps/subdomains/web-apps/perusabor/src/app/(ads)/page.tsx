@@ -327,7 +327,7 @@ export default function HomePage() {
                 IA
               </div>
               <div>
-                <h4 className="font-bold text-xs text-white">Chef IA Perú</h4>
+                <p className="font-bold text-xs text-white">Chef IA Perú</p>
                 <span className="text-[10px] text-emerald-400 font-medium">● En línea para consultas</span>
               </div>
             </div>

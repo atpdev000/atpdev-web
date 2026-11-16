@@ -173,6 +173,7 @@ export default async function PrivacyPolicy({
           <Link href={`${prefix}/sobre-mi`} className="hover:underline">{isEn ? "About" : "Sobre Mí"}</Link>
           <Link href={`${prefix}/${isEn ? "contact" : "contacto"}`} className="hover:underline">{isEn ? "Contact" : "Contacto"}</Link>
           <Link href={`${prefix}/privacy`} className="hover:underline">{isEn ? "Privacy" : "Privacidad"}</Link>
+          <Link href={`${prefix}/cookies`} className="hover:underline">{isEn ? "Cookie Policy" : "Política de Cookies"}</Link>
           <Link href={`${prefix}/terms`} className="hover:underline">{isEn ? "Terms" : "Términos"}</Link>
         </div>
       </div>

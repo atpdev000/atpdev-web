@@ -62,6 +62,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: buildAlternates('/privacy'),
     },
     {
+      url: `${BASE_URL}/cookies`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.4,
+      alternates: buildAlternates('/cookies'),
+    },
+    {
       url: `${BASE_URL}/terms`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
@@ -111,6 +118,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly' as const,
       priority: 0.4,
       alternates: buildAlternates('/privacy'),
+    },
+    {
+      url: `${BASE_URL}/${lang}/cookies`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly' as const,
+      priority: 0.4,
+      alternates: buildAlternates('/cookies'),
     },
     {
       url: `${BASE_URL}/${lang}/terms`,

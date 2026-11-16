@@ -52,6 +52,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.4,
     },
     {
+      url: `${BASE_URL}/politica-de-cookies`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.4,
+    },
+    {
       url: `${BASE_URL}/terminos`,
       lastModified: now,
       changeFrequency: 'monthly' as const,

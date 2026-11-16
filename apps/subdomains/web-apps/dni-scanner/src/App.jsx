@@ -303,6 +303,7 @@ function App() {
         <nav aria-label="Enlaces legales" className="flex flex-wrap justify-center gap-4 text-[11px] text-slate-400">
           <a href="/sobre-nosotros.html" className="hover:text-blue-400 transition-colors">Sobre Nosotros</a>
           <a href="/privacidad.html" className="hover:text-blue-400 transition-colors">Privacidad</a>
+          <a href="/cookies.html" className="hover:text-blue-400 transition-colors">Política de Cookies</a>
           <a href="/terminos.html" className="hover:text-blue-400 transition-colors">Términos de Uso</a>
           <a href="/contacto.html" className="hover:text-blue-400 transition-colors">Contacto</a>
         </nav>

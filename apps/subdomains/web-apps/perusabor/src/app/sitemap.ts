@@ -15,6 +15,7 @@ const ROUTES = [
   '/sobre-nosotros',
   '/contacto',
   '/privacidad',
+  '/politica-de-cookies',
   '/terminos',
 ];
 

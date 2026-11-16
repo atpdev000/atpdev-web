@@ -10,7 +10,7 @@ import { Outfit, Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import Link from "next/link";
 import Script from "next/script";
 import { 
-  ShieldCheck, PlusCircle, Scale,
+  ShieldCheck, PlusCircle, Scale, Cookie,
   Mail, Lock, Building2, BookOpen, FileCheck2
 } from "lucide-react";
 import { HeaderNav } from "@/components/HeaderNav";
@@ -596,6 +596,12 @@ export default function RootLayout({
                     <Link href="/politica-de-privacidad" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5">
                       <Lock size={12} className="text-emerald-600 dark:text-emerald-400" />
                       <span>Política de Privacidad</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/politica-de-cookies" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                      <Cookie size={12} className="text-emerald-600 dark:text-emerald-400" />
+                      <span>Política de Cookies</span>
                     </Link>
                   </li>
                   <li>

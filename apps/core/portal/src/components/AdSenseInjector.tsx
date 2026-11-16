@@ -16,7 +16,7 @@ export function AdSenseInjector({
     const resolvedId = (adsenseId || clientId || 'ca-pub-5414009811868137').trim()
 
     // Políticas de Google AdSense: No inyectar scripts publicitarios en pantallas legales, de contacto, rutas noindex o idiomas no indexables.
-    const isExcludedUtilityPage = /(?:^|\/)(?:privacy|terms|contacto|contact|credits|cv)\/?$/i.test(pathname)
+    const isExcludedUtilityPage = /(?:^|\/)(?:privacy|terms|cookies|politica-de-cookies|contacto|contact|credits|cv)\/?$/i.test(pathname)
     const isNonIndexableLocale =
         (lang ? !['es', 'en'].includes(lang) : false) ||
         /^\/(?:ru|hi|zh|fr|de|pt|ja)(?:\/|$)/i.test(pathname)

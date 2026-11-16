@@ -4021,6 +4021,7 @@ function App() {
                   <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     <li><a href="/sobre-nosotros.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Sobre Nosotros</a></li>
                     <li><a href="/politica-privacidad.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Política de Privacidad</a></li>
+                    <li><a href="/cookies.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Política de Cookies</a></li>
                     <li><a href="/terminos.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Términos de Uso</a></li>
                     <li><a href="/contacto.html" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>Contacto</a></li>
                     <li><a href="https://www.atpdev.dev" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color 0.3s' }}>ATP Dev Portal</a></li>

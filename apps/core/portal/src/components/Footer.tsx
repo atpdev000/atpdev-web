@@ -35,6 +35,7 @@ export default function Footer({
           <h4 className="font-bold mb-4 uppercase tracking-widest text-xs" style={{ color: 'var(--text-color)' }}>{ui.footerLegal}</h4>
           <ul className="space-y-3">
             <li><Link href={`${linkPrefix}/privacy`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkPrivacy}</Link></li>
+            <li><Link href={`${linkPrefix}/cookies`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Cookie Policy" : "Política de Cookies"}</Link></li>
             <li><Link href={`${linkPrefix}/terms`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkTerms}</Link></li>
             <li><Link href={`${linkPrefix}/sobre-mi`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "About Author" : "Sobre el Autor"}</Link></li>
           </ul>

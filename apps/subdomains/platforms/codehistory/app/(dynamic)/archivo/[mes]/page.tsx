@@ -157,6 +157,9 @@ export default async function ArchivoComputacionMesPage({ params }: ArchivoMesPa
               <Link href="/privacy" className="hover:text-emerald-300">
                 Política de Privacidad
               </Link>
+              <Link href="/cookies" className="hover:text-emerald-300">
+                Política de Cookies
+              </Link>
               <Link href="/terms" className="hover:text-emerald-300">
                 Términos de Servicio
               </Link>

@@ -70,6 +70,7 @@ export const Footer: React.FC = () => {
               <li><Link href="/contacto" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Contacto y Soporte</Link></li>
               <li><Link href="/terminos-y-condiciones" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_terms')}</Link></li>
               <li><Link href="/politica-de-privacidad" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_privacy')}</Link></li>
+              <li><Link href="/politica-de-cookies" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">Política de Cookies</Link></li>
               <li><Link href="/certificados/CERT-SP-98A41E8D" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors py-1.5 px-0.5 inline-block">{t('nav_verify_cert')}</Link></li>
               <li><Link href="/admin" className="text-slate-400 dark:text-zinc-600 hover:text-slate-600 dark:hover:text-zinc-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_admin')}</Link></li>
             </ul>
