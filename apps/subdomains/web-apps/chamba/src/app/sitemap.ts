@@ -3,8 +3,8 @@ import { getJobPostings } from '@atpdev/database';
 import { SITE_URL } from '@/lib/siteConfig';
 import { getAllGuias } from '@/data/guias';
 
-// Revalidar el sitemap cada 30 minutos para que las nuevas convocatorias aprobadas entren a Google Search Console sin recompilar
-export const revalidate = 1800;
+// Render dinámico usando el caché en memoria/disco (~2ms) para reflejar siempre convocatorias vigentes y evitar sitemaps vacíos tras deploy
+export const dynamic = 'force-dynamic';
 
 const REGION_MATCH_MAP: Record<string, string> = {
   lima: 'lima',

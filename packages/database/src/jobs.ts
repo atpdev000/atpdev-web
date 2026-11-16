@@ -2934,6 +2934,14 @@ export async function getJobPostings(): Promise<JobPosting[]> {
         if (!jobsMap.has(j.slug)) jobsMap.set(j.slug, j);
       });
     }
+  } else {
+    // En next build, leer el caché síncrono en disco sin peticiones HTTP externas para evitar sitemaps o páginas ISR vacías/noindex
+    const cachedCd = getCachedCdJobsList();
+    if (cachedCd && cachedCd.length > 0) {
+      cachedCd.forEach(j => {
+        if (!jobsMap.has(j.slug)) jobsMap.set(j.slug, j);
+      });
+    }
   }
 
   // 7. Cargar convocatorias oficiales universitarias (UNAJMA y UNAAT portal oficial directo)
