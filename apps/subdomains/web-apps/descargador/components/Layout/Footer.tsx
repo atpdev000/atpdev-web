@@ -65,18 +65,18 @@ export default function Footer({ modules }: FooterProps) {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
           <div className="col-span-2 md:col-span-1">
-            <h3 className="font-extrabold text-base mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <p className="font-extrabold text-base mb-3 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Descargador Pro
-            </h3>
+            </p>
             <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm leading-relaxed">
               {t.footer.bio}
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 text-slate-900 dark:text-white">
+            <p className="font-bold text-sm mb-4 text-slate-900 dark:text-white">
               {t.footer.linksTitle}
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li><Link href="/tools/facebook" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Video Facebook HD</span></Link></li>
               <li><Link href="/tools/tiktok" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">TikTok Sin Marca</span></Link></li>
@@ -91,9 +91,9 @@ export default function Footer({ modules }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 text-slate-900 dark:text-white">
+            <p className="font-bold text-sm mb-4 text-slate-900 dark:text-white">
               Sitemap
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li><Link href="/" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.home}</span></Link></li>
               <li><Link href="/about" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Sobre Nosotros</span></Link></li>
@@ -104,9 +104,9 @@ export default function Footer({ modules }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="font-bold text-sm mb-4 text-slate-900 dark:text-white">
+            <p className="font-bold text-sm mb-4 text-slate-900 dark:text-white">
               {t.footer.legalTitle}
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li><Link href="/faq" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.nav.faq}</span></Link></li>
               <li><Link href="/legal/privacidad" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">{t.footer.privacy}</span></Link></li>

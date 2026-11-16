@@ -17,7 +17,6 @@ import { HeaderNav } from "@/components/HeaderNav";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { ChambaThemeListener } from "@/components/ChambaThemeListener";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
-import { ChambaAdSense } from "@/components/ChambaAdSense";
 import { getSubdomainConfig } from "@atpdev/database";
 import { SITE_URL } from "@/lib/siteConfig";
 import "./globals.css";
@@ -139,15 +138,20 @@ export async function generateMetadata(): Promise<Metadata> {
         "max-snippet": -1,
       },
     },
-    verification: {
-      ...(gscToken ? { google: gscToken } : {}),
-      other: {
-        ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
-          ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
-          : {}),
-        "google-adsense-account": validAdsense,
-      },
-    },
+    ...(gscToken || process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? {
+          verification: {
+            ...(gscToken ? { google: gscToken } : {}),
+            ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+              ? {
+                  other: {
+                    "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -458,7 +462,7 @@ export default function RootLayout({
           />
         )}
 
-        {/* Google AdSense Configuration */}
+        {/* Google AdSense Slot Config */}
         <Script
           id="chamba-ads-config"
           strategy="beforeInteractive"
@@ -466,9 +470,6 @@ export default function RootLayout({
             __html: `window.__CHAMBA_ADS_CONFIG__ = ${JSON.stringify(adSlotsConfig)};`,
           }}
         />
-        {adsenseEnabled && adsenseId && (
-          <ChambaAdSense clientId={adsenseId} />
-        )}
 
         <ChambaThemeListener />
         <AnalyticsTracker />

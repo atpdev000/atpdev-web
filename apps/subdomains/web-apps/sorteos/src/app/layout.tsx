@@ -8,7 +8,6 @@ import { SorteosThemeListener } from "@/components/SorteosThemeListener";
 import { SorteosGlowWrapper } from "@/components/SorteosGlowWrapper";
 import { SorteosCustomCursor } from "@/components/SorteosCustomCursor";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
-import { GoogleAdSense } from "@/components/GoogleAdSense";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import { getSubdomainConfig } from "@atpdev/database";
 import { 
@@ -16,7 +15,6 @@ import {
   SITE_NAME, 
   SITE_TITLE, 
   SITE_DESCRIPTION, 
-  ADSENSE_CLIENT_ID, 
   CONTACT_EMAIL,
   GA_MEASUREMENT_ID,
   CLARITY_ID
@@ -108,10 +106,13 @@ export const metadata: Metadata = {
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
-    other: {
-      "google-adsense-account": ADSENSE_CLIENT_ID,
-      "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || "",
-    },
+    ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? {
+          other: {
+            "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION,
+          },
+        }
+      : {}),
   },
   icons: {
     icon: "/icon.svg",
@@ -414,7 +415,6 @@ export default function RootLayout({
           strategy="beforeInteractive"
         />
         <AnalyticsTracker />
-        <GoogleAdSense clientId={ADSENSE_CLIENT_ID} />
         <SorteosThemeListener />
         <SorteosCustomCursor />
         <LanguageProvider>

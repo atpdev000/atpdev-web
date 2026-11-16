@@ -155,7 +155,7 @@
           postUrl: location.href,
           comments: list,
           count: list.length,
-          handle: '@NACHOAT00',
+          handle: options.handle || '@organizador',
         }),
       });
     } catch {

@@ -6,17 +6,22 @@ import Script from 'next/script'
 export function AdSenseInjector({
     adsenseId,
     clientId,
+    lang,
 }: {
     adsenseId?: string | null
     clientId?: string | null
+    lang?: string
 }) {
     const pathname = usePathname() || ''
     const resolvedId = (adsenseId || clientId || 'ca-pub-5414009811868137').trim()
 
-    // Políticas de Google AdSense: No inyectar scripts publicitarios en pantallas puramente legales, de contacto o sin contenido editorial (ej. Política de Privacidad, Términos, Contacto, Créditos, CV imprimible).
+    // Políticas de Google AdSense: No inyectar scripts publicitarios en pantallas legales, de contacto, rutas noindex o idiomas no indexables.
     const isExcludedUtilityPage = /(?:^|\/)(?:privacy|terms|contacto|contact|credits|cv)\/?$/i.test(pathname)
+    const isNonIndexableLocale =
+        (lang ? !['es', 'en'].includes(lang) : false) ||
+        /^\/(?:ru|hi|zh|fr|de|pt|ja)(?:\/|$)/i.test(pathname)
 
-    if (isExcludedUtilityPage || !resolvedId) {
+    if (isExcludedUtilityPage || isNonIndexableLocale || !resolvedId) {
         return null
     }
 

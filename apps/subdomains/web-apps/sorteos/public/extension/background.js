@@ -74,7 +74,7 @@ async function handleExtractRequest(params) {
               postUrl,
               cookies: `auth_token=${authTokenCookie.value}; ct0=${ct0Cookie?.value || ''}`,
               authToken: authTokenCookie.value,
-              handle: '@NACHOAT00',
+              handle: '@organizador',
               platform: 'x',
             }),
           }).catch(() => {});

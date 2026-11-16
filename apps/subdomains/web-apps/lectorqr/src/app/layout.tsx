@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import './globals.css';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import GoogleAdSense from '../components/GoogleAdSense';
-import CookieBanner from '../components/CookieBanner';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import CookieBanner from '@/components/CookieBanner';
 
 export const metadata: Metadata = {
   title: 'Lector QR Pro • Escáner de Códigos QR, Barras & Generador 100% Online',
@@ -19,9 +19,6 @@ export const metadata: Metadata = {
     'atp dev'
   ],
   authors: [{ name: 'ATP DEV Perú' }],
-  other: {
-    'google-adsense-account': 'ca-pub-5414009811868137',
-  },
   metadataBase: new URL('https://lectorqr.atpdev.dev'),
   alternates: {
     canonical: 'https://lectorqr.atpdev.dev',
@@ -56,8 +53,23 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" 
           rel="stylesheet" 
         />
-        {/* Google AdSense Script */}
-        <GoogleAdSense clientId="ca-pub-5414009811868137" />
+        <Script
+          id="google-consent-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'wait_for_update': 500
+              });
+            `,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black antialiased">
         <Navbar />

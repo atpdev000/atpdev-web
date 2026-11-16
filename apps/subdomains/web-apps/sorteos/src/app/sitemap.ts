@@ -22,7 +22,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/herramientas/engagement', priority: 0.85, freq: 'weekly' as const },
     { path: '/herramientas/hashtags', priority: 0.85, freq: 'weekly' as const },
     { path: '/verificar', priority: 0.9, freq: 'daily' as const },
-    { path: '/sorteos/extension-install', priority: 0.85, freq: 'weekly' as const },
     { path: '/planes', priority: 0.85, freq: 'weekly' as const },
     { path: '/blog', priority: 0.9, freq: 'daily' as const },
     { path: '/quienes-somos', priority: 0.8, freq: 'monthly' as const },

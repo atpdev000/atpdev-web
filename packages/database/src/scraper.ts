@@ -643,89 +643,185 @@ function getCdCacheFilePath(): string | null {
   }
 }
 
+const SIDEBAR_PLAZA_TITLE_RE = /(?:\s-\s*Convocatoria\b|requiere\s+\d+\s+practicantes?|Hay\s+plazas\s+para\s*:)/i;
+const SIDEBAR_EDU_RE = /^Hay\s+plazas\s+para\s*:?$/i;
+
+function normalizeOrgToken(name?: string): string {
+  return (name || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Filtra plazas contaminadas con tarjetas recomendadas o widgets laterales de convocatorias de otras entidades.
+ */
+export function filterValidCdPlazas(plazas?: JobPlaza[], entityName?: string): JobPlaza[] {
+  if (!Array.isArray(plazas) || plazas.length === 0) return [];
+  const normEntity = normalizeOrgToken(entityName);
+
+  return plazas
+    .filter((p) => {
+      if (!p) return false;
+      const pTitle = (p.title || '').trim();
+      const pEdu = (p.education || '').trim();
+      if (!pTitle || SIDEBAR_PLAZA_TITLE_RE.test(pTitle) || SIDEBAR_EDU_RE.test(pEdu)) {
+        return false;
+      }
+      const otherOrgLead = pTitle.match(/^([A-ZÁÉÍÓÚÑ0-9\s\.\-]{3,55}?)\s+(?:requiere|solicita|convoca)\s+\d+/i);
+      if (otherOrgLead && normEntity) {
+        const leadToken = normalizeOrgToken(otherOrgLead[1]);
+        if (leadToken.length >= 4 && !normEntity.includes(leadToken) && !leadToken.includes(normEntity)) {
+          return false;
+        }
+      }
+      return true;
+    })
+    .map((p) => ({
+      ...p,
+      education: SIDEBAR_EDU_RE.test((p.education || '').trim()) ? undefined : p.education,
+    }));
+}
+
+let cachedCdDiskSnapshot: {
+  filePath: string;
+  mtimeMs: number;
+  size: number;
+  data: JobPosting[];
+} = (globalThis as any).__CACHED_CD_DISK_SNAPSHOT__ || {
+  filePath: '',
+  mtimeMs: -1,
+  size: -1,
+  data: [],
+};
+(globalThis as any).__CACHED_CD_DISK_SNAPSHOT__ = cachedCdDiskSnapshot;
+
+let cdFlushTimer: ReturnType<typeof setTimeout> | null = null;
+let cdFlushQueue: Promise<void> = Promise.resolve();
+
 export function loadPersistedCdJobs(): JobPosting[] {
   try {
     const fsMod = getNodeModule<typeof import('fs')>('fs');
     if (!fsMod) return [];
     const filePath = getCdCacheFilePath();
-    if (filePath && fsMod.existsSync(filePath)) {
-      const raw = fsMod.readFileSync(filePath, 'utf-8');
-      if (raw && raw.trim()) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
+    if (!filePath || !fsMod.existsSync(filePath)) return [];
+
+    const stat = fsMod.statSync(filePath);
+    if (
+      cachedCdDiskSnapshot.filePath === filePath &&
+      cachedCdDiskSnapshot.mtimeMs === stat.mtimeMs &&
+      cachedCdDiskSnapshot.size === stat.size &&
+      cachedCdDiskSnapshot.data.length > 0
+    ) {
+      return cachedCdDiskSnapshot.data;
+    }
+
+    const raw = fsMod.readFileSync(filePath, 'utf-8');
+    if (raw && raw.trim()) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const cleaned = parsed.map((j: JobPosting) => ({
+          ...j,
+          plazas: j.plazas ? filterValidCdPlazas(j.plazas, j.entity_name) : undefined,
+        }));
+        cachedCdDiskSnapshot = {
+          filePath,
+          mtimeMs: stat.mtimeMs,
+          size: stat.size,
+          data: cleaned,
+        };
+        (globalThis as any).__CACHED_CD_DISK_SNAPSHOT__ = cachedCdDiskSnapshot;
+        return cleaned;
       }
     }
   } catch {}
   return [];
 }
 
-export function persistCdJobs(jobs: JobPosting[]): void {
+function sanitizeJobListForDisk(mergedJobs: JobPosting[]): JobPosting[] {
+  return mergedJobs.map((j) => {
+    const fallbackPortal = getOfficialEntityPortalUrl(j.entity_name, j.sector_type);
+    const cleanApply = sanitizeOfficialUrl(j.apply_url, fallbackPortal, j.entity_name, j.sector_type);
+    const cleanBases = (j.bases_pdf_url && !isCompetitorUrl(j.bases_pdf_url) && !isGenericPublicationUrl(j.bases_pdf_url))
+      ? sanitizeOfficialUrl(j.bases_pdf_url, cleanApply, j.entity_name, j.sector_type)
+      : cleanApply;
+    const cleanLogo = (j.entity_logo && isCompetitorUrl(j.entity_logo))
+      ? extractServirEntityLogo(j.entity_name)
+      : (j.entity_logo || extractServirEntityLogo(j.entity_name));
+    const validPlazas = filterValidCdPlazas(j.plazas, j.entity_name);
+    return {
+      ...j,
+      entity_logo: cleanLogo,
+      apply_url: cleanApply,
+      bases_pdf_url: cleanBases,
+      fuente_url: cleanApply,
+      scrape_source_url: cleanApply,
+      plazas: validPlazas.length > 0 ? validPlazas : undefined,
+    };
+  });
+}
+
+async function flushCdJobsAsync(jobsToPersist: JobPosting[]): Promise<void> {
   try {
     const fsMod = getNodeModule<typeof import('fs')>('fs');
-    if (!fsMod || !Array.isArray(jobs) || jobs.length === 0) return;
+    if (!fsMod?.promises || !Array.isArray(jobsToPersist) || jobsToPersist.length === 0) return;
     const filePath = getCdCacheFilePath();
     if (!filePath) return;
 
-    let mergedJobs = jobs;
-    if (fsMod.existsSync(filePath)) {
-      try {
-        const currentRaw = fsMod.readFileSync(filePath, 'utf-8');
-        if (currentRaw && currentRaw.trim()) {
-          const currentDisk = JSON.parse(currentRaw);
-          if (Array.isArray(currentDisk) && currentDisk.length > 0) {
-            const jobMap = new Map<string, JobPosting>();
-            for (const j of currentDisk) {
-              const key = j.slug || j.id;
-              if (key) jobMap.set(key, j);
-            }
-            for (const j of jobs) {
-              const key = j.slug || j.id;
-              if (key) {
-                const existing = jobMap.get(key);
-                if (existing) {
-                  jobMap.set(key, {
-                    ...existing,
-                    ...j,
-                    plazas: (j.plazas && j.plazas.length > 0) ? j.plazas : existing.plazas,
-                    bases_pdf_url: j.bases_pdf_url || existing.bases_pdf_url,
-                    apply_url: j.apply_url || existing.apply_url,
-                  });
-                } else {
-                  jobMap.set(key, j);
-                }
-              }
-            }
-            mergedJobs = Array.from(jobMap.values());
-          }
-        }
-      } catch {}
+    const jobMap = new Map<string, JobPosting>();
+    const diskJobs = cachedCdDiskSnapshot.data.length > 0 ? cachedCdDiskSnapshot.data : loadPersistedCdJobs();
+    for (const j of diskJobs) {
+      const key = j.slug || j.id;
+      if (key) jobMap.set(key, j);
+    }
+    for (const j of jobsToPersist) {
+      const key = j.slug || j.id;
+      if (!key) continue;
+      const validNewPlazas = filterValidCdPlazas(j.plazas, j.entity_name);
+      const existing = jobMap.get(key);
+      if (existing) {
+        const validExistingPlazas = filterValidCdPlazas(existing.plazas, existing.entity_name || j.entity_name);
+        jobMap.set(key, {
+          ...existing,
+          ...j,
+          plazas: validNewPlazas.length > 0 ? validNewPlazas : (validExistingPlazas.length > 0 ? validExistingPlazas : undefined),
+          bases_pdf_url: j.bases_pdf_url || existing.bases_pdf_url,
+          apply_url: j.apply_url || existing.apply_url,
+        });
+      } else {
+        jobMap.set(key, {
+          ...j,
+          plazas: validNewPlazas.length > 0 ? validNewPlazas : undefined,
+        });
+      }
     }
 
-    const sanitizedJobs = mergedJobs.map(j => {
-      const fallbackPortal = getOfficialEntityPortalUrl(j.entity_name, j.sector_type);
-      const cleanApply = sanitizeOfficialUrl(j.apply_url, fallbackPortal, j.entity_name, j.sector_type);
-      const cleanBases = (j.bases_pdf_url && !isCompetitorUrl(j.bases_pdf_url) && !isGenericPublicationUrl(j.bases_pdf_url))
-        ? sanitizeOfficialUrl(j.bases_pdf_url, cleanApply, j.entity_name, j.sector_type)
-        : cleanApply;
-      const cleanLogo = (j.entity_logo && isCompetitorUrl(j.entity_logo))
-        ? extractServirEntityLogo(j.entity_name)
-        : (j.entity_logo || extractServirEntityLogo(j.entity_name));
-      return {
-        ...j,
-        entity_logo: cleanLogo,
-        apply_url: cleanApply,
-        bases_pdf_url: cleanBases,
-        fuente_url: cleanApply,
-        scrape_source_url: cleanApply,
-      };
-    });
+    const sanitizedJobs = sanitizeJobListForDisk(Array.from(jobMap.values()));
+    const serialized = JSON.stringify(sanitizedJobs);
+    const tmpPath = `${filePath}.${process.pid}.tmp`;
+    await fsMod.promises.writeFile(tmpPath, serialized, 'utf-8');
+    await fsMod.promises.rename(tmpPath, filePath);
 
-    fsMod.writeFileSync(filePath, JSON.stringify(sanitizedJobs, null, 2), 'utf-8');
+    const stat = await fsMod.promises.stat(filePath).catch(() => null);
+    if (stat) {
+      cachedCdDiskSnapshot = {
+        filePath,
+        mtimeMs: stat.mtimeMs,
+        size: stat.size,
+        data: sanitizedJobs,
+      };
+      (globalThis as any).__CACHED_CD_DISK_SNAPSHOT__ = cachedCdDiskSnapshot;
+    }
   } catch (err) {
     console.warn('Error saving scraped_cd_jobs.json:', err);
   }
+}
+
+export function persistCdJobs(jobs: JobPosting[]): void {
+  if (!Array.isArray(jobs) || jobs.length === 0) return;
+  const snapshot = [...jobs];
+  cdFlushQueue = cdFlushQueue.then(() => flushCdJobsAsync(snapshot)).catch(() => {});
 }
 
 let cachedCdJobs: { data: JobPosting[]; timestamp: number } = (globalThis as any).__CACHED_CD_JOBS__ || {
@@ -744,16 +840,33 @@ export function persistSingleEnrichedCdJob(job: JobPosting): void {
         cachedCdJobs.data = disk;
       }
     }
-    const existingIdx = cachedCdJobs.data.findIndex(j => j.slug === job.slug || j.id === job.id);
+    const cleanJob: JobPosting = {
+      ...job,
+      plazas: filterValidCdPlazas(job.plazas, job.entity_name),
+    };
+    const existingIdx = cachedCdJobs.data.findIndex(j => j.slug === cleanJob.slug || j.id === cleanJob.id);
     if (existingIdx !== -1) {
-      cachedCdJobs.data[existingIdx] = { ...cachedCdJobs.data[existingIdx], ...job };
+      cachedCdJobs.data[existingIdx] = { ...cachedCdJobs.data[existingIdx], ...cleanJob };
     } else {
-      cachedCdJobs.data.unshift(job);
+      cachedCdJobs.data.unshift(cleanJob);
     }
     cachedCdJobs.timestamp = Date.now();
     (globalThis as any).__CACHED_CD_JOBS__ = cachedCdJobs;
-    persistCdJobs(cachedCdJobs.data);
-    (globalThis as any).__INVALIDATE_GLOBAL_JOBS_CACHE__?.();
+
+    const globalCache = (globalThis as any).__GLOBAL_JOBS_CACHE__ as JobPosting[] | null | undefined;
+    if (Array.isArray(globalCache)) {
+      const gIdx = globalCache.findIndex(j => j.slug === cleanJob.slug || j.id === cleanJob.id);
+      if (gIdx !== -1) {
+        globalCache[gIdx] = { ...globalCache[gIdx], ...cleanJob };
+      }
+    }
+
+    if (cdFlushTimer) clearTimeout(cdFlushTimer);
+    cdFlushTimer = setTimeout(() => {
+      cdFlushTimer = null;
+      persistCdJobs(cachedCdJobs.data);
+    }, 5000);
+    (cdFlushTimer as any).unref?.();
   } catch {}
 }
 
@@ -1297,11 +1410,11 @@ export async function extractPlazasAndBasesFromCdUrl(fuenteUrl: string): Promise
     let directApplyUrl: string | undefined;
     const official_documents: { title: string; url: string; category?: string }[] = [];
 
-    // 2. Extraer plazas individuales desde <section class="convocatorias-grid"> o <article class="convocatoria|oferta">
+    // 2. Extraer plazas individuales únicamente desde <section class="convocatorias-grid"> (evitar recomendaciones laterales)
     const plazas: JobPlaza[] = [];
     const gridMatch = html.match(/<section class="convocatorias-grid">([\s\S]*?)<\/section>/i);
-    const searchGrid = gridMatch ? gridMatch[1] : html;
-    const articles = searchGrid.split(/<article\s+class=['"][^'"]*(?:convocatoria|oferta)[^'"]*['"]/i);
+    const searchGrid = gridMatch ? gridMatch[1] : '';
+    const articles = searchGrid ? searchGrid.split(/<article\s+class=['"][^'"]*(?:convocatoria|oferta)[^'"]*['"]/i) : [];
     articles.shift(); // Quitar cabecera
 
     for (const art of articles) {
@@ -1309,12 +1422,15 @@ export async function extractPlazasAndBasesFromCdUrl(fuenteUrl: string): Promise
       const content = endArtIdx !== -1 ? art.substring(0, endArtIdx) : art;
       if (content.includes('adsbygoogle') || (!content.includes('<h') && !content.includes('href='))) continue;
 
-      // Filtrar tarjetas recomendadas de otras organizaciones (ej. SUNARP en página de UNAS)
+      // Filtrar tarjetas recomendadas de otras organizaciones (ej. SUNARP/INDECOPI en páginas ajenas)
+      if (/Hay\s+plazas\s+para\s*:/i.test(content) || /\s-\s*Convocatoria\b/i.test(content)) {
+        continue;
+      }
       if (entity_name) {
         const pEntMatch = content.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i);
         const pEnt = pEntMatch ? pEntMatch[1].replace(/<[^>]+>/g, '').trim() : '';
-        const cleanE = entity_name.replace(/[\s\(\)\.-]/g, '').toLowerCase();
-        const cleanPE = pEnt.replace(/[\s\(\)\.-]/g, '').toLowerCase();
+        const cleanE = normalizeOrgToken(entity_name);
+        const cleanPE = normalizeOrgToken(pEnt);
         if (cleanPE && cleanE && !cleanE.includes(cleanPE) && !cleanPE.includes(cleanE)) {
           continue;
         }
@@ -1331,6 +1447,9 @@ export async function extractPlazasAndBasesFromCdUrl(fuenteUrl: string): Promise
       if (opUrl && !opUrl.startsWith('http')) {
         opUrl = `https://www.convocatoriasdetrabajo.com/${opUrl.replace(/^\//, '')}`;
       }
+      if (opUrl && /convocatoriasdetrabajo\.com\/oferta-de-empleo-/i.test(opUrl)) {
+        continue;
+      }
 
       let cas_code = '';
       let title = rawTitle;
@@ -1346,7 +1465,7 @@ export async function extractPlazasAndBasesFromCdUrl(fuenteUrl: string): Promise
 
       if (infoMatch) {
         const spans = [...infoMatch[1].matchAll(/<span>([\s\S]*?)<\/span>/gi)].map(m => m[1].replace(/<[^>]+>/g, '').trim());
-        const eduSpan = spans.find(s => !s.includes('S/.') && !s.includes('S/') && !s.includes('2026') && s.length > 5);
+        const eduSpan = spans.find(s => !s.includes('S/.') && !s.includes('S/') && !s.includes('2026') && !SIDEBAR_EDU_RE.test(s) && s.length > 5);
         if (eduSpan) education = eduSpan;
         const salSpan = spans.find(s => s.includes('S/.') || s.includes('S/'));
         if (salSpan) pSalary = salSpan;
@@ -1357,7 +1476,7 @@ export async function extractPlazasAndBasesFromCdUrl(fuenteUrl: string): Promise
                        content.match(/(\d+)\s*(?:plazas|vacantes)/i);
       const vacancies = vacMatch ? parseInt(vacMatch[1], 10) : 1;
 
-      plazas.push({
+      const candidatePlaza: JobPlaza = {
         cas_code: cas_code || `Plaza ${plazas.length + 1}`,
         title: title || rawTitle,
         education,
@@ -1365,7 +1484,10 @@ export async function extractPlazasAndBasesFromCdUrl(fuenteUrl: string): Promise
         salary: pSalary,
         vacancies,
         bases_url: opUrl,
-      });
+      };
+      if (filterValidCdPlazas([candidatePlaza], entity_name).length > 0) {
+        plazas.push(candidatePlaza);
+      }
     }
 
     // 3. Enriquecer las oportunidades laborales con sus bases PDF oficiales, cronogramas y enlaces de postulación

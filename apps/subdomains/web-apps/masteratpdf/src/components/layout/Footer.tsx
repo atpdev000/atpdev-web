@@ -60,9 +60,9 @@ export const Footer = () => {
 
                     {/* Column 1: Organizar */}
                     <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-ink mb-3.5">
+                        <p className="text-xs font-bold uppercase tracking-wider text-ink mb-3.5">
                             Organizar PDF
-                        </h3>
+                        </p>
                         <ul className="space-y-2 text-xs">
                             {organizeTools.map(t => (
                                 <li key={t.id}>
@@ -84,9 +84,9 @@ export const Footer = () => {
 
                     {/* Column 2: Conversión */}
                     <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-ink mb-3.5">
+                        <p className="text-xs font-bold uppercase tracking-wider text-ink mb-3.5">
                             Conversión
-                        </h3>
+                        </p>
                         <ul className="space-y-2 text-xs">
                             {convertTools.map(t => (
                                 <li key={t.id}>
@@ -108,9 +108,9 @@ export const Footer = () => {
 
                     {/* Column 3: Optimización y Seguridad */}
                     <div>
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-ink mb-3.5">
+                        <p className="text-xs font-bold uppercase tracking-wider text-ink mb-3.5">
                             Optimizar & Más
-                        </h3>
+                        </p>
                         <ul className="space-y-2 text-xs">
                             {optimizeTools.map(t => (
                                 <li key={t.id}>

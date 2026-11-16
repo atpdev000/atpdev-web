@@ -88,28 +88,28 @@ export default function SEOContentSection() {
                 </h2>
                 <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
                     <div>
-                        <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Por qué mi descarga falla o dice "Error"?</h4>
+                        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Por qué mi descarga falla o dice "Error"?</h3>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                             Esto suele ocurrir si el video es <strong>Privado</strong> (solo visible para amigos) o si tiene restricciones de edad/región.
                             Descargador Pro solo puede procesar videos que son 100% Públicos. Asegúrate de que el enlace sea accesible desde una ventana de incógnito.
                         </p>
                     </div>
                     <div>
-                        <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Dónde se guardan los archivos en Android/iPhone?</h4>
+                        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Dónde se guardan los archivos en Android/iPhone?</h3>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                             En Android, los archivos van directamente a la carpeta "Downloads" o "Descargas".
                             En iPhone (iOS), Safari te preguntará si quieres descargar; luego encontrarás el archivo en la aplicación "Archivos" (Files) de Apple.
                         </p>
                     </div>
                     <div>
-                        <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Puedo descargar transmisiones en vivo?</h4>
+                        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Puedo descargar transmisiones en vivo?</h3>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                             Solo es posible descargar transmisiones en vivo (Lives) <strong>una vez que han finalizado</strong> y se han publicado como video normal.
                             No es posible descargar un stream mientras se está emitiendo en tiempo real.
                         </p>
                     </div>
                     <div>
-                        <h4 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Descargador Pro es gratuito de verdad?</h4>
+                        <h3 className="font-bold text-base sm:text-lg text-gray-900 dark:text-white mb-2">¿Descargador Pro es gratuito de verdad?</h3>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
                             Sí, es una herramienta gratuita financiada mediante publicidad discreta. No limitamos la velocidad de descarga ni el número de videos que puedes procesar por día.
                         </p>

@@ -2,9 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
 import CookieBanner from '@/components/CookieBanner'
-import AdSenseInjector from '@/components/AdSenseInjector'
 import Script from 'next/script'
-const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://almaniq.atpdev.dev'),
@@ -18,9 +16,6 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',
-  },
-  other: {
-    'google-adsense-account': adsenseId,
   },
 }
 
@@ -70,7 +65,6 @@ export default function RootLayout({
       </head>
       <body>
         <AnalyticsTracker />
-        <AdSenseInjector adsenseId={adsenseId} />
         {children}
         <CookieBanner />
       </body>

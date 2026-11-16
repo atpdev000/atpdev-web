@@ -29,9 +29,9 @@ export const Footer: React.FC = () => {
 
           {/* Links Col 1: Regiones */}
           <div className="space-y-3">
-            <h4 className="font-black text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-display">
+            <p className="font-black text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-display">
               Regiones Gastronómicas
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs font-semibold text-stone-600 dark:text-stone-400">
               <li>
                 <Link href="/recetas?region=Costa" className="hover:text-[#c22929] transition-colors">
@@ -58,9 +58,9 @@ export const Footer: React.FC = () => {
 
           {/* Links Col 2: Módulos Pro */}
           <div className="space-y-3">
-            <h4 className="font-black text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-display">
+            <p className="font-black text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-display">
               Herramientas de Restaurante
-            </h4>
+            </p>
             <ul className="space-y-2 text-xs font-semibold text-stone-600 dark:text-stone-400">
               <li>
                 <Link href="/escalador" className="hover:text-[#c22929] transition-colors">
@@ -92,9 +92,9 @@ export const Footer: React.FC = () => {
 
           {/* Links Col 3: Inteligencia Culinaria */}
           <div className="space-y-3">
-            <h4 className="font-black text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-display">
+            <p className="font-black text-xs uppercase tracking-wider text-stone-900 dark:text-stone-100 font-display">
               Asistente Chef IA
-            </h4>
+            </p>
             <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
               Consulta en tiempo real cómo rescatar preparaciones, sustituir insumos en el extranjero y planificar el servicio de cocina.
             </p>

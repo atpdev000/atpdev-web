@@ -25,6 +25,16 @@ const nextConfig = {
     ],
   },
   transpilePackages: ['@atpdev/database'],
+  async redirects() {
+    return [
+      { source: '/unir', destination: '/tools/merge', permanent: true },
+      { source: '/dividir', destination: '/tools/split', permanent: true },
+      { source: '/comprimir', destination: '/tools/compress', permanent: true },
+      { source: '/proteger', destination: '/tools/protect', permanent: true },
+      { source: '/organizar', destination: '/tools/organize', permanent: true },
+      { source: '/rotar', destination: '/tools/rotate', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

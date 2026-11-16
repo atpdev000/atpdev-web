@@ -123,9 +123,13 @@ export async function generateMetadata(
     verification: {
       google: "xLX9HT_roi66Iips-tYL5paIvBDDP_EftOni_R9KyYw",
     },
-    other: {
-      "google-adsense-account": config?.adsense_id?.trim() || "ca-pub-5414009811868137",
-    },
+    ...(shouldIndex
+      ? {
+          other: {
+            "google-adsense-account": config?.adsense_id?.trim() || "ca-pub-5414009811868137",
+          },
+        }
+      : {}),
     openGraph: {
       type: "website",
       locale: localeToOgLocale(lang),
@@ -392,7 +396,7 @@ export default async function RootLayout({
           <CustomCursor glowStyle={normalizeGlowStyle(config?.glow_style)} />
           <LivePreviewListener />
           <AnalyticsTracker />
-          <AdSenseInjector adsenseId={config?.adsense_id || null} />
+          <AdSenseInjector adsenseId={config?.adsense_id || null} lang={lang} />
           {children}
           <CookieBanner />
         </Providers>

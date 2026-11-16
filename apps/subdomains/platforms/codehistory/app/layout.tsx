@@ -1,11 +1,8 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import AnalyticsTracker from '@/components/AnalyticsTracker'
-import AdSenseInjector from '@/components/AdSenseInjector'
 import CookieBanner from '@/components/CookieBanner'
 import Script from 'next/script'
-
-const adsenseId = process.env.NEXT_PUBLIC_ADSENSE_ID || 'ca-pub-5414009811868137'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://codehistory.atpdev.dev'),
@@ -14,9 +11,6 @@ export const metadata: Metadata = {
     'Archivo diario de efemérides sobre programación, lenguajes de software, sistemas operativos y pioneros de la computación. Proyecto educativo de ATP Dev.',
   alternates: {
     canonical: 'https://codehistory.atpdev.dev',
-  },
-  other: {
-    'google-adsense-account': adsenseId,
   },
   icons: {
     icon: '/favicon.svg',
@@ -57,7 +51,6 @@ export default function RootLayout({
       </head>
       <body>
         <AnalyticsTracker />
-        <AdSenseInjector adsenseId={adsenseId} />
         {children}
         <CookieBanner />
       </body>

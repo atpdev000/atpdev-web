@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { AdSenseInjector } from '@/components/AdSenseInjector';
 import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 
 export const metadata: Metadata = {
@@ -27,9 +27,6 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon.svg',
   },
-  other: {
-    'google-adsense-account': 'ca-pub-5414009811868137',
-  },
 };
 
 export default function RootLayout({
@@ -40,7 +37,23 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <AdSenseInjector />
+        <Script
+          id="google-consent-default"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'wait_for_update': 500
+              });
+            `,
+          }}
+        />
       </head>
       <body className="bg-[#faf9f6] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 min-h-screen flex flex-col antialiased selection:bg-red-500 selection:text-white">
         <Navbar />

@@ -113,7 +113,7 @@ export async function POST(req: NextRequest) {
     const rawComments = Array.isArray(body.comments) ? body.comments : [];
     const cookies = String(body.cookies || body.cookie || '').trim();
     const authToken = String(body.authToken || '').trim();
-    const organizerHandle = String(body.handle || '@NACHOAT00').trim();
+    const organizerHandle = String(body.handle || '@organizador').trim();
     const platform = String(body.platform || 'x').toLowerCase();
 
     if (!rawPostUrl) {

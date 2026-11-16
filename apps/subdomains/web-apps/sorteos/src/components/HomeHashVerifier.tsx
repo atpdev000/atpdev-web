@@ -29,9 +29,9 @@ export const HomeHashVerifier: React.FC = () => {
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
           <span>Auditoría Pública en Tiempo Real</span>
         </div>
-        <h3 className="text-xl sm:text-2xl font-extrabold font-display text-slate-900 dark:text-white">
+        <h2 className="text-xl sm:text-2xl font-extrabold font-display text-slate-900 dark:text-white">
           Verificar Autenticidad de un Sorteo
-        </h3>
+        </h2>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 max-w-md mx-auto">
           Ingresa el código oficial o hash SHA-256 para comprobar que los ganadores fueron elegidos con aleatoriedad pura.
         </p>
