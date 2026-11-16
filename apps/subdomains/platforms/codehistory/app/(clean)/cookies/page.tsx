@@ -70,7 +70,7 @@ export default function CookiesPage() {
               <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-violet-400 underline">
                 www.aboutads.info/choices/
               </a>
-              . Ten en cuenta que bloquear las cookies técnicas esenciales podría mostrar el aviso de privacidad en futuras sesiones. Consulta también nuestra{' '}
+              . Ten en cuenta que bloquear las cookies técnicas esenciales podría mostrar el aviso de privacidad en futuras sesiones y restablecer tus preferencias locales. Para consultas sobre derechos de privacidad (ARCO / RGPD), consulta también nuestra{' '}
               <Link href="/privacy" className="text-violet-400 underline">
                 Política de Privacidad
               </Link>
@@ -83,6 +83,13 @@ export default function CookiesPage() {
                 contacto@atpdev.dev
               </a>
               .
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3">4. Transparencia y Consent Mode v2</h2>
+            <p>
+              Operamos en cumplimiento con Google Publisher Policies y Consent Mode v2: las cookies publicitarias personalizadas y analíticas permanecen desactivadas hasta tu autorización expresa y nunca recopilamos cuentas ni contraseñas de visitantes en la edición pública del archivo.
             </p>
           </section>
         </div>

@@ -64,10 +64,15 @@ export default async function CookiesPolicyPage({
     li2_1: await t("Cookies técnicas y de preferencia (esenciales): recuerdan tu modo claro/oscuro, idioma activo y elección en el banner de privacidad sin recopilar información personal identificable."),
     li2_2: await t("Cookies de medición anónima (Google Analytics 4 y Clarity): solo se habilitan cuando otorgas tu consentimiento explícito para evaluar estabilidad, velocidad y calidad de lectura."),
     li2_3: await t("Cookies publicitarias de terceros (Google AdSense): Google y sus socios utilizan cookies para publicar anuncios personalizados o no personalizados según el historial de navegación y tu elección de consentimiento."),
-    h3: await t("3. Control de cookies y exclusión voluntaria"),
-    p3: await t("Puedes aceptar, rechazar o modificar tus preferencias de cookies desde la configuración de tu navegador (Chrome, Firefox, Safari o Edge) o gestionar directamente la personalización de anuncios de Google."),
-    h4: await t("4. Enlaces oficiales y contacto"),
-    p4: await t("Si tienes consultas sobre el uso de cookies en www.atpdev.dev o cualquiera de nuestras aplicaciones asociadas, escríbenos a contacto@atpdev.dev."),
+    h3: await t("3. Control de cookies, navegadores y exclusión voluntaria"),
+    p3: await t("Nuestro banner de privacidad mantiene por defecto las señales publicitarias y analíticas restringidas bajo Google Consent Mode v2 hasta que confirmes tu preferencia. También puedes aceptar, rechazar o eliminar las cookies desde los ajustes de tu navegador web:"),
+    li3_1: await t("Google Chrome: Configuración > Privacidad y seguridad > Cookies de terceros y datos de sitios."),
+    li3_2: await t("Mozilla Firefox: Ajustes > Privacidad y seguridad > Protección mejorada contra rastreo y cookies."),
+    li3_3: await t("Apple Safari: Preferencias > Privacidad > Bloquear cookies y administración de datos almacenados."),
+    li3_4: await t("Microsoft Edge: Configuración > Cookies y permisos del sitio > Administrar y eliminar cookies."),
+    p3_note: await t("Ten en cuenta que deshabilitar las cookies técnicas esenciales o el almacenamiento local puede restablecer tu preferencia de tema visual, idioma o volver a mostrar el aviso de consentimiento en futuras visitas. Para gestionar la personalización publicitaria directamente en Google puedes utilizar los enlaces oficiales indicados a continuación:"),
+    h4: await t("4. Conservación, normativa aplicable (Ley 29733 / RGPD) y contacto"),
+    p4: await t("Conservamos únicamente el registro local mínimo de tu preferencia de consentimiento en tu navegador sin perfilar ni comercializar datos personales. Para ejercer tus derechos ARCO o realizar consultas sobre el uso de cookies en www.atpdev.dev o cualquiera de nuestras plataformas asociadas, escríbenos a contacto@atpdev.dev."),
   };
 
   const linkPath = lang === "es" ? "/" : `/${lang}`;
@@ -112,6 +117,13 @@ export default async function CookiesPolicyPage({
               <section>
                 <h2 className="text-xl font-bold mb-4 border-b border-[var(--glass-border)] pb-2">{texts.h3}</h2>
                 <p className="mb-4">{texts.p3}</p>
+                <ul className="list-disc pl-6 space-y-2 mb-4">
+                  <li>{texts.li3_1}</li>
+                  <li>{texts.li3_2}</li>
+                  <li>{texts.li3_3}</li>
+                  <li>{texts.li3_4}</li>
+                </ul>
+                <p className="mb-4">{texts.p3_note}</p>
                 <ul className="list-disc pl-6 space-y-2 text-sm">
                   <li>
                     <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="text-[var(--primary)] underline">
