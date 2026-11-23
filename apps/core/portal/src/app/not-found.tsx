@@ -98,14 +98,14 @@ export default async function NotFound() {
       }} />
 
       <main className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'var(--background)' }}>
-        <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundColor: 'var(--bg1)' }}></div>
+        <div data-page-type="not-found" className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundColor: 'var(--bg1)' }}></div>
 
-        <div className="relative z-10 max-w-2xl mx-auto px-6 text-center flex flex-col items-center">
-          <div className="mb-8 p-4 rounded-full animate-pulse" style={{ backgroundColor: 'color-mix(in srgb, var(--primary) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)' }}>
+        <div data-page-type="not-found" className="relative z-10 max-w-2xl mx-auto px-6 text-center flex flex-col items-center">
+          <div data-page-type="not-found" className="mb-8 p-4 rounded-full animate-pulse" style={{ backgroundColor: 'color-mix(in srgb, var(--primary) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)' }}>
             <ShieldAlert size={48} color="var(--primary)" />
           </div>
           
-          <div className="glitch-wrapper mb-4">
+          <div data-page-type="not-found" className="glitch-wrapper mb-4">
             <h1 className="glitch" data-text="404">404</h1>
           </div>
           

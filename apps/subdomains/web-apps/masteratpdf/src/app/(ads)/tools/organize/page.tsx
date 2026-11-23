@@ -37,7 +37,7 @@ import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { usePageThumbnails, Page } from '@/hooks/usePageThumbnails';
 import { useToolFlow } from '@/hooks/useToolFlow';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError } from '@/lib/pdf/pdfHelper';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { 
     Workspace, 
@@ -348,7 +348,7 @@ export default function OrganizePage() {
                 canvas.height = viewport.height;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    await p.render({ canvasContext: ctx, viewport } as any).promise;
+                    await p.render({ canvasContext: ctx, canvas, viewport }).promise;
                     previews.push({
                         pageIndex: i,
                         thumbnail: canvas.toDataURL('image/jpeg', 0.8),
@@ -394,12 +394,16 @@ export default function OrganizePage() {
             setProgress(5, 'Iniciando reorganización documental…');
             const { PDFDocument, degrees } = await import('pdf-lib');
 
-            const docCache = new Map<File, any>();
+            const docCache = new Map<File, Awaited<ReturnType<typeof PDFDocument.load>>>();
             for (const p of visiblePages) {
                 if (!docCache.has(p.file)) {
                     const buf = await p.file.arrayBuffer();
-                    const loaded = await PDFDocument.load(buf);
-                    docCache.set(p.file, loaded);
+                    try {
+                        const loaded = await PDFDocument.load(buf);
+                        docCache.set(p.file, loaded);
+                    } catch (err) {
+                        throw new Error(`${p.file.name}: ${formatPdfError(err)}`);
+                    }
                 }
             }
 

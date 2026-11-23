@@ -1,74 +1,24 @@
-import type { MetadataRoute } from 'next';
-
-const BASE_URL = 'https://masteratpdf.atpdev.dev';
-
-const TOOL_SLUGS = [
-  'merge',
-  'split',
-  'compress',
-  'organize',
-  'rotate',
-  'page-numbers',
-  'watermark',
-  'protect',
-  'unlock',
-  'jpg-to-pdf',
-  'pdf-to-jpg',
-  'word-to-pdf',
-  'pdf-to-word',
-  'pdf-to-excel',
-  'pdf-to-ppt',
-  'pdf-to-text',
-  'pdf-to-markdown',
-  'ocr',
-  'ai-summary',
-];
+import { MetadataRoute } from 'next';
+import { TOOLS } from '@/lib/tools';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+  const baseUrl = 'https://masteratpdf.atpdev.dev';
+  const currentDate = new Date();
+
+  const toolUrls: MetadataRoute.Sitemap = TOOLS.map((tool) => ({
+    url: `${baseUrl}${tool.href}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  }));
+
   return [
     {
-      url: BASE_URL,
-      lastModified: now,
+      url: baseUrl,
+      lastModified: currentDate,
       changeFrequency: 'weekly',
-      priority: 1,
+      priority: 1.0,
     },
-    {
-      url: `${BASE_URL}/sobre-nosotros`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/contacto`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
-    {
-      url: `${BASE_URL}/privacidad`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${BASE_URL}/politica-de-cookies`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    {
-      url: `${BASE_URL}/terminos`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    },
-    ...TOOL_SLUGS.map((slug) => ({
-      url: `${BASE_URL}/tools/${slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.85,
-    })),
+    ...toolUrls,
   ];
 }
-

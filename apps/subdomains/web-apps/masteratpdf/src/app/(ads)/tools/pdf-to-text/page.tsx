@@ -22,7 +22,7 @@ import {
     Notice 
 } from '@/components/tool/Workspace';
 import { ProcessingView, DownloadView } from '@/components/tool/FlowViews';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError, extractPdfTextItems } from '@/lib/pdf/pdfHelper';
 
 export default function PdfToTextPage() {
     const tool = getTool('pdf-to-text');
@@ -55,8 +55,13 @@ export default function PdfToTextPage() {
     const processTextExtraction = (f: File) => {
         run(async (setProgress) => {
             setProgress(15, 'Cargando documento en memoria…');
-            const buffer = await f.arrayBuffer();
-            const pdfDoc = await loadPdfDocument(buffer);
+            let pdfDoc;
+            try {
+                const buffer = await f.arrayBuffer();
+                pdfDoc = await loadPdfDocument(buffer);
+            } catch (err) {
+                throw new Error(formatPdfError(err));
+            }
             const numPages = pdfDoc.numPages;
             setPageCount(numPages);
 
@@ -73,7 +78,7 @@ export default function PdfToTextPage() {
                 let currentLine = '';
                 let lastY: number | null = null;
 
-                for (const item of textContent.items as any[]) {
+                for (const item of extractPdfTextItems(textContent.items)) {
                     if (!item.str) continue;
                     const y = item.transform[5];
 

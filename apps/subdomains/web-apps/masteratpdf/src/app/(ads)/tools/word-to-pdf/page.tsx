@@ -12,6 +12,7 @@ import {
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { 
     Workspace, 
@@ -54,18 +55,9 @@ export default function WordToPdfPage() {
             formData.append('file', file);
 
             setProgress(45, 'Renderizando tipografía y tablas en vector PDF…');
-            const backendUrl = process.env.NEXT_PUBLIC_PDF_BACKEND_URL || 'http://localhost:8000';
 
             try {
-                const response = await fetch(`${backendUrl}/api/convert/word-to-pdf`, {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    const errJson = await response.json().catch(() => ({}));
-                    throw new Error(errJson.detail || 'Fallo en la conversión a PDF');
-                }
+                const response = await postToBackend('/api/convert/word-to-pdf', formData, 180000);
 
                 setProgress(90, 'Generando archivo PDF con máxima fidelidad…');
                 const blob = await response.blob();
@@ -76,10 +68,17 @@ export default function WordToPdfPage() {
                     blob,
                     fileName: `${baseName}.pdf`,
                 };
-            } catch (err: any) {
-                // Si el microservicio externo no está activo, procesar 100% en el cliente sin fallar
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
+                }
+                if (file.name.toLowerCase().endsWith('.doc')) {
+                    throw new Error(
+                        'Los archivos .doc antiguos requieren el motor de conversión del servidor activo. Conviértelo a .docx o inicia el servidor backend.'
+                    );
+                }
                 console.warn('Microservicio no disponible, usando motor Word local en navegador:', err);
-                setProgress(45, 'Procesando directamente con el motor Word local en el navegador…');
+                setProgress(45, 'Procesando con el motor Word local en navegador…');
                 const { convertWordToPdfClient } = await import('@/lib/pdf/wordToPdfClient');
                 const blob = await convertWordToPdfClient(file, {
                     onProgress: (p, msg) => setProgress(p, msg),

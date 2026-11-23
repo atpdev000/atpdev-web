@@ -92,7 +92,7 @@ export default function HomePage() {
                 <h2 className="sr-only">Herramientas PDF disponibles en línea</h2>
                 {filteredTools.length === 0 ? (
                     <div className="text-center py-16 bg-surface rounded-2xl border border-line p-8 max-w-md mx-auto">
-                        <p className="text-sm text-ink-2 font-medium">No se encontraron herramientas con "{searchQuery}"</p>
+                        <p className="text-sm text-ink-2 font-medium">No se encontraron herramientas con &ldquo;{searchQuery}&rdquo;</p>
                         <button
                             onClick={() => {
                                 setSearchQuery('');
@@ -194,9 +194,9 @@ export default function HomePage() {
                             <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
                                 <ShieldCheck className="w-5 h-5" />
                             </div>
-                            <h3 className="text-base font-bold text-ink">100% Privado en tu Navegador</h3>
+                            <h3 className="text-base font-bold text-ink">Privacidad por Diseño (Local + Efímero)</h3>
                             <p className="text-xs text-ink-2 leading-relaxed">
-                                A diferencia de otros servicios en la nube, MasterAtPDF ejecuta todo el procesamiento localmente mediante WebAssembly. Tus documentos confidenciales nunca se suben a ningún servidor.
+                                Todas las operaciones estructurales se procesan localmente en tu navegador con WebAssembly y PDF.js. Cuando utilizas motores avanzados en servidor (AES-256, OCR o Word), los archivos se eliminan inmediatamente al terminar.
                             </p>
                         </div>
 
@@ -214,11 +214,69 @@ export default function HomePage() {
                             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
                                 <Zap className="w-5 h-5" />
                             </div>
-                            <h3 className="text-base font-bold text-ink">Velocidad Instantánea Sin Esperas</h3>
+                            <h3 className="text-base font-bold text-ink">Velocidad Instantánea y Alta Fidelidad</h3>
                             <p className="text-xs text-ink-2 leading-relaxed">
-                                Sin colas de espera, sin tiempo de carga ni de descarga a servidores remotos. El motor local aprovecha al máximo la CPU y memoria de tu dispositivo para resultados instantáneos.
+                                Sin colas de espera ni registros obligatorios. Nuestro motor híbrido combina la respuesta inmediata de WebAssembly en tu equipo con conversión estructural precisa para documentos complejos.
                             </p>
                         </div>
+                    </div>
+
+                    {/* Comprehensive Technical Guide & Editorial Architecture Section */}
+                    <div className="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-line pt-12">
+                        <article className="p-6 sm:p-8 rounded-2xl bg-canvas border border-line space-y-4">
+                            <span className="inline-block px-3 py-1 rounded-full text-[11px] font-bold bg-brand/10 text-brand uppercase tracking-wider">
+                                Arquitectura Documental ISO 32000
+                            </span>
+                            <h3 className="text-xl font-black text-ink">
+                                Cómo elegir la herramienta adecuada para tu flujo de trabajo PDF
+                            </h3>
+                            <p className="text-xs sm:text-sm text-ink-2 leading-relaxed">
+                                El formato <strong>Portable Document Format (ISO 32000)</strong> encapsula fuentes vectoriales, flujos de imágenes rasterizadas, tablas de referencias cruzadas (<code>xref</code>) y diccionarios de permisos criptográficos. En <strong>MasterAtPDF Pro</strong> hemos agrupado nuestras 23 herramientas en cinco módulos especializados para cubrir todo el ciclo de vida documental de estudios jurídicos, ingenieros, contadores, docentes y estudiantes:
+                            </p>
+                            <ul className="space-y-2.5 text-xs sm:text-sm text-ink-2 leading-relaxed list-disc pl-5">
+                                <li>
+                                    <strong>Organización y Estructura:</strong> <em>Unir PDF</em>, <em>Dividir PDF</em>, <em>Organizar páginas</em>, <em>Rotar PDF</em> y <em>Recortar márgenes</em> permiten reestructurar expedientes multipágina conservando marcadores e hipervínculos internos.
+                                </li>
+                                <li>
+                                    <strong>Optimización y Recuperación:</strong> <em>Comprimir PDF</em> reduce el peso de archivos escaneados para portales estatales o correo electrónico, mientras que <em>Reparar PDF</em> reconstruye tablas <code>xref</code> dañadas y recupera objetos huérfanos.
+                                </li>
+                                <li>
+                                    <strong>Conversión Bidireccional Office e Imágenes:</strong> transforma tus archivos con <em>PDF a Word (.docx)</em>, <em>PDF a Excel (.xlsx)</em>, <em>PDF a PowerPoint (.pptx)</em>, <em>Word a PDF</em>, <em>PDF a JPG</em>, <em>JPG a PDF</em>, <em>PDF a Texto</em> y <em>PDF a Markdown</em> manteniendo la disposición visual y tablas.
+                                </li>
+                                <li>
+                                    <strong>Seguridad Criptográfica y Conformidad:</strong> protege contratos con <em>Proteger PDF (AES-256)</em>, elimina restricciones conocidas con <em>Desbloquear PDF</em>, aplica <em>Firmar PDF</em>, añade <em>Marca de Agua</em>, inserta <em>Números de Página</em> o ejecuta <em>Censurar / Redactar PDF</em> eliminando físicamente texto e imágenes confidenciales a nivel binario.
+                                </li>
+                            </ul>
+                        </article>
+
+                        <article className="p-6 sm:p-8 rounded-2xl bg-canvas border border-line space-y-4">
+                            <span className="inline-block px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-700 uppercase tracking-wider">
+                                Preguntas Frecuentes & Buenas Prácticas
+                            </span>
+                            <h3 className="text-xl font-black text-ink">
+                                Preguntas frecuentes sobre privacidad, formatos y calidad
+                            </h3>
+                            <div className="space-y-4 text-xs sm:text-sm text-ink-2 leading-relaxed">
+                                <div className="p-4 rounded-xl bg-surface border border-line/70 space-y-1">
+                                    <h4 className="font-bold text-ink">¿Cómo protege MasterAtPDF la confidencialidad de mis documentos?</h4>
+                                    <p>
+                                        Aplicamos privacidad por diseño: las herramientas de manipulación de páginas funcionan directamente en la memoria RAM de tu navegador mediante WebAssembly, y las herramientas que emplean nuestro motor de conversión avanzada o cifrado AES-256 procesan el documento en un entorno efímero aislado por UUID que elimina automáticamente los archivos temporales inmediatamente después de entregarte el resultado.
+                                    </p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-surface border border-line/70 space-y-1">
+                                    <h4 className="font-bold text-ink">¿Cuál es la diferencia entre ocultar texto y usar Censurar PDF (Redact)?</h4>
+                                    <p>
+                                        Dibujar un rectángulo oscuro encima de un PDF convencional solo cubre visualmente el texto, pero los caracteres siguen seleccionables al copiar y pegar. Nuestra herramienta <strong>Censurar PDF</strong> destruye de forma permanente tanto los glifos tipográficos como los píxeles de imagen dentro del área marcada, garantizando que los datos sensibles sean 100 % irrecuperables.
+                                    </p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-surface border border-line/70 space-y-1">
+                                    <h4 className="font-bold text-ink">¿Cuándo debo usar OCR PDF antes de convertir a Word o Excel?</h4>
+                                    <p>
+                                        Si tu PDF proviene de un escáner físico o fotografía, sus páginas contienen únicamente una imagen plana sin capa de texto. Ejecutar primero <strong>OCR PDF</strong> reconoce los caracteres en español o inglés y genera una capa de texto seleccionable e indexable lista para búsqueda o extracción.
+                                    </p>
+                                </div>
+                            </div>
+                        </article>
                     </div>
                 </div>
             </section>

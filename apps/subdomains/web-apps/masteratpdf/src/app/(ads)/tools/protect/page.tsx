@@ -1,36 +1,41 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-    Lock, 
-    KeyRound, 
-    Eye, 
-    EyeOff, 
-    Trash2, 
-    ShieldCheck, 
-    CheckCircle2, 
-    AlertTriangle 
+import {
+    Lock,
+    KeyRound,
+    Eye,
+    EyeOff,
+    Trash2,
+    ShieldCheck,
+    CheckCircle2,
+    AlertTriangle,
 } from 'lucide-react';
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 import { ToolUpload } from '@/components/tool/ToolUpload';
-import { 
-    Workspace, 
-    SidebarSection, 
-    StatRow, 
-    Notice 
+import {
+    Workspace,
+    SidebarSection,
+    StatRow,
+    Notice,
+    Checkbox,
 } from '@/components/tool/Workspace';
 import { ProcessingView, DownloadView } from '@/components/tool/FlowViews';
 
 export default function ProtectPage() {
     const tool = getTool('protect');
-    const { stage, progress, message, run, download, backToEdit, reset, error, setError, result } = useToolFlow();
+    const { stage, progress, message, run, download, backToEdit, reset, error, setError } = useToolFlow();
 
     const [file, setFile] = useState<File | null>(null);
     const [password, setPassword] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [allowPrint, setAllowPrint] = useState<boolean>(true);
+    const [allowCopy, setAllowCopy] = useState<boolean>(false);
+    const [allowModify, setAllowModify] = useState<boolean>(false);
 
     const handleUpload = (files: File[]) => {
         const { valid, errors } = validateFiles(files, {
@@ -80,50 +85,35 @@ export default function ProtectPage() {
         }
 
         run(async (setProgress) => {
-            setProgress(20, 'Preparando claves de cifrado criptográfico…');
-            const backendUrl = process.env.NEXT_PUBLIC_PDF_BACKEND_URL || 'http://localhost:8000';
+            setProgress(25, 'Preparando cifrado criptográfico AES-256…');
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('password', password);
+            formData.append('allow_print', String(allowPrint));
+            formData.append('allow_copy', String(allowCopy));
+            formData.append('allow_modify', String(allowModify));
 
             try {
-                setProgress(45, 'Cifrando documento con algoritmo AES-256…');
-                const response = await fetch(`${backendUrl}/api/convert/protect`, {
-                    method: 'POST',
-                    body: formData,
-                });
+                setProgress(55, 'Cifrando documento con algoritmo AES-256…');
+                const response = await postToBackend('/api/convert/protect', formData);
+                setProgress(90, 'Generando archivo PDF protegido…');
+                const blob = await response.blob();
+                setProgress(100, '¡Documento cifrado con éxito!');
 
-                if (response.ok) {
-                    setProgress(90, 'Generando archivo PDF protegido…');
-                    const blob = await response.blob();
-                    setProgress(100, '¡Documento cifrado con éxito!');
-
-                    const baseName = file.name.replace(/\.pdf$/i, '');
-                    return {
-                        blob,
-                        fileName: `${baseName}-protegido.pdf`,
-                    };
+                const baseName = file.name.replace(/\.pdf$/i, '');
+                return {
+                    blob,
+                    fileName: `${baseName}-protegido.pdf`,
+                };
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
                 }
-            } catch (err) {
-                console.warn('Backend unavailable, creating encrypted representation:', err);
+                throw new Error(
+                    'El cifrado AES-256 real requiere que el motor de conversión de MasterAtPDF esté activo. Inicia el servidor backend e inténtalo de nuevo.'
+                );
             }
-
-            // Fallback: save clean document
-            setProgress(60, 'Finalizando empaquetado de seguridad…');
-            const { PDFDocument } = await import('pdf-lib');
-            const buffer = await file.arrayBuffer();
-            const doc = await PDFDocument.load(buffer, { ignoreEncryption: true });
-            doc.setTitle(`[Protegido] ${file.name}`);
-            const finalBytes = await doc.save();
-            const blob = new Blob([new Uint8Array(finalBytes)], { type: 'application/pdf' });
-            setProgress(100, '¡PDF protegido!');
-
-            const baseName = file.name.replace(/\.pdf$/i, '');
-            return {
-                blob,
-                fileName: `${baseName}-protegido.pdf`,
-            };
         });
     };
 
@@ -134,13 +124,13 @@ export default function ProtectPage() {
         reset();
     };
 
-    // Stage 1: Upload
     if (!file && stage === 'edit') {
         return (
             <ToolUpload
                 tool={tool}
                 accept=".pdf,application/pdf"
                 multiple={false}
+                processing="server"
                 buttonLabel="Seleccionar documento PDF"
                 dropLabel="o arrastra el archivo aquí"
                 onFiles={handleUpload}
@@ -149,16 +139,14 @@ export default function ProtectPage() {
         );
     }
 
-    // Stage 2: Processing
     if (stage === 'processing') {
         return <ProcessingView title="Cifrando y protegiendo tu documento…" progress={progress} message={message} />;
     }
 
-    // Stage 3: Done
     if (stage === 'done') {
         return (
             <DownloadView
-                title="¡Documento protegido con éxito!"
+                title="¡Documento cifrado con AES-256!"
                 downloadLabel="Descargar PDF Protegido"
                 onDownload={download}
                 onBack={backToEdit}
@@ -168,7 +156,6 @@ export default function ProtectPage() {
         );
     }
 
-    // Stage 4: Edit Workspace
     return (
         <Workspace
             title={tool.name}
@@ -214,8 +201,31 @@ export default function ProtectPage() {
                             </div>
                             <div className="pt-1 flex items-center gap-2 text-[11px] text-muted">
                                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                                <span>Cifrado estándar AES-256 bits</span>
+                                <span>Cifrado real AES-256 bits</span>
                             </div>
+                        </div>
+                    </SidebarSection>
+
+                    <SidebarSection title="Permisos del documento">
+                        <div className="space-y-3">
+                            <Checkbox
+                                label="Permitir impresión"
+                                description="Autoriza imprimir el documento tras ingresar la contraseña."
+                                checked={allowPrint}
+                                onChange={setAllowPrint}
+                            />
+                            <Checkbox
+                                label="Permitir copiar texto"
+                                description="Autoriza seleccionar y copiar texto e imágenes."
+                                checked={allowCopy}
+                                onChange={setAllowCopy}
+                            />
+                            <Checkbox
+                                label="Permitir anotaciones y cambios"
+                                description="Autoriza editar páginas o agregar comentarios."
+                                checked={allowModify}
+                                onChange={setAllowModify}
+                            />
                         </div>
                     </SidebarSection>
 
@@ -226,7 +236,7 @@ export default function ProtectPage() {
                     </SidebarSection>
 
                     <Notice tone="info">
-                        Recuerda guardar bien tu contraseña. Sin ella, nadie (ni siquiera tú) podrá abrir el documento.
+                        El documento se cifra de forma real con AES-256 y se elimina inmediatamente tras la descarga.
                     </Notice>
                 </div>
             }
@@ -240,7 +250,7 @@ export default function ProtectPage() {
                         Define la contraseña de tu PDF
                     </h2>
                     <p className="text-xs text-muted max-w-sm mx-auto">
-                        Se solicitará esta contraseña cada vez que alguien intente abrir o visualizar el documento.
+                        Se solicitará esta contraseña cada vez que alguien intente abrir el documento.
                     </p>
                 </div>
 
@@ -257,7 +267,7 @@ export default function ProtectPage() {
                                 type={showPassword ? 'text' : 'password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Escribe al menos 6 caracteres…"
+                                placeholder="Escribe al menos 4 caracteres…"
                                 className="w-full pl-10 pr-12 py-2.5 rounded-xl border border-line bg-canvas text-sm font-semibold text-ink placeholder:text-muted focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/10 transition-all"
                             />
                             <button

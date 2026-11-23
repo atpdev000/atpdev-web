@@ -3,186 +3,90 @@ import { getProjects } from '@atpdev/database';
 import { BLOG_POSTS } from '@/data/blog-posts';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const BASE_URL = 'https://www.atpdev.dev';
-  // Enfocar el sitemap en idiomas principales y URLs con contenido real (evitando páginas legales finas y traducciones masivas de bajo valor)
-  const langs = ['en'];
-  const allLangs = ['es', ...langs];
+    const baseUrl = 'https://www.atpdev.dev';
+    const currentDate = new Date();
 
-  const buildAlternates = (path: string) => {
-    const languages: Record<string, string> = {
-      "x-default": `${BASE_URL}${path}`
-    };
-    allLangs.forEach(l => {
-      const prefix = l === 'es' ? '' : `/${l}`;
-      languages[l] = `${BASE_URL}${prefix}${path}`;
-    });
-    return { languages };
-  };
-  
-  const mainRoutes: MetadataRoute.Sitemap = [
-    {
-      url: BASE_URL,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 1,
-      alternates: buildAlternates(''),
-    },
-    {
-      url: `${BASE_URL}/sobre-mi`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-      alternates: buildAlternates('/sobre-mi'),
-    },
-    {
-      url: `${BASE_URL}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
-      alternates: buildAlternates('/blog'),
-    },
-    {
-      url: `${BASE_URL}/contacto`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-      alternates: {
-        languages: {
-          "x-default": `${BASE_URL}/contacto`,
-          es: `${BASE_URL}/contacto`,
-          en: `${BASE_URL}/en/contact`,
+    let projects: Awaited<ReturnType<typeof getProjects>> = [];
+    try {
+        const allProjects = await getProjects();
+        projects = allProjects.filter((p) => p.status !== 'Privado' && Boolean(p.slug));
+    } catch (e) {
+        console.error('Sitemap: Error fetching projects', e);
+    }
+
+    // Core high-value editorial pages only (legal/utility pages excluded from sitemap inventory)
+    const staticPages: MetadataRoute.Sitemap = [
+        {
+            url: `${baseUrl}`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 1.0,
         },
-      },
-    },
-    {
-      url: `${BASE_URL}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.4,
-      alternates: buildAlternates('/privacy'),
-    },
-    {
-      url: `${BASE_URL}/cookies`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.4,
-      alternates: buildAlternates('/cookies'),
-    },
-    {
-      url: `${BASE_URL}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.4,
-      alternates: buildAlternates('/terms'),
-    },
-  ];
-
-  const langRoutes: MetadataRoute.Sitemap = langs.flatMap(lang => [
-    {
-      url: `${BASE_URL}/${lang}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      alternates: buildAlternates(''),
-    },
-    {
-      url: `${BASE_URL}/${lang}/sobre-mi`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-      alternates: buildAlternates('/sobre-mi'),
-    },
-    {
-      url: `${BASE_URL}/${lang}/blog`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      alternates: buildAlternates('/blog'),
-    },
-    {
-      url: `${BASE_URL}/${lang}/${lang === 'en' ? 'contact' : 'contacto'}`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-      alternates: {
-        languages: {
-          "x-default": `${BASE_URL}/contacto`,
-          es: `${BASE_URL}/contacto`,
-          en: `${BASE_URL}/en/contact`,
+        {
+            url: `${baseUrl}/sobre-mi`,
+            lastModified: currentDate,
+            changeFrequency: 'monthly',
+            priority: 0.9,
         },
-      },
-    },
-    {
-      url: `${BASE_URL}/${lang}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly' as const,
-      priority: 0.4,
-      alternates: buildAlternates('/privacy'),
-    },
-    {
-      url: `${BASE_URL}/${lang}/cookies`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly' as const,
-      priority: 0.4,
-      alternates: buildAlternates('/cookies'),
-    },
-    {
-      url: `${BASE_URL}/${lang}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly' as const,
-      priority: 0.4,
-      alternates: buildAlternates('/terms'),
-    },
-  ]);
+        {
+            url: `${baseUrl}/blog`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/en`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/en/sobre-mi`,
+            lastModified: currentDate,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/en/blog`,
+            lastModified: currentDate,
+            changeFrequency: 'weekly',
+            priority: 0.85,
+        },
+    ];
 
-  const esBlogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map(post => ({
-    url: `${BASE_URL}/blog/${post.slug}`,
-    lastModified: new Date(post.updatedAt),
-    changeFrequency: 'monthly' as const,
-    priority: 0.85,
-    alternates: buildAlternates(`/blog/${post.slug}`),
-  }));
-
-  const otherLangBlogRoutes: MetadataRoute.Sitemap = langs.flatMap(lang =>
-    BLOG_POSTS.map(post => ({
-      url: `${BASE_URL}/${lang}/blog/${post.slug}`,
-      lastModified: new Date(post.updatedAt),
-      changeFrequency: 'monthly' as const,
-      priority: 0.75,
-      alternates: buildAlternates(`/blog/${post.slug}`),
-    }))
-  );
-
-  const blogRoutes: MetadataRoute.Sitemap = [...esBlogRoutes, ...otherLangBlogRoutes];
-
-  // Dynamic projects routes (solo fichas de producto, excluyendo subpáginas legales/créditos con noindex)
-  let projectRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const allProjects = await getProjects();
-    const projects = allProjects.filter(p => p.status !== 'Privado');
-    
-    const esProjectRoutes = projects.filter(p => p.slug).map(p => ({
-      url: `${BASE_URL}/apps/${p.slug}`,
-      lastModified: new Date(p.created_at || new Date()),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      alternates: buildAlternates(`/apps/${p.slug}`),
+    const esAppRoutes: MetadataRoute.Sitemap = projects.map((app) => ({
+        url: `${baseUrl}/apps/${app.slug}`,
+        lastModified: currentDate,
+        changeFrequency: 'weekly',
+        priority: 0.85,
     }));
 
-    const otherLangProjectRoutes = langs.flatMap(lang => 
-      projects.filter(p => p.slug).map(p => ({
-        url: `${BASE_URL}/${lang}/apps/${p.slug}`,
-        lastModified: new Date(p.created_at || new Date()),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-        alternates: buildAlternates(`/apps/${p.slug}`),
-      }))
-    );
+    const enAppRoutes: MetadataRoute.Sitemap = projects.map((app) => ({
+        url: `${baseUrl}/en/apps/${app.slug}`,
+        lastModified: currentDate,
+        changeFrequency: 'weekly',
+        priority: 0.8,
+    }));
 
-    projectRoutes = [...esProjectRoutes, ...otherLangProjectRoutes];
-  } catch (error) {
-    console.error("Error fetching projects for sitemap:", error);
-  }
+    const esBlogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: 'monthly',
+        priority: 0.85,
+    }));
 
-  return [...mainRoutes, ...langRoutes, ...blogRoutes, ...projectRoutes];
+    const enBlogRoutes: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
+        url: `${baseUrl}/en/blog/${post.slug}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: 'monthly',
+        priority: 0.8,
+    }));
+
+    return [
+        ...staticPages,
+        ...esAppRoutes,
+        ...enAppRoutes,
+        ...esBlogRoutes,
+        ...enBlogRoutes,
+    ];
 }

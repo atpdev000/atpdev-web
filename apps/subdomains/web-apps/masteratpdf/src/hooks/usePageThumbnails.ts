@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError } from '@/lib/pdf/pdfHelper';
 import { MAX_FILE_MB } from '@/lib/files';
 
 export type Page = {
@@ -53,7 +53,7 @@ export function usePageThumbnails() {
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                await page.render({ canvasContext: ctx, viewport } as any).promise;
+                await page.render({ canvasContext: ctx, canvas, viewport }).promise;
 
                 newPages.push({
                     id: `${file.name}-${i}-${Math.random().toString(36).slice(2, 7)}`,
@@ -68,10 +68,9 @@ export function usePageThumbnails() {
             }
 
             setPages(newPages);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error loading PDF:', err);
-            const msg = err?.message || 'Error al procesar el documento PDF. Comprueba que el archivo sea válido.';
-            setError(`Error al cargar el documento: ${msg}`);
+            setError(formatPdfError(err, 'Error al cargar el documento PDF. Comprueba que el archivo sea válido.'));
         } finally {
             setLoading(false);
             setLoadingProgress(0);
@@ -102,7 +101,7 @@ export function usePageThumbnails() {
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                await page.render({ canvasContext: ctx, viewport } as any).promise;
+                await page.render({ canvasContext: ctx, canvas, viewport }).promise;
 
                 newInsertedPages.push({
                     id: `inserted-${file.name}-${i}-${Math.random().toString(36).slice(2, 7)}`,
@@ -129,9 +128,10 @@ export function usePageThumbnails() {
                 // Default: append to the end
                 return [...prev, ...newInsertedPages];
             });
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error inserting pages from PDF:', err);
-            setError(`Error al insertar páginas: ${err?.message || 'Error desconocido'}`);
+            const msg = err instanceof Error ? err.message : '';
+            setError(`Error al insertar páginas: ${msg || 'Error desconocido'}`);
         } finally {
             setLoading(false);
         }

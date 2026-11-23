@@ -175,9 +175,10 @@ export const ToolWorkspace: React.FC<ToolWorkspaceProps> = ({
         try {
             await onAction(files);
             setSuccess(true);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error(err);
-            setError(err.message || 'Ocurrió un error al procesar el archivo. Por favor inténtalo de nuevo.');
+            const msg = err instanceof Error ? err.message : '';
+            setError(msg || 'Ocurrió un error al procesar el archivo. Por favor inténtalo de nuevo.');
         } finally {
             setIsProcessing(false);
         }

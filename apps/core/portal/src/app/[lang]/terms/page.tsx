@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     title,
     description,
     robots: {
-      index: shouldIndex,
+      index: false,
       follow: true,
     },
     alternates: {

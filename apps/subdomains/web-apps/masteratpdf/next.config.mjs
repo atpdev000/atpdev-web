@@ -33,6 +33,10 @@ const nextConfig = {
       { source: '/proteger', destination: '/tools/protect', permanent: true },
       { source: '/organizar', destination: '/tools/organize', permanent: true },
       { source: '/rotar', destination: '/tools/rotate', permanent: true },
+      { source: '/recortar', destination: '/tools/crop', permanent: true },
+      { source: '/reparar', destination: '/tools/repair', permanent: true },
+      { source: '/firmar', destination: '/tools/sign', permanent: true },
+      { source: '/censurar', destination: '/tools/redact', permanent: true },
     ];
   },
   async headers() {

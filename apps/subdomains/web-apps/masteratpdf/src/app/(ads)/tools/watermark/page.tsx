@@ -307,6 +307,23 @@ export default function WatermarkPage() {
                             </div>
                         </SidebarSection>
 
+                        <SidebarSection title={`Tamaño de fuente: ${fontSize}pt`}>
+                            <input
+                                type="range"
+                                min={18}
+                                max={84}
+                                step={2}
+                                value={fontSize}
+                                onChange={(e) => setFontSize(Number(e.target.value))}
+                                className="w-full accent-[var(--brand)] cursor-pointer"
+                            />
+                            <div className="flex justify-between text-[10px] text-muted font-medium mt-1">
+                                <span>18pt Discreto</span>
+                                <span>48pt Estándar</span>
+                                <span>84pt Grande</span>
+                            </div>
+                        </SidebarSection>
+
                         <SidebarSection title={`Transparencia: ${Math.round(opacity * 100)}%`}>
                             <input
                                 type="range"

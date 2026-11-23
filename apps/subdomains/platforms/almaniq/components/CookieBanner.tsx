@@ -3,42 +3,42 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+function updateGtagConsent(state: "granted" | "denied") {
+  if (typeof window !== "undefined") {
+    const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+    if (typeof w.gtag === "function") {
+      w.gtag("consent", "update", {
+        ad_storage: state,
+        ad_user_data: state,
+        ad_personalization: state,
+        analytics_storage: state,
+      });
+    }
+  }
+}
+
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const consent = localStorage.getItem("cookie_consent");
-    if (!consent) setVisible(true);
+    if (!consent) {
+      setVisible(true);
+    } else if (consent === "accepted") {
+      updateGtagConsent("granted");
+    }
   }, []);
 
   const accept = () => {
     localStorage.setItem("cookie_consent", "accepted");
     setVisible(false);
-    
-    // Consent Mode v2 update - Granted
-    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-      (window as any).gtag('consent', 'update', {
-        'ad_storage': 'granted',
-        'ad_user_data': 'granted',
-        'ad_personalization': 'granted',
-        'analytics_storage': 'granted'
-      });
-    }
+    updateGtagConsent("granted");
   };
 
   const decline = () => {
     localStorage.setItem("cookie_consent", "declined");
     setVisible(false);
-    
-    // Consent Mode v2 update - Denied
-    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-      (window as any).gtag('consent', 'update', {
-        'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'denied'
-      });
-    }
+    updateGtagConsent("denied");
   };
 
   if (!visible) return null;

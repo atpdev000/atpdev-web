@@ -19,7 +19,7 @@ import { Trash2, ArrowUpDown, ArrowDownUp, RefreshCw } from 'lucide-react';
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError } from '@/lib/pdf/pdfHelper';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { Workspace, SidebarSection, StatRow, Notice } from '@/components/tool/Workspace';
 import { SortableThumb } from '@/components/tool/ThumbCard';
@@ -56,7 +56,7 @@ export default function MergePage() {
             const ctx = canvas.getContext('2d');
 
             if (ctx) {
-                await page.render({ canvasContext: ctx, viewport } as any).promise;
+                await page.render({ canvasContext: ctx, canvas, viewport }).promise;
                 return canvas.toDataURL('image/jpeg', 0.85);
             }
             return '';
@@ -135,7 +135,12 @@ export default function MergePage() {
                 );
 
                 const buffer = await f.file.arrayBuffer();
-                const pdf = await PDFDocument.load(buffer);
+                let pdf;
+                try {
+                    pdf = await PDFDocument.load(buffer);
+                } catch (err) {
+                    throw new Error(`${f.name}: ${formatPdfError(err)}`);
+                }
                 const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
                 copiedPages.forEach((p) => mergedPdf.addPage(p));
             }

@@ -8,7 +8,21 @@ export default function CookieBanner() {
 
   useEffect(() => {
     const consent = localStorage.getItem("cookie_consent");
-    if (!consent) setVisible(true);
+    if (!consent) {
+      setVisible(true);
+    } else if (consent === "accepted") {
+      if (typeof window !== "undefined") {
+        const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+        if (typeof w.gtag === "function") {
+          w.gtag("consent", "update", {
+            ad_storage: "granted",
+            ad_user_data: "granted",
+            ad_personalization: "granted",
+            analytics_storage: "granted",
+          });
+        }
+      }
+    }
   }, []);
 
   const accept = () => {

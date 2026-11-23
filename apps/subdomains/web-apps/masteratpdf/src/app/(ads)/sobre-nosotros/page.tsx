@@ -39,7 +39,7 @@ export default function SobreNosotrosPdfPage() {
             La mayoría de las utilidades PDF tradicionales en internet obligan al usuario a subir contratos confidenciales, estados bancarios, historias clínicas o expedientes legales a servidores remotos desconocidos simplemente para unir dos páginas o comprimir un documento.
           </p>
           <p>
-            <strong>MasterAtPDF Pro</strong> resuelve este riesgo de raíz: diseñamos una suite de 19 herramientas documentales que ejecutan todo el procesamiento binario directamente en la memoria RAM del navegador del usuario mediante <strong>WebAssembly, pdf-lib y PDF.js v5</strong>. Tus archivos jamás abandonan tu dispositivo.
+            <strong>MasterAtPDF Pro</strong> resuelve este riesgo de raíz: diseñamos una suite de 23 herramientas documentales en la que las operaciones principales se ejecutan en la memoria RAM del navegador mediante <strong>WebAssembly, pdf-lib y PDF.js v5</strong>. Para tareas avanzadas (como cifrado AES-256, conversión Word de alta fidelidad o OCR neuronal opcional), el motor de conversión procesa temporalmente el archivo y lo elimina inmediatamente tras entregar el resultado.
           </p>
         </div>
 

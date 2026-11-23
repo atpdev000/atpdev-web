@@ -14,6 +14,7 @@ import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
 import { usePageThumbnails } from '@/hooks/usePageThumbnails';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { 
     Workspace, 
@@ -34,8 +35,8 @@ type ConversionMethod = 'auto' | 'pdf2docx' | 'pymupdf';
 
 export default function PdfToWordPage() {
     const tool = getTool('pdf-to-word');
-    const { stage, progress, message, run, download, backToEdit, reset, error, setError } = useToolFlow();
-    const { pages, loading, loadingProgress, addFiles, clearPages, originalFile } = usePageThumbnails();
+    const { stage, progress, message, run, download, backToEdit, reset, error, setError, result } = useToolFlow();
+    const { pages, loading, loadingProgress, addFiles, clearPages, originalFile, error: thumbError } = usePageThumbnails();
 
     const [selectedMethod, setSelectedMethod] = useState<ConversionMethod>('auto');
     const [enableOCR, setEnableOCR] = useState(true);
@@ -69,32 +70,27 @@ export default function PdfToWordPage() {
             formData.append('enable_ocr', String(enableOCR));
 
             setProgress(40, 'Reconstruyendo párrafos, estilos y tablas…');
-            const backendUrl = process.env.NEXT_PUBLIC_PDF_BACKEND_URL || 'http://localhost:8000';
 
             try {
-                const response = await fetch(`${backendUrl}/api/convert/pdf-to-word`, {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    const errJson = await response.json().catch(() => ({}));
-                    throw new Error(errJson.detail || 'Fallo en la conversión DOCX');
-                }
+                const response = await postToBackend('/api/convert/pdf-to-word', formData, 180000);
 
                 setProgress(90, 'Generando archivo DOCX editable…');
                 const blob = await response.blob();
+                const usedMethod = response.headers.get('X-Conversion-Method') || selectedMethod;
                 setProgress(100, '¡Documento convertido!');
 
                 const baseName = originalFile.name.replace(/\.pdf$/i, '');
                 return {
                     blob,
                     fileName: `${baseName}.docx`,
+                    meta: { engine: `Servidor (${usedMethod})` },
                 };
-            } catch (err: any) {
-                // Si el microservicio externo no está activo, procesar 100% en el cliente sin fallar
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
+                }
                 console.warn('Microservicio no disponible, usando motor DOCX local en navegador:', err);
-                setProgress(45, 'Procesando directamente con el motor DOCX local en el navegador…');
+                setProgress(45, 'Procesando con el motor DOCX local en navegador…');
                 const { convertPdfToDocxClient } = await import('@/lib/pdf/pdfToDocxClient');
                 const blob = await convertPdfToDocxClient(originalFile, {
                     onProgress: (p, msg) => setProgress(p, msg),
@@ -103,6 +99,7 @@ export default function PdfToWordPage() {
                 return {
                     blob,
                     fileName: `${baseName}.docx`,
+                    meta: { engine: 'Local WebAssembly (texto y estructura básica)' },
                 };
             }
         });
@@ -122,7 +119,7 @@ export default function PdfToWordPage() {
                 multiple={false}
                 buttonLabel="Seleccionar archivo PDF"
                 dropLabel="o arrastra y suelta el PDF aquí"
-                error={error}
+                error={error || thumbError}
                 onFiles={handleUpload}
             />
         );
@@ -135,6 +132,7 @@ export default function PdfToWordPage() {
 
     // Stage 3: Done
     if (stage === 'done') {
+        const meta = result?.meta as { engine?: string } | undefined;
         return (
             <DownloadView
                 title="¡Tu archivo Word (DOCX) está listo!"
@@ -143,7 +141,11 @@ export default function PdfToWordPage() {
                 onBack={backToEdit}
                 onRestart={handleRestart}
                 toolId="pdf-to-word"
-            />
+            >
+                {meta?.engine && (
+                    <p className="text-xs text-muted">Motor utilizado: {meta.engine}</p>
+                )}
+            </DownloadView>
         );
     }
 

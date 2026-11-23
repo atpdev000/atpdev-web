@@ -16,6 +16,7 @@ import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { usePageThumbnails } from '@/hooks/usePageThumbnails';
 import { useToolFlow } from '@/hooks/useToolFlow';
+import { formatPdfError } from '@/lib/pdf/pdfHelper';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { 
     Workspace, 
@@ -144,7 +145,12 @@ export default function SplitPage() {
 
             setProgress(10, 'Leyendo documento original…');
             const fileBuffer = await originalFile.arrayBuffer();
-            const sourcePdf = await PDFDocument.load(fileBuffer);
+            let sourcePdf;
+            try {
+                sourcePdf = await PDFDocument.load(fileBuffer);
+            } catch (err) {
+                throw new Error(formatPdfError(err));
+            }
 
             if (outputFormat === 'zip') {
                 setProgress(20, 'Creando archivo comprimido ZIP…');

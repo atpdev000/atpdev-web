@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Mail, ShieldCheck, Clock } from 'lucide-react';
+import { ArrowLeft, Mail, ShieldCheck, Clock, MessageSquare } from 'lucide-react';
+import { ContactForm } from '@/components/ContactForm';
 
 export const metadata: Metadata = {
   title: 'Contacto y Soporte Técnico — MasterAtPDF Pro',
@@ -58,6 +59,14 @@ export default function ContactoPdfPage() {
             <li><strong>Portal principal:</strong> <a href="https://www.atpdev.dev/contacto" className="text-brand underline font-semibold">www.atpdev.dev/contacto</a></li>
           </ul>
         </div>
+      </section>
+
+      <section className="p-6 sm:p-8 rounded-2xl bg-surface border border-line space-y-4">
+        <div className="flex items-center gap-2 text-ink font-bold text-base">
+          <MessageSquare className="w-4 h-4 text-brand" />
+          <h2>Enviar consulta técnica</h2>
+        </div>
+        <ContactForm />
       </section>
 
       <section className="p-6 sm:p-8 rounded-2xl bg-surface border border-line space-y-4 text-sm leading-relaxed text-ink-2">

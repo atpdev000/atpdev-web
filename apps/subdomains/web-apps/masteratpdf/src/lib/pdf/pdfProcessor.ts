@@ -1,5 +1,5 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { getPdfJs } from './pdfHelper';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
+import { getPdfJs, extractPdfTextItems } from './pdfHelper';
 
 export class PDFProcessor {
     // --- Merge ---
@@ -40,9 +40,10 @@ export class PDFProcessor {
             copiedPages.forEach((page) => newPdf.addPage(page));
 
             return await newPdf.save();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error splitting PDF:', error);
-            throw new Error(error.message || 'Failed to split PDF');
+            const msg = error instanceof Error ? error.message : '';
+            throw new Error(msg || 'Failed to split PDF');
         }
     }
 
@@ -102,7 +103,7 @@ export class PDFProcessor {
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                const pageText = extractPdfTextItems(textContent.items).map((item) => item.str).join(' ');
                 fullText += pageText + '\n\n';
             }
 
@@ -159,8 +160,9 @@ export class PDFProcessor {
 
             await page.render({
                 canvasContext: context,
+                canvas,
                 viewport: viewport,
-            } as any).promise;
+            }).promise;
 
             return canvas.toDataURL('image/jpeg', 0.8);
         } catch (error) {

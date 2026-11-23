@@ -54,7 +54,7 @@ export default function UnlockPage() {
 
             try {
                 const buffer = await f.arrayBuffer();
-                const encrypted = await checkPdfEncrypted(buffer);
+                const encrypted = await checkPdfEncrypted(buffer, f);
                 setIsEncrypted(encrypted);
             } catch {
                 setIsEncrypted(true);
@@ -72,7 +72,7 @@ export default function UnlockPage() {
             const buffer = await file.arrayBuffer();
 
             setProgress(50, 'Descifrando contenido y eliminando restricciones…');
-            const res = await unlockPdf(buffer, password);
+            const res = await unlockPdf(buffer, password, file);
 
             if (!res.success || !res.bytes) {
                 throw new Error(res.error || 'No se pudo desbloquear el PDF.');

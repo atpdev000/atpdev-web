@@ -1,51 +1,37 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-    Sparkles, 
-    FileText, 
-    Copy, 
-    Check, 
-    Download, 
-    Trash2, 
-    Clock, 
-    BookOpen, 
-    Layers, 
-    BrainCircuit 
+import {
+    Sparkles,
+    Copy,
+    Check,
+    Trash2,
+    Tag,
+    RefreshCw,
 } from 'lucide-react';
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
 import { ToolUpload } from '@/components/tool/ToolUpload';
-import { 
-    Workspace, 
-    SidebarSection, 
-    OptionCard, 
-    StatRow, 
-    Notice 
+import {
+    Workspace,
+    SidebarSection,
+    OptionCard,
+    StatRow,
+    Notice,
 } from '@/components/tool/Workspace';
-import { ProcessingView, DownloadView } from '@/components/tool/FlowViews';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
-
-type SummaryStyle = 'executive' | 'bullets' | 'detailed';
-
-interface SummaryData {
-    title: string;
-    executiveSummary: string;
-    keyPoints: string[];
-    topics: string[];
-    readingTimeOriginalMin: number;
-    readingTimeSummaryMin: number;
-    totalWords: number;
-}
+import { ProcessingView } from '@/components/tool/FlowViews';
+import { loadPdfDocument, formatPdfError, extractPdfTextItems } from '@/lib/pdf/pdfHelper';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
+import { summarizeTextLocal, type SummaryOutput, type SummaryStyle } from '@/lib/pdf/textRankSummary';
 
 export default function AiSummaryPage() {
     const tool = getTool('ai-summary');
-    const { stage, progress, message, run, download, backToEdit, reset, error, setError, result } = useToolFlow();
+    const { stage, progress, message, run, download, reset, error, setError } = useToolFlow();
 
     const [file, setFile] = useState<File | null>(null);
     const [summaryStyle, setSummaryStyle] = useState<SummaryStyle>('executive');
-    const [summaryResult, setSummaryResult] = useState<SummaryData | null>(null);
+    const [summaryResult, setSummaryResult] = useState<SummaryOutput | null>(null);
     const [copied, setCopied] = useState<boolean>(false);
 
     const handleUpload = (files: File[]) => {
@@ -67,91 +53,114 @@ export default function AiSummaryPage() {
         }
     };
 
+    const buildMarkdown = (summaryObj: SummaryOutput, sourceFile: File, numPagesLabel: string) => {
+        return (
+            `# Resumen (${summaryStyle}): ${summaryObj.title}\n\n` +
+            `**Documento original:** ${sourceFile.name} (${formatBytes(sourceFile.size)})\n` +
+            `**Extensión:** ${summaryObj.totalWords.toLocaleString()} palabras · ${numPagesLabel}\n` +
+            `**Motor:** ${summaryObj.engine}\n` +
+            `**Lectura estimada:** De ${summaryObj.readingTimeOriginalMin} min a ${summaryObj.readingTimeSummaryMin} min\n\n` +
+            `---\n\n` +
+            `## Síntesis General\n\n${summaryObj.executiveSummary}\n\n` +
+            `## Puntos Clave\n\n` +
+            summaryObj.keyPoints.map((p, i) => `${i + 1}. ${p}`).join('\n') +
+            `\n\n## Temas Identificados\n\n` +
+            summaryObj.topics.map((t) => `- ${t}`).join('\n')
+        );
+    };
+
     const executeSummary = (f: File, style: SummaryStyle) => {
         run(async (setProgress) => {
-            setProgress(15, 'Extrayendo texto y estructura del documento…');
-            const buffer = await f.arrayBuffer();
-            const pdfDoc = await loadPdfDocument(buffer);
-            const numPages = pdfDoc.numPages;
+            setProgress(15, 'Analizando contenido del documento…');
 
+            // 1. Intentar motor del backend (LLM si configurado o TextRank Python)
+            try {
+                const formData = new FormData();
+                formData.append('file', f);
+                formData.append('style', style);
+
+                setProgress(45, 'Sintetizando conceptos clave e ideas principales…');
+                const response = await postToBackend('/api/convert/ai-summary', formData);
+                const data = await response.json();
+
+                const summaryObj: SummaryOutput = {
+                    title: data.title || f.name.replace(/\.pdf$/i, ''),
+                    executiveSummary: data.executive_summary || '',
+                    keyPoints: data.key_points || [],
+                    topics: data.topics || [],
+                    readingTimeOriginalMin: data.reading_time_original_min || 1,
+                    readingTimeSummaryMin: data.reading_time_summary_min || 1,
+                    totalWords: data.total_words || 0,
+                    engine: data.engine || 'Servidor NLP/LLM',
+                };
+
+                setSummaryResult(summaryObj);
+                setProgress(100, '¡Resumen completado!');
+
+                const md = buildMarkdown(summaryObj, f, `${data.page_count || '?'} páginas`);
+                return {
+                    blob: new Blob([md], { type: 'text/markdown;charset=utf-8' }),
+                    fileName: `${f.name.replace(/\.pdf$/i, '')}-resumen.md`,
+                };
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
+                }
+            }
+
+            // 2. Fallback 100% local con TextRank + TF-IDF real en navegador
+            let pdfDoc;
+            try {
+                const buffer = await f.arrayBuffer();
+                pdfDoc = await loadPdfDocument(buffer);
+            } catch (err) {
+                throw new Error(formatPdfError(err));
+            }
+
+            const numPages = pdfDoc.numPages;
             let fullText = '';
+
             for (let i = 1; i <= numPages; i++) {
-                const percent = 15 + Math.round(((i - 0.5) / numPages) * 45);
-                setProgress(percent, `Analizando página ${i} de ${numPages}…`);
+                const percent = 20 + Math.round(((i - 0.5) / numPages) * 50);
+                setProgress(percent, `Leyendo página ${i} de ${numPages}…`);
 
                 const page = await pdfDoc.getPage(i);
                 const textContent = await page.getTextContent();
-                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                const pageText = extractPdfTextItems(textContent.items).map((item) => item.str).join(' ');
                 fullText += pageText + ' ';
             }
 
-            setProgress(65, 'Sintetizando ideas principales y extrayendo conceptos clave…');
+            if (fullText.trim().split(/\s+/).filter(Boolean).length < 10) {
+                throw new Error(
+                    'El documento no contiene texto seleccionable suficiente (si es un escaneo, pásalo primero por OCR PDF).'
+                );
+            }
 
-            const words = fullText.trim().split(/\s+/).filter(Boolean);
-            const totalWordsCount = words.length;
-            const originalReadingTime = Math.max(1, Math.round(totalWordsCount / 200));
-
-            // Intelligent extractive summarization
-            const sentences = fullText
-                .replace(/\n+/g, ' ')
-                .split(/(?<=[.?!])\s+/)
-                .filter((s) => s.length > 30 && s.length < 250);
-
-            // Select key prominent sentences
-            const selectedSentences = sentences
-                .slice(0, Math.min(sentences.length, 12))
-                .filter((s, idx) => idx % 2 === 0);
-
-            const docTitle = f.name.replace(/\.pdf$/i, '').replace(/[-_]/g, ' ');
-
-            const keyPointsList = selectedSentences.slice(0, 5).map((s) => s.trim());
-            const topicsFound = ['Objetivos y Alcance', 'Metodología', 'Resultados Principales', 'Conclusiones y Recomendaciones'];
-
-            const executiveText = selectedSentences.length > 0
-                ? selectedSentences.join(' ')
-                : `El documento ${f.name} contiene ${numPages} páginas con ${totalWordsCount.toLocaleString()} palabras. Presenta información técnica y profesional estructurada en múltiples secciones.`;
-
-            setProgress(90, 'Generando reporte ejecutivo de síntesis…');
-
-            const summaryObj: SummaryData = {
-                title: docTitle,
-                executiveSummary: executiveText,
-                keyPoints: keyPointsList.length > 0 ? keyPointsList : [
-                    'Estructura integral organizada en capítulos temáticos.',
-                    'Contenido analítico con métricas cuantitativas y cualitativas.',
-                    'Desarrollo conceptual orientado a objetivos específicos.',
-                    'Conclusiones y líneas de acción definidas en el documento.'
-                ],
-                topics: topicsFound,
-                readingTimeOriginalMin: originalReadingTime,
-                readingTimeSummaryMin: Math.max(1, Math.round(originalReadingTime * 0.15)),
-                totalWords: totalWordsCount,
-            };
-
+            setProgress(80, 'Calculando relevancia semántica (TextRank + TF-IDF)…');
+            const summaryObj = summarizeTextLocal(fullText, f.name, style);
             setSummaryResult(summaryObj);
             setProgress(100, '¡Resumen completado con éxito!');
 
-            const markdownSummary = `# Resumen Ejecutivo: ${summaryObj.title}\n\n` +
-                `**Documento original:** ${f.name} (${formatBytes(f.size)})\n` +
-                `**Extensión:** ${totalWordsCount.toLocaleString()} palabras · ${numPages} páginas\n` +
-                `**Ahorro de tiempo estimado:** De ${originalReadingTime} min a ${summaryObj.readingTimeSummaryMin} min\n\n` +
-                `---\n\n` +
-                `## 📌 Síntesis General\n\n${summaryObj.executiveSummary}\n\n` +
-                `## 🎯 Puntos Clave\n\n` +
-                summaryObj.keyPoints.map((p, i) => `${i + 1}. ${p}`).join('\n') +
-                `\n\n## 🏷️ Temas Tratados\n\n` +
-                summaryObj.topics.map((t) => `- ${t}`).join('\n');
-
+            const md = buildMarkdown(summaryObj, f, `${numPages} páginas`);
             return {
-                blob: new Blob([markdownSummary], { type: 'text/markdown;charset=utf-8' }),
+                blob: new Blob([md], { type: 'text/markdown;charset=utf-8' }),
                 fileName: `${f.name.replace(/\.pdf$/i, '')}-resumen.md`,
             };
         });
     };
 
+    const handleChangeStyle = (nextStyle: SummaryStyle) => {
+        setSummaryStyle(nextStyle);
+        if (file) {
+            executeSummary(file, nextStyle);
+        }
+    };
+
     const handleCopy = () => {
         if (!summaryResult) return;
-        const textToCopy = `Resumen Ejecutivo: ${summaryResult.title}\n\n${summaryResult.executiveSummary}\n\nPuntos Clave:\n` +
+        const textToCopy =
+            `Resumen (${summaryStyle}): ${summaryResult.title}\n\n` +
+            `${summaryResult.executiveSummary}\n\nPuntos Clave:\n` +
             summaryResult.keyPoints.map((p, i) => `${i + 1}. ${p}`).join('\n');
         navigator.clipboard.writeText(textToCopy);
         setCopied(true);
@@ -164,7 +173,6 @@ export default function AiSummaryPage() {
         reset();
     };
 
-    // Stage 1: Upload
     if (!file && stage === 'edit') {
         return (
             <ToolUpload
@@ -179,12 +187,14 @@ export default function AiSummaryPage() {
         );
     }
 
-    // Stage 2: Processing
     if (stage === 'processing') {
-        return <ProcessingView title="Sintetizando documento con Inteligencia Artificial…" progress={progress} message={message} />;
+        return <ProcessingView title="Sintetizando documento…" progress={progress} message={message} />;
     }
 
-    // Stage 3: Results Workspace
+    const origMin = summaryResult?.readingTimeOriginalMin || 1;
+    const sumMin = summaryResult?.readingTimeSummaryMin || 1;
+    const savedPct = origMin > sumMin ? Math.round(((origMin - sumMin) / origMin) * 100) : 0;
+
     return (
         <Workspace
             title={tool.name}
@@ -193,7 +203,7 @@ export default function AiSummaryPage() {
             actionDisabled={!summaryResult}
             error={error}
             toolbar={
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <span className="text-xs font-bold uppercase tracking-wider text-ink-2">
                             Resumen generado
@@ -205,6 +215,16 @@ export default function AiSummaryPage() {
                         )}
                     </div>
                     <div className="flex items-center gap-2">
+                        {file && (
+                            <button
+                                type="button"
+                                onClick={() => executeSummary(file, summaryStyle)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface border border-line hover:border-brand hover:text-brand text-xs font-semibold text-ink transition-colors cursor-pointer"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" />
+                                <span>Regenerar</span>
+                            </button>
+                        )}
                         <button
                             type="button"
                             onClick={handleCopy}
@@ -226,42 +246,70 @@ export default function AiSummaryPage() {
             }
             options={
                 <div className="space-y-6">
+                    <SidebarSection title="Estilo de síntesis">
+                        <div className="space-y-2">
+                            <OptionCard
+                                title="Resumen Ejecutivo"
+                                description="Síntesis equilibrada en 4 ideas centrales y 5 puntos clave."
+                                selected={summaryStyle === 'executive'}
+                                onSelect={() => handleChangeStyle('executive')}
+                            />
+                            <OptionCard
+                                title="Puntos Clave (Bullets)"
+                                description="Introducción breve y hasta 8 hallazgos ordenados por relevancia."
+                                selected={summaryStyle === 'bullets'}
+                                onSelect={() => handleChangeStyle('bullets')}
+                            />
+                            <OptionCard
+                                title="Análisis Detallado"
+                                description="Extracto amplio preservando el hilo argumental completo."
+                                selected={summaryStyle === 'detailed'}
+                                onSelect={() => handleChangeStyle('detailed')}
+                            />
+                        </div>
+                    </SidebarSection>
+
                     <SidebarSection title="Ahorro de tiempo estimado">
                         <div className="p-4 rounded-2xl bg-brand/10 border border-brand/20 space-y-2">
                             <div className="flex items-center justify-between text-xs font-bold text-ink">
                                 <span>Lectura completa:</span>
-                                <span className="line-through text-muted">{summaryResult?.readingTimeOriginalMin || 5} min</span>
+                                <span className="line-through text-muted">{origMin} min</span>
                             </div>
                             <div className="flex items-center justify-between text-sm font-black text-brand">
                                 <span>Lectura con resumen:</span>
-                                <span>{summaryResult?.readingTimeSummaryMin || 1} min</span>
+                                <span>{sumMin} min</span>
                             </div>
                             <div className="w-full h-1.5 bg-brand/20 rounded-full overflow-hidden">
-                                <div className="h-full bg-brand rounded-full w-[85%]" />
+                                <div className="h-full bg-brand rounded-full" style={{ width: `${Math.max(15, savedPct)}%` }} />
                             </div>
-                            <p className="text-[10px] text-muted text-right font-medium">85% de tiempo ahorrado</p>
+                            <p className="text-[10px] text-muted text-right font-medium">
+                                {savedPct > 0 ? `${savedPct}% de tiempo ahorrado` : 'Lectura rápida'}
+                            </p>
                         </div>
                     </SidebarSection>
 
                     <SidebarSection title="Métricas del análisis">
-                        <StatRow label="Palabras analizadas" value={summaryResult?.totalWords.toLocaleString() || ''} />
+                        <StatRow label="Palabras analizadas" value={summaryResult?.totalWords.toLocaleString() || '0'} />
                         <StatRow label="Puntos clave" value={`${summaryResult?.keyPoints.length || 0} identificados`} />
-                        <StatRow label="Modelo" value="IA Extractiva Local" />
+                        <StatRow label="Motor" value={summaryResult?.engine || 'TextRank + TF-IDF'} />
                     </SidebarSection>
 
                     <Notice tone="info">
-                        El resumen se genera mediante análisis semántico en tiempo real sin enviar tus documentos a servidores externos.
+                        Análisis mediante algoritmo de centralidad TextRank y TF-IDF (o LLM si hay clave configurada en servidor).
                     </Notice>
                 </div>
             }
         >
             {summaryResult && (
                 <div className="w-full max-w-4xl mx-auto space-y-6">
-                    {/* Header Card */}
                     <div className="bg-surface border border-line rounded-3xl p-6 sm:p-8 shadow-card space-y-4">
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex flex-wrap items-center gap-2.5">
                             <span className="px-2.5 py-1 rounded-lg bg-brand/10 text-brand text-xs font-bold uppercase tracking-wider">
-                                Resumen Ejecutivo
+                                {summaryStyle === 'detailed'
+                                    ? 'Análisis Detallado'
+                                    : summaryStyle === 'bullets'
+                                    ? 'Puntos Clave'
+                                    : 'Resumen Ejecutivo'}
                             </span>
                             <span className="text-xs text-muted font-medium">
                                 Documento: {file?.name}
@@ -273,9 +321,22 @@ export default function AiSummaryPage() {
                         <p className="text-sm text-ink-2 leading-relaxed text-justify">
                             {summaryResult.executiveSummary}
                         </p>
+
+                        {summaryResult.topics.length > 0 && (
+                            <div className="pt-2 flex flex-wrap items-center gap-2">
+                                <Tag className="w-3.5 h-3.5 text-muted" />
+                                {summaryResult.topics.map((topic, idx) => (
+                                    <span
+                                        key={idx}
+                                        className="px-2.5 py-1 rounded-full bg-canvas border border-line text-[11px] font-semibold text-ink-2"
+                                    >
+                                        {topic}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Key Takeaways */}
                     <div className="bg-surface border border-line rounded-3xl p-6 sm:p-8 shadow-card space-y-4">
                         <h3 className="text-base font-bold text-ink flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-brand" />

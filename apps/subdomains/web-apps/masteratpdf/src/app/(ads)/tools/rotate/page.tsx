@@ -12,7 +12,7 @@ import {
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError } from '@/lib/pdf/pdfHelper';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { 
     Workspace, 
@@ -63,7 +63,7 @@ export default function RotatePage() {
                 const ctx = canvas.getContext('2d');
 
                 if (ctx) {
-                    await page.render({ canvasContext: ctx, viewport } as any).promise;
+                    await page.render({ canvasContext: ctx, canvas, viewport }).promise;
                     loaded.push({
                         index: i - 1,
                         thumbnail: canvas.toDataURL('image/jpeg', 0.85),
@@ -76,7 +76,7 @@ export default function RotatePage() {
             setPages(loaded);
         } catch (err) {
             console.error('Error loading PDF:', err);
-            setError('Error al procesar el documento PDF.');
+            setError(formatPdfError(err));
         } finally {
             setLoading(false);
             setLoadingProgress(0);

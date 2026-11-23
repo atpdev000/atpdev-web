@@ -29,6 +29,7 @@ import {
     PdfLoadingOverlay 
 } from '@/components/tool/FlowViews';
 import { convertPdfToExcel } from '@/lib/pdf/pdfToExcel';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 
 type SheetMode = 'single-sheet' | 'multi-sheet';
 
@@ -60,6 +61,30 @@ export default function PdfToExcelPage() {
         if (!originalFile) return;
 
         run(async (setProgress) => {
+            const baseName = originalFile.name.replace(/\.pdf$/i, '');
+            setProgress(15, 'Analizando tablas y celdas del documento…');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', originalFile);
+                formData.append('mode', sheetMode);
+
+                setProgress(40, 'Extrayendo tablas con detector estructural (pdfplumber)…');
+                const response = await postToBackend('/api/convert/pdf-to-excel', formData, 180000);
+                setProgress(90, 'Generando libro Excel (.xlsx)…');
+                const blob = await response.blob();
+                setProgress(100, '¡Archivo Excel listo!');
+
+                return {
+                    blob,
+                    fileName: `${baseName}.xlsx`,
+                };
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
+                }
+            }
+
             const res = await convertPdfToExcel(originalFile, {
                 mode: sheetMode,
                 onProgress: (p, msg) => setProgress(p, msg),

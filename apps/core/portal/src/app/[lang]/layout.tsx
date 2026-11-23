@@ -45,7 +45,7 @@ const BUILTIN_FONT_MAP: Record<string, string> = {
 const BASE_URL = "https://www.atpdev.dev";
 const OG_IMAGE = `${BASE_URL}/og-image.png`;
 
-const supportedLocales = ['es', 'en', 'ru', 'hi', 'zh', 'fr', 'de', 'pt', 'ja'];
+const supportedLocales = ['es', 'en'];
 
 export async function generateStaticParams() {
   return supportedLocales.map((lang) => ({ lang }));
@@ -372,11 +372,8 @@ export default async function RootLayout({
             }
           `
         }} />
-      </head>
-      <body className={`font-sans antialiased min-h-screen`} data-interaction={normalizeGlowStyle(config?.glow_style)} suppressHydrationWarning>
-
-        {/* Consent Mode v2 Default (Must be loaded before GA4/AdSense) */}
-        <Script id="consent-mode-default">{`
+        {/* Consent Mode v2 Default (Must execute in head before GA4/AdSense) */}
+        <Script id="consent-mode-default" strategy="beforeInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('consent', 'default', {
@@ -388,6 +385,8 @@ export default async function RootLayout({
           });
           gtag('set', 'ads_data_redaction', true);
         `}</Script>
+      </head>
+      <body className={`font-sans antialiased min-h-screen`} data-interaction={normalizeGlowStyle(config?.glow_style)} suppressHydrationWarning>
 
         {/* Google Analytics & Microsoft Clarity cargados post-interacción/consentimiento */}
         <ThirdPartyScripts ga4Id={config?.ga4_id} clarityId={clarityId} />

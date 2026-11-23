@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Política oficial de cookies de MasterAtPDF Pro: cookies técnicas esenciales, Consent Mode v2 y cookies de Google AdSense sin almacenar tus archivos PDF.',
   alternates: { canonical: '/politica-de-cookies' },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: true },
 };
 
 export default function PoliticaCookiesPage() {
@@ -50,7 +50,7 @@ export default function PoliticaCookiesPage() {
               <strong>Cookies técnicas esenciales:</strong> preservan tus preferencias de interfaz y el consentimiento configurado, manteniendo por defecto señales restrictivas hasta tu autorización.
             </li>
             <li>
-              <strong>Cookies de Google AdSense:</strong> Google y sus socios utilizan cookies publicitarias para mostrar anuncios relevantes o no personalizados según tu consentimiento, permitiendo ofrecer las 19 herramientas PDF de forma gratuita.
+              <strong>Cookies de Google AdSense:</strong> Google y sus socios utilizan cookies publicitarias para mostrar anuncios relevantes o no personalizados según tu consentimiento, permitiendo ofrecer las 23 herramientas PDF de forma gratuita.
             </li>
             <li>
               <strong>Cookies analíticas agregadas:</strong> únicamente tras consentimiento, miden rendimiento y estabilidad del servicio web sin asociar documentos ni datos personales.

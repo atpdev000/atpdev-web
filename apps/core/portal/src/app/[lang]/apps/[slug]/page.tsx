@@ -34,7 +34,7 @@ const AppleStoreIcon = ({ size = 24 }: { size?: number }) => (
 export async function generateStaticParams() {
   const allProjects = await getProjects();
   const projects = allProjects.filter(p => p.status !== 'Privado');
-  const langs = ['es', 'en', 'ru', 'hi', 'zh', 'fr', 'de', 'pt', 'ja'];
+  const langs = ['es', 'en'];
   
   // Create combinations for all languages and all slugs
   const params: { lang: string; slug: string }[] = [];
@@ -115,6 +115,10 @@ export default async function ProjectPage({
   params: Promise<{ lang: string; slug: string }>;
 }) {
   const { lang, slug } = await params;
+
+  if (!['es', 'en'].includes(lang)) {
+    notFound();
+  }
   
   const [projects, config] = await Promise.all([
     getProjects(),
@@ -461,6 +465,58 @@ export default async function ProjectPage({
               appstore={appstoreUrl}
               qrConfig={localTheme?.qr || null}
             />
+
+            {wordCount < 220 && (
+              <section className="mt-8 pt-8 border-t border-white/10 space-y-6 text-base leading-relaxed">
+                <div className="space-y-3">
+                  <h2 className="text-xl sm:text-2xl font-black text-[var(--text-color)] tracking-tight">
+                    {isEn
+                      ? `Technical Architecture & Systems Engineering of ${translatedTitle}`
+                      : `Arquitectura Técnica e Ingeniería de Sistemas de ${translatedTitle}`}
+                  </h2>
+                  <p className="text-[var(--text-muted)]">
+                    {isEn
+                      ? `${translatedTitle} is engineered within the ATP Dev ecosystem under the ${translatedCat} category, utilizing a modern production stack based on ${stackSummary}. Its modular architecture separates the presentation layer, domain validation rules, and data persistence so that every user interaction completes with deterministic latency, strict type safety, and responsive visual feedback across ${operatingSystems}.`
+                      : `${translatedTitle} ha sido diseñado y desarrollado dentro del ecosistema de ingeniería de software de ATP Dev bajo la categoría ${translatedCat}, implementando una pila tecnológica de producción basada en ${stackSummary}. Su arquitectura modular desacopla la capa de presentación interactiva, las reglas de validación de dominio y la gestión de estado para garantizar tiempos de respuesta deterministas, tipado estricto y una experiencia fluida en ${operatingSystems}.`}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <h3 className="text-base font-bold text-emerald-400">
+                      {isEn ? "Performance & Runtime Optimization" : "Rendimiento y Optimización en Ejecución"}
+                    </h3>
+                    <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                      {isEn
+                        ? `Built with ${stackSummary}, the application minimizes main-thread blocking, optimizes asset hydration, and prioritizes Core Web Vitals (LCP, INP, and CLS) or native 60fps rendering on mobile and desktop environments.`
+                        : `Construido con ${stackSummary}, el sistema minimiza el bloqueo del hilo principal, optimiza la carga de recursos estáticos y prioriza métricas de Core Web Vitals (LCP, INP y CLS) o renderizado nativo a 60 fps en entornos móviles y de escritorio.`}
+                    </p>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                    <h3 className="text-base font-bold text-cyan-400">
+                      {isEn ? "Security, Privacy & Data Integrity" : "Seguridad, Privacidad e Integridad de Datos"}
+                    </h3>
+                    <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                      {isEn
+                        ? `Adheres to privacy-by-design principles over encrypted HTTPS transport, enforcing input sanitization, zero invasive background trackers, and transparent user consent under GDPR and Peruvian Law No. 29733.`
+                        : `Aplica principios de privacidad por diseño sobre transporte cifrado HTTPS, incorporando validación estricta de entradas, ausencia de rastreadores invasivos en segundo plano y cumplimiento transparente de la Ley N° 29733 y GDPR.`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-[var(--text-color)]">
+                    {isEn ? "Operational Workflow & Practical Use Cases" : "Flujo Operativo y Casos de Uso Reales"}
+                  </h3>
+                  <p className="text-sm sm:text-base text-[var(--text-muted)]">
+                    {isEn
+                      ? `Whether accessed via web browser or native build (${operatingSystems}), ${translatedTitle} streamlines daily technical and professional workflows without requiring complex local installations or mandatory paywalls. Users can inspect the live deployment, verify the stack components (${stackSummary}), and consult the technical FAQ below before integrating the tool into their routine.`
+                      : `Ya sea accediendo desde un navegador moderno o mediante su compilación para ${operatingSystems}, ${translatedTitle} resuelve flujos de trabajo reales sin exigir configuraciones complejas ni registros forzosos. Los usuarios y equipos técnicos pueden explorar la versión operativa, auditar los componentes del stack (${stackSummary}) y consultar las preguntas frecuentes detalladas a continuación.`}
+                  </p>
+                </div>
+              </section>
+            )}
 
             {/* In-article Google AdSense Slot */}
             {config?.adsense_id && (

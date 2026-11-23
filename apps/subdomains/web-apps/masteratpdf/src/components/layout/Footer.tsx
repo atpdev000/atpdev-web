@@ -18,11 +18,11 @@ export const Footer = () => {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-ink-2">
                         <div className="flex items-center gap-2">
                             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span><strong>Privacidad 100% Garantizada:</strong> Procesamiento local en tu navegador. Tus archivos nunca salen de tu ordenador.</span>
+                            <span><strong>Privacidad por Diseño:</strong> Procesamiento local WebAssembly + conversión efímera con borrado automático inmediato.</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted">
                             <Cpu className="w-4 h-4 text-brand shrink-0" />
-                            <span>Acelerado con WebAssembly & PDF.js v5</span>
+                            <span>Acelerado con WebAssembly, PDF.js v5 & Motor PyMuPDF</span>
                         </div>
                     </div>
                 </div>
@@ -43,7 +43,7 @@ export const Footer = () => {
                             </span>
                         </Link>
                         <p className="text-xs text-ink-2 leading-relaxed max-w-sm">
-                            La suite integral de herramientas PDF client-side con estándar profesional. Une, divide, comprime, rota, convierte y organiza documentos hasta 250MB con total privacidad y velocidad.
+                            La suite integral de 23 herramientas PDF con arquitectura híbrida profesional. Une, divide, comprime, rota, cifra con AES-256, convierte a Office y organiza documentos de hasta 250 MB con total privacidad y velocidad.
                         </p>
                         <div className="pt-2">
                             <a

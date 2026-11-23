@@ -462,6 +462,88 @@ export const TOOL_GUIDES: Record<string, ToolGuideData> = {
         a: 'No; funciona como apoyo rápido para ubicar secciones relevantes antes de revisar el documento oficial.'
       }
     ]
+  },
+  crop: {
+    headline: 'Cómo recortar márgenes blancos o áreas no deseadas de un PDF',
+    intro:
+      'Elimina bordes amplios, encabezados repetitivos o márgenes de escaneo ajustando la caja visible de todas las páginas o de una hoja puntual sin perder nitidez.',
+    steps: [
+      'Carga tu documento PDF en el área de trabajo.',
+      'Ajusta los porcentajes de recorte superior, inferior, izquierdo y derecho sobre la vista previa.',
+      'Aplica a todo el documento o a la página actual y descarga el PDF recortado.'
+    ],
+    tips: [
+      'Útil para adaptar documentos escaneados o tickets antes de imprimir en formato compacto.',
+      'Puedes restablecer los márgenes a 0% en cualquier momento antes de exportar.'
+    ],
+    faqs: [
+      {
+        q: '¿El recorte reduce la calidad del texto?',
+        a: 'No. Se actualizan las cajas CropBox y MediaBox preservando el contenido vectorial original.'
+      },
+      {
+        q: '¿Puedo recortar solo una página?',
+        a: 'Sí, selecciona la opción Solo página actual en el panel lateral.'
+      }
+    ]
+  },
+  repair: {
+    headline: 'Cómo reparar un archivo PDF corrupto o dañado',
+    intro:
+      'Cuando una descarga se interrumpe o un software genera tablas de referencias cruzadas dañadas, el motor reconstruye los objetos recuperables en un PDF limpio.',
+    steps: [
+      'Selecciona el archivo PDF que presenta fallos de apertura.',
+      'Inicia el proceso de reconstrucción estructural (PyMuPDF / pdf-lib).',
+      'Descarga el documento recuperado y verifica las páginas restauradas.'
+    ],
+    tips: [
+      'Conserva el archivo original como respaldo por si el daño afecta a flujos binarios irrecuperables.'
+    ],
+    faqs: [
+      {
+        q: '¿Qué tipos de errores puede corregir?',
+        a: 'Tablas XRef desalineadas, streams sin comprimir o cabeceras con metadatos corruptos.'
+      }
+    ]
+  },
+  sign: {
+    headline: 'Cómo firmar un PDF online dibujando o subiendo tu rúbrica',
+    intro:
+      'Estampa tu firma manuscrita, tipográfica o imagen PNG transparente sobre contratos, solicitudes o constancias sin necesidad de imprimir ni escanear.',
+    steps: [
+      'Sube el PDF que necesitas firmar.',
+      'Dibuja tu firma con el mouse/dedo, escríbela o sube una imagen PNG.',
+      'Haz clic sobre la página en el lugar exacto y descarga el PDF firmado.'
+    ],
+    tips: [
+      'Puedes colocar firmas en múltiples páginas dentro de la misma sesión.',
+      'Ajusta el porcentaje de ancho antes de hacer clic para adaptarlo al recuadro del contrato.'
+    ],
+    faqs: [
+      {
+        q: '¿Se borra o altera el texto existente del contrato?',
+        a: 'No, la firma se incrusta como una capa gráfica independiente encima de la página.'
+      }
+    ]
+  },
+  redact: {
+    headline: 'Cómo censurar y eliminar datos confidenciales de un PDF',
+    intro:
+      'Antes de compartir expedientes, boletas o contratos públicamente, marca los campos sensibles para purgar el texto y gráficos subyacentes de forma irreversible.',
+    steps: [
+      'Carga el documento PDF con información sensible.',
+      'Arrastra con el cursor sobre los datos que deseas ocultar en cada página.',
+      'Aplica la censura permanente y descarga el archivo limpio.'
+    ],
+    tips: [
+      'A diferencia de tapar con un cuadro negro en un editor simple, aquí se elimina el texto real debajo del área marcada.'
+    ],
+    faqs: [
+      {
+        q: '¿Se puede recuperar o copiar el texto debajo de la zona negra?',
+        a: 'No. Tanto la purga estructural en servidor como el aplanado de página eliminan los caracteres subyacentes.'
+      }
+    ]
   }
 };
 

@@ -60,7 +60,7 @@ export function PageZoomModal({
                 const ctx = canvas.getContext('2d');
 
                 if (ctx) {
-                    await page.render({ canvasContext: ctx, viewport } as any).promise;
+                    await page.render({ canvasContext: ctx, canvas, viewport }).promise;
                     if (!isCancelled) {
                         setHighResUrl(canvas.toDataURL('image/jpeg', 0.95));
                     }

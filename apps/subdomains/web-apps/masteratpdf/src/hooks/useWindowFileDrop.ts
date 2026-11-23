@@ -10,12 +10,16 @@ export function useWindowFileDrop(onFiles: (files: File[]) => void, enabled = tr
     const [isDragging, setIsDragging] = useState(false);
     const counter = useRef(0);
     const handlerRef = useRef(onFiles);
-    handlerRef.current = onFiles;
+
+    useEffect(() => {
+        handlerRef.current = onFiles;
+    }, [onFiles]);
 
     useEffect(() => {
         if (!enabled) {
-            setIsDragging(false);
-            return;
+            counter.current = 0;
+            const t = window.setTimeout(() => setIsDragging(false), 0);
+            return () => window.clearTimeout(t);
         }
 
         const hasFiles = (e: DragEvent) => Array.from(e.dataTransfer?.types ?? []).includes('Files');
@@ -56,5 +60,5 @@ export function useWindowFileDrop(onFiles: (files: File[]) => void, enabled = tr
         };
     }, [enabled]);
 
-    return isDragging;
+    return enabled && isDragging;
 }

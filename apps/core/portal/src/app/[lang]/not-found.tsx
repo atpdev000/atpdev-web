@@ -60,11 +60,11 @@ export default function NotFound() {
       <div className="absolute inset-0 bg-[var(--bg1)] opacity-20 pointer-events-none"></div>
 
       <div className="relative z-10 max-w-2xl mx-auto px-6 text-center flex flex-col items-center">
-        <div className="mb-8 p-4 rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/30 animate-pulse">
+        <div data-page-type="not-found" className="mb-8 p-4 rounded-full bg-[var(--primary)]/10 border border-[var(--primary)]/30 animate-pulse">
           <ShieldAlert size={48} className="text-[var(--primary)]" />
         </div>
         
-        <div className="glitch-wrapper mb-4">
+        <div data-page-type="not-found" className="glitch-wrapper mb-4">
           <h1 className="glitch font-heading" data-text="404">404</h1>
         </div>
         

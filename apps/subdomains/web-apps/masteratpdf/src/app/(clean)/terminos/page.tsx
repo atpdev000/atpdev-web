@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Términos y condiciones de uso de las herramientas PDF locales de MasterAtPDF Pro.',
   alternates: { canonical: '/terminos' },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: true },
 };
 
 export default function TerminosPage() {
@@ -33,10 +33,10 @@ export default function TerminosPage() {
         <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
           <div className="flex items-center gap-2 text-ink font-bold">
             <FileText className="w-4 h-4 text-brand" />
-            <h2>1. Alcance del servicio y procesamiento en cliente</h2>
+            <h2>1. Alcance del servicio y arquitectura híbrida de procesamiento</h2>
           </div>
           <p>
-            MasterAtPDF Pro pone a disposición herramientas web gratuitas para manipular archivos PDF en el dispositivo del usuario mediante tecnologías modernas del navegador (WebAssembly y procesamiento local de memoria). Al no transferir documentos hacia servidores remotos de procesamiento, el usuario mantiene en todo momento la custodia física y lógica de sus archivos.
+            MasterAtPDF Pro pone a disposición herramientas web gratuitas para manipular archivos PDF mediante una arquitectura híbrida: las operaciones estructurales rápidas (unión, división, rotación, recorte, numeración, marca de agua, firma visual y organización) pueden ejecutarse directamente en la memoria del navegador con WebAssembly y PDF.js, mientras que las conversiones avanzadas (Word, Excel, PowerPoint, cifrado AES-256, reparación estructural y OCR) se procesan de forma efímera y cifrada en nuestro motor de conversión, eliminándose automáticamente tras finalizar la descarga.
           </p>
           <p>
             Recomendamos encarecidamente conservar una copia de respaldo de los documentos originales antes de ejecutar compresiones, reducciones de DPI o eliminaciones de páginas.

@@ -1,43 +1,39 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-    ScanText, 
-    FileText, 
-    Globe, 
-    Search, 
-    Trash2, 
-    Check, 
-    Sparkles, 
-    Download 
+import {
+    FileText,
+    Search,
+    Trash2,
 } from 'lucide-react';
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
 import { usePageThumbnails } from '@/hooks/usePageThumbnails';
 import { ToolUpload } from '@/components/tool/ToolUpload';
-import { 
-    Workspace, 
-    SidebarSection, 
-    OptionCard, 
-    StatRow, 
-    Notice 
+import {
+    Workspace,
+    SidebarSection,
+    OptionCard,
+    StatRow,
+    Notice,
 } from '@/components/tool/Workspace';
 import { ThumbCard } from '@/components/tool/ThumbCard';
-import { 
-    ProcessingView, 
-    DownloadView, 
-    PdfLoadingOverlay 
+import {
+    ProcessingView,
+    DownloadView,
+    PdfLoadingOverlay,
 } from '@/components/tool/FlowViews';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError, extractPdfTextItems } from '@/lib/pdf/pdfHelper';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 
 type OcrLanguage = 'spa' | 'eng' | 'fra' | 'deu';
 
 export default function OcrPage() {
     const tool = getTool('ocr');
     const { stage, progress, message, run, download, backToEdit, reset, error, setError, result } = useToolFlow();
-    const { pages, loading, loadingProgress, addFiles, clearPages, originalFile } = usePageThumbnails();
+    const { pages, loading, loadingProgress, addFiles, clearPages, originalFile, error: thumbError } = usePageThumbnails();
 
     const [language, setLanguage] = useState<OcrLanguage>('spa');
     const [outputMode, setOutputMode] = useState<'searchable_pdf' | 'text_file'>('searchable_pdf');
@@ -63,102 +59,151 @@ export default function OcrPage() {
         if (!originalFile) return;
 
         run(async (setProgress) => {
-            setProgress(15, 'Analizando capas de imagen y mapas de bits…');
-            const buffer = await originalFile.arrayBuffer();
-            const pdfDoc = await loadPdfDocument(buffer);
-            const numPages = pdfDoc.numPages;
+            setProgress(10, 'Analizando capas del documento PDF…');
+            const baseName = originalFile.name.replace(/\.pdf$/i, '');
 
-            let extractedFullText = '';
-
-            // Check if backend OCR is available
-            const backendUrl = process.env.NEXT_PUBLIC_PDF_BACKEND_URL || 'http://localhost:8000';
-            let backendSuccess = false;
-
+            // 1. Intentar motor OCR en servidor (EasyOCR / Tesseract)
             try {
                 const formData = new FormData();
                 formData.append('file', originalFile);
                 formData.append('language', language);
+                formData.append('output_mode', outputMode);
 
-                setProgress(35, 'Conectando con motor de reconocimiento óptico…');
-                const res = await fetch(`${backendUrl}/api/convert/ocr`, {
-                    method: 'POST',
-                    body: formData,
-                });
+                setProgress(30, 'Ejecutando reconocimiento óptico (OCR) en servidor…');
+                const res = await postToBackend('/api/convert/ocr', formData, 180000);
+                setProgress(90, 'Generando archivo con texto indexado…');
+                const blob = await res.blob();
+                setProgress(100, '¡OCR completado con éxito!');
 
-                if (res.ok) {
-                    setProgress(90, 'Generando documento con capa de texto indexada…');
-                    const blob = await res.blob();
-                    backendSuccess = true;
-                    setProgress(100, '¡OCR completado con éxito!');
-
-                    const baseName = originalFile.name.replace(/\.pdf$/i, '');
-                    return {
-                        blob,
-                        fileName: `${baseName}-ocr.pdf`,
-                    };
+                return {
+                    blob,
+                    fileName: outputMode === 'text_file' ? `${baseName}-ocr.txt` : `${baseName}-buscable.pdf`,
+                    meta: { engine: `Servidor (${res.headers.get('X-Conversion-Method') || 'OCR'})` },
+                };
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
                 }
-            } catch (err) {
-                console.warn('Backend OCR offline, running client-side OCR layer generator:', err);
             }
 
-            // Local in-browser OCR Layer processing
-            setProgress(40, 'Digitalizando y reconstruyendo vectores de texto…');
-            const targetPdf = await PDFDocument.load(buffer, { ignoreEncryption: true });
-            const font = await targetPdf.embedFont(StandardFonts.Helvetica);
-            const pdfPages = targetPdf.getPages();
+            // 2. Fallback OCR real 100% en navegador con Tesseract.js (WebAssembly)
+            setProgress(20, 'Inicializando motor OCR Tesseract WebAssembly local…');
+            const buffer = await originalFile.arrayBuffer();
 
-            for (let i = 0; i < numPages; i++) {
-                const pPercent = 40 + Math.round(((i + 1) / numPages) * 50);
-                setProgress(pPercent, `Indexando caracteres de la página ${i + 1} de ${numPages}…`);
+            let pdfDoc;
+            try {
+                pdfDoc = await loadPdfDocument(buffer);
+            } catch (err) {
+                throw new Error(formatPdfError(err));
+            }
 
-                const page = await pdfDoc.getPage(i + 1);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map((item: any) => item.str).join(' ');
+            const numPages = pdfDoc.numPages;
+            const targetPdf = outputMode === 'searchable_pdf' ? await PDFDocument.load(buffer) : null;
+            const font = targetPdf ? await targetPdf.embedFont(StandardFonts.Helvetica) : null;
+            const pdfPages = targetPdf ? targetPdf.getPages() : [];
 
-                extractedFullText += `--- PÁGINA ${i + 1} ---\n` + pageText + '\n\n';
+            const { createWorker } = await import('tesseract.js');
+            const worker = await createWorker(language);
 
-                // Add searchable text layer if needed
-                if (i < pdfPages.length && textContent.items.length > 0) {
-                    const targetPage = pdfPages[i];
-                    // Embedding transparent searchable text layer
-                    for (const item of textContent.items as any[]) {
-                        if (!item.str || item.str.trim() === '') continue;
-                        try {
-                            targetPage.drawText(item.str, {
-                                x: Math.max(0, item.transform[4]),
-                                y: Math.max(0, item.transform[5]),
-                                size: Math.max(6, Math.hypot(item.transform[0], item.transform[1])),
-                                font,
-                                color: rgb(0, 0, 0),
-                                opacity: 0.01, // Invisible overlay over the scanned image for searchability
-                            });
-                        } catch {
-                            // Skip glyph encoding errors
+            let extractedFullText = '';
+
+            try {
+                for (let i = 0; i < numPages; i++) {
+                    const pPercent = 25 + Math.round(((i + 0.5) / numPages) * 68);
+                    setProgress(pPercent, `Reconociendo texto (OCR) en página ${i + 1} de ${numPages}…`);
+
+                    const page = await pdfDoc.getPage(i + 1);
+                    const textContent = await page.getTextContent();
+                    const nativeText = extractPdfTextItems(textContent.items)
+                        .map((item) => item.str || '')
+                        .join(' ')
+                        .trim();
+
+                    // Si la página ya tiene texto seleccionable suficiente, conservarlo
+                    if (nativeText.split(/\s+/).filter(Boolean).length >= 8) {
+                        extractedFullText += `--- PÁGINA ${i + 1} ---\n${nativeText}\n\n`;
+                        continue;
+                    }
+
+                    // Renderizar página escaneada a canvas en alta resolución para OCR
+                    const scale = 2.0;
+                    const viewport = page.getViewport({ scale });
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) continue;
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({ canvasContext: ctx, canvas, viewport }).promise;
+
+                    const ocrRes = await worker.recognize(canvas, {}, { text: true, blocks: true });
+                    const pageOcrText = (ocrRes.data.text || '').trim();
+                    extractedFullText += `--- PÁGINA ${i + 1} ---\n${pageOcrText}\n\n`;
+
+                    // Superponer capa de texto invisible exactamente sobre las palabras detectadas
+                    if (targetPdf && font && i < pdfPages.length && ocrRes.data.blocks) {
+                        const targetPage = pdfPages[i];
+                        const { width: pdfW, height: pdfH } = targetPage.getSize();
+                        const ratioX = pdfW / canvas.width;
+                        const ratioY = pdfH / canvas.height;
+
+                        for (const block of ocrRes.data.blocks) {
+                            for (const para of block.paragraphs || []) {
+                                for (const line of para.lines || []) {
+                                    for (const word of line.words || []) {
+                                        const wText = (word.text || '').trim();
+                                        if (!wText) continue;
+                                        const xPt = word.bbox.x0 * ratioX;
+                                        const boxH = Math.max(6, (word.bbox.y1 - word.bbox.y0) * ratioY);
+                                        const yPt = pdfH - word.bbox.y1 * ratioY;
+                                        const safeText = wText.replace(/[^\x20-\xFF]/g, '');
+                                        if (!safeText) continue;
+                                        try {
+                                            targetPage.drawText(safeText, {
+                                                x: Math.max(0, xPt),
+                                                y: Math.max(0, yPt),
+                                                size: Math.min(72, Math.max(5, boxH * 0.85)),
+                                                font,
+                                                color: rgb(0, 0, 0),
+                                                opacity: 0.01,
+                                            });
+                                        } catch {
+                                            // Omitir glifos no compatibles con WinAnsi
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+            } finally {
+                await worker.terminate();
             }
 
-            setProgress(95, 'Compilando documento final…');
-
-            const baseName = originalFile.name.replace(/\.pdf$/i, '');
+            setProgress(96, 'Compilando documento final…');
 
             if (outputMode === 'text_file') {
-                const textBlob = new Blob([extractedFullText], { type: 'text/plain;charset=utf-8' });
+                const textBlob = new Blob([extractedFullText.trim() || 'No se detectó texto legible.'], {
+                    type: 'text/plain;charset=utf-8',
+                });
                 setProgress(100, '¡Texto extraído con éxito!');
                 return {
                     blob: textBlob,
                     fileName: `${baseName}-ocr.txt`,
+                    meta: { engine: 'Tesseract.js WebAssembly' },
                 };
             }
 
-            const finalBytes = await targetPdf.save();
+            const finalBytes = await targetPdf!.save();
             const pdfBlob = new Blob([new Uint8Array(finalBytes)], { type: 'application/pdf' });
             setProgress(100, '¡PDF con OCR listo!');
 
             return {
                 blob: pdfBlob,
                 fileName: `${baseName}-buscable.pdf`,
+                meta: { engine: 'Tesseract.js WebAssembly' },
             };
         });
     };
@@ -168,7 +213,6 @@ export default function OcrPage() {
         reset();
     };
 
-    // Stage 1: Upload
     if (!originalFile && stage === 'edit') {
         return (
             <ToolUpload
@@ -178,18 +222,17 @@ export default function OcrPage() {
                 buttonLabel="Seleccionar PDF escaneado"
                 dropLabel="o arrastra el documento aquí"
                 onFiles={handleUpload}
-                error={error}
+                error={error || thumbError}
             />
         );
     }
 
-    // Stage 2: Processing
     if (stage === 'processing') {
         return <ProcessingView title="Aplicando Reconocimiento Óptico (OCR)…" progress={progress} message={message} />;
     }
 
-    // Stage 3: Done
     if (stage === 'done') {
+        const meta = result?.meta as { engine?: string } | undefined;
         return (
             <DownloadView
                 title="¡Documento procesado con OCR!"
@@ -198,11 +241,14 @@ export default function OcrPage() {
                 onBack={backToEdit}
                 onRestart={handleRestart}
                 toolId="ocr"
-            />
+            >
+                {meta?.engine && (
+                    <p className="text-xs text-muted">Motor OCR utilizado: {meta.engine}</p>
+                )}
+            </DownloadView>
         );
     }
 
-    // Stage 4: Edit Workspace
     return (
         <>
             {loading && <PdfLoadingOverlay progress={loadingProgress} />}
@@ -212,7 +258,7 @@ export default function OcrPage() {
                 actionLabel="Aplicar OCR al PDF"
                 onAction={handleRunOcr}
                 actionDisabled={pages.length === 0}
-                error={error}
+                error={error || thumbError}
                 toolbar={
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -239,50 +285,25 @@ export default function OcrPage() {
                     <div className="space-y-6">
                         <SidebarSection title="Idioma del documento">
                             <div className="grid grid-cols-2 gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setLanguage('spa')}
-                                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                                        language === 'spa'
-                                            ? 'border-brand bg-brand/10 text-brand shadow-xs'
-                                            : 'border-line bg-canvas text-ink hover:border-line-strong'
-                                    }`}
-                                >
-                                    🇪🇸 Español
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setLanguage('eng')}
-                                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                                        language === 'eng'
-                                            ? 'border-brand bg-brand/10 text-brand shadow-xs'
-                                            : 'border-line bg-canvas text-ink hover:border-line-strong'
-                                    }`}
-                                >
-                                    🇺🇸 English
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setLanguage('fra')}
-                                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                                        language === 'fra'
-                                            ? 'border-brand bg-brand/10 text-brand shadow-xs'
-                                            : 'border-line bg-canvas text-ink hover:border-line-strong'
-                                    }`}
-                                >
-                                    🇫🇷 Français
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setLanguage('deu')}
-                                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                                        language === 'deu'
-                                            ? 'border-brand bg-brand/10 text-brand shadow-xs'
-                                            : 'border-line bg-canvas text-ink hover:border-line-strong'
-                                    }`}
-                                >
-                                    🇩🇪 Deutsch
-                                </button>
+                                {[
+                                    { id: 'spa', label: '🇪🇸 Español' },
+                                    { id: 'eng', label: '🇺🇸 English' },
+                                    { id: 'fra', label: '🇫🇷 Français' },
+                                    { id: 'deu', label: '🇩🇪 Deutsch' },
+                                ].map((lang) => (
+                                    <button
+                                        key={lang.id}
+                                        type="button"
+                                        onClick={() => setLanguage(lang.id as OcrLanguage)}
+                                        className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                                            language === lang.id
+                                                ? 'border-brand bg-brand/10 text-brand shadow-xs'
+                                                : 'border-line bg-canvas text-ink hover:border-line-strong'
+                                        }`}
+                                    >
+                                        {lang.label}
+                                    </button>
+                                ))}
                             </div>
                         </SidebarSection>
 
@@ -291,14 +312,14 @@ export default function OcrPage() {
                                 <OptionCard
                                     icon={Search}
                                     title="PDF Buscable (Recomendado)"
-                                    description="Conserva el diseño original e incrusta una capa de texto transparente seleccionable."
+                                    description="Conserva las imágenes originales e incrusta una capa de texto transparente seleccionable."
                                     selected={outputMode === 'searchable_pdf'}
                                     onSelect={() => setOutputMode('searchable_pdf')}
                                 />
                                 <OptionCard
                                     icon={FileText}
                                     title="Solo Texto Plano (.txt)"
-                                    description="Extrae todo el texto digitalizado en un archivo ligero sin imágenes."
+                                    description="Extrae todo el texto reconocido en un archivo de texto limpio."
                                     selected={outputMode === 'text_file'}
                                     onSelect={() => setOutputMode('text_file')}
                                 />
@@ -312,7 +333,7 @@ export default function OcrPage() {
                         </SidebarSection>
 
                         <Notice tone="info">
-                            Convierte fotocopias y escaneos en documentos donde puedes buscar palabras (Ctrl+F) y seleccionar texto libremente.
+                            Usa OCR real (EasyOCR en servidor o Tesseract WebAssembly en navegador) para convertir escaneos en texto buscable.
                         </Notice>
                     </div>
                 }

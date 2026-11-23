@@ -23,7 +23,8 @@ import {
     Notice 
 } from '@/components/tool/Workspace';
 import { ProcessingView, DownloadView } from '@/components/tool/FlowViews';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError, extractPdfTextItems } from '@/lib/pdf/pdfHelper';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 
 export default function PdfToMarkdownPage() {
     const tool = getTool('pdf-to-markdown');
@@ -58,87 +59,105 @@ export default function PdfToMarkdownPage() {
     const processPdfToMarkdown = (f: File) => {
         run(async (setProgress) => {
             setProgress(15, 'Analizando estructura semántica y orden de lectura…');
-            const backendUrl = process.env.NEXT_PUBLIC_PDF_BACKEND_URL || 'http://localhost:8000';
 
             try {
-                // Try backend with OpenDataLoader PDF SOTA engine
                 const formData = new FormData();
                 formData.append('file', f);
 
-                setProgress(35, 'Ejecutando motor OpenDataLoader (XY-Cut++ & Tablas)…');
-                const response = await fetch(`${backendUrl}/api/convert/pdf-to-markdown`, {
-                    method: 'POST',
-                    body: formData,
-                });
+                setProgress(35, 'Ejecutando motor OpenDataLoader / PyMuPDF…');
+                const response = await postToBackend('/api/convert/pdf-to-markdown', formData, 180000);
+                const data = await response.json();
+                setProgress(90, 'Formateando Markdown estructurado…');
+                const mdText = data.markdown || '';
+                setMarkdownContent(mdText);
+                setEngineUsed(data.engine || 'OpenDataLoader PDF #1 SOTA');
+                setProgress(100, '¡Markdown listo!');
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setProgress(90, 'Formateando Markdown estructurado…');
-                    const mdText = data.markdown || '';
-                    setMarkdownContent(mdText);
-                    setEngineUsed('OpenDataLoader PDF #1 SOTA');
-                    setProgress(100, '¡Markdown listo!');
-
-                    const baseName = f.name.replace(/\.pdf$/i, '');
-                    return {
-                        blob: new Blob([mdText], { type: 'text/markdown;charset=utf-8' }),
-                        fileName: `${baseName}.md`,
-                    };
+                const baseName = f.name.replace(/\.pdf$/i, '');
+                return {
+                    blob: new Blob([mdText], { type: 'text/markdown;charset=utf-8' }),
+                    fileName: `${baseName}.md`,
+                };
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
                 }
-            } catch (err) {
                 console.warn('Backend unavailable, running client-side Markdown extractor:', err);
             }
 
-            // Client-side fallback if backend is offline
-            setProgress(40, 'Extrayendo bloques de contenido en el navegador…');
-            const buffer = await f.arrayBuffer();
-            const pdfDoc = await loadPdfDocument(buffer);
+            // Client-side fallback con detección de encabezados por tamaño tipográfico
+            setProgress(40, 'Extrayendo jerarquía tipográfica en navegador…');
+            let pdfDoc;
+            try {
+                const buffer = await f.arrayBuffer();
+                pdfDoc = await loadPdfDocument(buffer);
+            } catch (err) {
+                throw new Error(formatPdfError(err));
+            }
             const numPages = pdfDoc.numPages;
             setPageCount(numPages);
 
-            let generatedMd = `# ${f.name.replace(/\.pdf$/i, '')}\n\n`;
+            const allLineObjs: Array<{ page: number; y: number; maxSize: number; text: string }> = [];
+            const fontSizes: number[] = [];
 
             for (let pageNum = 1; pageNum <= numPages; pageNum++) {
-                const percent = 40 + Math.round(((pageNum - 0.5) / numPages) * 50);
+                const percent = 40 + Math.round(((pageNum - 0.5) / numPages) * 45);
                 setProgress(percent, `Procesando página ${pageNum} de ${numPages}…`);
 
                 const page = await pdfDoc.getPage(pageNum);
                 const textContent = await page.getTextContent();
-                const pageLines: string[] = [];
+                const items = extractPdfTextItems(textContent.items)
+                    .filter((item) => item.str && item.str.trim() !== '')
+                    .map((item) => {
+                        const size = Math.round(Math.hypot(item.transform[0], item.transform[1]) * 10) / 10;
+                        fontSizes.push(size);
+                        return { str: item.str, x: item.transform[4], y: item.transform[5], size };
+                    });
 
-                let currentLine = '';
-                let lastY: number | null = null;
-
-                for (const item of textContent.items as any[]) {
-                    if (!item.str) continue;
-                    const y = item.transform[5];
-
-                    if (lastY !== null && Math.abs(y - lastY) > 5) {
-                        if (currentLine.trim()) pageLines.push(currentLine.trim());
-                        currentLine = item.str;
-                    } else {
-                        currentLine += (currentLine ? ' ' : '') + item.str;
-                    }
-                    lastY = y;
+                items.sort((a, b) => b.y - a.y);
+                const grouped: Array<{ y: number; items: typeof items }> = [];
+                for (const item of items) {
+                    const g = grouped.find((grp) => Math.abs(grp.y - item.y) <= 5);
+                    if (g) g.items.push(item);
+                    else grouped.push({ y: item.y, items: [item] });
                 }
 
-                if (currentLine.trim()) {
-                    pageLines.push(currentLine.trim());
+                for (const g of grouped) {
+                    g.items.sort((a, b) => a.x - b.x);
+                    const text = g.items.map((i) => i.str).join(' ').replace(/\s+/g, ' ').trim();
+                    const maxSize = Math.max(...g.items.map((i) => i.size));
+                    if (text) allLineObjs.push({ page: pageNum, y: g.y, maxSize, text });
                 }
-
-                if (numPages > 1) {
-                    generatedMd += `\n## Página ${pageNum}\n\n`;
-                }
-                generatedMd += pageLines.join('\n\n') + '\n\n';
             }
 
-            setMarkdownContent(generatedMd);
-            setEngineUsed('Motor Local WebAssembly');
+            fontSizes.sort((a, b) => a - b);
+            const bodySize = fontSizes.length > 0 ? fontSizes[Math.floor(fontSizes.length * 0.5)] : 11;
+
+            let generatedMd = `# ${f.name.replace(/\.pdf$/i, '')}\n\n`;
+            let currentPage = 0;
+            for (const line of allLineObjs) {
+                if (numPages > 1 && line.page !== currentPage) {
+                    currentPage = line.page;
+                    generatedMd += `\n## Página ${currentPage}\n\n`;
+                }
+                if (line.maxSize >= bodySize * 1.4 && line.text.length < 120) {
+                    generatedMd += `# ${line.text}\n\n`;
+                } else if (line.maxSize >= bodySize * 1.18 && line.text.length < 140) {
+                    generatedMd += `### ${line.text}\n\n`;
+                } else if (/^[•\-*]\s+/.test(line.text)) {
+                    generatedMd += `- ${line.text.replace(/^[•\-*]\s+/, '')}\n`;
+                } else {
+                    generatedMd += `${line.text}\n\n`;
+                }
+            }
+
+            setMarkdownContent(generatedMd.trim());
+            setEngineUsed('Motor Local WebAssembly (Jerárquico)');
             setProgress(100, '¡Markdown generado!');
 
             const baseName = f.name.replace(/\.pdf$/i, '');
             return {
-                blob: new Blob([generatedMd], { type: 'text/markdown;charset=utf-8' }),
+                blob: new Blob([generatedMd.trim()], { type: 'text/markdown;charset=utf-8' }),
                 fileName: `${baseName}.md`,
             };
         });

@@ -116,6 +116,53 @@ export default function JpgToPdfPage() {
         }
     };
 
+    const normalizeRotatedImageBytes = async (
+        file: File,
+        rotationDeg: number
+    ): Promise<{ bytes: ArrayBuffer; isPng: boolean }> => {
+        const isPng = file.type === 'image/png' || file.name.toLowerCase().endsWith('.png');
+        if (rotationDeg % 360 === 0) {
+            return { bytes: await file.arrayBuffer(), isPng };
+        }
+
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result));
+            reader.onerror = () => reject(new Error('No se pudo leer la imagen.'));
+            reader.readAsDataURL(file);
+        });
+
+        const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const el = new Image();
+            el.onload = () => resolve(el);
+            el.onerror = () => reject(new Error('No se pudo decodificar la imagen.'));
+            el.src = dataUrl;
+        });
+
+        const rad = ((rotationDeg % 360) * Math.PI) / 180;
+        const swapDims = rotationDeg % 180 !== 0;
+        const canvas = document.createElement('canvas');
+        canvas.width = swapDims ? img.naturalHeight : img.naturalWidth;
+        canvas.height = swapDims ? img.naturalWidth : img.naturalHeight;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas no disponible para rotar la imagen.');
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(rad);
+        ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+
+        const mime = isPng ? 'image/png' : 'image/jpeg';
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(
+                (b) => (b ? resolve(b) : reject(new Error('Error al exportar imagen rotada.'))),
+                mime,
+                0.94
+            );
+        });
+        return { bytes: await blob.arrayBuffer(), isPng };
+    };
+
     const handleConvert = () => {
         if (images.length === 0) return;
 
@@ -132,8 +179,10 @@ export default function JpgToPdfPage() {
                     `Incrustando imagen ${i + 1} de ${total}…`
                 );
 
-                const arrayBuffer = await imgItem.file.arrayBuffer();
-                const isPng = imgItem.file.type === 'image/png' || imgItem.name.toLowerCase().endsWith('.png');
+                const { bytes: arrayBuffer, isPng } = await normalizeRotatedImageBytes(
+                    imgItem.file,
+                    imgItem.rotation
+                );
 
                 let embeddedImage;
                 try {
@@ -141,7 +190,6 @@ export default function JpgToPdfPage() {
                         ? await pdfDoc.embedPng(arrayBuffer)
                         : await pdfDoc.embedJpg(arrayBuffer);
                 } catch {
-                    // Fallback to jpg embed
                     embeddedImage = await pdfDoc.embedJpg(arrayBuffer);
                 }
 

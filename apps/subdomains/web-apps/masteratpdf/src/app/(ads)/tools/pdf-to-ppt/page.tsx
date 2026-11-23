@@ -28,6 +28,7 @@ import {
     PdfLoadingOverlay 
 } from '@/components/tool/FlowViews';
 import { convertPdfToPptx } from '@/lib/pdf/pdfToPptx';
+import { postToBackend, isHttpClientError } from '@/lib/pdf/backendClient';
 
 export default function PdfToPptPage() {
     const tool = getTool('pdf-to-ppt');
@@ -55,6 +56,29 @@ export default function PdfToPptPage() {
         if (!originalFile) return;
 
         run(async (setProgress) => {
+            const baseName = originalFile.name.replace(/\.pdf$/i, '');
+            setProgress(15, 'Analizando bloques de texto y gráficos…');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', originalFile);
+
+                setProgress(40, 'Generando diapositivas PowerPoint editables…');
+                const response = await postToBackend('/api/convert/pdf-to-pptx', formData, 180000);
+                setProgress(90, 'Empaquetando presentación PPTX…');
+                const blob = await response.blob();
+                setProgress(100, '¡Presentación PowerPoint lista!');
+
+                return {
+                    blob,
+                    fileName: `${baseName}.pptx`,
+                };
+            } catch (err: unknown) {
+                if (isHttpClientError(err)) {
+                    throw err;
+                }
+            }
+
             const res = await convertPdfToPptx(originalFile, {
                 onProgress: (p, msg) => setProgress(p, msg),
             });

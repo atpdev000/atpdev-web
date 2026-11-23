@@ -13,7 +13,7 @@ import {
 import { getTool } from '@/lib/tools';
 import { formatBytes, validateFiles } from '@/lib/files';
 import { useToolFlow } from '@/hooks/useToolFlow';
-import { loadPdfDocument } from '@/lib/pdf/pdfHelper';
+import { loadPdfDocument, formatPdfError } from '@/lib/pdf/pdfHelper';
 import { ToolUpload } from '@/components/tool/ToolUpload';
 import { 
     Workspace, 
@@ -63,7 +63,7 @@ export default function PdfToJpgPage() {
                 const ctx = canvas.getContext('2d');
 
                 if (ctx) {
-                    await page.render({ canvasContext: ctx, viewport } as any).promise;
+                    await page.render({ canvasContext: ctx, canvas, viewport }).promise;
                     previews.push({
                         index: i - 1,
                         thumbnail: canvas.toDataURL('image/jpeg', 0.8),
@@ -75,7 +75,7 @@ export default function PdfToJpgPage() {
             setPages(previews);
         } catch (err) {
             console.error('Error loading PDF for JPG extraction:', err);
-            setError('Error al procesar el documento PDF.');
+            setError(formatPdfError(err));
         } finally {
             setLoading(false);
             setLoadingProgress(0);
@@ -120,7 +120,7 @@ export default function PdfToJpgPage() {
                 const ctx = canvas.getContext('2d');
                 if (!ctx) throw new Error('Canvas no disponible');
 
-                await page.render({ canvasContext: ctx, viewport } as any).promise;
+                await page.render({ canvasContext: ctx, canvas, viewport }).promise;
                 const blob = await new Promise<Blob>((resolve) => {
                     canvas.toBlob((b) => resolve(b || new Blob()), 'image/jpeg', 0.95);
                 });
@@ -148,7 +148,7 @@ export default function PdfToJpgPage() {
                 canvas.height = viewport.height;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    await page.render({ canvasContext: ctx, viewport } as any).promise;
+                    await page.render({ canvasContext: ctx, canvas, viewport }).promise;
                     const blob = await new Promise<Blob>((resolve) => {
                         canvas.toBlob((b) => resolve(b || new Blob()), 'image/jpeg', 0.92);
                     });

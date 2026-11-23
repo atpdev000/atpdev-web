@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Política de privacidad, procesamiento local de documentos PDF en el navegador y uso de cookies publicitarias de Google AdSense en MasterAtPDF Pro.',
   alternates: { canonical: '/privacidad' },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: true },
 };
 
 export default function PrivacidadPage() {
@@ -36,7 +36,7 @@ export default function PrivacidadPage() {
             <h2>1. Procesamiento local en tu navegador</h2>
           </div>
           <p>
-            MasterAtPDF Pro ejecuta las operaciones de unión, división, compresión, rotación y conversión de documentos PDF directamente en tu navegador mediante WebAssembly y PDF.js. Los documentos seleccionados no se suben ni almacenan en servidores externos de ATP DEV.
+            MasterAtPDF Pro ejecuta las operaciones de unión, división, recorte, rotación, numeración, marca de agua, firma visual y extracción básica directamente en tu navegador mediante WebAssembly y PDF.js. En las herramientas que utilizan el motor auxiliar de conversión (cifrado AES-256, desbloqueo avanzado, OCR en servidor o conversión Office de alta fidelidad), el archivo se procesa de forma efímera y se elimina automáticamente tras finalizar la solicitud.
           </p>
         </div>
 

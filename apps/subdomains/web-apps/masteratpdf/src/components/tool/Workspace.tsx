@@ -143,14 +143,18 @@ interface OptionCardProps {
     onClick?: () => void;
     title: string;
     description?: string;
-    icon?: any;
+    icon?: React.ReactNode | React.ElementType;
     badge?: string;
 }
 
 /** Radio-style option used across tool sidebars. */
 export function OptionCard({ selected, onSelect, onClick, title, description, icon, badge }: OptionCardProps) {
     const handleClick = onSelect || onClick;
-    const IconComponent = typeof icon === 'function' ? icon : null;
+    const isElement = React.isValidElement(icon);
+    const IconComponent =
+        !isElement && icon && (typeof icon === 'function' || (typeof icon === 'object' && '$$typeof' in icon))
+            ? (icon as React.ElementType)
+            : null;
 
     return (
         <button
@@ -164,7 +168,7 @@ export function OptionCard({ selected, onSelect, onClick, title, description, ic
         >
             {IconComponent ? (
                 <IconComponent className={`w-4 h-4 mt-0.5 shrink-0 ${selected ? 'text-brand' : 'text-muted'}`} />
-            ) : icon ? (
+            ) : isElement ? (
                 <span className={`mt-0.5 shrink-0 ${selected ? 'text-brand' : 'text-muted'}`}>{icon}</span>
             ) : null}
             <span className="flex-1 min-w-0">

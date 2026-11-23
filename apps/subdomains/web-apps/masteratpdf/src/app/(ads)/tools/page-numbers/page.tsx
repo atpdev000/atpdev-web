@@ -344,16 +344,32 @@ export default function PageNumbersPage() {
                             </div>
                         </SidebarSection>
 
-                        <SidebarSection title="Tipografía y Tamaño">
+                        <SidebarSection title={`Tipografía y Tamaño (${fontSize}pt)`}>
                             <Segmented
                                 value={fontFamily}
-                                onChange={(val) => setFontFamily(val as any)}
+                                onChange={(val) => setFontFamily(val as 'Helvetica' | 'TimesRoman' | 'Courier')}
                                 options={[
                                     { value: 'Helvetica', label: 'Helvetica' },
                                     { value: 'TimesRoman', label: 'Times' },
                                     { value: 'Courier', label: 'Courier' },
                                 ]}
                             />
+                            <div className="pt-2">
+                                <input
+                                    type="range"
+                                    min={8}
+                                    max={20}
+                                    step={1}
+                                    value={fontSize}
+                                    onChange={(e) => setFontSize(Number(e.target.value))}
+                                    className="w-full accent-[var(--brand)] cursor-pointer"
+                                />
+                                <div className="flex justify-between text-[10px] text-muted mt-0.5">
+                                    <span>8pt</span>
+                                    <span>12pt</span>
+                                    <span>20pt</span>
+                                </div>
+                            </div>
                         </SidebarSection>
 
                         <SidebarSection title="Resumen">

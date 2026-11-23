@@ -1,26 +1,43 @@
 'use client';
 
-import Script from 'next/script';
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 const ADSENSE_CLIENT_ID = 'ca-pub-5414009811868137';
+const EXCLUDED_ROUTES =
+  /^\/(?:privacidad|politica-de-privacidad|terminos|terminos-y-condiciones|cookies|politica-de-cookies|contacto|login|admin)(?:\/|$)/i;
 
 /**
  * Carga oficial de Google AdSense para Lector QR Pro (lectorqr.atpdev.dev).
- * Renderizado exclusivamente bajo el grupo de rutas de contenido público (ads).
+ * Inyecta <script> nativo sin atributo data-nscript y excluye rutas legales/utilitarias.
  */
 export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
+  const pathname = usePathname() || '';
   const rawId = clientId || ADSENSE_CLIENT_ID;
   const resolvedId = rawId.startsWith('ca-') ? rawId : `ca-${rawId}`;
+  const isExcluded = EXCLUDED_ROUTES.test(pathname);
 
-  return (
-    <Script
-      id="google-adsense-script"
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${resolvedId}`}
-      crossOrigin="anonymous"
-      strategy="afterInteractive"
-    />
-  );
+  useEffect(() => {
+    if (isExcluded || typeof document === 'undefined') return;
+    if (document.querySelector('[data-page-type="not-found"]')) return;
+
+    const scriptId = 'google-adsense-script';
+    if (document.getElementById(scriptId)) return;
+
+    const existing = document.querySelector(
+      'script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
+    );
+    if (existing) return;
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.async = true;
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${resolvedId}`;
+    script.crossOrigin = 'anonymous';
+    document.head.appendChild(script);
+  }, [isExcluded, resolvedId, pathname]);
+
+  return null;
 }
 
 export default GoogleAdSense;

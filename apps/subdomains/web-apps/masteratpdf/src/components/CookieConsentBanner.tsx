@@ -3,16 +3,22 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+type WindowWithGtag = Window & {
+  gtag?: (...args: unknown[]) => void;
+};
+
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    let showTimer: number | undefined;
     try {
       const saved = localStorage.getItem('masteratpdf_cookie_consent');
+      const win = typeof window !== 'undefined' ? (window as WindowWithGtag) : undefined;
       if (!saved) {
-        setVisible(true);
-      } else if (saved === 'granted' && typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-        (window as any).gtag('consent', 'update', {
+        showTimer = window.setTimeout(() => setVisible(true), 0);
+      } else if (saved === 'granted' && typeof win?.gtag === 'function') {
+        win.gtag('consent', 'update', {
           ad_storage: 'granted',
           ad_user_data: 'granted',
           ad_personalization: 'granted',
@@ -22,13 +28,17 @@ export function CookieConsentBanner() {
     } catch {
       // ignore
     }
+    return () => {
+      if (showTimer !== undefined) window.clearTimeout(showTimer);
+    };
   }, []);
 
   const handleChoice = (choice: 'granted' | 'denied') => {
     try {
       localStorage.setItem('masteratpdf_cookie_consent', choice);
-      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-        (window as any).gtag('consent', 'update', {
+      const win = typeof window !== 'undefined' ? (window as WindowWithGtag) : undefined;
+      if (typeof win?.gtag === 'function') {
+        win.gtag('consent', 'update', {
           ad_storage: choice,
           ad_user_data: choice,
           ad_personalization: choice,
@@ -50,7 +60,7 @@ export function CookieConsentBanner() {
       className="fixed bottom-4 inset-x-4 z-50 max-w-3xl mx-auto p-4 rounded-2xl bg-slate-900/95 text-slate-100 border border-slate-700 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs"
     >
       <p className="leading-relaxed text-slate-300">
-        Tus archivos PDF se procesan 100% en tu navegador. Usamos cookies propias y de Google AdSense para personalizar anuncios y medir el tráfico. Más información en nuestra{' '}
+        Tus archivos PDF se procesan con privacidad por diseño (ejecución local WebAssembly y conversión efímera sin retención). Usamos cookies propias y de Google AdSense para personalizar anuncios y medir el tráfico. Más información en nuestra{' '}
         <Link href="/privacidad" className="text-indigo-400 underline font-semibold">
           Política de Privacidad
         </Link>.
