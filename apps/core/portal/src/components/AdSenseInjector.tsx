@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 
 // Non-content / utility / policy paths where AdSense must NEVER be injected
 const EXCLUDED_SEGMENTS = [
@@ -43,27 +42,18 @@ export default function AdSenseInjector({ adsenseId, clientId }: AdSenseInjector
             pathname?.includes(`${segment}/`)
     );
 
-    useEffect(() => {
-        if (isExcluded) return;
-        if (typeof document === "undefined") return;
-        // Never load AdSense on 404 / Not Found error screens
-        if (document.querySelector('[data-page-type="not-found"]')) return;
+    if (isExcluded) {
+        return null;
+    }
 
-        const scriptId = "adsense-main-script";
-        if (document.getElementById(scriptId)) return;
-
-        const existing = document.querySelector(
-            'script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
-        );
-        if (existing) return;
-
-        const script = document.createElement("script");
-        script.id = scriptId;
-        script.async = true;
-        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanId}`;
-        script.crossOrigin = "anonymous";
-        document.head.appendChild(script);
-    }, [cleanId, isExcluded, pathname]);
-
-    return null;
+    // Native lowercase <script> tag renders in SSR HTML for Mediapartners-Google
+    // and is hoisted to <head> by React 19 without next/script's data-nscript attribute.
+    return (
+        <script
+            id="adsense-main-script"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanId}`}
+            crossOrigin="anonymous"
+        />
+    );
 }

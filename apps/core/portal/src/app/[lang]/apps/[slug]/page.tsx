@@ -57,7 +57,10 @@ export async function generateMetadata(
 
   if (!project || project.status === 'Privado') return {};
 
-  const title = lang === 'es' ? project.title : await translateText(project.title, lang);
+  const rawTitle = lang === 'es' ? project.title : await translateText(project.title, lang);
+  const title = lang === 'es'
+    ? `${rawTitle} — Arquitectura, Ficha Técnica y Demo`
+    : `${rawTitle} — Technical Architecture, Specs & Live App`;
   const description = lang === 'es' 
     ? project.description 
     : await translateText(project.description, lang);
@@ -466,8 +469,7 @@ export default async function ProjectPage({
               qrConfig={localTheme?.qr || null}
             />
 
-            {wordCount < 220 && (
-              <section className="mt-8 pt-8 border-t border-white/10 space-y-6 text-base leading-relaxed">
+            <section className="mt-8 pt-8 border-t border-white/10 space-y-6 text-base leading-relaxed">
                 <div className="space-y-3">
                   <h2 className="text-xl sm:text-2xl font-black text-[var(--text-color)] tracking-tight">
                     {isEn
@@ -515,8 +517,7 @@ export default async function ProjectPage({
                       : `Ya sea accediendo desde un navegador moderno o mediante su compilación para ${operatingSystems}, ${translatedTitle} resuelve flujos de trabajo reales sin exigir configuraciones complejas ni registros forzosos. Los usuarios y equipos técnicos pueden explorar la versión operativa, auditar los componentes del stack (${stackSummary}) y consultar las preguntas frecuentes detalladas a continuación.`}
                   </p>
                 </div>
-              </section>
-            )}
+            </section>
 
             {/* In-article Google AdSense Slot */}
             {config?.adsense_id && (

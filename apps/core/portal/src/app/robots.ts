@@ -4,12 +4,11 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: '*',
+        userAgent: ['*', 'Googlebot', 'Mediapartners-Google', 'Google-Display-Ads-Bot'],
         allow: '/',
-        disallow: ['/api/'],  // quitamos '/_next/' de aquí
+        disallow: ['/api/'],
       },
     ],
     sitemap: 'https://www.atpdev.dev/sitemap.xml',
-    host: 'https://www.atpdev.dev',
   };
 }

@@ -1,10 +1,10 @@
-import type { MetadataRoute } from 'next';
+import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: '*',
+        userAgent: ['*', 'Googlebot', 'Mediapartners-Google', 'Google-Display-Ads-Bot'],
         allow: '/',
         disallow: ['/api/'],
       },
@@ -12,4 +12,3 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: 'https://masteratpdf.atpdev.dev/sitemap.xml',
   };
 }
-

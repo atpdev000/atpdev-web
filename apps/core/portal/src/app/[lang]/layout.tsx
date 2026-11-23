@@ -75,10 +75,11 @@ export async function generateMetadata(
   const { lang = 'es' } = await params;
   const config = await getSiteConfig();
 
-  const titleBase = "Percy Acha Taipe | ATP Dev – Android & Fullstack Developer";
   const descBase = config?.bio_short ?? "Ingeniero de Sistemas. Android, Next.js, Supabase e IA. Apps en Google Play. Disponible para proyectos freelance.";
   
-  const title = lang === 'es' ? titleBase : await translateText(titleBase, lang);
+  const title = lang === 'es'
+    ? "Percy Acha Taipe | ATP Dev – Ingeniería de Software, Android & Fullstack"
+    : "Percy Acha Taipe | ATP Dev – Software Engineering, Android & Fullstack Architecture";
   const description = lang === 'es' ? descBase : await translateText(descBase, lang);
 
   const path = lang === 'es' ? '' : `/${lang}`;

@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
 import { ADSENSE_CLIENT_ID } from '@/lib/siteConfig';
 
 const EXCLUDED_ROUTES =
@@ -9,35 +8,25 @@ const EXCLUDED_ROUTES =
 
 /**
  * Componente oficial de Google AdSense para Sorteos Pro.
- * Inyecta <script> nativo sin atributo data-nscript y excluye páginas legales, de autenticación y paneles privados.
+ * Renderiza <script> nativo en SSR HTML sin atributo data-nscript y excluye páginas legales y paneles privados.
  */
 export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
   const pathname = usePathname() || '';
   const rawId = clientId || ADSENSE_CLIENT_ID;
-  const isExcluded = !rawId || EXCLUDED_ROUTES.test(pathname);
-  const cleanClientId = rawId?.startsWith('ca-') ? rawId : `ca-${rawId}`;
+  if (!rawId || EXCLUDED_ROUTES.test(pathname)) {
+    return null;
+  }
 
-  useEffect(() => {
-    if (isExcluded || typeof document === 'undefined') return;
-    if (document.querySelector('[data-page-type="not-found"]')) return;
+  const cleanClientId = rawId.startsWith('ca-') ? rawId : `ca-${rawId}`;
 
-    const scriptId = 'google-adsense-script';
-    if (document.getElementById(scriptId)) return;
-
-    const existing = document.querySelector(
-      'script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
-    );
-    if (existing) return;
-
-    const script = document.createElement('script');
-    script.id = scriptId;
-    script.async = true;
-    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanClientId}`;
-    script.crossOrigin = 'anonymous';
-    document.head.appendChild(script);
-  }, [cleanClientId, isExcluded, pathname]);
-
-  return null;
+  return (
+    <script
+      id="google-adsense-script"
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cleanClientId}`}
+      crossOrigin="anonymous"
+    />
+  );
 }
 
 export default GoogleAdSense;
