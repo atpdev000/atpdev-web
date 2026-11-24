@@ -23,10 +23,57 @@ export const metadata: Metadata = {
     'escalador de porciones',
     'gestion de restaurantes'
   ],
-  authors: [{ name: 'Perú Sabor Inteligente Team' }],
+  authors: [{ name: 'Perú Sabor Inteligente Team', url: 'https://www.atpdev.dev' }],
+  openGraph: {
+    title: 'Perú Sabor Inteligente — Gastronomía Peruana, Chef IA & Gestión de Restaurantes',
+    description: 'Descubre, documenta, prepara, costea y gestiona la gastronomía peruana con fichas técnicas, escalador de porciones y asistente Chef IA.',
+    url: 'https://perusabor.atpdev.dev',
+    siteName: 'Perú Sabor Inteligente',
+    locale: 'es_PE',
+    type: 'website',
+    images: [
+      {
+        url: 'https://www.atpdev.dev/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Perú Sabor Inteligente — Gastronomía Peruana & Costeo Técnico',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Perú Sabor Inteligente — Gastronomía Peruana & Chef IA',
+    description: 'Fichas técnicas de cocina peruana, costeo Food Cost, escalador de porciones e inventario gastronómico.',
+    images: ['https://www.atpdev.dev/og-image.png'],
+  },
   icons: {
     icon: '/icon.svg',
   },
+};
+
+const rootJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://perusabor.atpdev.dev/#webapp',
+      name: 'Perú Sabor Inteligente',
+      url: 'https://perusabor.atpdev.dev',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'All',
+      inLanguage: 'es-PE',
+      description: 'Plataforma técnica de gastronomía peruana: recetario estandarizado en gramos, calculadora de Food Cost, escalador de porciones y gestión de cocina.',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'PEN' },
+      publisher: { '@id': 'https://www.atpdev.dev/#organization' },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://www.atpdev.dev/#organization',
+      name: 'ATP Dev',
+      url: 'https://www.atpdev.dev',
+      logo: 'https://www.atpdev.dev/og-image.png',
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -56,6 +103,10 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#faf9f6] dark:bg-[#0c0a09] text-stone-900 dark:text-stone-100 min-h-screen flex flex-col antialiased selection:bg-red-500 selection:text-white">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootJsonLd) }}
+        />
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

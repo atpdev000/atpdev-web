@@ -12,11 +12,55 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://almaniq.atpdev.dev',
   },
+  openGraph: {
+    title: 'Almaniq | Curiosidades, Historia Universal y Tendencias Globales',
+    description: 'Almanaque digital de historia universal, hitos científicos, curiosidades culturales y tendencias verificadas día a día.',
+    url: 'https://almaniq.atpdev.dev',
+    siteName: 'Almaniq',
+    locale: 'es_PE',
+    type: 'website',
+    images: [
+      {
+        url: 'https://www.atpdev.dev/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Almaniq — Historia Universal y Efemérides Verificadas',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Almaniq | Historia Universal y Efemérides',
+    description: 'Almanaque digital de historia universal, ciencia y cultura editado por ATP Dev.',
+    images: ['https://www.atpdev.dev/og-image.png'],
+  },
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',
   },
+}
+
+const rootJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://almaniq.atpdev.dev/#website',
+      name: 'Almaniq',
+      url: 'https://almaniq.atpdev.dev',
+      inLanguage: 'es',
+      description: 'Almanaque digital de historia universal, hitos científicos, curiosidades culturales y efemérides verificadas.',
+      publisher: { '@id': 'https://www.atpdev.dev/#organization' },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://www.atpdev.dev/#organization',
+      name: 'ATP Dev',
+      url: 'https://www.atpdev.dev',
+      logo: 'https://www.atpdev.dev/og-image.png',
+    },
+  ],
 }
 
 export default function RootLayout({
@@ -64,6 +108,10 @@ export default function RootLayout({
         )}
       </head>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootJsonLd) }}
+        />
         <AnalyticsTracker />
         {children}
         <CookieBanner />

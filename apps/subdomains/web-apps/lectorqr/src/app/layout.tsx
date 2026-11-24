@@ -30,7 +30,46 @@ export const metadata: Metadata = {
     siteName: 'Lector QR Pro',
     locale: 'es_PE',
     type: 'website',
+    images: [
+      {
+        url: 'https://www.atpdev.dev/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Lector QR Pro — Escáner y Generador de Códigos QR',
+      },
+    ],
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lector QR Pro • Escáner y Generador de Códigos QR',
+    description: 'Escáner óptico en el navegador y generador vectorial de códigos QR con corrección Reed-Solomon.',
+    images: ['https://www.atpdev.dev/og-image.png'],
+  },
+};
+
+const rootJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://lectorqr.atpdev.dev/#webapp',
+      name: 'Lector QR Pro',
+      url: 'https://lectorqr.atpdev.dev',
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'All',
+      inLanguage: 'es-PE',
+      description: 'Escáner óptico de códigos QR y códigos de barras 100% en el navegador y generador de códigos QR vectoriales SVG/PNG.',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      publisher: { '@id': 'https://www.atpdev.dev/#organization' },
+    },
+    {
+      '@type': 'Organization',
+      '@id': 'https://www.atpdev.dev/#organization',
+      name: 'ATP Dev',
+      url: 'https://www.atpdev.dev',
+      logo: 'https://www.atpdev.dev/og-image.png',
+    },
+  ],
 };
 
 export const viewport: Viewport = {
@@ -72,6 +111,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(rootJsonLd) }}
+        />
         <Navbar />
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {children}
