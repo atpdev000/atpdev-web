@@ -62,7 +62,7 @@ export default function ContactPage() {
             Cada reporte recibido pasa por una revisión documental frente a memorandos RFC del IETF, actas académicas de la ACM e IEEE y anuncios originales de lanzamiento publicados por universidades o laboratorios de ingeniería. Diferenciamos explícitamente entre borradores internos de laboratorio, versiones públicas iniciales y especificaciones estándar definitivas para preservar el rigor histórico.
           </p>
           <p>
-            Si utilizas las fichas mensuales en cursos introductorios de ciencias de la computación o bootcamps técnicos, te invitamos a citar la ruta del mes específico y escribirnos ante cualquier duda de licenciamiento o accesibilidad.
+            Si utilizas las fichas mensuales en cursos introductorios de ciencias de la computación o bootcamps técnicos, te invitamos a citar la ruta del mes específico y escribirnos ante cualquier duda de licenciamiento o accesibilidad. Nuestro equipo editorial en Lima, Perú responde en un plazo de 24 a 48 horas hábiles bajo estricto cumplimiento de la Ley N° 29733 de Protección de Datos Personales y estándares internacionales RGPD.
           </p>
           <div className="pt-3 border-t border-slate-800 flex flex-wrap gap-4 text-xs text-slate-400">
             <a href="/archivo" className="text-emerald-400 hover:underline">Explorar Archivo Anual</a>

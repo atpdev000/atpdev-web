@@ -395,6 +395,19 @@ export default function NumerosPage() {
         <AdBanner format="horizontal" />
       </div>
 
+      {/* Documentación Técnica CSPRNG de Extracción Numérica */}
+      <section className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+          Algoritmo de Muestreo Uniforme y Firma SHA-256 para Loterías Numéricas
+        </h2>
+        <p>
+          El generador de números aleatorios de <strong>Sorteos Pro</strong> aplica el algoritmo de permutación de Fisher-Yates alimentado por <code>window.crypto.getRandomValues()</code> cuando se seleccionan extracciones sin repetición, y muestreo uniforme con descarte de límite superior (<em>rejection sampling</em>) cuando se permiten duplicados. Este procedimiento elimina el sesgo de módulo que ocurre al dividir un registro de 32 bits entre rangos que no son potencia de dos.
+        </p>
+        <p>
+          Al finalizar cada extracción de bolillas, el motor concatena el intervalo configurado (mínimo y máximo), la marca temporal ISO-8601 y la secuencia exacta de números extraídos para calcular localmente una huella criptográfica <strong>SHA-256</strong> mediante <code>crypto.subtle.digest</code>. Dicho código hash puede exportarse en acta PDF, Excel o imagen oficial y contrastarse públicamente en el módulo de verificación criptográfica.
+        </p>
+      </section>
+
       {/* Live Stream Stage */}
       {results.length > 0 && (
         <LiveStreamStage

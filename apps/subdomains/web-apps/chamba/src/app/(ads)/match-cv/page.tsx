@@ -550,6 +550,19 @@ export default function MatchCvPage() {
 
       {/* Bottom Horizontal Ad Slot */}
       <AdBannerSlot type="billboard" className="mt-8" />
+
+      {/* Guía Técnica de Evaluación Curricular en el Sector Público */}
+      <section className="p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
+          Metodología de Calificación Curricular y Ponderación de Perfiles en Convocatorias del Estado Peruano
+        </h2>
+        <p>
+          El motor de compatibilidad curricular de <strong>Chamba Perú</strong> analiza el perfil profesional ingresado contrastándolo con los requisitos mínimos exigidos en las bases integradas de concursos públicos bajo los regímenes del <strong>Decreto Legislativo N.° 1057 (CAS)</strong>, <strong>D.L. N.° 728</strong>, <strong>D.L. N.° 276</strong> y la <strong>Ley N.° 30057 (Ley del Servicio Civil - SERVIR)</strong>. El algoritmo pondera cuatro dimensiones obligatorias en toda etapa de evaluación curricular: grado académico registrado en SUNEDU o MINEDU, años de experiencia general y específica en el sector público o privado, dominio de sistemas administrativos del Estado (SIAF-RP, SIGA-MEF, SEACE 3.0, Invierte.pe) y disponibilidad geográfica.
+        </p>
+        <p>
+          Recuerda que en las convocatorias estatales los requisitos establecidos en el perfil del puesto tienen carácter eliminatorio (<em>Cumple / No Cumple</em>). Para acreditar válidamente tu experiencia laboral ante el Comité de Selección, debes adjuntar certificados o constancias de trabajo, resoluciones de designación o órdenes de servicio acompañadas de su respectiva conformidad de prestación, contabilizando el tiempo de servicios desde la fecha de obtención del grado de egresado o bachiller según lo estipulen las bases de cada entidad.
+        </p>
+      </section>
     </div>
   );
 }

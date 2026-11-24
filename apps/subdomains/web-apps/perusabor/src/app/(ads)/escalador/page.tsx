@@ -195,6 +195,30 @@ export default function EscaladorPage() {
         </div>
       </div>
 
+      {/* Culinary Scaling Engineering Guide */}
+      <section className="rounded-3xl p-6 sm:p-8 border-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-[#13110f] space-y-4 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+        <h2 className="text-xl font-black font-display text-stone-900 dark:text-white">
+          Por qué el Escalado Gastronómico No es una Simple Multiplicación Lineal
+        </h2>
+        <p>
+          Cuando un chef o jefe de partida escala una receta tradicional peruana desde 4 porciones caseras hasta un servicio de 50, 100 o 300 comensales para banquetes o menú corporativo, multiplicar linealmente todos los insumos produce errores organolépticos graves: exceso de salinidad, picor descontrolado en pastas de ají amarillo o rocoto, y tiempos de evaporación alterados por la geometría de las ollas industriales.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-white">Curvas de Corrección en Especias, Sal y Grasas</h3>
+            <p>
+              Nuestro algoritmo aplica coeficientes de amortiguación progresiva sobre cloruro de sodio, comino, pimienta, pastas de ajíes nativos y aceites de sellado en wok o rondón. Así conservas el perfil aromático exacto del plato original sin saturar el paladar en producciones por lote.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-white">Estandarización de Mise en Place y Compras</h3>
+            <p>
+              Utiliza la hoja de producción imprimible para entregar a tu equipo de cocina los pesos exactos en gramos, kilogramos y litros junto con el costo proyectado de materia prima en soles (PEN), integrando directamente esta planificación con el módulo de <Link href="/inventario" className="text-[#c22929] font-bold underline">Inventario PEPS</Link> y <Link href="/costeo" className="text-[#c22929] font-bold underline">Costeo de Carta</Link>.
+            </p>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

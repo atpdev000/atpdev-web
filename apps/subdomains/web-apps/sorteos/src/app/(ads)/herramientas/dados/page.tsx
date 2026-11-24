@@ -296,6 +296,19 @@ export default function DadosPage() {
         <AdBanner format="horizontal" />
       </div>
 
+      {/* Documentación Técnica CSPRNG de Dados Virtuales */}
+      <section className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+          Metodología Criptográfica CSPRNG en Lanzamientos de Dados Poliedros
+        </h2>
+        <p>
+          El simulador de dados 3D de <strong>Sorteos Pro</strong> reemplaza las funciones pseudoaleatorias convencionales (<code>Math.random()</code>) por la interfaz nativa de entropía de hardware <code>window.crypto.getRandomValues()</code> del estándar Web Crypto API (W3C). Cada dado poliedro (D4, D6, D8, D10, D12 y D20) se calcula mediante muestreo por rechazo (<em>rejection sampling</em>) sobre enteros sin signo de 32 bits, garantizando equiprobabilidad matemática exacta en todas las caras sin sesgo modular.
+        </p>
+        <p>
+          Esta arquitectura permite auditar tiradas en partidas de rol de mesa (D&amp;D, Pathfinder), dinámicas educativas de probabilidad estadística y desempates en torneos competitivos. El historial de lanzamientos se almacena localmente en la sesión del navegador para facilitar el cálculo acumulado de medias, desviación estándar y distribución de frecuencias sin transmitir datos personales a servidores externos.
+        </p>
+      </section>
+
       {/* Live Stream Stage */}
       <LiveStreamStage
         isOpen={showLiveStream}

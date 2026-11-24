@@ -261,6 +261,19 @@ export default function MonedaPage() {
       <div className="pt-6">
         <AdBanner format="horizontal" />
       </div>
+
+      {/* Documentación Técnica CSPRNG de Cara o Cruz */}
+      <section className="bg-white dark:bg-[#0f172a] rounded-2xl p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+          Verificación Estadística de Lanzamiento Binario (Ensayo de Bernoulli CSPRNG)
+        </h2>
+        <p>
+          El simulador de <strong>Cara o Cruz</strong> implementa un ensayo de Bernoulli criptográficamente seguro con probabilidad exacta <em>p = 0.5000</em> utilizando el generador de entropía del sistema operativo a través de <code>window.crypto.getRandomValues(new Uint32Array(1))</code>. A diferencia de una moneda física —cuyo centro de masa, desgaste del canto o ángulo de impulso inicial introduce desviaciones mecánicas de hasta el 1.2%—, la evaluación del bit menos significativo de un buffer CSPRNG asegura independencia estadística total entre lanzamientos consecutivos.
+        </p>
+        <p>
+          Esta herramienta está diseñada para sorteos de saque inicial en arbitrajes deportivos, resolución transparente de empates en concursos en vivo y demostraciones académicas de la Ley de los Grandes Números. Cada resultado queda registrado en el contador de frecuencias de la sesión para comprobar empíricamente la convergencia hacia el 50% entre cara y sello.
+        </p>
+      </section>
     </div>
   );
 }

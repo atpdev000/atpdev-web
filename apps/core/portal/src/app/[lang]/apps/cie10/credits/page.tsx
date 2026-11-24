@@ -70,17 +70,24 @@ export default async function Cie10CreditsPage({
           <section>
             <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              {lang === "es" ? "Descargo de Responsabilidad Médica" : "Medical Disclaimer"}
+              {lang === "es" ? "Descargo de Responsabilidad Médica y Estándares Técnicos" : "Medical Disclaimer & Technical Standards"}
             </h2>
-            <p className="text-sm bg-neutral-900/60 p-4 rounded-xl border border-white/5 text-neutral-400">
-              Esta aplicación está destinada únicamente como una herramienta de referencia y consulta informativa para profesionales de la salud y estudiantes. No reemplaza el juicio clínico profesional ni proporciona diagnósticos médicos.
+            <p className="text-sm bg-neutral-900/60 p-4 rounded-xl border border-white/5 text-neutral-400 mb-3">
+              {lang === "es"
+                ? "Esta aplicación está destinada únicamente como una herramienta de referencia rápida y consulta informativa para médicos, residentes, internos, personal de enfermería, auditores clínicos y estudiantes de ciencias de la salud. No reemplaza el juicio clínico profesional ni proporciona diagnósticos médicos vinculantes."
+                : "This application is intended solely as a quick reference and informational lookup tool for physicians, residents, nurses, clinical auditors, and health sciences students. It does not replace professional clinical judgment or provide binding medical diagnoses."}
+            </p>
+            <p>
+              {lang === "es"
+                ? "La arquitectura técnica emplea bases de datos precompiladas con búsqueda de texto completo (Full-Text Search FTS4), normalización diacrítica en tiempo real y verificación de integridad SHA-256 para operar sin latencia en hospitales, postas médicas rurales y consultorios sin conectividad a internet. Para soporte o sugerencias de actualización normativa MINSA / EsSalud, escríbenos a contacto@atpdev.dev."
+                : "The technical architecture utilizes precompiled databases with Full-Text Search (FTS4), real-time diacritic normalization, and SHA-256 integrity verification to operate with zero latency in hospitals, rural health posts, and clinics without internet connectivity. For support or regulatory update suggestions, email contacto@atpdev.dev."}
             </p>
           </section>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={`/${lang}`}
+            href={lang === "es" ? "/" : `/${lang}`}
             className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
             ← {lang === "es" ? "Volver a ATP Dev" : "Back to ATP Dev"}

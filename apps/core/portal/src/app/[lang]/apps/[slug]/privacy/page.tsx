@@ -117,31 +117,36 @@ export default async function DynamicAppPrivacyPage({
           <section>
             <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-              4. {lang === "es" ? "Almacenamiento Local" : "Local Storage"}
+              4. {lang === "es" ? "Almacenamiento Local, Seguridad y Derechos del Usuario (Ley N° 29733 / RGPD)" : "Local Storage, Security & User Rights (Law No. 29733 / GDPR)"}
             </h2>
+            <p className="mb-3">
+              {lang === "es"
+                ? "Las preferencias, configuraciones del tema y elementos guardados se almacenan localmente en tu dispositivo para garantizar un funcionamiento rápido, privado e ininterrumpido bajo transporte cifrado HTTPS / TLS 1.3."
+                : "Your preferences, theme settings, and saved items are stored locally on your device to ensure fast, private, and uninterrupted performance over encrypted HTTPS / TLS 1.3 transport."}
+            </p>
             <p>
               {lang === "es"
-                ? "Las preferencias, configuraciones del tema y elementos guardados se almacenan localmente en tu dispositivo para garantizar el funcionamiento rápido e ininterrumpido."
-                : "Your preferences, theme settings, and saved items are stored locally on your device to ensure fast and uninterrupted performance."}
+                ? `De conformidad con la Ley N° 29733 de Protección de Datos Personales del Perú y el Reglamento General de Protección de Datos (RGPD / GDPR), los usuarios de ${project.title} pueden ejercer sus derechos de acceso, rectificación, cancelación y oposición (ARCO), así como gestionar o revocar su consentimiento de cookies y publicidad personalizada en cualquier momento desde los controles de privacidad de su dispositivo o navegador.`
+                : `In accordance with Peruvian Personal Data Protection Law No. 29733 and the General Data Protection Regulation (GDPR), users of ${project.title} may exercise their rights of access, rectification, erasure, and objection, as well as manage or revoke cookie and personalized advertising consent at any time via their device or browser privacy controls.`}
             </p>
           </section>
 
           <section className="bg-neutral-900/60 p-5 rounded-2xl border border-white/5">
             <h3 className="text-lg font-semibold text-white mb-2">
-              {lang === "es" ? "Contacto y Soporte" : "Contact & Support"}
+              {lang === "es" ? "Contacto y Soporte Oficial" : "Official Contact & Support"}
             </h3>
             <p className="text-sm text-neutral-400">
               {lang === "es"
-                ? "Si tienes consultas sobre la privacidad de este proyecto, puedes contactar al desarrollador desde "
-                : "If you have questions regarding this project's privacy, contact the developer at "}
-              <a href="https://www.atpdev.dev" className="text-emerald-400 hover:underline">ATP Dev</a>.
+                ? "Si tienes consultas sobre la privacidad o tratamiento de datos de este proyecto, puedes escribir directamente a contacto@atpdev.dev o visitar el portal principal de "
+                : "If you have questions regarding this project's privacy or data handling, email contacto@atpdev.dev or visit "}
+              <a href="https://www.atpdev.dev/contacto" className="text-emerald-400 hover:underline">ATP Dev</a>.
             </p>
           </section>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={`/${lang}/apps/${slug}`}
+            href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}`}
             className="inline-flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
           >
             ← {lang === "es" ? `Volver a ${project.title}` : `Back to ${project.title}`}

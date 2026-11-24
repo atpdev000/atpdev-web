@@ -83,6 +83,15 @@ export default function ContactoPage() {
             </p>
           </div>
         </div>
+        <div className="pt-4 border-t border-stone-200 dark:border-stone-800 space-y-2 text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+          <h3 className="font-bold text-stone-900 dark:text-stone-100 text-sm">Protocolo de Revisión Gastronómica, Estandarización de Recetas y Colaboraciones</h3>
+          <p>
+            En Perú Sabor Inteligente trabajamos de manera continua en la verificación de pesos brutos, rendimientos netos tras deshidratación térmica, equivalencias de insumos regionales (ají amarillo, ají panca, ají limo, rocoto, huacatay, chicha de jora y variedades de papa nativa) y costos referenciales en mercados mayoristas y minoristas del Perú.
+          </p>
+          <p>
+            Si eres docente de gastronomía, jefe de cocina, propietario de restaurante o investigador culinario y deseas proponer la inclusión de una receta regional documentada o reportar una variación técnica en nuestros factores de merma, envíanos tu ficha técnica a contacto@atpdev.dev indicando la región de origen, el número de raciones base y el procedimiento térmico detallado. Todas las solicitudes son evaluadas por el equipo editorial de ATP DEV en Lima, Perú en un plazo máximo de 24 a 48 horas hábiles.
+          </p>
+        </div>
       </section>
     </main>
   );

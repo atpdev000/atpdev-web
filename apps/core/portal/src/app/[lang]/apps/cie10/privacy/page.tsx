@@ -95,22 +95,27 @@ export default async function Cie10PrivacyPage({
             </p>
           </section>
 
-          <section className="bg-neutral-900/60 p-5 rounded-2xl border border-white/5">
+          <section className="bg-neutral-900/60 p-5 rounded-2xl border border-white/5 space-y-3">
             <h3 className="text-lg font-semibold text-white mb-2">
-              {lang === "es" ? "Contacto y Soporte" : "Contact & Support"}
+              {lang === "es" ? "Derechos ARCO, Seguridad Médica y Contacto Oficial" : "User Rights, Medical Data Security & Official Contact"}
             </h3>
             <p className="text-sm text-neutral-400">
               {lang === "es"
-                ? "Si tienes alguna duda sobre esta política de privacidad, puedes contactarnos directamente a través de nuestro portal oficial "
-                : "If you have questions regarding this privacy policy, feel free to contact us via our official portal "}
-              <a href="https://www.atpdev.dev" className="text-emerald-400 hover:underline">ATP Dev</a>.
+                ? "En estricto cumplimiento de la Ley N° 29733 de Protección de Datos Personales del Perú, la Ley General de Salud N° 26842 y el Reglamento General de Protección de Datos (RGPD / GDPR), la aplicación CIE-10 Pro jamás solicita nombres de pacientes, números de historia clínica ni documentos de identidad. Toda consulta médica permanece confinada a la base de datos SQLite / Room FTS4 local del teléfono."
+                : "In strict compliance with Peruvian Personal Data Protection Law No. 29733 and the General Data Protection Regulation (GDPR), the CIE-10 Pro application never collects patient names, clinical record numbers, or national ID documents. Every clinical search remains confined to the phone's local SQLite / Room FTS4 database."}
+            </p>
+            <p className="text-sm text-neutral-400">
+              {lang === "es"
+                ? "Si tienes alguna duda sobre esta política de privacidad o deseas ejercer tus derechos de privacidad, puedes contactarnos en contacto@atpdev.dev o a través de nuestro portal oficial "
+                : "If you have questions regarding this privacy policy or wish to exercise your privacy rights, email contacto@atpdev.dev or visit our official portal "}
+              <a href="https://www.atpdev.dev/contacto" className="text-emerald-400 hover:underline">ATP Dev</a>.
             </p>
           </section>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={`/${lang}/apps/cie10`}
+            href={`${lang === "es" ? "" : `/${lang}`}/apps/buscador-clinico-cie-10-pro`}
             className="inline-flex items-center gap-2 text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
           >
             ← {lang === "es" ? "Volver a CIE-10 App" : "Back to CIE-10 App"}

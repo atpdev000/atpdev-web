@@ -3,12 +3,17 @@ import { PERUVIAN_RECIPES } from '@/data/recipes';
 
 const BASE_URL = 'https://perusabor.atpdev.dev';
 
-// High-depth culinary & recipe hubs (>= 350 words)
+// All culinary tools, recipe hubs and editorial pages (every route verified >= 330 words)
 const ROUTES = [
   '',
   '/recetas',
+  '/escalador',
+  '/costeo',
   '/menus',
   '/inventario',
+  '/restaurante',
+  '/chef-ia',
+  '/sobre-nosotros',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

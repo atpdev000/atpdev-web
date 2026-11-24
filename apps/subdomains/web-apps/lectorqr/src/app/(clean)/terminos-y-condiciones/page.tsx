@@ -67,10 +67,17 @@ export default function TerminosCondicionesPage() {
 
         <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
           <h2 className="text-base font-bold text-white font-display">
-            5. Legislación Aplicable y Jurisdicción
+            5. Privacidad, Publicidad y Legislación Aplicable
           </h2>
           <p>
-            Estos términos se regirán e interpretarán de acuerdo con las leyes de la República del Perú y los estándares internacionales de comercio electrónico.
+            Todo el procesamiento óptico de cámara, decodificación de matrices QR/barras y generación vectorial SVG/PNG se ejecuta localmente en la memoria del navegador del usuario sin almacenar capturas en servidores externos, conforme a nuestra Política de Privacidad y a la Ley N° 29733 de Protección de Datos Personales del Perú. El acceso gratuito a las secciones informativas y herramientas principales se sostiene mediante publicidad contextual gestionada con Google AdSense bajo Google Consent Mode v2.
+          </p>
+          <p>
+            Estos términos se regirán e interpretarán de acuerdo con las leyes de la República del Perú y los estándares internacionales de servicios digitales. Para soporte técnico, consultas sobre licencias o reportes de uso indebido, puedes comunicarte con el equipo de ingeniería de ATP DEV en Lima, Perú escribiendo a{' '}
+            <a href="mailto:contacto@atpdev.dev" className="text-cyan-400 underline font-semibold">
+              contacto@atpdev.dev
+            </a>
+            .
           </p>
         </section>
 

@@ -142,6 +142,31 @@ export default function ContactoPage() {
           {/* Right Column: Contact Form Client Component */}
           <ContactoFormClient />
         </div>
+
+        {/* Editorial Support & Anti-Fraud Protocol Section */}
+        <section className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-white text-base">
+            <ShieldCheck size={18} className="text-emerald-600 dark:text-emerald-400" />
+            <h2>Protocolo Editorial de Verificación de Convocatorias y Prevención de Fraude Laboral</h2>
+          </div>
+          <p>
+            En <strong>Chamba Pro</strong> revisamos diariamente las bases oficiales publicadas por ministerios, organismos técnicos especializados, gobiernos regionales, municipalidades y empresas públicas o privadas del Perú. Si detectas un enlace institucional caído, una modificación en el cronograma de evaluación curricular o cualquier intento de cobro indebido por parte de terceros ajenos a las entidades convocantes, repórtalo inmediatamente indicando el número de proceso CAS / 728 y la institución involucrada.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
+              <h3 className="font-bold text-slate-900 dark:text-white">Atención a Postulantes y Profesionales</h3>
+              <p>
+                Recuerda que Chamba Pro es un portal informativo y de herramientas laborales (<Link href="/calculadora-sueldo" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Calculadora de Sueldo Neto</Link>, <Link href="/crear-cv-cas" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Generador de CV CAS</Link> y <Link href="/plantillas-anexos" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Plantillas de Anexos</Link>). No recibimos expedientes de postulación por correo: toda postulación debe enviarse directamente en la mesa de partes virtual o plataforma oficial de la entidad empleadora.
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5">
+              <h3 className="font-bold text-slate-900 dark:text-white">Privacidad, Derechos ARCO y Alianzas Institucionales</h3>
+              <p>
+                Las oficinas de Recursos Humanos u Oficinas de Talento Humano que deseen difundir gratuitamente sus convocatorias oficiales pueden solicitar su verificación institucional desde nuestra sección <Link href="/publicar-empleo" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Publicar Empleo</Link>. Todas las comunicaciones están protegidas bajo nuestra <Link href="/politica-de-privacidad" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Política de Privacidad</Link> y la Ley N° 29733.
+              </p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );

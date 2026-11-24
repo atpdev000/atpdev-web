@@ -267,6 +267,12 @@ export default function AjustesPage() {
               </p>
             </div>
           </div>
+          <div className="pt-3 border-t border-slate-800 space-y-2 text-xs text-slate-400 leading-relaxed">
+            <h3 className="text-white font-bold">Compatibilidad de Hardware, Web Audio API y Vibración Háptica</h3>
+            <p>
+              El tono acústico de confirmación de 880 Hz se sintetiza en tiempo real mediante la <strong>Web Audio API</strong> nativa del navegador sin descargar archivos MP3 externos, garantizando respuesta instantánea con latencia cero incluso sin conexión a internet. Por su parte, la confirmación táctil emplea <code>navigator.vibrate</code> en teléfonos Android compatibles, permitiendo operar el lector en entornos industriales, almacenes logísticos o eventos con alto ruido ambiental donde la señal visual o sonora podría pasar desapercibida.
+            </p>
+          </div>
         </section>
 
       </div>

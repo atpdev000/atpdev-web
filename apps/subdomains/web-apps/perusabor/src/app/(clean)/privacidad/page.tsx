@@ -95,21 +95,24 @@ export default function PrivacidadPage() {
         <div className="p-6 rounded-2xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-800 space-y-3">
           <div className="flex items-center gap-2 text-stone-900 dark:text-stone-100 font-bold">
             <ShieldCheck className="w-4 h-4 text-[#c22929]" />
-            <h2>3. Derechos y contacto del titular</h2>
+            <h2>3. Seguridad en tránsito, marco normativo y derechos ARCO del usuario</h2>
           </div>
           <p>
-            Si tienes preguntas sobre esta política de privacidad o deseas solicitar aclaraciones sobre tus datos, puedes escribirnos a{' '}
+            Todas las conexiones con <strong>perusabor.atpdev.dev</strong> operan sobre canales cifrados <strong>HTTPS / TLS 1.3</strong> con políticas estrictas de seguridad de transporte (HSTS). Las estructuras de costos, precios de proveedores, inventarios PEPS y menús semanales que simulas en nuestras calculadoras gastronómicas permanecen bajo custodia local en tu navegador, evitando que información comercial sensible de tu restaurante sea expuesta o indexada en bases de datos públicas.
+          </p>
+          <p>
+            En cumplimiento de la <strong>Ley N° 29733 (Ley de Protección de Datos Personales del Perú)</strong> y del <strong>Reglamento General de Protección de Datos (RGPD / GDPR)</strong>, garantizamos el ejercicio pleno de tus derechos de información, acceso, rectificación, cancelación y oposición (ARCO), así como la posibilidad de modificar o revocar tu consentimiento bajo Google Consent Mode v2 en cualquier momento. Si tienes preguntas sobre esta política de privacidad o deseas solicitar aclaraciones sobre tus datos, puedes escribirnos a{' '}
             <a href="mailto:contacto@atpdev.dev" className="text-[#c22929] font-semibold underline">
               contacto@atpdev.dev
             </a>{' '}
             o mediante el portal oficial en{' '}
             <a
-              href="https://www.atpdev.dev/#contact"
+              href="https://www.atpdev.dev/contacto"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#c22929] font-semibold underline"
             >
-              www.atpdev.dev/#contact
+              www.atpdev.dev/contacto
             </a>
             .
           </p>

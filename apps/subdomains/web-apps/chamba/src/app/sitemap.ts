@@ -59,6 +59,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/crear-cv-cas',
     '/plantillas-anexos',
     '/preguntas-entrevista-cas',
+    '/comparador-regimenes',
+    '/match-cv',
+    '/simulador-entrevista-ia',
+    '/quienes-somos',
     '/organizaciones',
   ].map((route) => ({
     url: `${baseUrl}${route}`,

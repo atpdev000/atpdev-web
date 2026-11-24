@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 
 const EXCLUDED_ROUTES =
-  /^\/(?:privacidad|politica-de-privacidad|terminos|terminos-y-condiciones|cookies|politica-de-cookies|contacto|sobre-nosotros|chef-ia|costeo|escalador|restaurante|login|admin)(?:\/|$)/i;
+  /^\/(?:privacidad|politica-de-privacidad|terminos|terminos-y-condiciones|cookies|politica-de-cookies|contacto|login|admin)(?:\/|$)/i;
 
 export function AdSenseInjector({ clientId }: { clientId?: string } = {}) {
   const pathname = usePathname() || '';

@@ -130,10 +130,13 @@ export default function QuienesSomosPage() {
 
         <section className="space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
           <h2 className="text-xl font-bold font-display text-slate-900 dark:text-white">
-            3. Canales de Contacto Directo
+            3. Metodología de Verificación Estadística y Contacto Directo
           </h2>
           <p>
-            Para consultas institucionales, colaboraciones o soporte sobre certificaciones digitales, puedes escribir a <strong className="text-slate-900 dark:text-white font-mono">{CONTACT_EMAIL}</strong> o visitar nuestra sección de{' '}
+            Antes de liberar cada versión de nuestro motor de selección aleatoria, sometemos el algoritmo de permutación de Fisher-Yates y muestreo por rechazo (<em>Rejection Sampling</em>) sobre <code>window.crypto.getRandomValues()</code> a pruebas estadísticas de bondad de ajuste Chi-cuadrado de Pearson con más de un millón de iteraciones simuladas, garantizando que ningún participante sufra sesgo de módulo ni alteración de probabilidades por posición en la lista.
+          </p>
+          <p>
+            Para consultas institucionales, auditorías de sorteos corporativos, colaboraciones o soporte sobre certificaciones digitales, puedes escribir directamente a la dirección de ingeniería de ATP DEV en Lima, Perú al correo <strong className="text-slate-900 dark:text-white font-mono">{CONTACT_EMAIL}</strong> o visitar nuestra sección de{' '}
             <Link href="/contacto" className="text-pink-600 dark:text-pink-400 font-bold hover:underline">
               Contacto y Soporte
             </Link>.

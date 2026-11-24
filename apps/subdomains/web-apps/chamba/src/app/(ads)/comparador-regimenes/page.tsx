@@ -108,6 +108,19 @@ export default function ComparadorPage() {
       {/* Interactive Matrix */}
       <ComparadorRegimenes />
 
+      {/* Guía Normativa de Regímenes Laborales en el Perú */}
+      <section className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/60 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-white font-display">
+          Marco Legal y Diferencias Remunerativas entre los Regímenes CAS 1057, D.L. 728, D.L. 276 y Ley 30057
+        </h2>
+        <p>
+          En la administración pública peruana coexisten múltiples regímenes laborales con estructuras salariales y beneficios sociales diferenciados. El régimen del <strong>Decreto Legislativo N.° 728</strong> (aplicable a empresas del Estado y entidades como SUNAT, Contraloría, EsSalud, RENIEC y ONPE) reconoce dos gratificaciones legales equivalentes a una remuneración íntegra en julio y diciembre (Ley N.° 27735), depósito semestral de Compensación por Tiempo de Servicios (<strong>CTS</strong>) en mayo y noviembre, y asignación familiar del 10% de la Remuneración Mínima Vital.
+        </p>
+        <p>
+          Por su parte, el Contrato Administrativo de Servicios (<strong>D.L. N.° 1057 - CAS</strong>, modificado por la Ley N.° 29849 y la Ley N.° 31131) otorga 30 días calendario de descanso vacacional remunerado, afiliación obligatoria a EsSalud (con tope de aportación patronal calculado sobre la UIT vigente) y aguinaldos por Fiestas Patrias y Navidad cuyo monto (usualmente S/ 300) es fijado anualmente por la Ley de Presupuesto del Sector Público. En contraste, las órdenes de servicio o <strong>Locación de Servicios</strong> se rigen por los artículos 1764° al 1770° del Código Civil, por lo que no generan vínculo laboral, estabilidad, vacaciones ni beneficios sociales en planilla.
+        </p>
+      </section>
+
       {/* Bottom Billboard AdSlot */}
       <AdBannerSlot type="billboard" className="mt-8" />
     </div>

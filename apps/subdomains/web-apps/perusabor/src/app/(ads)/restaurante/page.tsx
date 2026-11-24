@@ -282,6 +282,36 @@ export default function RestaurantePage() {
         </div>
       </div>
 
+      {/* Restaurant Floor & KOT Operations Guide */}
+      <section className="rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#13110f] border-2 border-stone-200 dark:border-stone-800 space-y-4 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+        <h2 className="text-xl font-black font-display text-stone-900 dark:text-white">
+          Arquitectura Operativa de Salón, Rotación de Mesas y Flujo de Comandas (KOT)
+        </h2>
+        <p>
+          En la gestión moderna de restaurantes peruanos, cevicherías y formatos casual dining, la coordinación entre el personal de salón (mozos y anfitriones) y las estaciones de cocina caliente y barra fría (partida de ceviches y coctelería con pisco) determina el tiempo de rotación de mesa (<em>Table Turnover Rate</em>) y el ticket promedio por comensal.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-white">1. Tiempos de Marcha y Pase</h3>
+            <p>
+              El flujo estructurado de estados (<em>Confirmado → En Cocina → Listo → Entregado → Cobrado</em>) elimina comandas extraviadas en papel y sincroniza la salida de entradas frías con platos de fondo salteados al wok en el momento exacto.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-white">2. Integración con Recetario y Costos</h3>
+            <p>
+              Cada ítem comandado está vinculado directamente a las fichas técnicas del <Link href="/recetas" className="text-[#c22929] font-bold underline">Recetario Oficial</Link>, permitiendo auditar el consumo teórico frente al stock real en el módulo de <Link href="/inventario" className="text-[#c22929] font-bold underline">Inventario y Kardex</Link>.
+            </p>
+          </div>
+          <div className="p-4 rounded-2xl bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 space-y-1.5">
+            <h3 className="font-bold text-stone-900 dark:text-white">3. Optimización de Capacidad en Hora Punta</h3>
+            <p>
+              Distribuir las zonas entre Salón Principal, Terraza, Barra y Privado VIP según el número de pax reduce tiempos muertos de espera entre las 12:30 y las 15:30 horas, maximizando el margen operativo diario del local.
+            </p>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

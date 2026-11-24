@@ -85,7 +85,7 @@ export default function PoliticaCookiesPage() {
             <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-[#c22929] font-semibold underline">
               www.aboutads.info/choices/
             </a>
-            . Ten presente que deshabilitar cookies esenciales puede restablecer tus escalas de porciones o tema oscuro. Consulta también nuestra{' '}
+            . Ten presente que deshabilitar cookies esenciales puede restablecer tus escalas de porciones o tema oscuro. Puedes revocar o actualizar tu preferencia de Google Consent Mode v2 (`ad_storage`, `ad_user_data`, `ad_personalization` y `analytics_storage`) eliminando el almacenamiento local del sitio en cualquier momento. Consulta también nuestra{' '}
             <Link href="/privacidad" className="text-[#c22929] font-semibold underline">
               Política de Privacidad
             </Link>{' '}

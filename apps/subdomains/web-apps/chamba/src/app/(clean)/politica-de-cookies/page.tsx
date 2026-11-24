@@ -122,9 +122,13 @@ export default function PoliticaCookiesPage() {
               >
                 www.aboutads.info/choices/
               </a>
-              . También puedes bloquear o borrar cookies en Google Chrome, Mozilla Firefox, Apple Safari o Microsoft Edge desde sus ajustes de privacidad. Para más información, consulta nuestra{' '}
+              . También puedes bloquear o borrar cookies en Google Chrome, Mozilla Firefox, Apple Safari o Microsoft Edge desde sus ajustes de privacidad. Asimismo, en cumplimiento de la Ley N° 29733 de Protección de Datos Personales del Perú y del Reglamento General de Protección de Datos (RGPD), puedes restablecer tu elección bajo Google Consent Mode v2 (<code>ad_storage</code>, <code>ad_user_data</code>, <code>ad_personalization</code> y <code>analytics_storage</code>) limpiando los datos locales del sitio para que el aviso de consentimiento vuelva a mostrarse. Para más información, consulta nuestra{' '}
               <Link href="/politica-de-privacidad" className="text-emerald-600 dark:text-emerald-400 underline">
                 Política de Privacidad
+              </Link>{' '}
+              y nuestros{' '}
+              <Link href="/terminos-y-condiciones" className="text-emerald-600 dark:text-emerald-400 underline">
+                Términos y Condiciones
               </Link>
               .
             </p>

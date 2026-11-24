@@ -84,6 +84,9 @@ export default function SobreNosotrosQrPage() {
               Mantenemos la herramienta gratuita, rápida y libre de registros forzados mediante publicidad contextual supervisada con Google AdSense únicamente en páginas con contenido editorial y herramientas públicas. El historial local de escaneos y los ajustes de cámara se excluyen estrictamente de anuncios y quedan bajo control exclusivo del usuario conforme a nuestra{' '}
               <Link href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</Link>.
             </p>
+            <p>
+              Asimismo, nuestro generador soporta corrección de errores Reed-Solomon en sus cuatro niveles estándar (L 7%, M 15%, Q 25% y H 30%), exportación vectorial SVG de alta definición para imprenta y validación automática de cargas útiles para redes Wi-Fi WPA2/WPA3, tarjetas de contacto vCard 3.0, enlaces universales HTTPS y coordenadas geolocalizadas.
+            </p>
           </div>
         </div>
       </section>

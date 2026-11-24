@@ -134,7 +134,7 @@ export default async function QuienesSomosPage() {
           <Award size={48} className="text-emerald-400 mx-auto" />
           <h2 className="text-2xl sm:text-3xl font-bold font-display text-white">Compromiso con la Meritocracia y el Servicio Civil</h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Chamba Pro es una iniciativa informativa independiente alineada con las buenas prácticas de transparencia del Servicio Civil (SERVIR) y la Ley N° 29733 de Protección de Datos Personales.
+            Chamba Pro es una iniciativa informativa independiente desarrollada por el equipo de ingeniería de ATP DEV en Lima, Perú, alineada con las buenas prácticas de transparencia del Servicio Civil (SERVIR), la Autoridad Nacional de Protección de Datos Personales (Ley N° 29733) y la normativa laboral peruana vigente (D.L. 1057 CAS, D.L. 728, D.L. 276 y Ley N° 30057). Además de nuestro directorio actualizado de convocatorias, ponemos a disposición de todos los profesionales peruanos calculadoras salariales gratuitas de quinta categoría, plantillas de anexos verificadas, guías de entrevista y herramientas de formato curricular sin registros forzosos ni cobros ocultos.
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4">

@@ -70,7 +70,7 @@ export default function CookiesPage() {
               <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-violet-400 underline">
                 www.aboutads.info/choices/
               </a>
-              . Ten en cuenta que deshabilitar las cookies técnicas puede impedir recordar tu preferencia de consentimiento entre visitas. Más información sobre protección de datos en nuestra{' '}
+              . Ten en cuenta que deshabilitar las cookies técnicas puede impedir recordar tu preferencia de consentimiento entre visitas. En cumplimiento de la Ley N° 29733 de Protección de Datos Personales del Perú y el Reglamento General de Protección de Datos (RGPD), puedes revocar tu elección de Google Consent Mode v2 (<code>ad_storage</code>, <code>ad_user_data</code>, <code>ad_personalization</code> y <code>analytics_storage</code>) eliminando los datos locales del navegador en cualquier momento para que el banner vuelva a solicitar tu decisión. Más información sobre protección de datos en nuestra{' '}
               <Link href="/privacy" className="text-violet-400 underline">
                 Política de Privacidad
               </Link>

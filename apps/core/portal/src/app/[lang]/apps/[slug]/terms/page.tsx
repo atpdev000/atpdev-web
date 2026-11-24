@@ -101,12 +101,24 @@ export default async function DynamicAppTermsPage({
           <section>
             <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              3. {lang === "es" ? "Limitación de Responsabilidad" : "Limitation of Liability"}
+              3. {lang === "es" ? "Limitación de Responsabilidad y Disponibilidad Técnica" : "Limitation of Liability & Technical Availability"}
             </h2>
             <p>
               {lang === "es"
-                ? `ATP Dev no se responsabiliza por daños directos o indirectos derivados del uso inadecuado o interrupción del servicio de la aplicación.`
-                : `ATP Dev is not liable for any direct or indirect damages resulting from inappropriate use or service interruptions of the app.`}
+                ? `ATP Dev desarrolla y mantiene ${project.title} siguiendo estándares de ingeniería de software de producción, cifrado en tránsito HTTPS y validación continua. No obstante, el software se proporciona «tal cual» (as-is) sin garantías implícitas de disponibilidad ininterrumpida frente a cortes de red de terceros, mantenimiento programado o incompatibilidades específicas de hardware del dispositivo del usuario. ATP Dev no se responsabiliza por daños directos, indirectos o lucro cesante derivados del uso inadecuado de la aplicación.`
+                : `ATP Dev develops and maintains ${project.title} following production software engineering standards, encrypted HTTPS transport, and continuous validation. However, the software is provided "as-is" without implied warranties of uninterrupted availability against third-party network outages, scheduled maintenance, or device-specific hardware incompatibilities. ATP Dev is not liable for any direct, indirect, or consequential damages resulting from improper use of the application.`}
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              4. {lang === "es" ? "Privacidad, Actualizaciones y Jurisdicción Aplicable" : "Privacy, Updates & Governing Law"}
+            </h2>
+            <p>
+              {lang === "es"
+                ? `El tratamiento de datos técnicos, almacenamiento local y preferencias de consentimiento se rige por la Política de Privacidad oficial de ${project.title} y la Ley N° 29733 de Protección de Datos Personales del Perú, en armonía con el Reglamento General de Protección de Datos (RGPD). ATP Dev se reserva el derecho de publicar actualizaciones evolutivas, parches de seguridad y mejoras funcionales en cualquier momento. Para soporte técnico, consultas legales o notificaciones sobre propiedad intelectual, escribe a contacto@atpdev.dev.`
+                : `The processing of technical data, local storage, and consent preferences is governed by the official Privacy Policy of ${project.title}, Peruvian Personal Data Protection Law No. 29733, and GDPR standards. ATP Dev reserves the right to release feature updates, security patches, and functional improvements at any time. For technical support, legal inquiries, or intellectual property notices, contact us at contacto@atpdev.dev.`}
             </p>
           </section>
         </div>

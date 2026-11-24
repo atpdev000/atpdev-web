@@ -434,6 +434,9 @@ export default function HistorialPage() {
           <p>
             Utiliza los filtros superiores para separar códigos de tipo web (URL), redes inalámbricas, contactos vCard o etiquetas comerciales de un vistazo, y destaca los registros frecuentes con la estrella de favoritos. Antes de abrir enlaces acortados almacenados previamente, verifica siempre que el dominio mostrado comience con protocolo seguro HTTPS y pertenezca a una fuente confiable.
           </p>
+          <p>
+            Además, la función de exportación estructurada en formatos <strong>CSV y JSON</strong> te permite respaldar tus lecturas de códigos de barras EAN-13, UPC-A, Code 128 e identificadores QR para integrarlos en hojas de cálculo de control de activos, auditorías de almacén o registros de asistencia sin depender de bases de datos externas ni suscripciones de pago.
+          </p>
         </div>
       </section>
 

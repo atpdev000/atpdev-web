@@ -189,6 +189,9 @@ export default function ContactoPage() {
             <li>• Revisa nuestra <a href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</a> y <a href="/politica-de-cookies" className="text-cyan-400 underline font-semibold">Política de Cookies</a>.</li>
             <li>• Consulta las condiciones en <a href="/terminos-y-condiciones" className="text-cyan-400 underline font-semibold">Términos y Condiciones</a> o explora nuestras <a href="/guias" className="text-cyan-400 underline font-semibold">Guías de Uso Seguro</a> y <a href="/sobre-nosotros" className="text-cyan-400 underline font-semibold">Sobre Nosotros</a>.</li>
           </ul>
+          <p className="text-xs text-slate-400 pt-2 border-t border-slate-800">
+            Todas las solicitudes técnicas, reportes de seguridad o consultas sobre integración de códigos QR en comercios, restaurantes e instituciones educativas son atendidas directamente por el equipo de ingeniería de <strong>ATP DEV</strong> desde Lima, Perú bajo estricto cumplimiento de la Ley N° 29733 de Protección de Datos Personales y normativas internacionales RGPD.
+          </p>
         </div>
       </section>
 

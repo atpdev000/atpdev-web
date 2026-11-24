@@ -118,6 +118,19 @@ export default function AiInterviewPage() {
         </p>
       </div>
 
+      {/* Guía Metodológica STAR y Criterios de Evaluación SERVIR */}
+      <section className="p-6 rounded-3xl border border-slate-800 bg-slate-900/60 space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-white font-display">
+          Criterios de Calificación del Comité de Selección y Metodología STAR en Entrevistas Públicas
+        </h2>
+        <p>
+          La etapa de entrevista personal en los concursos públicos del Estado Peruano representa entre el 35% y el 50% del puntaje total del proceso de selección según las directivas de la Autoridad Nacional del Servicio Civil (<strong>SERVIR</strong>). El Comité Evaluador califica cuatro factores estandarizados: dominio técnico de las funciones del puesto y sistemas transversales (SIAF, SIGA, SEACE, Ley N.° 27444 del Procedimiento Administrativo General), competencias conductuales (orientación a resultados, vocación de servicio al ciudadano y trabajo en equipo), ética en la función pública (Ley N.° 27815) y solvencia comunicativa.
+        </p>
+        <p>
+          Para maximizar tu calificación, estructura tus respuestas aplicando el método <strong>STAR</strong> (<em>Situación, Tarea, Acción y Resultado</em>): contextualiza brevemente un reto real en tu experiencia previa, detalla tu responsabilidad directa, describe la base normativa o procedimiento técnico que ejecutaste y concluye con un indicador cuantificable del logro obtenido en beneficio de la entidad o institución.
+        </p>
+      </section>
+
       {/* Top Banner AdSlot */}
       <AdBannerSlot type="leaderboard" className="my-4" />
 

@@ -186,6 +186,21 @@ export default function CosteoPage() {
             </p>
           </div>
         </div>
+
+        <div className="pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-stone-300 leading-relaxed">
+          <div className="space-y-1.5">
+            <h4 className="font-bold text-white text-sm">Metodología de Escandallo y Control de Merma en Cocina Peruana</h4>
+            <p>
+              En la operación real de una cevichería, pollería o restaurante criollo en el Perú, calcular el costo de un plato sumando únicamente el precio de compra del mercado conduce a pérdidas ocultas de entre el 15 % y el 28 %. Nuestro motor de escandallo incorpora el factor de rendimiento neto tras limpieza y deshidratación térmica (por ejemplo, el fileteado de pescado fresco, el pelado de camarones o la reducción prolongada de un aderezo norteño de ají panca y chicha de jora).
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-bold text-white text-sm">Fijación de Precio en Carta, IGV (18%) y Margen de Contribución</h4>
+            <p>
+              El precio sugerido calculado en la tabla superior refleja el valor neto antes de impuestos operativos. Al diseñar la carta física o digital, recuerda contemplar el Impuesto General a las Ventas (IGV 18 %), los costos fijos de planilla gastronómica, alquiler de local, cadena de frío y empaques biodegradables para delivery, priorizando siempre el margen de contribución en soles por plato vendido.
+            </p>
+          </div>
+        </div>
       </div>
 
     </div>

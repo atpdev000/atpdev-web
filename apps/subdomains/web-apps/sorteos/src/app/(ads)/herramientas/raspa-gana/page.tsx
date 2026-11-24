@@ -294,6 +294,19 @@ export default function RaspaGanaPage() {
           ))}
         </div>
       </div>
+
+      {/* Documentación Técnica CSPRNG de Tarjetas Raspa y Gana */}
+      <section className="max-w-2xl mx-auto bg-white dark:bg-[#0f172a] rounded-3xl p-6 border border-slate-200 dark:border-white/10 shadow-xs space-y-3 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
+        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+          Arquitectura de Asignación Criptográfica Pre-Sellada en Tarjetas Raspa y Gana
+        </h2>
+        <p>
+          Cada tarjeta interactiva de <strong>Raspa y Gana</strong> determina su premio oculto en el instante exacto de su creación mediante una selección aleatoria CSPRNG (<code>window.crypto.getRandomValues()</code>) sobre el catálogo de premios configurado por el organizador. Una vez emitido el boleto, el resultado queda bloqueado en memoria antes de que el participante interactúe con el lienzo HTML5 Canvas, impidiendo cualquier alteración durante el raspado táctil o con cursor.
+        </p>
+        <p>
+          El motor gráfico calcula en tiempo real el porcentaje de píxeles transparentes (canal alfa) dentro de la capa metálica utilizando <code>getImageData()</code> y revela automáticamente el certificado cuando se supera el umbral de descubrimiento, ideal para activaciones promocionales de marca, ferias comerciales y dinámicas de fidelización de clientes.
+        </p>
+      </section>
     </div>
   );
 }

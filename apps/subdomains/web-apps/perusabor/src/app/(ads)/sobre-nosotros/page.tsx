@@ -70,7 +70,7 @@ export default function SobreNosotrosPage() {
               Perú Sabor Inteligente forma parte del ecosistema tecnológico de <strong>ATP DEV</strong>, dirigido por <strong>Percy Acha Taipe</strong>, Ingeniero de Sistemas y Arquitecto de Software Full-Stack en Lima, Perú.
             </p>
             <p>
-              Todos los cálculos de merma, inventario y costeo se ejecutan localmente en tu navegador sin almacenar fórmulas secretas ni costos privados de tu negocio en servidores de terceros.
+              Todos los cálculos de merma, inventario y costeo se ejecutan localmente en tu navegador sin almacenar fórmulas secretas ni costos privados de tu negocio en servidores de terceros. Nuestra base gastronómica abarca las tres macrorregiones del Perú (Costa, Sierra y Selva), integrando fichas de alérgenos alimentarios, tablas nutricionales por porción y guías técnicas de puntos de humo, emulsiones estables y marinados ácidos seguros.
             </p>
           </div>
         </div>

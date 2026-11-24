@@ -62,7 +62,7 @@ export default function ContactPage() {
             Antes de incorporar una corrección o ampliar una efeméride del archivo histórico anual, nuestro equipo editorial contrasta las fechas en al menos dos fuentes documentales independientes, considerando la transición histórica del calendario juliano al calendario gregoriano en registros anteriores al siglo XVIII. Si preparas material escolar o presentaciones culturales usando nuestras fichas, agradecemos incluir el enlace directo al mes correspondiente dentro del archivo público.
           </p>
           <p>
-            Las consultas sobre colaboraciones editoriales o derechos de reproducción comercial se derivan al portal principal de ATP Dev tras validar la identidad del remitente por correo electrónico.
+            Las consultas sobre colaboraciones editoriales o derechos de reproducción comercial se derivan al portal principal de ATP Dev tras validar la identidad del remitente por correo electrónico. Todas las comunicaciones se procesan desde nuestra sede en Lima, Perú cumpliendo estrictamente con la Ley N° 29733 de Protección de Datos Personales y el Reglamento General de Protección de Datos (RGPD), garantizando confidencialidad absoluta y ausencia de envíos publicitarios no solicitados.
           </p>
           <div className="pt-3 border-t border-slate-800 flex flex-wrap gap-4 text-xs text-slate-400">
             <a href="/archivo" className="text-emerald-400 hover:underline">Explorar Archivo Anual</a>

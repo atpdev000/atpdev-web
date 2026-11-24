@@ -18,6 +18,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/herramientas/bases-legales', priority: 0.85, freq: 'weekly' as const },
     { path: '/herramientas/engagement', priority: 0.85, freq: 'weekly' as const },
     { path: '/herramientas/hashtags', priority: 0.85, freq: 'weekly' as const },
+    { path: '/herramientas/dados', priority: 0.85, freq: 'weekly' as const },
+    { path: '/herramientas/moneda', priority: 0.85, freq: 'weekly' as const },
+    { path: '/herramientas/numeros', priority: 0.85, freq: 'weekly' as const },
+    { path: '/herramientas/raspa-gana', priority: 0.85, freq: 'weekly' as const },
+    { path: '/quienes-somos', priority: 0.8, freq: 'monthly' as const },
     { path: '/planes', priority: 0.85, freq: 'weekly' as const },
     { path: '/blog', priority: 0.9, freq: 'daily' as const },
   ];

@@ -78,7 +78,7 @@ export default function TerminosPage() {
             <Link href="/privacidad" className="text-[#c22929] font-semibold underline">Política de Privacidad</Link>.
           </p>
           <p>
-            Para consultas editoriales, correcciones o soporte técnico puedes comunicarte mediante{' '}
+            Para consultas editoriales, correcciones de fichas técnicas gastronómicas, avisos de derechos de autor o soporte técnico sobre cualquiera de nuestras calculadoras culinarias, puedes comunicarte directamente con la dirección de ingeniería de ATP DEV en Lima, Perú mediante{' '}
             <a href="mailto:contacto@atpdev.dev" className="text-[#c22929] font-semibold underline">
               contacto@atpdev.dev
             </a>{' '}
@@ -86,7 +86,7 @@ export default function TerminosPage() {
             <Link href="/contacto" className="text-[#c22929] font-semibold underline">
               página de Contacto
             </Link>
-            .
+            . Las presentes condiciones de servicio se rigen por la legislación vigente de la República del Perú y las normas internacionales de protección al consumidor y propiedad intelectual.
           </p>
         </div>
       </section>

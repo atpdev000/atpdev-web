@@ -371,6 +371,14 @@ export default function VerificarPage() {
               Publica siempre el código del certificado o el enlace de verificación junto al resultado final en Instagram Stories, TikTok o tu comunidad para evitar reclamos por falta de transparencia.
             </p>
           </div>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 space-y-1.5 md:col-span-2">
+            <h3 className="font-bold text-slate-900 dark:text-white">
+              Especificación Técnica del Algoritmo Web Crypto CSPRNG y FIPS 180-4
+            </h3>
+            <p className="leading-relaxed">
+              A diferencia de los sorteadores tradicionales basados en <code>Math.random()</code> —cuyo estado interno Xorshift128+ puede predecirse si se conoce la semilla temporal—, <strong>Sorteos Pro</strong> obtiene entropía directamente del generador criptográfico del sistema operativo (<code>window.crypto.getRandomValues</code>) y aplica permutación uniforme de Fisher-Yates sin sesgo modular. Inmediatamente después de la extracción, el bloque de datos canónico (identificador del sorteo, timestamp ISO-8601, total de registros procesados y lista nominal de ganadores titulares y suplentes) se procesa mediante <code>crypto.subtle.digest(&apos;SHA-256&apos;, buffer)</code>, produciendo un resumen de 256 bits resistente a colisiones de segunda preimagen.
+            </p>
+          </div>
         </div>
       </section>
     </div>

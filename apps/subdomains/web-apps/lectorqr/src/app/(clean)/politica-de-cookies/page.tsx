@@ -79,6 +79,25 @@ export default function PoliticaCookiesPage() {
             <li>Apple Safari: Preferencias &gt; Privacidad &gt; Bloquear todas las cookies.</li>
             <li>Microsoft Edge: Configuración &gt; Permisos del sitio &gt; Cookies y datos del sitio.</li>
           </ul>
+          <p className="pt-2">
+            Adicionalmente, Lector QR Pro implementa <strong>Google Consent Mode v2</strong> con señales predeterminadas denegadas (<code>ad_storage</code>, <code>ad_user_data</code>, <code>ad_personalization</code> y <code>analytics_storage</code>) hasta que otorgues tu consentimiento explícito en el banner de privacidad. Puedes administrar la personalización de anuncios directamente en{' '}
+            <a href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline font-semibold">
+              adssettings.google.com
+            </a>
+            , revisar el uso de datos en sitios asociados de Google en{' '}
+            <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline font-semibold">
+              policies.google.com/technologies/partner-sites
+            </a>{' '}
+            o ejercer opciones globales de exclusión publicitaria en{' '}
+            <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-cyan-400 underline font-semibold">
+              www.aboutads.info/choices/
+            </a>
+            . Ninguna cookie almacena ni transmite las imágenes o códigos QR que escaneas localmente en tu navegador. Para cualquier consulta adicional, escríbenos a{' '}
+            <a href="mailto:contacto@atpdev.dev" className="text-cyan-400 underline font-semibold">
+              contacto@atpdev.dev
+            </a>
+            .
+          </p>
         </section>
 
       </div>

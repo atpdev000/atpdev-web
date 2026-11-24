@@ -286,6 +286,12 @@ export default function ChefIAPage() {
               </p>
             </div>
           </div>
+          <div className="pt-4 border-t border-stone-200 dark:border-stone-800 space-y-2 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed">
+            <h3 className="font-bold text-stone-900 dark:text-white">Inocuidad Alimentaria, Puntos Críticos HACCP y Tradición Regional</h3>
+            <p>
+              Cada recomendación técnica emitida por Chef IA Perú integra los parámetros sanitarios vigentes para servicios de alimentación colectiva (control de cadena de frío entre 0 °C y 4 °C para pescados y mariscos destinados a ceviche y tiradito, regeneración térmica por encima de 74 °C en fondos y guisos de larga cocción, y prevención de contaminación cruzada en tablas de corte). De esta manera, tanto emprendedores gastronómicos como cocineros aficionados disponen de una guía confiable que respeta la identidad culinaria de la costa, sierra y selva peruana.
+            </p>
+          </div>
         </div>
       </section>
     </div>

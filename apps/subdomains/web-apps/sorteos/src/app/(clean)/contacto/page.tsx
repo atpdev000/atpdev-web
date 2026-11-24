@@ -214,6 +214,12 @@ export default function ContactoPage() {
               Puedes revisar nuestra <Link href="/politica-de-privacidad" className="text-pink-500 underline font-semibold">Política de Privacidad</Link> y los <Link href="/terminos-y-condiciones" className="text-pink-500 underline font-semibold">Términos y Condiciones</Link> aplicables en todo el ecosistema ATP DEV.
             </p>
           </div>
+          <div className="p-4 rounded-xl bg-white dark:bg-black/30 border border-slate-200 dark:border-white/5 space-y-1.5 md:col-span-2">
+            <p className="font-bold text-slate-900 dark:text-white">Protocolo de Auditoría Técnica y Verificación para Agencias, Marcas y Notarías</p>
+            <p>
+              Si representas a una agencia de marketing digital, institución educativa o marca comercial y necesitas validar la integridad matemática de un sorteo ejecutado en <strong>Sorteos Pro</strong>, adjunta en tu consulta el código de certificado (formato <code>CERT-SP-XXXX</code>) o la cadena hexadecimal del resumen criptográfico <strong>SHA-256</strong> junto con el acta exportada en formato PDF o Excel. Nuestro equipo de ingeniería verificará la correspondencia entre el vector de entrada, la marca de tiempo UTC y el algoritmo de muestreo CSPRNG (<code>window.crypto.getRandomValues</code>) conforme al estándar FIPS 180-4, emitiendo respuesta técnica desde nuestro centro de operaciones en Lima, Perú.
+            </p>
+          </div>
         </div>
       </div>
     </div>

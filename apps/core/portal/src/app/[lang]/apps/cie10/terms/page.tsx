@@ -86,19 +86,24 @@ export default async function Cie10TermsPage({
           <section>
             <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              4. {lang === "es" ? "Propiedad Intelectual" : "Intellectual Property"}
+              4. {lang === "es" ? "Propiedad Intelectual y Fuentes Oficiales OMS" : "Intellectual Property & Official WHO Sources"}
             </h2>
+            <p className="mb-3">
+              {lang === "es"
+                ? "El diseño de la interfaz, el logotipo, la arquitectura de indexación offline Room FTS4, el código fuente en Kotlin y las herramientas interactivas son propiedad intelectual de ATP Dev (Percy Acha Taipe). La nomenclatura y estructura jerárquica de diagnósticos CIE-10 corresponden a la clasificación internacional publicada por la Organización Mundial de la Salud (OMS)."
+                : "The interface design, logo, Room FTS4 offline indexing architecture, Kotlin source code, and interactive tools are the intellectual property of ATP Dev (Percy Acha Taipe). The ICD-10 diagnostic nomenclature and hierarchical structure correspond to the international classification published by the World Health Organization (WHO)."}
+            </p>
             <p>
               {lang === "es"
-                ? "El diseño de la interfaz, el logotipo, el código fuente y las herramientas interactivas son propiedad intelectual de ATP Dev (Percy Acha Taipe). Los nombres y códigos de diagnósticos pertenecen a la OMS."
-                : "The interface design, logo, source code, and interactive tools are intellectual property of ATP Dev (Percy Acha Taipe). Diagnostic titles and codes belong to the WHO."}
+                ? "Queda prohibida la ingeniería inversa, redistribución no autorizada del paquete APK/AAB o alteración de los avisos legales integrados. Para consultas institucionales, soporte técnico o licenciamiento académico en universidades y centros de salud, escríbenos a contacto@atpdev.dev."
+                : "Reverse engineering, unauthorized redistribution of the APK/AAB package, or alteration of embedded legal notices is prohibited. For institutional inquiries, technical support, or academic licensing in universities and healthcare centers, contact us at contacto@atpdev.dev."}
             </p>
           </section>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={`/${lang}/apps/cie10`}
+            href={`${lang === "es" ? "" : `/${lang}`}/apps/buscador-clinico-cie-10-pro`}
             className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
             ← {lang === "es" ? "Volver a CIE-10 App" : "Back to CIE-10 App"}
