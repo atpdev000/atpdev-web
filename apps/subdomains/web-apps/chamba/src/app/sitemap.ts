@@ -4,35 +4,13 @@ import { SITE_URL } from '@/lib/siteConfig';
 import { getAllGuias } from '@/data/guias';
 import { isEnrichedJobPosting } from '@/lib/jobQuality';
 
-// Render dinámico usando el caché en memoria/disco (~2ms) para reflejar siempre convocatorias vigentes y evitar sitemaps vacíos tras deploy
 export const dynamic = 'force-dynamic';
 
 const REGION_MATCH_MAP: Record<string, string> = {
   lima: 'lima',
-  callao: 'callao',
   arequipa: 'arequipa',
-  cusco: 'cusco',
   'la-libertad': 'la libertad',
   piura: 'piura',
-  junin: 'junín',
-  puno: 'puno',
-  lambayeque: 'lambayeque',
-  'san-martin': 'san martín',
-  ancash: 'áncash',
-  ica: 'ica',
-  cajamarca: 'cajamarca',
-  loreto: 'loreto',
-  ayacucho: 'ayacucho',
-  huanuco: 'huánuco',
-  tacna: 'tacna',
-  ucayali: 'ucayali',
-  apurimac: 'apurímac',
-  amazonas: 'amazonas',
-  huancavelica: 'huancavelica',
-  moquegua: 'moquegua',
-  pasco: 'pasco',
-  tumbes: 'tumbes',
-  'madre-de-dios': 'madre de dios',
   remoto: 'remoto',
 };
 
@@ -51,15 +29,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const todayIso = new Date().toISOString().split('T')[0];
 
-  // Google AdSense & Search Central: Solo indexar ofertas VIGENTES y con datos únicos reales
-  // (excluye Pendientes, Finalizadas y stubs repetitivos sin requisitos/bases/salario propios)
   const activeJobs = jobs.filter((job) => {
     if (job.status !== 'Vigente') return false;
     const isExpired = Boolean(job.end_date && job.end_date.trim() < todayIso);
     return !isExpired;
   });
 
-  const jobUrls = activeJobs.filter(isEnrichedJobPosting).map((job) => ({
+  const enrichedJobs = activeJobs.filter(isEnrichedJobPosting);
+
+  const jobUrls = enrichedJobs.map((job) => ({
     url: `${baseUrl}/empleos/${job.slug}`,
     lastModified: new Date(job.created_at || Date.now()),
     changeFrequency: 'daily' as const,
@@ -73,34 +51,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.95,
   }));
 
+  // Only high-depth editorial & Pillar tool routes (>= 350 words)
   const toolUrls = [
     '/empleos',
-    '/match-cv',
     '/guias',
     '/calculadora-sueldo',
-    '/comparador-regimenes',
     '/crear-cv-cas',
     '/plantillas-anexos',
     '/preguntas-entrevista-cas',
-    '/simulador-entrevista-ia',
     '/organizaciones',
-    '/publicar-empleo',
-    '/quienes-somos',
-    '/politica-de-privacidad',
-    '/politica-de-cookies',
-    '/terminos-y-condiciones',
-    '/contacto',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
-    priority: route.includes('politica') || route.includes('terminos') ? 0.6 : 0.95,
+    priority: 0.95,
   }));
 
-  // Solo incluir en sitemap regiones que tengan al menos 1 convocatoria vigente (coherente con robots index de empleos/en/[region])
+  // Only index regions with >= 5 enriched active jobs so regional landing pages are always content-rich
   const regionUrls = Object.entries(REGION_MATCH_MAP)
-    .filter(([regionKey, regionName]) =>
-      activeJobs.some((job) => {
+    .filter(([regionKey, regionName]) => {
+      const count = enrichedJobs.filter((job) => {
         const jobRegion = (job.region || '').toLowerCase();
         if (regionKey === 'remoto') {
           return jobRegion.includes('remoto') || jobRegion.includes('nacional') || jobRegion.includes('teletrabajo');
@@ -109,8 +79,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           return jobRegion.includes('lima') || jobRegion.includes('callao');
         }
         return jobRegion.includes(regionName);
-      })
-    )
+      }).length;
+      return count >= 5;
+    })
     .map(([region]) => ({
       url: `${baseUrl}/empleos/en/${region}`,
       lastModified: new Date(),
@@ -118,10 +89,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
     }));
 
-  // Solo incluir en sitemap categorías con al menos 1 convocatoria vigente (coherente con robots index de convocatorias/[categoria])
   const categoriaUrls = Object.entries(CATEGORIA_MATCH_MAP)
     .filter(([, sectorMatch]) =>
-      activeJobs.some((job) => (job.sector_type || '').toLowerCase().includes(sectorMatch))
+      enrichedJobs.filter((job) => (job.sector_type || '').toLowerCase().includes(sectorMatch)).length >= 3
     )
     .map(([cat]) => ({
       url: `${baseUrl}/convocatorias/${cat}`,

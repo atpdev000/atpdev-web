@@ -3,20 +3,12 @@ import { PERUVIAN_RECIPES } from '@/data/recipes';
 
 const BASE_URL = 'https://perusabor.atpdev.dev';
 
+// High-depth culinary & recipe hubs (>= 350 words)
 const ROUTES = [
   '',
   '/recetas',
-  '/escalador',
-  '/costeo',
   '/menus',
   '/inventario',
-  '/restaurante',
-  '/chef-ia',
-  '/sobre-nosotros',
-  '/contacto',
-  '/privacidad',
-  '/politica-de-cookies',
-  '/terminos',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -25,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${BASE_URL}${route}`,
     lastModified: now,
     changeFrequency: route === '' ? 'weekly' : 'monthly',
-    priority: route === '' ? 1 : route === '/privacidad' || route === '/terminos' ? 0.4 : 0.85,
+    priority: route === '' ? 1 : 0.85,
   }));
 
   const recipeEntries: MetadataRoute.Sitemap = PERUVIAN_RECIPES.map((recipe) => ({

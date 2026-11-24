@@ -4,6 +4,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://lectorqr.atpdev.dev';
   const lastModified = new Date();
 
+  // Only high-value content and primary tool routes in sitemap (exclude legal/settings/local-history utilities)
   return [
     {
       url: baseUrl,
@@ -21,50 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/guias`,
       lastModified,
       changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/historial`,
-      lastModified,
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/ajustes`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/politica-de-privacidad`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/terminos-y-condiciones`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/politica-de-cookies`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${baseUrl}/sobre-nosotros`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/contacto`,
-      lastModified,
-      changeFrequency: 'monthly',
-      priority: 0.6,
+      priority: 0.85,
     },
   ];
 }
-
