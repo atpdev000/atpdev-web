@@ -4,11 +4,11 @@ import { usePathname } from 'next/navigation';
 
 const ADSENSE_CLIENT_ID = 'ca-pub-5414009811868137';
 const EXCLUDED_ROUTES =
-  /^\/(?:privacidad|politica-de-privacidad|terminos|terminos-y-condiciones|cookies|politica-de-cookies|contacto|login|admin)(?:\/|$)/i;
+  /^\/(?:privacidad|politica-de-privacidad|terminos|terminos-y-condiciones|cookies|politica-de-cookies|contacto|sobre-nosotros|ajustes|historial|login|admin)(?:\/|$)/i;
 
 /**
  * Carga oficial de Google AdSense para Lector QR Pro (lectorqr.atpdev.dev).
- * Renderiza <script> nativo en SSR HTML sin atributo data-nscript y excluye rutas legales/utilitarias.
+ * Renderiza <script> nativo exclusivamente en rutas pilares de contenido (>= 350 palabras).
  */
 export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
   const pathname = usePathname() || '';

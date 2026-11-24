@@ -4,11 +4,11 @@ import { usePathname } from 'next/navigation';
 import { ADSENSE_CLIENT_ID } from '@/lib/siteConfig';
 
 const EXCLUDED_ROUTES =
-  /^\/(?:politica-de-privacidad|terminos-y-condiciones|cookies|politica-de-cookies|login|registro|recuperar-password|restablecer-password|dashboard|admin|auth|contacto|verificar|sorteos\/extension-install)(?:\/|$)/i;
+  /^\/(?:politica-de-privacidad|terminos-y-condiciones|cookies|politica-de-cookies|login|registro|recuperar-password|restablecer-password|dashboard|admin|auth|contacto|verificar|quienes-somos|certificados|herramientas\/(?:dados|moneda|numeros|raspa-gana)|sorteos\/extension-install)(?:\/|$)/i;
 
 /**
  * Componente oficial de Google AdSense para Sorteos Pro.
- * Renderiza <script> nativo en SSR HTML sin atributo data-nscript y excluye páginas legales y paneles privados.
+ * Carga adsbygoogle.js exclusivamente en páginas editoriales y herramientas con >= 350 palabras.
  */
 export function GoogleAdSense({ clientId }: { clientId?: string } = {}) {
   const pathname = usePathname() || '';

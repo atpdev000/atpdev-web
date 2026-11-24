@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { ArrowLeft, Cpu, ShieldCheck, Lock, Layers, Award } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Sobre Nosotros y Arquitectura Local WebAssembly — MasterAtPDF Pro',
+  title: 'Sobre Nosotros y Arquitectura Híbrida WebAssembly — MasterAtPDF Pro',
   description:
-    'Conoce la arquitectura de procesamiento PDF 100% en el navegador (WebAssembly y PDF.js), políticas de cero subida a servidores y equipo de ingeniería detrás de MasterAtPDF Pro.',
+    'Conoce la arquitectura híbrida de procesamiento PDF (WebAssembly, PDF.js v5 y PyMuPDF C++), estándares ISO 32000-2 y equipo de ingeniería detrás de MasterAtPDF Pro.',
   alternates: { canonical: '/sobre-nosotros' },
   robots: { index: true, follow: true },
 };
@@ -22,7 +22,7 @@ export default function SobreNosotrosPdfPage() {
           Volver a MasterAtPDF Pro
         </Link>
         <h1 className="text-3xl sm:text-4xl font-black text-ink tracking-tight">
-          Sobre Nosotros: Procesamiento PDF Privado en el Navegador
+          Sobre Nosotros: Ingeniería Documental y Arquitectura Híbrida PDF
         </h1>
         <p className="text-xs sm:text-sm text-muted">
           Ingeniería de software por Percy Acha Taipe (ATP DEV) • masteratpdf.atpdev.dev
@@ -36,10 +36,10 @@ export default function SobreNosotrosPdfPage() {
             <h2>1. Por qué creamos MasterAtPDF Pro</h2>
           </div>
           <p>
-            La mayoría de las utilidades PDF tradicionales en internet obligan al usuario a subir contratos confidenciales, estados bancarios, historias clínicas o expedientes legales a servidores remotos desconocidos simplemente para unir dos páginas o comprimir un documento.
+            La mayoría de las utilidades PDF tradicionales en internet obligan al usuario a subir contratos confidenciales, estados bancarios, historias clínicas o expedientes legales a servidores remotos con políticas opacas de retención simplemente para unir dos páginas, numerar un informe o comprimir un documento escaneado.
           </p>
           <p>
-            <strong>MasterAtPDF Pro</strong> resuelve este riesgo de raíz: diseñamos una suite de 23 herramientas documentales en la que las operaciones principales se ejecutan en la memoria RAM del navegador mediante <strong>WebAssembly, pdf-lib y PDF.js v5</strong>. Para tareas avanzadas (como cifrado AES-256, conversión Word de alta fidelidad o OCR neuronal opcional), el motor de conversión procesa temporalmente el archivo y lo elimina inmediatamente tras entregar el resultado.
+            <strong>MasterAtPDF Pro</strong> resuelve este desafío técnico y de privacidad mediante una <strong>arquitectura híbrida de dos niveles</strong>: diseñamos una suite de 23 herramientas documentales en la que las operaciones estructurales rápidas se ejecutan en la memoria RAM del navegador mediante <strong>WebAssembly, pdf-lib y PDF.js v5</strong>. Para transformaciones de alta complejidad (como cifrado estándar ISO 32000 AES-256, reparación de tablas XREF corruptas, redacción binaria irrecuperable, conversión Office de alta fidelidad o reconocimiento óptico OCR), nuestro motor en <strong>FastAPI + PyMuPDF C++</strong> procesa el archivo de manera efímera en contenedores aislados por UUID y lo destruye automáticamente tras completarse la descarga.
           </p>
         </div>
 
@@ -47,20 +47,42 @@ export default function SobreNosotrosPdfPage() {
           <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
             <div className="flex items-center gap-2 text-ink font-bold">
               <Cpu className="w-4 h-4 text-brand" />
-              <h2>2. Tecnología de Nivel Industrial</h2>
+              <h2>2. Tecnología de Nivel Industrial (ISO 32000-2)</h2>
             </div>
             <p>
-              Nuestros motores de manipulación de árboles de objetos PDF (XRef tables, streams FlateDecode, incrustación de fuentes estándar y renderizado rasterizado a 300 DPI) aprovechan múltiples hilos mediante Web Workers para procesar documentos de hasta 250 MB sin congelar la interfaz.
+              Nuestros motores de manipulación de árboles de objetos PDF (tablas de referencias cruzadas <code>xref</code>, flujos comprimidos FlateDecode, incrustación de fuentes tipográficas vectoriales y renderizado rasterizado hasta 300 DPI) aprovechan múltiples hilos mediante Web Workers y binarios compilados en C++ para procesar expedientes de hasta 250 MB sin bloquear la interfaz del usuario.
             </p>
           </div>
 
           <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
             <div className="flex items-center gap-2 text-ink font-bold">
               <Award className="w-4 h-4 text-brand" />
-              <h2>3. Autoría y Transparencia (ATP DEV)</h2>
+              <h2>3. Autoría, Transparencia y Sostenibilidad (ATP DEV)</h2>
             </div>
             <p>
-              MasterAtPDF Pro es desarrollado y mantenido por <strong>Percy Acha Taipe</strong>, Ingeniero de Sistemas y fundador de <strong>ATP DEV</strong> en Lima, Perú. Nuestro servicio básico es 100 % gratuito y se sostiene de forma transparente mediante publicidad contextual no intrusiva de Google AdSense.
+              MasterAtPDF Pro es desarrollado y mantenido por <strong>Percy Acha Taipe</strong>, Ingeniero de Sistemas y fundador del ecosistema tecnológico <strong>ATP DEV</strong> en Lima, Perú. Nuestro acceso a las 23 herramientas es 100 % gratuito, sin marcas de agua forzadas ni muros de pago sorpresivos, sosteniéndose de forma transparente mediante publicidad contextual no intrusiva de Google AdSense bajo estricto cumplimiento de Google Consent Mode v2.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
+            <div className="flex items-center gap-2 text-ink font-bold">
+              <ShieldCheck className="w-4 h-4 text-brand" />
+              <h2>4. Seguridad Criptográfica y Censura Binaria Real</h2>
+            </div>
+            <p>
+              A diferencia de editores básicos que solo superponen figuras gráficas sobre información privada, nuestras herramientas de seguridad implementan cifrado simétrico <strong>AES-256</strong> conforme al estándar PDF 2.0 y redacción definitiva (<em>True Binary Redaction</em>), eliminando físicamente tanto los glifos de texto como los píxeles de imágenes subyacentes para impedir cualquier extracción posterior.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-surface border border-line space-y-3">
+            <div className="flex items-center gap-2 text-ink font-bold">
+              <Layers className="w-4 h-4 text-brand" />
+              <h2>5. Documentación Práctica en Cada Herramienta</h2>
+            </div>
+            <p>
+              Cada una de las 23 herramientas de la plataforma incluye una guía operativa paso a paso, recomendaciones técnicas sobre resolución y compresión, especificaciones del estándar ISO 32000-2 y respuestas a preguntas frecuentes para ayudar a estudiantes, abogados, contadores e ingenieros a obtener documentos óptimos al primer intento.
             </p>
           </div>
         </div>
