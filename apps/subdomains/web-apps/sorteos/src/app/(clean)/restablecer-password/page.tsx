@@ -82,8 +82,23 @@ function ResetContent() {
 
 export default function RestablecerPage() {
   return (
-    <React.Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center text-zinc-500 text-xs font-mono">Cargando…</div>}>
-      <ResetContent />
-    </React.Suspense>
+    <div className="space-y-8 pb-12">
+      <React.Suspense fallback={<div className="min-h-[40vh] flex items-center justify-center text-zinc-500 text-xs font-mono">Cargando módulo criptográfico de restablecimiento…</div>}>
+        <ResetContent />
+      </React.Suspense>
+      <section className="max-w-2xl mx-auto px-4">
+        <div className="rounded-3xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 p-6 space-y-3 text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-display">
+            Política de Seguridad Criptográfica en el Restablecimiento de Credenciales
+          </h2>
+          <p>
+            El proceso de actualización de contraseña en <strong>Sorteos Pro</strong> utiliza tokens temporales de un solo uso firmados criptográficamente con caducidad estricta para impedir accesos no autorizados a tu panel de organizador. Al definir tu nueva clave, el sistema aplica derivación segura con sal criptográfica única bajo transporte cifrado TLS 1.3 e invalida de inmediato cualquier enlace de recuperación emitido con anterioridad.
+          </p>
+          <p>
+            Recuerda que todas las herramientas públicas de selección aleatoria (<Link href="/herramientas/ruleta" className="text-pink-600 dark:text-pink-400 underline font-semibold">Ruleta</Link>, <Link href="/herramientas/lista" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lista de Nombres</Link>, <Link href="/herramientas/dados" className="text-pink-600 dark:text-pink-400 underline font-semibold">Dados 3D</Link>, <Link href="/herramientas/numeros" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lotería Numérica</Link> y el <Link href="/verificar" className="text-pink-600 dark:text-pink-400 underline font-semibold">Verificador SHA-256</Link>) permanecen disponibles sin necesidad de autenticación. Si requieres asistencia adicional con tu cuenta corporativa, visita nuestra sección de <Link href="/contacto" className="text-pink-600 dark:text-pink-400 underline font-semibold">Contacto y Soporte</Link>.
+          </p>
+        </div>
+      </section>
+    </div>
   );
 }

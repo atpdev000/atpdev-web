@@ -724,8 +724,27 @@ function TriviaPlayerContent() {
 
 export default function TriviaPlayerPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#070a13] flex items-center justify-center text-white">Cargando sala de trivia...</div>}>
-      <TriviaPlayerContent />
-    </Suspense>
+    <div className="bg-[#070a13] text-white">
+      <Suspense fallback={<div className="min-h-[60vh] bg-[#070a13] flex items-center justify-center text-white">Cargando sala interactiva de trivia en vivo...</div>}>
+        <TriviaPlayerContent />
+      </Suspense>
+
+      <section className="max-w-4xl mx-auto px-4 pb-14 pt-4">
+        <div className="rounded-3xl bg-white/[0.03] border border-white/10 p-6 sm:p-8 space-y-4 text-xs sm:text-sm text-zinc-300 leading-relaxed">
+          <h2 className="text-base sm:text-lg font-bold text-white font-display">
+            Sistema de Puntuación Cronometrada y Gamificación Interactiva de Trivias en Vivo
+          </h2>
+          <p>
+            La sala de juego de <strong>Sorteos Pro Trivia</strong> evalúa cada respuesta combinando precisión conceptual y velocidad de reacción en milisegundos. Cada pregunta acertada dentro del tiempo reglamentario otorga una base de hasta 1,000 puntos ponderados por el tiempo restante en el cronómetro, sumando bonificaciones progresivas por racha de aciertos consecutivos (<em>streak multiplier</em>) para desempatar el podio final de participantes.
+          </p>
+          <p>
+            Los docentes, capacitadores corporativos, creadores de contenido y organizadores de eventos pueden diseñar sus propios cuestionarios personalizados desde el <Link href="/herramientas/trivia" className="text-pink-400 underline font-semibold">Creador de Trivias y Quiz Interactivo</Link>, configurar códigos PIN de sala compartibles mediante enlace o código QR, establecer umbrales mínimos de aprobación para liberar cupones promocionales y exportar las métricas de participación de toda la sesión.
+          </p>
+          <p>
+            Todas las dinámicas de evaluación y desempates aleatorios dentro de la plataforma operan con entropía criptográfica nativa <code>window.crypto.getRandomValues()</code> (Web Crypto API CSPRNG), garantizando equidad técnica tanto en aulas educativas como en activaciones de marca en directo. Si deseas verificar un certificado emitido o explorar más herramientas de selección aleatoria, visita nuestro <Link href="/verificar" className="text-pink-400 underline font-semibold">Verificador SHA-256</Link> o la <Link href="/herramientas/ruleta" className="text-pink-400 underline font-semibold">Ruleta Aleatoria</Link>.
+          </p>
+        </div>
+      </section>
+    </div>
   );
 }

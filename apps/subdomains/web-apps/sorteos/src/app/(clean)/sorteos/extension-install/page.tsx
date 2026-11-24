@@ -424,6 +424,16 @@ export default function ExtensionInstallPage() {
             </Link>
           </div>
         </div>
+
+        {/* Especificación de Seguridad Manifest V3 y Privacidad de Datos */}
+        <section className="p-6 rounded-3xl bg-slate-900/60 border border-white/10 space-y-3 text-xs text-slate-300 leading-relaxed font-mono">
+          <h2 className="text-sm sm:text-base font-bold text-white">
+            Arquitectura de Seguridad Manifest V3 y Lectura Local de Comentarios Públicos
+          </h2>
+          <p>
+            El conector oficial de navegador de <strong>Sorteos Pro</strong> cumple con la especificación <strong>Chromium Manifest V3</strong>, ejecutándose únicamente bajo invocación explícita del organizador sobre la pestaña activa de la publicación del sorteo. La extensión no recolecta historial de navegación, cookies de sesión ni credenciales privadas: su única función técnica consiste en paginar el árbol DOM de comentarios visibles públicamente para transferir la lista limpia de participantes al motor criptográfico CSPRNG (<code>window.crypto.getRandomValues</code>) y emitir el certificado auditable SHA-256.
+          </p>
+        </section>
       </div>
     </div>
   );

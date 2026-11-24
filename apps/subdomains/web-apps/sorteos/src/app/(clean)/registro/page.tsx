@@ -424,6 +424,9 @@ export default function RegistroPage() {
           <p>
             <strong>Auditoría Imparcial y Cumplimiento para Sorteos Comerciales:</strong> Al registrar una cuenta gratuita o profesional en Sorteos Pro, obtienes acceso inmediato al panel de gestión de sorteos multiplataforma donde cada evento procesado genera un identificador único de certificado (<code>CERT-SP</code>) verificable públicamente por tus seguidores. Nuestro motor aplica reglas transparentes de filtrado (menciones mínimas obligatorias, validación de hashtags oficiales, exclusión de cuentas duplicadas o listas negras de bots y selección simultánea de titulares y suplentes) utilizando muestreo de rechazo sin sesgo modular. De esta manera, tu comunidad, patrocinadores y clientes pueden comprobar matemáticamente que la elección de ganadores fue 100% aleatoria e inalterable desde el momento de su emisión.
           </p>
+          <p>
+            Además, podrás organizar múltiples campañas por cliente o marca, activar el escenario de transmisión en vivo con cuenta regresiva para presentaciones en directo (OBS, Twitch, YouTube Live, TikTok Live o Instagram Live) y consultar estadísticas históricas de participación sin límite de tiempo y con soporte técnico dedicado en español.
+          </p>
         </div>
       </section>
     </div>

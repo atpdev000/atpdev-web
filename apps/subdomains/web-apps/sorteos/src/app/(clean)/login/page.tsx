@@ -339,6 +339,9 @@ export default function LoginPage() {
             <p>
               <strong>Protocolo de Seguridad de Sesiones y Protección de Cuentas:</strong> Todas las sesiones autenticadas en Sorteos Pro utilizan tokens firmados criptográficamente con expiración automática y renovación segura para proteger la integridad de tus dinámicas promocionales. Nunca almacenamos contraseñas en texto plano ni solicitamos permisos de publicación intrusivos sobre tus perfiles de redes sociales: las conexiones con Instagram Graph API, YouTube Data API y TikTok operan en modo de lectura autorizada exclusivamente para importar comentarios públicos de tus publicaciones seleccionadas, filtrar participantes duplicados en tiempo real y emitir actas de ganadores auditables por cualquier participante o notaría. Si necesitas recuperar el acceso a tu cuenta corporativa o actualizar el correo titular de tu organización, utiliza el flujo de recuperación cifrada o comunícate directamente con nuestro equipo de soporte técnico en Lima, Perú.
             </p>
+            <p>
+              Asimismo, cada sorteo guardado desde tu cuenta conserva su vector de auditoría inmutable (marca de tiempo UTC ISO-8601, total de registros válidos, reglas de exclusión aplicadas y resumen hexadecimal SHA-256), permitiéndote descargar nuevamente tus certificados oficiales en formato PDF, Excel o tarjeta gráfica en alta definición cuando lo requieras para auditorías internas o reportes de campaña.
+            </p>
           </div>
         </section>
       </div>

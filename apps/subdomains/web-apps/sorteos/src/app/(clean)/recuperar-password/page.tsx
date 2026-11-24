@@ -126,6 +126,21 @@ export default function RecuperarPasswordPage() {
             </form>
           )}
         </div>
+
+        <section className="rounded-3xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 p-6 space-y-3 text-xs text-slate-600 dark:text-zinc-300 leading-relaxed shadow-xs">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-display">
+            Procedimiento de Recuperación Segura y Acceso a Herramientas sin Cuenta
+          </h2>
+          <p>
+            Al solicitar el restablecimiento de tu contraseña en <strong>Sorteos Pro</strong>, nuestro servidor genera un enlace cifrado de un solo uso con validez temporal limitada y lo envía exclusivamente al correo electrónico titular registrado. Ningún operador de soporte solicita claves por correo ni redes sociales, y todas las comunicaciones se realizan bajo protocolo seguro TLS 1.3.
+          </p>
+          <p>
+            Mientras recuperas el acceso a tu panel de organizador, recuerda que puedes ejecutar sorteos y dinámicas de manera 100% gratuita y sin iniciar sesión utilizando la <Link href="/herramientas/ruleta" className="text-pink-600 dark:text-pink-400 underline font-semibold">Ruleta Aleatoria</Link>, <Link href="/herramientas/lista" className="text-pink-600 dark:text-pink-400 underline font-semibold">Sorteo por Lista de Nombres</Link>, <Link href="/herramientas/equipos" className="text-pink-600 dark:text-pink-400 underline font-semibold">Generador de Equipos</Link>, <Link href="/herramientas/dados" className="text-pink-600 dark:text-pink-400 underline font-semibold">Dados 3D</Link>, <Link href="/herramientas/moneda" className="text-pink-600 dark:text-pink-400 underline font-semibold">Cara o Cruz</Link>, <Link href="/herramientas/numeros" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lotería de Números</Link> y el <Link href="/verificar" className="text-pink-600 dark:text-pink-400 underline font-semibold">Verificador Público de Certificados SHA-256</Link>.
+          </p>
+          <p>
+            Si ya no tienes acceso a tu bandeja de correo corporativo o necesitas asistencia técnica para migrar tus certificados históricos emitidos con entropía criptográfica <code>window.crypto.getRandomValues()</code> (CSPRNG), comunícate con nuestro equipo desde la página de <Link href="/contacto" className="text-pink-600 dark:text-pink-400 underline font-semibold">Contacto y Soporte</Link> o revisa nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link>.
+          </p>
+        </section>
       </div>
     </div>
   );

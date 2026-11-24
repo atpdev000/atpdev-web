@@ -1,4 +1,13 @@
-User-agent: *
+User-Agent: Mediapartners-Google
+Allow: /
+
+User-Agent: Google-Display-Ads-Bot
+Allow: /
+
+User-Agent: Googlebot
+Allow: /
+
+User-Agent: *
 Allow: /
 
 Sitemap: https://magic.atpdev.dev/sitemap.xml
