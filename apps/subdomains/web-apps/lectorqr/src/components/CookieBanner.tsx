@@ -12,6 +12,18 @@ export function CookieBanner() {
       const consent = localStorage.getItem('lectorqr_cookie_consent');
       if (consent) {
         setAccepted(true);
+        if (
+          (consent === 'accepted' || consent === 'granted') &&
+          typeof window !== 'undefined' &&
+          typeof (window as any).gtag === 'function'
+        ) {
+          (window as any).gtag('consent', 'update', {
+            ad_storage: 'granted',
+            ad_user_data: 'granted',
+            ad_personalization: 'granted',
+            analytics_storage: 'granted',
+          });
+        }
       } else {
         setAccepted(false);
       }
@@ -23,6 +35,29 @@ export function CookieBanner() {
   const handleAccept = () => {
     try {
       localStorage.setItem('lectorqr_cookie_consent', 'accepted');
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('consent', 'update', {
+          ad_storage: 'granted',
+          ad_user_data: 'granted',
+          ad_personalization: 'granted',
+          analytics_storage: 'granted',
+        });
+      }
+    } catch {}
+    setAccepted(true);
+  };
+
+  const handleDecline = () => {
+    try {
+      localStorage.setItem('lectorqr_cookie_consent', 'declined');
+      if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+        (window as any).gtag('consent', 'update', {
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          analytics_storage: 'denied',
+        });
+      }
     } catch {}
     setAccepted(true);
   };
@@ -49,17 +84,18 @@ export function CookieBanner() {
       <div className="flex items-center gap-2 pt-1">
         <button
           type="button"
+          onClick={handleDecline}
+          className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer"
+        >
+          Solo necesarias
+        </button>
+        <button
+          type="button"
           onClick={handleAccept}
           className="flex-1 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase tracking-wider cursor-pointer shadow-md transition-all"
         >
           Aceptar Todas
         </button>
-        <Link
-          href="/politica-de-privacidad"
-          className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all text-center"
-        >
-          Políticas
-        </Link>
       </div>
     </div>
   );
