@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { translateText } from "@atpdev/database";
 
 export async function generateMetadata({
   params,
@@ -26,6 +25,11 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+      languages: {
+        es: `${BASE_URL}${path}`,
+        en: `${BASE_URL}/en${path}`,
+        "x-default": `${BASE_URL}${path}`,
+      },
     },
   };
 }

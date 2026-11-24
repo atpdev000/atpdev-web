@@ -336,6 +336,9 @@ export default function LoginPage() {
             <p>
               El panel autenticado permite a creadores de contenido, agencias de marketing, comercios e instituciones gestionar su historial centralizado de sorteos en Instagram, TikTok, YouTube, Facebook y X, descargar certificados oficiales de transparencia firmados con <strong>SHA-256 (FIPS 180-4)</strong> mediante entropía criptográfica <code>window.crypto.getRandomValues()</code> (CSPRNG) y administrar integraciones OAuth oficiales bajo transporte cifrado TLS 1.3. Consulta nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link> o escríbenos en <Link href="/contacto" className="text-pink-600 dark:text-pink-400 underline font-semibold">Contacto y Soporte</Link>.
             </p>
+            <p>
+              <strong>Protocolo de Seguridad de Sesiones y Protección de Cuentas:</strong> Todas las sesiones autenticadas en Sorteos Pro utilizan tokens firmados criptográficamente con expiración automática y renovación segura para proteger la integridad de tus dinámicas promocionales. Nunca almacenamos contraseñas en texto plano ni solicitamos permisos de publicación intrusivos sobre tus perfiles de redes sociales: las conexiones con Instagram Graph API, YouTube Data API y TikTok operan en modo de lectura autorizada exclusivamente para importar comentarios públicos de tus publicaciones seleccionadas, filtrar participantes duplicados en tiempo real y emitir actas de ganadores auditables por cualquier participante o notaría. Si necesitas recuperar el acceso a tu cuenta corporativa o actualizar el correo titular de tu organización, utiliza el flujo de recuperación cifrada o comunícate directamente con nuestro equipo de soporte técnico en Lima, Perú.
+            </p>
           </div>
         </section>
       </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProjects, translateText } from "@atpdev/database";
+import { getProjects } from "@atpdev/database";
 
 export async function generateMetadata({
   params,
@@ -31,6 +31,11 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+      languages: {
+        es: `${BASE_URL}${path}`,
+        en: `${BASE_URL}/en${path}`,
+        "x-default": `${BASE_URL}${path}`,
+      },
     },
   };
 }
@@ -92,33 +97,37 @@ export default async function DynamicAppPrivacyPage({
             </p>
           </section>
 
-          {legalConfig.has_admob !== false && (
-            <section>
-              <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                2. {lang === "es" ? "Publicidad y Google AdMob" : "Advertising & Google AdMob"}
-              </h2>
-              <p>
-                {lang === "es"
-                  ? "Para mantener la aplicación accesible, podemos mostrar anuncios a través de Google AdMob. Google AdMob puede usar identificadores anónimos del dispositivo (ID de publicidad de Android / IDFA de iOS) para servir anuncios relevantes cumpliendo con las políticas de privacidad de Google."
-                  : "To keep the application accessible, we may display ads via Google AdMob. Google AdMob may use anonymous device identifiers (Android Advertising ID / iOS IDFA) to serve relevant ads in compliance with Google Privacy Policies."}
-              </p>
-            </section>
-          )}
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              2. {lang === "es" ? "Publicidad, Consentimiento y Servicios de Google" : "Advertising, Consent & Google Services"}
+            </h2>
+            <p>
+              {legalConfig.has_admob !== false
+                ? lang === "es"
+                  ? "Para mantener la aplicación accesible de manera gratuita, podemos mostrar anuncios a través de Google AdMob o Google AdSense bajo Google Consent Mode v2. Dichos servicios pueden emplear identificadores anónimos del dispositivo o cookies técnicas conforme a las políticas de privacidad de Google."
+                  : "To keep the application accessible for free, we may display ads via Google AdMob or Google AdSense under Google Consent Mode v2. These services may use anonymous device identifiers or technical cookies in strict compliance with Google Privacy Policies."
+                : lang === "es"
+                  ? `${project.title} opera en un entorno limpio centrado en la productividad del usuario. Cualquier integración futura o analítica agregada respeta estrictamente las señales de Google Consent Mode v2 y nunca comparte identificadores personales con redes de terceros sin consentimiento explícito.`
+                  : `${project.title} operates in a clean environment focused on user productivity. Any aggregated analytics or external service integration strictly respects Google Consent Mode v2 signals and never shares personal identifiers with third-party networks without explicit user consent.`}
+            </p>
+          </section>
 
-          {legalConfig.has_ai !== false && (
-            <section>
-              <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                3. {lang === "es" ? "Funcionalidades de Inteligencia Artificial (Google Gemini API)" : "AI Features (Google Gemini API)"}
-              </h2>
-              <p>
-                {lang === "es"
-                  ? "Las herramientas asistidas por Inteligencia Artificial procesan las consultas a través de la API segura de Google Gemini. Ninguna información enviada se asocia a la identidad real del usuario ni se utiliza para elaboración de perfiles."
-                  : "AI-assisted tools process queries securely via the Google Gemini API. Submitted data is not associated with personal user identity nor used for profiling."}
-              </p>
-            </section>
-          )}
+          <section>
+            <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+              3. {lang === "es" ? "Procesamiento de Datos e Inteligencia Artificial" : "Data Processing & Artificial Intelligence"}
+            </h2>
+            <p>
+              {legalConfig.has_ai !== false
+                ? lang === "es"
+                  ? "Las herramientas asistidas por Inteligencia Artificial procesan las consultas a través de canales cifrados hacia la API segura de Google Gemini. Ninguna información enviada se asocia a la identidad real del usuario ni se utiliza para elaboración de perfiles comerciales."
+                  : "AI-assisted tools process queries over encrypted channels via the secure Google Gemini API. Submitted data is never associated with personal user identity nor used for commercial profiling."
+                : lang === "es"
+                  ? `Todos los algoritmos de cálculo, validación y transformación de datos dentro de ${project.title} se ejecutan de forma determinista y local en la memoria del dispositivo o navegador del usuario, sin enviar tus entradas de trabajo a modelos externos de inteligencia artificial.`
+                  : `All calculation, validation, and data transformation algorithms within ${project.title} execute deterministically and locally in your device or browser memory, without transmitting your working inputs to external artificial intelligence models.`}
+            </p>
+          </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3 flex items-center gap-2">
@@ -138,7 +147,7 @@ export default async function DynamicAppPrivacyPage({
             <p className="mt-3">
               {lang === "es"
                 ? `Asimismo, ${project.title} aplica el principio de minimización de datos y aislamiento de permisos del sistema operativo: cualquier acceso opcional a almacenamiento local, cámara, red o sensores se ejecuta estrictamente bajo acción explícita del usuario en primer plano, sin telemetría oculta en segundo plano ni transferencia de archivos personales a terceros no autorizados.`
-                : `Furthermore, ${project.title} enforces strict data minimization and operating-system permission sandboxing: any optional access to local device storage, camera hardware, network sockets, or sensors executes exclusively upon explicit foreground user interaction, with zero hidden background telemetry, zero cross-app tracking, and zero transfer of personal files or credentials to unauthorized external servers. All diagnostic logs and crash reports remain anonymized and strictly limited to maintaining stability, security, and compatibility across operating system updates.`}
+                : `Furthermore, ${project.title} enforces strict data minimization and operating-system permission sandboxing: any optional access to local device storage, camera hardware, network sockets, or sensors executes exclusively upon explicit foreground user interaction, with zero hidden background telemetry, zero cross-app tracking, and zero transfer of personal files or credentials to unauthorized external servers. All diagnostic logs and crash reports remain anonymized and strictly limited to maintaining stability, security, and compatibility across operating system updates, while users retain complete control to clear local application cache or revoke runtime permissions at any moment.`}
             </p>
           </section>
 

@@ -421,6 +421,9 @@ export default function RegistroPage() {
           <p>
             Tus credenciales se transmiten exclusivamente bajo cifrado <strong>TLS 1.3</strong>, las contraseñas se almacenan mediante funciones de derivación criptográfica con sal única y puedes ejercer en cualquier momento tus derechos de acceso, rectificación o cancelación conforme a nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link> y <Link href="/terminos-y-condiciones" className="text-pink-600 dark:text-pink-400 underline font-semibold">Términos y Condiciones</Link>.
           </p>
+          <p>
+            <strong>Auditoría Imparcial y Cumplimiento para Sorteos Comerciales:</strong> Al registrar una cuenta gratuita o profesional en Sorteos Pro, obtienes acceso inmediato al panel de gestión de sorteos multiplataforma donde cada evento procesado genera un identificador único de certificado (<code>CERT-SP</code>) verificable públicamente por tus seguidores. Nuestro motor aplica reglas transparentes de filtrado (menciones mínimas obligatorias, validación de hashtags oficiales, exclusión de cuentas duplicadas o listas negras de bots y selección simultánea de titulares y suplentes) utilizando muestreo de rechazo sin sesgo modular. De esta manera, tu comunidad, patrocinadores y clientes pueden comprobar matemáticamente que la elección de ganadores fue 100% aleatoria e inalterable desde el momento de su emisión.
+          </p>
         </div>
       </section>
     </div>

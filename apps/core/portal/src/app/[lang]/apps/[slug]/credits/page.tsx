@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProjects, translateText } from "@atpdev/database";
+import { getProjects } from "@atpdev/database";
 
 export async function generateMetadata({
   params,
@@ -31,6 +31,11 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+      languages: {
+        es: `${BASE_URL}${path}`,
+        en: `${BASE_URL}/en${path}`,
+        "x-default": `${BASE_URL}${path}`,
+      },
     },
   };
 }
@@ -125,7 +130,7 @@ export default async function DynamicAppCreditsPage({
             <p className="mt-3">
               {lang === "es"
                 ? `Gobernanza de Código Abierto y Transparencia Técnica: En cumplimiento con las cláusulas de atribución de las licencias MIT, Apache License 2.0, BSD-3-Clause e ISC que respaldan los compiladores, entornos de ejecución, motores de renderizado y bibliotecas criptográficas utilizadas en ${project.title}, ATP Dev mantiene la trazabilidad completa de versiones en su repositorio centralizado de integración continua. Ningún componente propietario de terceros ha sido incorporado sin la debida autorización o licencia de uso correspondiente, garantizando la integridad legal, técnica y operativa de la aplicación en entornos personales, educativos y corporativos.`
-                : `Open-Source Governance & Technical Transparency: In full compliance with the attribution clauses of the MIT, Apache License 2.0, BSD-3-Clause, and ISC licenses governing the compilers, runtime environments, rendering engines, and cryptographic libraries integrated into ${project.title}, ATP Dev maintains complete version traceability within its centralized continuous integration and deployment pipeline. No proprietary third-party software component or copyrighted asset has been bundled without proper authorization or licensing, ensuring complete legal, technical, and operational integrity across personal, academic, and enterprise production environments worldwide.`}
+                : `Open-Source Governance & Technical Transparency: In full compliance with the attribution clauses of the MIT, Apache License 2.0, BSD-3-Clause, and ISC licenses governing the compilers, runtime environments, rendering engines, and cryptographic libraries integrated into ${project.title}, ATP Dev maintains complete version traceability within its centralized continuous integration and deployment pipeline. No proprietary third-party software component or copyrighted asset has been bundled without proper authorization or licensing, ensuring complete legal, technical, and operational integrity across personal, academic, and enterprise production environments worldwide. All documentation, cryptographic checksums, and release notes are verified prior to publication on our official distribution channels.`}
             </p>
           </section>
         </div>

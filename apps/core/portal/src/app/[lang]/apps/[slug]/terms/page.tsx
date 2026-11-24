@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProjects, translateText } from "@atpdev/database";
+import { getProjects } from "@atpdev/database";
 
 export async function generateMetadata({
   params,
@@ -31,6 +31,11 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: `${BASE_URL}${lang === "es" ? "" : `/${lang}`}${path}`,
+      languages: {
+        es: `${BASE_URL}${path}`,
+        en: `${BASE_URL}/en${path}`,
+        "x-default": `${BASE_URL}${path}`,
+      },
     },
   };
 }
