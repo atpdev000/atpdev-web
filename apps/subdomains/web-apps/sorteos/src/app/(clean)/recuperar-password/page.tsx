@@ -140,6 +140,12 @@ export default function RecuperarPasswordPage() {
           <p>
             Si ya no tienes acceso a tu bandeja de correo corporativo o necesitas asistencia técnica para migrar tus certificados históricos emitidos con entropía criptográfica <code>window.crypto.getRandomValues()</code> (CSPRNG), comunícate con nuestro equipo desde la página de <Link href="/contacto" className="text-pink-600 dark:text-pink-400 underline font-semibold">Contacto y Soporte</Link> o revisa nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link>.
           </p>
+          <p>
+            <strong>Protección Criptográfica contra Accesos No Autorizados:</strong> Nuestro sistema de gestión de identidades aplica limitación de tasa (<em>rate limiting</em>) por dirección IP, validación de caducidad automática en cada token de recuperación y notificación inmediata de cambios de credenciales. Todos los certificados públicos de sorteos asociados a tu cuenta (identificados con código <code>CERT-SP</code> y firma hexadecimal <strong>SHA-256</strong> conforme al estándar FIPS 180-4) permanecen intactos e inmutables durante el proceso de actualización de tu clave de acceso, garantizando la continuidad operativa de tus campañas en Instagram, TikTok, YouTube, Facebook y X.
+          </p>
+          <p>
+            Una vez restablecida tu contraseña, te recomendamos emplear una combinación alfanumérica única de al menos 10 caracteres y verificar tus integraciones autorizadas desde el panel principal de organizador. Consulta también nuestros <Link href="/terminos-y-condiciones" className="text-pink-600 dark:text-pink-400 underline font-semibold">Términos y Condiciones</Link> para conocer las políticas de resguardo y auditoría de sorteos digitales.
+          </p>
         </section>
       </div>
     </div>

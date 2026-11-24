@@ -743,6 +743,12 @@ export default function TriviaPlayerPage() {
           <p>
             Todas las dinámicas de evaluación y desempates aleatorios dentro de la plataforma operan con entropía criptográfica nativa <code>window.crypto.getRandomValues()</code> (Web Crypto API CSPRNG), garantizando equidad técnica tanto en aulas educativas como en activaciones de marca en directo. Si deseas verificar un certificado emitido o explorar más herramientas de selección aleatoria, visita nuestro <Link href="/verificar" className="text-pink-400 underline font-semibold">Verificador SHA-256</Link> o la <Link href="/herramientas/ruleta" className="text-pink-400 underline font-semibold">Ruleta Aleatoria</Link>.
           </p>
+          <p>
+            <strong>Metodología de Desempate y Ranking en Tiempo Real:</strong> Cuando dos o más participantes alcanzan el mismo número de respuestas correctas dentro de una sala identificada por código PIN, el motor algorítmico ordena la tabla de clasificación priorizando el menor tiempo acumulado de respuesta medido con temporizadores de alta precisión (<code>performance.now()</code>) y el factor de racha continua. Al concluir la partida, los jugadores que superan el porcentaje mínimo de aprobación pueden desbloquear recompensas configuradas por el anfitrión y validar la integridad del evento mediante los estándares de transparencia de Sorteos Pro.
+          </p>
+          <p>
+            Asimismo, la interfaz interactiva está optimizada para funcionar sin latencia en teléfonos móviles, tabletas y proyectores de aula o transmisiones en vivo (OBS Studio, YouTube Live, Twitch y TikTok Live), almacenando el progreso localmente sin exponer datos sensibles de los concursantes y cumpliendo con nuestra <Link href="/politica-de-privacidad" className="text-pink-400 underline font-semibold">Política de Privacidad</Link> y <Link href="/terminos-y-condiciones" className="text-pink-400 underline font-semibold">Términos y Condiciones</Link>.
+          </p>
         </div>
       </section>
     </div>

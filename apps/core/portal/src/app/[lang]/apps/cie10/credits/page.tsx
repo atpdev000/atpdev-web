@@ -52,7 +52,9 @@ export default async function Cie10CreditsPage({
             {lang === "es" ? "Créditos y Fuentes Médicas" : "Credits & Medical Sources"}
           </h1>
           <p className="text-neutral-400 mt-2">
-            CIE10 - Códigos y Enfermedades (Android App)
+            {lang === "es"
+              ? "CIE10 - Códigos y Enfermedades (Aplicación Android e iOS)"
+              : "CIE-10 - Clinical Codes & Diseases (Android & iOS Application)"}
           </p>
         </div>
 
@@ -63,7 +65,9 @@ export default async function Cie10CreditsPage({
               {lang === "es" ? "Organización Mundial de la Salud (OMS / WHO)" : "World Health Organization (WHO)"}
             </h2>
             <p>
-              La Clasificación Internacional de Enfermedades (CIE-10) es una norma internacional de diagnóstico mantenida y publicada por la <strong>Organización Mundial de la Salud (OMS)</strong>. Esta aplicación utiliza la base de datos oficial codificada para facilitar la búsqueda médica y asistencial.
+              {lang === "es"
+                ? "La Clasificación Internacional de Enfermedades (CIE-10) es la norma internacional de codificación diagnóstica mantenida y publicada oficialmente por la Organización Mundial de la Salud (OMS). Esta aplicación estructura e indexa el catálogo oficial codificado por capítulos, bloques y subcategorías para facilitar la consulta médica, epidemiológica y asistencial en tiempo real."
+                : "The International Classification of Diseases (ICD-10 / CIE-10) is the global diagnostic coding standard officially maintained and published by the World Health Organization (WHO). This application structures and indexes the official coded catalog across chapters, blocks, and subcategories to streamline real-time clinical, epidemiological, and healthcare reference lookups."}
             </p>
           </section>
 
@@ -73,7 +77,9 @@ export default async function Cie10CreditsPage({
               {lang === "es" ? "Desarrollo y Arquitectura" : "Development & Architecture"}
             </h2>
             <p>
-              Desarrollado y mantenido de forma independiente por <strong>Percy Acha Taipe (ATP Dev)</strong>. Diseñado en Android Kotlin nativo con Jetpack Compose y sincronización remota OTA.
+              {lang === "es"
+                ? "Desarrollado, optimizado y mantenido de forma independiente por Percy Acha Taipe (Ingeniero de Sistemas y fundador de ATP Dev en Lima, Perú). Diseñado en arquitectura nativa Android Kotlin con Jetpack Compose, motor de indexación SQLite Room FTS4 de latencia cero y sincronización remota segura OTA."
+                : "Independently engineered, optimized, and maintained by Percy Acha Taipe (Systems Engineer and founder of ATP Dev in Lima, Peru). Built on a native Android Kotlin architecture with Jetpack Compose, a zero-latency SQLite Room FTS4 indexing engine, and secure over-the-air (OTA) remote synchronization."}
             </p>
           </section>
 

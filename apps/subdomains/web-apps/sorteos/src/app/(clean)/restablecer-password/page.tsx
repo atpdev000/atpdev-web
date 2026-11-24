@@ -97,6 +97,12 @@ export default function RestablecerPage() {
           <p>
             Recuerda que todas las herramientas públicas de selección aleatoria (<Link href="/herramientas/ruleta" className="text-pink-600 dark:text-pink-400 underline font-semibold">Ruleta</Link>, <Link href="/herramientas/lista" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lista de Nombres</Link>, <Link href="/herramientas/dados" className="text-pink-600 dark:text-pink-400 underline font-semibold">Dados 3D</Link>, <Link href="/herramientas/numeros" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lotería Numérica</Link> y el <Link href="/verificar" className="text-pink-600 dark:text-pink-400 underline font-semibold">Verificador SHA-256</Link>) permanecen disponibles sin necesidad de autenticación. Si requieres asistencia adicional con tu cuenta corporativa, visita nuestra sección de <Link href="/contacto" className="text-pink-600 dark:text-pink-400 underline font-semibold">Contacto y Soporte</Link>.
           </p>
+          <p>
+            <strong>Estándares de Cifrado y Resguardo de Certificados Digitales:</strong> En Sorteos Pro protegemos las credenciales de los organizadores mediante algoritmos de hashing unidireccional con factor de trabajo adaptativo, impidiendo la reconstrucción de contraseñas incluso ante auditorías de base de datos. Al completar la actualización de tu clave con el token recibido por correo electrónico, todas las sesiones previas abiertas en otros dispositivos o navegadores se cierran automáticamente por seguridad, mientras que tu historial de sorteos multiplataforma, plantillas de bases legales y actas firmadas con <strong>SHA-256 (FIPS 180-4)</strong> continúan íntegros y disponibles en tu panel.
+          </p>
+          <p>
+            Si el token temporal ha expirado por superar la ventana de seguridad desde su emisión, puedes generar uno nuevo sin costo desde la vista de <Link href="/recuperar-password" className="text-pink-600 dark:text-pink-400 underline font-semibold">Recuperación de Contraseña</Link>. Revisa nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link> y <Link href="/terminos-y-condiciones" className="text-pink-600 dark:text-pink-400 underline font-semibold">Términos y Condiciones</Link> para mayor detalle sobre el tratamiento de datos bajo la Ley N.° 29733 y normativas internacionales RGPD.
+          </p>
         </div>
       </section>
     </div>
