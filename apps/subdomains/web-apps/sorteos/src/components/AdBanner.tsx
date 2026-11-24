@@ -62,18 +62,11 @@ export function AdBanner({ slot = '', format = 'horizontal', className = '' }: A
 
   // Banner para usuarios FREE o invitados
   return (
-    <div className={`w-full my-6 p-4 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 dark:from-white/[0.03] dark:to-white/[0.01] border border-slate-200/80 dark:border-white/10 text-center relative overflow-hidden group ${className}`}>
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-500 font-bold">
-          Publicidad
+    <div className={`w-full my-8 p-4 rounded-2xl bg-slate-50/80 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/10 text-center relative overflow-hidden ${className}`}>
+      <div className="flex items-center justify-center mb-2">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-500 font-bold select-none pointer-events-none">
+          Anuncios
         </span>
-        <Link
-          href="/planes"
-          className="inline-flex items-center gap-1 text-[11px] font-mono text-pink-600 dark:text-purple-400 hover:underline font-bold"
-        >
-          <Sparkles className="w-3 h-3" />
-          <span>¿Quitar anuncios? Pásate a Pro</span>
-        </Link>
       </div>
 
       {/* Contenedor del anuncio oficial de AdSense */}

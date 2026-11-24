@@ -35,12 +35,9 @@ export function AdBanner({
     <div
       className={`w-full max-w-4xl mx-auto my-8 p-4 rounded-3xl bg-slate-900/60 border border-slate-800 text-center relative overflow-hidden backdrop-blur-md ${className}`}
     >
-      <div className="flex items-center justify-between gap-2 mb-2 px-1">
-        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold">
-          Publicidad
-        </span>
-        <span className="text-[10px] text-slate-500">
-          Anuncio patrocinado
+      <div className="flex items-center justify-center mb-2 px-1">
+        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold select-none pointer-events-none">
+          Anuncios
         </span>
       </div>
 

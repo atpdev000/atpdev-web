@@ -20,8 +20,8 @@ export function AdSenseBanner({ adsenseId, slot }: { adsenseId?: string | null; 
   if (!canRenderManualSlot || !adsenseId) return null;
 
   return (
-    <div className="my-8 w-full flex flex-col items-center justify-center min-h-[90px] bg-white/5 border border-white/10 rounded-2xl p-4 overflow-hidden shadow-inner">
-      <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2">Publicidad</span>
+    <div className="my-8 w-full flex flex-col items-center justify-center min-h-[100px] bg-white/5 border border-white/10 rounded-2xl p-4 overflow-hidden shadow-inner">
+      <span className="text-[10px] uppercase font-bold text-gray-500 tracking-widest mb-2 select-none pointer-events-none">Anuncios</span>
       <ins
         className="adsbygoogle"
         style={{ display: "block", textAlign: "center", width: "100%" }}

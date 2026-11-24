@@ -79,8 +79,8 @@ export function AdBannerSlot({ type, slotId, className = '' }: AdBannerSlotProps
       className={`w-full my-6 sm:my-8 flex flex-col justify-center items-center overflow-hidden print:hidden ${className}`}
       aria-label="Espacio publicitario patrocinado"
     >
-      <span className="text-[10px] tracking-widest uppercase font-mono text-slate-400 dark:text-slate-500 mb-1.5 select-none pointer-events-none">
-        Publicidad
+      <span className="text-[10px] tracking-widest uppercase font-mono text-slate-400 dark:text-slate-500 mb-2 select-none pointer-events-none">
+        Anuncios
       </span>
       <div className="w-full flex justify-center items-center overflow-hidden">
         <ins

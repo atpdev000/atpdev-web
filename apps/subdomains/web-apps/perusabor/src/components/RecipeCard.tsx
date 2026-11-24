@@ -29,7 +29,10 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe }) => {
         {recipe.imageUrl ? (
           <img
             src={recipe.imageUrl}
-            alt={recipe.name}
+            alt={`${recipe.name} — Plato tradicional de ${recipe.department} (${recipe.region})`}
+            width={640}
+            height={384}
+            decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />

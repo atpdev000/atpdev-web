@@ -37,9 +37,36 @@ export default async function RecipeSlugLayout({
   const { slug } = await params;
   const recipe = getRecipeBySlug(slug);
 
+  const recipeJsonLd = recipe
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'Recipe',
+        name: recipe.name,
+        description: recipe.description,
+        image: recipe.imageUrl ? [recipe.imageUrl] : ['https://www.atpdev.dev/og-image.png'],
+        author: {
+          '@type': 'Organization',
+          name: 'Perú Sabor Inteligente — ATP Dev',
+          url: 'https://perusabor.atpdev.dev',
+        },
+        prepTime: `PT${recipe.prepTimeMinutes}M`,
+        cookTime: `PT${recipe.cookTimeMinutes}M`,
+        totalTime: `PT${recipe.prepTimeMinutes + recipe.cookTimeMinutes}M`,
+        recipeYield: `${recipe.baseServings} porciones`,
+        recipeCategory: recipe.category,
+        recipeCuisine: 'Peruana',
+      }
+    : null;
+
   return (
     <>
       {recipe ? <AdSenseInjector /> : null}
+      {recipeJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(recipeJsonLd) }}
+        />
+      ) : null}
       {children}
     </>
   );
