@@ -138,7 +138,7 @@ export default async function DynamicAppPrivacyPage({
             <p className="mt-3">
               {lang === "es"
                 ? `Asimismo, ${project.title} aplica el principio de minimización de datos y aislamiento de permisos del sistema operativo: cualquier acceso opcional a almacenamiento local, cámara, red o sensores se ejecuta estrictamente bajo acción explícita del usuario en primer plano, sin telemetría oculta en segundo plano ni transferencia de archivos personales a terceros no autorizados.`
-                : `Furthermore, ${project.title} enforces data minimization and operating-system permission sandboxing: any optional access to local storage, camera, network, or hardware sensors runs strictly upon explicit foreground user interaction, with zero hidden background telemetry and zero transfer of personal files to unauthorized third parties.`}
+                : `Furthermore, ${project.title} enforces strict data minimization and operating-system permission sandboxing: any optional access to local device storage, camera hardware, network sockets, or sensors executes exclusively upon explicit foreground user interaction, with zero hidden background telemetry, zero cross-app tracking, and zero transfer of personal files or credentials to unauthorized external servers. All diagnostic logs and crash reports remain anonymized and strictly limited to maintaining stability, security, and compatibility across operating system updates.`}
             </p>
           </section>
 

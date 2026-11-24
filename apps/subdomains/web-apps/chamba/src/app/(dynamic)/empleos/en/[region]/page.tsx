@@ -494,6 +494,9 @@ export default async function RegionJobsPage({
         <p>
           Para postular con éxito a una plaza en <strong>{regionInfo.name}</strong>, descarga siempre las bases integradas en PDF y verifica la modalidad de recepción del expediente: mesa de partes presencial en la sede institucional o mesa de partes virtual (sistema web o correo institucional habilitado dentro del horario oficial del cronograma). Recuerda foliarlo de atrás hacia adelante o según lo indiquen las bases, firmar cada anexo obligatorio y respaldar toda experiencia general y específica con constancias de trabajo, contratos u órdenes de servicio acompañadas de su respectiva conformidad. Utiliza gratuitamente nuestra <Link href="/calculadora-sueldo" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Calculadora Salarial</Link>, el <Link href="/match-cv" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Analizador de Compatibilidad de CV</Link> y el <Link href="/simulador-entrevista-ia" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Simulador de Entrevista CAS</Link> para preparar tu postulación.
         </p>
+        <p>
+          Asimismo, ten presente que todas las convocatorias públicas en el departamento de <strong>{regionInfo.name}</strong> contemplan bonificaciones de ley sobre el puntaje final o en la entrevista personal para licenciados de las Fuerzas Armadas (10% según Ley N.° 29248), personas con discapacidad acreditadas ante CONADIS (15% según Ley N.° 29973) y deportistas calificados de alto nivel, siempre que el postulante lo declare en su ficha curricular y adjunte el documento oficial correspondiente.
+        </p>
       </section>
     </div>
   );
