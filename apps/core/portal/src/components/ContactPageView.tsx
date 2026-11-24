@@ -89,6 +89,10 @@ export default async function ContactPageView({ lang = "es" }: { lang?: string }
     faqA2: await t(
       "Si deseas solicitar aclaraciones sobre tratamiento de datos personales, preferencias de consentimiento publicitario, avisos DMCA o correcciones editoriales, utiliza el asunto correspondiente en tu mensaje dirigido al correo oficial."
     ),
+    slaNoteTitle: await t("Compromiso de Transparencia, Seguridad y Cumplimiento Normativo"),
+    slaNoteDesc: await t(
+      "Todas las comunicaciones recibidas en contacto@atpdev.dev son atendidas directamente por la dirección de ingeniería de ATP Dev bajo confidencialidad estricta conforme a la Ley N° 29733 de Protección de Datos Personales del Perú y estándares internacionales GDPR. No compartimos direcciones de correo electrónico con terceros ni enviamos boletines publicitarios no solicitados. Para reportar vulnerabilidades de seguridad (Responsible Disclosure), adjunta una descripción técnica reproducible sin comprometer datos de usuarios."
+    ),
     interactiveCta: await t("Ir al formulario interactivo"),
     privacyCta: await t("Leer Política de Privacidad"),
     aboutCta: await t("Conocer Sobre Mí"),
@@ -205,6 +209,12 @@ export default async function ContactPageView({ lang = "es" }: { lang?: string }
                       {copy.faqA2}
                     </p>
                   </div>
+                </div>
+                <div className="pt-2 space-y-1">
+                  <h3 className="font-bold text-sm">{copy.slaNoteTitle}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    {copy.slaNoteDesc}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-3 pt-2">

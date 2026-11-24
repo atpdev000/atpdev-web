@@ -73,7 +73,7 @@ export default function TerminosPage() {
             <Link href="/privacidad" className="text-brand font-semibold underline">Política de Privacidad</Link>.
           </p>
           <p>
-            Para consultas técnicas, reporte de incidencias o soporte puedes escribir a{' '}
+            Para consultas técnicas, reporte de incidencias, avisos sobre propiedad intelectual o soporte sobre cualquiera de las 23 herramientas de la plataforma, puedes escribir directamente al equipo responsable de ATP DEV en{' '}
             <a href="mailto:contacto@atpdev.dev" className="text-brand font-semibold underline">
               contacto@atpdev.dev
             </a>{' '}
@@ -81,7 +81,7 @@ export default function TerminosPage() {
             <Link href="/contacto" className="text-brand font-semibold underline">
               página de Contacto
             </Link>
-            .
+            . Estos términos se rigen por la legislación vigente de la República del Perú y las buenas prácticas internacionales de servicios digitales.
           </p>
         </div>
       </section>

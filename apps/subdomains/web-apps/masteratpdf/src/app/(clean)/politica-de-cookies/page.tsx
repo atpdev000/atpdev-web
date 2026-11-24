@@ -85,7 +85,7 @@ export default function PoliticaCookiesPage() {
             <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-brand font-semibold underline">
               www.aboutads.info/choices/
             </a>
-            . Recuerda que tus PDFs nunca dependen de cookies ni abandonan tu equipo al ejecutarse localmente con WebAssembly. Revisa nuestra{' '}
+            . Recuerda que tus PDFs nunca dependen de cookies para su procesamiento documental. Puedes restablecer o revocar tu elección de Google Consent Mode v2 (`ad_storage`, `ad_user_data`, `ad_personalization` y `analytics_storage`) borrando los datos de sitio en tu navegador para que el aviso de consentimiento vuelva a mostrarse de inmediato. Revisa nuestra{' '}
             <Link href="/privacidad" className="text-brand font-semibold underline">
               Política de Privacidad
             </Link>{' '}
