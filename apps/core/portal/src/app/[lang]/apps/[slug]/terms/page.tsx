@@ -113,7 +113,7 @@ export default async function DynamicAppTermsPage({
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={`/${lang}/apps/${slug}`}
+            href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}`}
             className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
             ← {lang === "es" ? `Volver a ${project.title}` : `Back to ${project.title}`}

@@ -97,7 +97,7 @@ export default function ContactoPdfPage() {
             Cuando nos escribas para reportar un problema con alguna de nuestras 23 herramientas (unión, división, compresión, reparación XREF, conversión a Word/Excel/PowerPoint, cifrado AES-256, desbloqueo, redacción binaria, firma visual u OCR), te recomendamos detallar el tamaño aproximado del archivo, la versión del estándar PDF (por ejemplo, PDF 1.4, PDF 1.7 o PDF/A) y el navegador utilizado (Google Chrome, Microsoft Edge, Mozilla Firefox o Apple Safari).
           </p>
           <p>
-            Por políticas de confidencialidad y protección de datos personales (Ley N° 29733 y RGPD), nunca adjuntes documentos que contengan información sensible, financiera o médica en tus mensajes de soporte. Nuestro equipo de ingeniería reproduce los casos utilizando archivos sintéticos de prueba y responde en un plazo máximo de 24 a 48 horas hábiles desde Lima, Perú.
+            Por políticas de confidencialidad y protección de datos personales (Ley N° 29733 y RGPD), nunca adjuntes documentos que contengan información sensible, financiera o médica en tus mensajes de soporte. Nuestro equipo de ingeniería reproduce los casos utilizando archivos sintéticos de prueba y responde en un plazo máximo de 24 a 48 horas hábiles desde Lima, Perú. También puedes consultar nuestra guía arquitectónica y listado completo de utilidades en la página principal de MasterAtPDF Pro antes de enviar tu solicitud.
           </p>
         </div>
       </section>

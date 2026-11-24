@@ -154,6 +154,14 @@ export default function Navbar() {
             );
           })}
           <div className="flex items-center gap-4 border-l pl-4" style={{ borderColor: 'var(--glass-border)' }}>
+            <Link
+              href={lang === 'es' ? `/en${normalizedPath === '/' ? '' : normalizedPath}` : normalizedPath}
+              className="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors hover:opacity-80"
+              style={{ borderColor: 'var(--glass-border)', color: 'var(--text-color)' }}
+              aria-label={lang === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+            >
+              {lang === 'es' ? 'EN' : 'ES'}
+            </Link>
             <ThemeToggle />
             <MagneticEffect intensity={0.2}>
               <Link

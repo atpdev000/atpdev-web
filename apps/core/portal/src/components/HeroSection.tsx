@@ -61,6 +61,11 @@ export default function HeroSection({
             </a>
           </MagneticEffect>
           <MagneticEffect intensity={0.15} className="inline-flex w-full sm:w-auto">
+            <Link href={`${linkPrefix}/blog`} className={`w-full sm:w-auto border border-[var(--glass-border)] px-8 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 hover:bg-black/5 dark:hover:bg-white/10 hover:scale-[1.03] hover:shadow-[0_10px_30px_rgba(0,0,0,0.15)] ${glowClass}`} style={{ backgroundColor: 'var(--glass-bg)', backdropFilter: 'blur(10px)', color: 'var(--text-color)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}>
+              {lang === "es" ? "Artículos Técnicos" : "Technical Articles"}
+            </Link>
+          </MagneticEffect>
+          <MagneticEffect intensity={0.15} className="inline-flex w-full sm:w-auto">
             <a href="#about" className={`w-full sm:w-auto border border-[var(--glass-border)] px-8 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 hover:bg-black/5 dark:hover:bg-white/10 hover:scale-[1.03] hover:shadow-[0_10px_30px_rgba(0,0,0,0.15)] ${glowClass}`} style={{ backgroundColor: 'var(--glass-bg)', backdropFilter: 'blur(10px)', color: 'var(--text-color)', '--glow-bg': 'var(--glass-bg)' } as React.CSSProperties}>
               {ui.btnAbout}
             </a>

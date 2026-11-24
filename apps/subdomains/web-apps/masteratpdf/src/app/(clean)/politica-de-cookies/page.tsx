@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Política oficial de cookies de MasterAtPDF Pro: cookies técnicas esenciales, Consent Mode v2 y cookies de Google AdSense sin almacenar tus archivos PDF.',
   alternates: { canonical: '/politica-de-cookies' },
-  robots: { index: false, follow: true },
+  robots: { index: true, follow: true },
 };
 
 export default function PoliticaCookiesPage() {

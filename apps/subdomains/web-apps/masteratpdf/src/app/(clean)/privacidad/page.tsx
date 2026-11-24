@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Política de privacidad, procesamiento local de documentos PDF en el navegador y uso de cookies publicitarias de Google AdSense en MasterAtPDF Pro.',
   alternates: { canonical: '/privacidad' },
-  robots: { index: false, follow: true },
+  robots: { index: true, follow: true },
 };
 
 export default function PrivacidadPage() {

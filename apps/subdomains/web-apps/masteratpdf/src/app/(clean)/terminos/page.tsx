@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description:
     'Términos y condiciones de uso de las herramientas PDF locales de MasterAtPDF Pro.',
   alternates: { canonical: '/terminos' },
-  robots: { index: false, follow: true },
+  robots: { index: true, follow: true },
 };
 
 export default function TerminosPage() {

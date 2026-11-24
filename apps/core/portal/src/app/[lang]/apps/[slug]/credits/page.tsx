@@ -97,7 +97,7 @@ export default async function DynamicAppCreditsPage({
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={`/${lang}/apps/${slug}`}
+            href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}`}
             className="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
           >
             ← {lang === "es" ? `Volver a ${project.title}` : `Back to ${project.title}`}

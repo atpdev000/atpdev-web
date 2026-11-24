@@ -105,6 +105,40 @@ export function ToolUpload({
 
         {guide && (
             <article className="border-t border-line bg-surface px-4 py-12 sm:py-14">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@graph': [
+                                {
+                                    '@type': 'SoftwareApplication',
+                                    name: `${tool.name} — MasterAtPDF Pro`,
+                                    applicationCategory: 'BusinessApplication',
+                                    operatingSystem: 'All',
+                                    url: `https://masteratpdf.atpdev.dev${tool.href}`,
+                                    description: guide.intro,
+                                    offers: {
+                                        '@type': 'Offer',
+                                        price: '0',
+                                        priceCurrency: 'USD',
+                                    },
+                                },
+                                {
+                                    '@type': 'FAQPage',
+                                    mainEntity: guide.faqs.map((faq) => ({
+                                        '@type': 'Question',
+                                        name: faq.q,
+                                        acceptedAnswer: {
+                                            '@type': 'Answer',
+                                            text: faq.a,
+                                        },
+                                    })),
+                                },
+                            ],
+                        }),
+                    }}
+                />
                 <div className="max-w-4xl mx-auto space-y-8">
                     <div className="space-y-2">
                         <span className="text-xs font-bold uppercase tracking-wider text-brand">

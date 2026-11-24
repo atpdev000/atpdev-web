@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
     title,
     description,
     robots: {
-      index: false,
+      index: shouldIndex,
       follow: true,
     },
     alternates: {
