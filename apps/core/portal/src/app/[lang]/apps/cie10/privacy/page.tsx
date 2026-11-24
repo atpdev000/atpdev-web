@@ -10,12 +10,18 @@ export async function generateMetadata({
   const { lang = "es" } = await params;
   const BASE_URL = "https://www.atpdev.dev";
   const path = "/apps/cie10/privacy";
-  const title = lang === "es" ? "Política de Privacidad - CIE-10 App" : await translateText("Privacy Policy - CIE-10 App", lang);
+  const title =
+    lang === "es"
+      ? "Política de Privacidad - CIE-10 App"
+      : "Privacy Policy - CIE-10 App";
   return {
     title,
-    description: "Política de Privacidad oficial para la aplicación móvil CIE10 - Códigos y Enfermedades (Android e iOS). Cumplimiento AdMob, Gemini IA y privacidad de datos de salud.",
+    description:
+      lang === "es"
+        ? "Política de Privacidad oficial para la aplicación móvil CIE10 - Códigos y Enfermedades (Android e iOS). Cumplimiento AdMob, Gemini IA y privacidad de datos de salud."
+        : "Official Privacy Policy for the CIE-10 Clinical Codes mobile application (Android & iOS). AdMob compliance, Gemini AI, and medical data privacy.",
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
     alternates: {

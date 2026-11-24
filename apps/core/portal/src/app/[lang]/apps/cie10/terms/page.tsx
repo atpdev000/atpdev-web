@@ -10,12 +10,18 @@ export async function generateMetadata({
   const { lang = "es" } = await params;
   const BASE_URL = "https://www.atpdev.dev";
   const path = "/apps/cie10/terms";
-  const title = lang === "es" ? "Términos y Condiciones - CIE-10 App" : await translateText("Terms & Conditions - CIE-10 App", lang);
+  const title =
+    lang === "es"
+      ? "Términos y Condiciones - CIE-10 App"
+      : "Terms & Conditions - CIE-10 App";
   return {
     title,
-    description: "Términos y Condiciones de uso para la aplicación CIE10 - Códigos y Enfermedades. Información sobre el uso de referencias médicas, licencias y responsabilidad.",
+    description:
+      lang === "es"
+        ? "Términos y Condiciones de uso para la aplicación CIE10 - Códigos y Enfermedades. Información sobre el uso de referencias médicas, licencias y responsabilidad."
+        : "Official Terms and Conditions of use for the CIE-10 Clinical Codes mobile application. Medical reference disclaimer, licensing, and liability.",
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
     alternates: {

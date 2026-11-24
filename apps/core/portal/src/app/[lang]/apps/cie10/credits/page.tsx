@@ -10,12 +10,18 @@ export async function generateMetadata({
   const { lang = "es" } = await params;
   const BASE_URL = "https://www.atpdev.dev";
   const path = "/apps/cie10/credits";
-  const title = lang === "es" ? "Créditos y Fuentes - CIE-10 App" : await translateText("Credits & Sources - CIE-10 App", lang);
+  const title =
+    lang === "es"
+      ? "Créditos y Fuentes - CIE-10 App"
+      : "Credits & Sources - CIE-10 App";
   return {
     title,
-    description: "Información sobre la Clasificación Internacional de Enfermedades (CIE-10), fuentes oficiales OMS y créditos del desarrollador.",
+    description:
+      lang === "es"
+        ? "Información sobre la Clasificación Internacional de Enfermedades (CIE-10), fuentes oficiales OMS y créditos del desarrollador."
+        : "Information on the International Classification of Diseases (ICD-10), official WHO sources, and developer attributions.",
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
     alternates: {

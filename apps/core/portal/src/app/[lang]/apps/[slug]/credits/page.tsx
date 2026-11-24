@@ -15,12 +15,18 @@ export async function generateMetadata({
 
   const BASE_URL = "https://www.atpdev.dev";
   const path = `/apps/${slug}/credits`;
-  const title = lang === "es" ? `Créditos y Fuentes - ${project.title}` : await translateText(`Credits & Sources - ${project.title}`, lang);
+  const title =
+    lang === "es"
+      ? `Créditos y Fuentes - ${project.title}`
+      : `Credits & Sources - ${project.title}`;
   return {
     title,
-    description: `Créditos oficiales y atribuciones para la aplicación ${project.title}.`,
+    description:
+      lang === "es"
+        ? `Créditos oficiales, arquitectura y atribuciones de código abierto para la aplicación ${project.title}.`
+        : `Official credits, software architecture, and open-source attributions for the ${project.title} application.`,
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
     alternates: {

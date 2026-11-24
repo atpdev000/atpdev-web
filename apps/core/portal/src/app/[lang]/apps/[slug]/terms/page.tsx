@@ -15,12 +15,18 @@ export async function generateMetadata({
 
   const BASE_URL = "https://www.atpdev.dev";
   const path = `/apps/${slug}/terms`;
-  const title = lang === "es" ? `Términos y Condiciones - ${project.title}` : await translateText(`Terms & Conditions - ${project.title}`, lang);
+  const title =
+    lang === "es"
+      ? `Términos y Condiciones - ${project.title}`
+      : `Terms & Conditions - ${project.title}`;
   return {
     title,
-    description: `Términos y Condiciones de uso oficial para la aplicación ${project.title}.`,
+    description:
+      lang === "es"
+        ? `Términos y Condiciones de uso oficial para la aplicación ${project.title}.`
+        : `Official Terms and Conditions of use for the ${project.title} application.`,
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
     alternates: {

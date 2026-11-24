@@ -205,25 +205,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        {/* Descargador Ads Config */}
+        {/* Descargador Ads Config (Web AdSense & Ezoic permanently disabled) */}
         <Script
           id="descargador-ads-config"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `window.__DESCARGADOR_ADS_CONFIG__ = ${JSON.stringify(
-              config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_enabled !== false
-                ? {
-                    enabled: true,
-                    clientId: config?.monetization?.adsense_client_id || '',
-                    slots: {
-                      leaderboard: config?.monetization?.adsense_slot_header || process.env.NEXT_PUBLIC_ADSENSE_SLOT_HEADER || '',
-                      'in-feed': config?.monetization?.adsense_slot_incontent || process.env.NEXT_PUBLIC_ADSENSE_SLOT_INCONTENT || '',
-                      sidebar: config?.monetization?.adsense_slot_sidebar || process.env.NEXT_PUBLIC_ADSENSE_SLOT_SIDEBAR || '',
-                      billboard: config?.monetization?.adsense_slot_footer || process.env.NEXT_PUBLIC_ADSENSE_SLOT_FOOTER || '',
-                    },
-                  }
-                : { enabled: false, clientId: '', slots: {} }
-            )};`
+            __html: `window.__DESCARGADOR_ADS_CONFIG__ = { enabled: false, clientId: '', slots: {} };`
           }}
         />
         <DescargadorThemeListener />
@@ -271,43 +258,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 `
               }}
             />
-          )}
-
-          {/* Google AdSense Oficial cargado dinámicamente desde el CMS Admin */}
-          {config?.monetization?.adsense_enabled !== false && config?.modules?.adsense_enabled !== false && config?.monetization?.adsense_client_id && (
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.monetization.adsense_client_id}`}
-              crossOrigin="anonymous"
-            />
-          )}
-
-          {/* Scripts de Ezoic y consentimiento cargados solo en producción si Ezoic está habilitado en CMS */}
-          {process.env.NODE_ENV === 'production' && config?.monetization?.ezoic_enabled === true && (
-            <>
-              <Script
-                strategy="afterInteractive"
-                src="https://cmp.gatekeeperconsent.com/min.js"
-              />
-              <Script
-                strategy="afterInteractive"
-                src="https://the.gatekeeperconsent.com/cmp.min.js"
-              />
-              <Script
-                strategy="afterInteractive"
-                src="//www.ezojs.com/ezoic/sa.min.js"
-              />
-              <Script
-                id="ezoic-standalone-init"
-                strategy="afterInteractive"
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    window.ezstandalone = window.ezstandalone || {};
-                    ezstandalone.cmd = ezstandalone.cmd || [];
-                  `
-                }}
-              />
-            </>
           )}
 
           <AdManager />

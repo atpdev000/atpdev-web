@@ -15,12 +15,18 @@ export async function generateMetadata({
 
   const BASE_URL = "https://www.atpdev.dev";
   const path = `/apps/${slug}/privacy`;
-  const title = lang === "es" ? `Política de Privacidad - ${project.title}` : await translateText(`Privacy Policy - ${project.title}`, lang);
+  const title =
+    lang === "es"
+      ? `Política de Privacidad - ${project.title}`
+      : `Privacy Policy - ${project.title}`;
   return {
     title,
-    description: `Política de Privacidad oficial para la aplicación ${project.title}. Transparencia de datos, publicidad y privacidad.`,
+    description:
+      lang === "es"
+        ? `Política de Privacidad oficial para la aplicación ${project.title}. Transparencia de datos, publicidad y privacidad.`
+        : `Official Privacy Policy for ${project.title}. Data transparency, local processing, advertising, and user privacy rights.`,
     robots: {
-      index: false,
+      index: true,
       follow: true,
     },
     alternates: {
