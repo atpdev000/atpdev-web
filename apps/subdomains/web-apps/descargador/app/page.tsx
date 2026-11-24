@@ -25,7 +25,7 @@ import TopNav from '@/components/AppLayout/TopNav'
 import AppHeader from '@/components/AppLayout/AppHeader'
 import { useAdMobInterstitial } from '@/hooks/useAdMobInterstitial'
 import { useEffect, useRef } from 'react'
-import { FEATURES } from '@/lib/featureFlags'
+import { FEATURES, isYoutubeVisible } from '@/lib/featureFlags'
 import { LocalNotifications } from '@capacitor/local-notifications'
 import { Filesystem } from '@capacitor/filesystem'
 import { useI18n } from '@/lib/i18n/context'
@@ -35,7 +35,7 @@ import { DetectedUrlInfo } from '@/lib/clipboardDetector'
 import AnnouncementBar from '@/components/Layout/AnnouncementBar'
 
 export default function Home() {
-  const { isNative } = usePlatform()
+  const { isNative, isPlayStore } = usePlatform()
   const { t } = useI18n()
   const defaultPlatform: Platform = 'facebook'
   const [activePlatform, setActivePlatform] = useState<Platform>(defaultPlatform)
@@ -159,8 +159,17 @@ export default function Home() {
     }
   }, [isNative, showInterstitial])
 
+  const youtubeVisible = isYoutubeVisible(modules, isNative, isPlayStore)
+
+  useEffect(() => {
+    if (!youtubeVisible && activePlatform === 'youtube') {
+      setActivePlatform('facebook')
+    }
+  }, [youtubeVisible, activePlatform])
+
   // 🔄 CAMBIAR PLATAFORMA + ANUNCIO
   const handlePlatformChange = (platform: Platform) => {
+    if (!youtubeVisible && platform === 'youtube') return
     setActivePlatform(platform)
     if (isNative) {
       showInterstitial().catch(() => {})
@@ -168,6 +177,7 @@ export default function Home() {
   }
 
   const handleClipboardDetected = (info: DetectedUrlInfo, autoSearch: boolean) => {
+    if (!youtubeVisible && info.platform === 'youtube') return
     setActivePlatform(info.platform)
     setAutoSearchPayload({
       platform: info.platform,
@@ -195,7 +205,9 @@ export default function Home() {
       case 'threads':
         return <ThreadsDownloader key={`th-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
       case 'youtube':
-        return <YoutubeDownloader key={`yt-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+        return youtubeVisible
+          ? <YoutubeDownloader key={`yt-${searchKey}`} initialUrl={initialUrl} autoSearch={autoSearch} />
+          : <FacebookDownloader key="fb-def" />
       case 'whatsapp':
         return <WhatsappStatusDownloader key="wa-status" />
       default:
@@ -207,7 +219,7 @@ export default function Home() {
   if (isNative) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 pb-safe transition-colors">
-        <SmartClipboardDetector activePlatform={activePlatform} onDetected={handleClipboardDetected} />
+        <SmartClipboardDetector activePlatform={activePlatform} allowYoutube={youtubeVisible} onDetected={handleClipboardDetected} />
         
         {/* 📱 HEADER NATIVO LIMPIO Y STICKY */}
         <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm border-b border-gray-200/80 dark:border-slate-800 transition-colors">
@@ -241,7 +253,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50/70 dark:bg-[#070a12] text-slate-900 dark:text-slate-100 transition-colors duration-200 relative">
       <AnnouncementBar initialText={branding.announcement_text} initialEnabled={branding.announcement_enabled} />
-      <SmartClipboardDetector activePlatform={activePlatform} onDetected={handleClipboardDetected} />
+      <SmartClipboardDetector activePlatform={activePlatform} allowYoutube={youtubeVisible} onDetected={handleClipboardDetected} />
       <Header />
 
       {/* Rieles Panorámicos en Pantallas Anchas (Widescreen >= 1440px) */}
@@ -253,7 +265,7 @@ export default function Home() {
         <HeroSection onSelectPlatform={setActivePlatform} modules={modules} branding={branding} />
 
         {/* 📱 Promoción Oficial App Android APK */}
-        {apkConfig?.enabled && (
+        {!isPlayStore && apkConfig?.enabled && (
           <div className="max-w-4xl mx-auto mb-8 p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950/40 via-slate-900/90 to-blue-950/40 border border-emerald-500/30 shadow-xl shadow-emerald-950/20 backdrop-blur-md relative overflow-hidden">
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
             <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">

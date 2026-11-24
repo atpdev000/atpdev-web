@@ -111,6 +111,16 @@ export default async function DynamicAppCreditsPage({
                 ? `La distribución digital, pruebas de regresión automatizadas, validación criptográfica de paquetes y documentación técnica de ${project.title} forman parte del ecosistema de software de ATP Dev (www.atpdev.dev). Si deseas reportar una atribución adicional, colaborar en la mejora técnica o realizar consultas sobre licenciamiento, comunícate con nuestro equipo en contacto@atpdev.dev.`
                 : `Digital distribution, automated regression testing, cryptographic package verification, and technical documentation for ${project.title} are maintained as part of the ATP Dev software ecosystem (www.atpdev.dev). To report an attribution notice, contribute technical feedback, or inquire about licensing, contact our team at contacto@atpdev.dev.`}
             </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? `Estándares de Ingeniería y Auditoría de Dependencias: Cada versión de producción de ${project.title} pasa por análisis estático de tipos, auditoría de vulnerabilidades en árbol de dependencias (CVE scanning), optimización de recursos gráficos vectoriales (SVG / WebP) y pruebas de compatibilidad multiplataforma en dispositivos móviles y navegadores modernos. Todos los iconos vectoriales (Lucide Icons), tipografías web optimizadas y módulos de interfaz cumplen con licencias permisivas de distribución comercial y académica.`
+                : `Engineering Standards & Dependency Auditing: Every production release of ${project.title} undergoes static type analysis, dependency tree vulnerability auditing (CVE scanning), vector and WebP asset optimization, and cross-platform compatibility testing across mobile devices and modern web browsers. All vector icon sets (Lucide Icons), web fonts, and UI runtime modules comply with permissive commercial and academic distribution licenses.`}
+            </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? `Gobernanza de Código Abierto y Transparencia Técnica: En cumplimiento con las cláusulas de atribución de las licencias MIT, Apache License 2.0, BSD-3-Clause e ISC que respaldan los compiladores, entornos de ejecución, motores de renderizado y bibliotecas criptográficas utilizadas en ${project.title}, ATP Dev mantiene la trazabilidad completa de versiones en su repositorio centralizado de integración continua. Ningún componente propietario de terceros ha sido incorporado sin la debida autorización o licencia de uso correspondiente, garantizando la integridad legal, técnica y operativa de la aplicación en entornos personales, educativos y corporativos.`
+                : `Open-Source Governance & Technical Transparency: In compliance with the attribution clauses of the MIT, Apache License 2.0, BSD-3-Clause, and ISC licenses governing the compilers, runtime environments, rendering engines, and cryptographic libraries integrated into ${project.title}, ATP Dev maintains full version traceability within its continuous integration pipeline. No proprietary third-party component has been bundled without proper authorization or licensing, ensuring complete legal, technical, and operational integrity across personal, academic, and enterprise environments.`}
+            </p>
           </section>
         </div>
 
@@ -123,14 +133,14 @@ export default async function DynamicAppCreditsPage({
           </Link>
           <div className="flex gap-4 text-xs text-neutral-500">
             {legalConfig.has_privacy !== false && (
-              <Link href={`/apps/${slug}/privacy`} className="hover:underline">
+              <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}/privacy`} className="hover:underline">
                 {lang === "es" ? "Privacidad" : "Privacy"}
               </Link>
             )}
             {legalConfig.has_terms !== false && (
               <>
                 <span>•</span>
-                <Link href={`/apps/${slug}/terms`} className="hover:underline">
+                <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}/terms`} className="hover:underline">
                   {lang === "es" ? "Términos" : "Terms"}
                 </Link>
               </>

@@ -14,7 +14,7 @@ interface FooterProps {
 
 export default function Footer({ modules }: FooterProps) {
   const { t } = useI18n()
-  const { isNative } = usePlatform()
+  const { isNative, isPlayStore } = usePlatform()
   const [resolvedModules, setResolvedModules] = useState<Record<string, boolean> | undefined>(modules)
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function Footer({ modules }: FooterProps) {
           setResolvedModules(data.modules)
         }
       })
-      .catch(() => {})
+      .catch(() => { })
 
     try {
       const channel = new BroadcastChannel('descargador_theme_channel')
@@ -43,10 +43,10 @@ export default function Footer({ modules }: FooterProps) {
         }
       }
       return () => channel.close()
-    } catch (e) {}
+    } catch (e) { }
   }, [modules])
 
-  const isYoutubeActive = isYoutubeVisible(resolvedModules, isNative)
+  const isYoutubeActive = isYoutubeVisible(resolvedModules, isNative, isPlayStore)
 
   const scrollToTools = () => {
     if (typeof window !== 'undefined') {

@@ -1,8 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { ArrowLeft, Sparkles } from 'lucide-react'
-import { FEATURES } from '@/lib/featureFlags'
+import { FEATURES, isPlayStoreUserAgent } from '@/lib/featureFlags'
 import YoutubeDownloader from '@/components/platforms/YoutubeDownloader'
 import YoutubeToolGate from '@/components/YoutubeToolGate'
 import { getSubdomainConfig } from '@atpdev/database'
@@ -28,7 +29,11 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 
-export default function YoutubeToolPage() {
+export default async function YoutubeToolPage() {
+    const hdrs = await headers()
+    if (isPlayStoreUserAgent(hdrs.get('user-agent'))) {
+        redirect('/')
+    }
     const isEnabled = isServerYoutubeEnabled()
     if (!isEnabled) {
         redirect('/')

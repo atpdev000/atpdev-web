@@ -120,6 +120,16 @@ export default async function DynamicAppTermsPage({
                 ? `El tratamiento de datos técnicos, almacenamiento local y preferencias de consentimiento se rige por la Política de Privacidad oficial de ${project.title} y la Ley N° 29733 de Protección de Datos Personales del Perú, en armonía con el Reglamento General de Protección de Datos (RGPD). ATP Dev se reserva el derecho de publicar actualizaciones evolutivas, parches de seguridad y mejoras funcionales en cualquier momento. Para soporte técnico, consultas legales o notificaciones sobre propiedad intelectual, escribe a contacto@atpdev.dev.`
                 : `The processing of technical data, local storage, and consent preferences is governed by the official Privacy Policy of ${project.title}, Peruvian Personal Data Protection Law No. 29733, and GDPR standards. ATP Dev reserves the right to release feature updates, security patches, and functional improvements at any time. For technical support, legal inquiries, or intellectual property notices, contact us at contacto@atpdev.dev.`}
             </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? `5. Conducta del Usuario y Uso Permitido: El usuario se compromete a utilizar ${project.title} exclusivamente para fines lícitos, absteniéndose de realizar ingeniería inversa, descompilación no autorizada, automatización abusiva de solicitudes (scraping o ataques de denegación de servicio) o cualquier actividad que vulnere la seguridad de la infraestructura de ATP Dev o derechos de terceros. Cualquier controversia derivada de la interpretación o aplicación de estos términos se someterá a la legislación vigente de la República del Perú.`
+                : `5. User Conduct & Permitted Use: Users agree to use ${project.title} solely for lawful purposes, refraining from reverse engineering, unauthorized decompilation, abusive request automation (scraping or denial-of-service attacks), or any activity that compromises the security of ATP Dev infrastructure or third-party rights. Any dispute arising from the interpretation or enforcement of these terms shall be governed by the laws of the Republic of Peru.`}
+            </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? `6. Integraciones de Terceros, Niveles de Servicio y Soporte Técnico: Cuando ${project.title} interactúe con servicios externos opcionales (pasarelas de autenticación, motores de inteligencia artificial o redes publicitarias certificadas por Google), dichas integraciones operarán bajo protocolos de comunicación cifrada TLS 1.3 y sus respectivas políticas de servicio. El usuario reconoce que las funciones gratuitas se brindan como herramientas de apoyo productivo e informativo, pudiendo reportar incidencias técnicas o sugerencias de mejora directamente al equipo de ingeniería de ATP Dev en Lima, Perú.`
+                : `6. Third-Party Integrations, Service Levels & Technical Support: Whenever ${project.title} interacts with optional external services (authentication gateways, artificial intelligence engines, or Google-certified advertising networks), such integrations operate over encrypted TLS 1.3 communication protocols and their respective terms of service. Users acknowledge that free features are provided as productive and informational support tools, and may report technical issues or improvement requests directly to the ATP Dev engineering team in Lima, Peru.`}
+            </p>
           </section>
         </div>
 
@@ -132,14 +142,14 @@ export default async function DynamicAppTermsPage({
           </Link>
           <div className="flex gap-4 text-xs text-neutral-500">
             {legalConfig.has_privacy !== false && (
-              <Link href={`/apps/${slug}/privacy`} className="hover:underline">
+              <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}/privacy`} className="hover:underline">
                 {lang === "es" ? "Privacidad" : "Privacy"}
               </Link>
             )}
             {legalConfig.has_credits !== false && (
               <>
                 <span>•</span>
-                <Link href={`/apps/${slug}/credits`} className="hover:underline">
+                <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}/credits`} className="hover:underline">
                   {lang === "es" ? "Créditos" : "Credits"}
                 </Link>
               </>

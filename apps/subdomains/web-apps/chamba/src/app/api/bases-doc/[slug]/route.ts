@@ -381,6 +381,7 @@ export async function GET(
       .card { box-shadow: none; border: 1px solid #94a3b8; }
     }
   </style>
+  <meta name="robots" content="noindex, follow" />
 </head>
 <body>
   <div class="toolbar">
@@ -403,7 +404,7 @@ export async function GET(
     </div>
   </div>
 
-  <div class="container">
+  <main class="container">
     <!-- 1. PÁGINAS OFICIALES REALES Y ARCHIVOS OFICIALES REALES DE LAS BASES -->
     <div class="card">
       <div class="section-header">1. Archivos Oficiales de las Bases y Página Oficial de la Convocatoria</div>
@@ -523,7 +524,23 @@ export async function GET(
         </ul>
       </div>
     </div>
-  </div>
+
+    <!-- 4. GUÍA DE VERIFICACIÓN DOCUMENTAL Y PRESENTACIÓN DE EXPEDIENTE SERVIR -->
+    <div class="card">
+      <div class="section-header">Guía Oficial de Postulación, Foliado y Verificación de Bases Integradas (SERVIR / D.L. 1057 / D.L. 728)</div>
+      <div style="font-size:13px;color:#334155;line-height:1.65;space-y:10px;">
+        <p style="margin:0 0 10px 0;">
+          <strong>1. Validez Normativa de este Expediente:</strong> El presente documento consolida la ficha técnica registrada por <strong>${escapeHtml(sd?.entidad || cleanEntity)}</strong> en el Sistema de Difusión de Ofertas Laborales y Prácticas del Estado Peruano (<strong>Talento Perú — SERVIR</strong>, regulado por el Decreto Supremo N.° 003-2018-TR y la Ley N.° 30057) junto con los enlaces directos a las bases oficiales, anexos editables y cronogramas publicados en la sede digital de la institución convocante.
+        </p>
+        <p style="margin:0 0 10px 0;">
+          <strong>2. Instrucciones Obligatorias para el Postulante:</strong> Antes de remitir tu Ficha de Postulación y Currículum Vitae documentado para la plaza de <strong>${escapeHtml(sd?.puesto || cleanTitle)}</strong> en la región <strong>${escapeHtml(job.region)}</strong>, verifica el cronograma vigente en el portal institucional y comprueba si la entidad ha emitido comunicados o fe de erratas. Asegúrate de adjuntar copias legibles de tu grado académico o título profesional registrado en SUNEDU/MINEDU, constancias de trabajo o certificados de prestación de servicios con fecha exacta de inicio y término, y las declaraciones juradas de ausencia de nepotismo, incompatibilidad e inhabilitación administrativa (RNSSC, REDAM y REDERECI) debidamente firmadas y foliadas según el orden exigido en las bases.
+        </p>
+        <p style="margin:0;">
+          <strong>3. Gratuidad y Transparencia en el Servicio Civil:</strong> Todas las etapas de los concursos públicos de méritos en el Estado Peruano son 100% gratuitas y meritocráticas. Puedes regresar al expediente completo en <a href="/empleos/${encodeURIComponent(job.slug)}" style="color:#024487;font-weight:700;">Chamba Pro (${escapeHtml(cleanTitle)})</a>, descargar formatos editables en <a href="/plantillas-anexos" style="color:#024487;font-weight:700;">Plantillas de Anexos CAS</a> o calcular tu remuneración neta mensual en la <a href="/calculadora-sueldo" style="color:#024487;font-weight:700;">Calculadora de Sueldo Neto</a>.
+        </p>
+      </div>
+    </div>
+  </main>
   ${autoPrint ? `<script>window.addEventListener('load', () => { setTimeout(() => window.print(), 400); });</script>` : ''}
 </body>
 </html>`;
@@ -532,6 +549,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
+        'X-Robots-Tag': 'noindex, follow',
         'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600'
       }
     });

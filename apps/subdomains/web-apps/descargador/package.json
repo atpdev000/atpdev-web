@@ -8,8 +8,10 @@
     "build": "next build",
     "start": "next start -p 3007",
     "lint": "next lint",
-    "cap:sync": "npx cap sync",
-    "cap:sync:playstore": "npx cap sync android"
+    "cap:sync": "npx cap sync android",
+    "android:bundle:playstore": "cd android && .\\gradlew.bat bundlePlaystoreRelease",
+    "android:apk:playstore": "cd android && .\\gradlew.bat assemblePlaystoreRelease",
+    "android:apk:direct": "cd android && .\\gradlew.bat assembleDirectRelease"
   },
   "dependencies": {
     "@atpdev/database": "*",

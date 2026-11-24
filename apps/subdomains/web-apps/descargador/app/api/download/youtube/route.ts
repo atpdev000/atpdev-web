@@ -7,6 +7,7 @@ import os from 'os'
 import dns from 'dns'
 import { findYtDlpBinary, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs, getYtDlpProxyArgs } from '@/lib/server/binaries'
 import { getBackendEndpoint } from '@/lib/server/backend-config'
+import { isPlayStoreRequest, playStoreBlockedResponse } from '@/lib/server/channelGuard'
 import { Innertube, UniversalCache, Platform } from 'youtubei.js'
 
 Platform.shim.eval = async (data: any) => {
@@ -310,6 +311,9 @@ async function extractMetadata(url: string, binPath: string, playerClient = '', 
 
 export async function POST(request: NextRequest) {
   try {
+    if (isPlayStoreRequest(request)) {
+      return playStoreBlockedResponse()
+    }
     const body = await request.json().catch(() => ({}))
     let { url, quality = '1080p', format_type = 'mp4' } = body
 

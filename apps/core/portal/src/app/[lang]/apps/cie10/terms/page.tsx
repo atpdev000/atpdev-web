@@ -98,6 +98,16 @@ export default async function Cie10TermsPage({
                 ? "Queda prohibida la ingeniería inversa, redistribución no autorizada del paquete APK/AAB o alteración de los avisos legales integrados. Para consultas institucionales, soporte técnico o licenciamiento académico en universidades y centros de salud, escríbenos a contacto@atpdev.dev."
                 : "Reverse engineering, unauthorized redistribution of the APK/AAB package, or alteration of embedded legal notices is prohibited. For institutional inquiries, technical support, or academic licensing in universities and healthcare centers, contact us at contacto@atpdev.dev."}
             </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? "5. Alcance Normativo y Actualizaciones Clínicas: La codificación CIE-10 es utilizada como estándar de referencia en historias clínicas electrónicas, formatos FUA (SIS), registros HIS-MINSA, EsSalud y auditorías de seguros médicos en América Latina. El profesional de la salud es el único responsable de contrastar el código diagnóstico seleccionado con el cuadro clínico integral del paciente y las guías de práctica clínica vigentes en su jurisdicción."
+                : "5. Regulatory Scope & Clinical Updates: ICD-10 coding serves as a reference standard in electronic health records, public health insurance forms, hospital information systems, and medical billing audits. Healthcare professionals remain solely responsible for verifying any selected diagnostic code against the patient's complete clinical presentation and applicable clinical practice guidelines in their jurisdiction."}
+            </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? "6. Disponibilidad Offline, Actualizaciones y Jurisdicción: La base de datos local de diagnósticos funciona al 100% sin conexión a internet tras la instalación inicial. Las funciones complementarias de asistencia mediante inteligencia artificial requieren conectividad activa y están sujetas a disponibilidad de red. Cualquier controversia legal relacionada con el uso de la aplicación se regirá por las leyes de la República del Perú."
+                : "6. Offline Availability, Updates & Governing Law: The local diagnostic database operates 100% offline after initial installation. Complementary AI-assisted lookup features require active internet connectivity and are subject to network availability. Any legal dispute arising from the use of the application shall be governed by the laws of the Republic of Peru."}
+            </p>
           </section>
         </div>
 
@@ -109,11 +119,11 @@ export default async function Cie10TermsPage({
             ← {lang === "es" ? "Volver a CIE-10 App" : "Back to CIE-10 App"}
           </Link>
           <div className="flex gap-4 text-xs text-neutral-500">
-            <Link href="/apps/cie10/privacy" className="hover:underline">
+            <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/cie10/privacy`} className="hover:underline">
               {lang === "es" ? "Privacidad" : "Privacy"}
             </Link>
             <span>•</span>
-            <Link href="/apps/cie10/credits" className="hover:underline">
+            <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/cie10/credits`} className="hover:underline">
               {lang === "es" ? "Créditos" : "Credits"}
             </Link>
           </div>

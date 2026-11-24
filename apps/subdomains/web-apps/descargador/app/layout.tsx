@@ -41,12 +41,6 @@ export function generateMetadata(): Metadata {
     alternates: {
       canonical: siteUrl
     },
-    other: {
-      'ezoic-site-verification': config?.monetization?.ezoic_verification_code || 'wStjwIfmHCWL7mcvHPkYWJi6FeTviZ',
-      ...(adsenseEnabled && (config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137')
-        ? { 'google-adsense-account': config?.monetization?.adsense_client_id || 'ca-pub-5414009811868137' }
-        : {})
-    },
     openGraph: {
       title,
       description,
@@ -70,14 +64,11 @@ export function generateMetadata(): Metadata {
       images: ['/images/og-image.png']
     },
     robots: {
-      index: true,
-      follow: true,
+      index: false,
+      follow: false,
       googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1
+        index: false,
+        follow: false,
       }
     },
     icons: {

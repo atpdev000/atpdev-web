@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
@@ -77,7 +77,7 @@ export default function WhatsappStatusDownloader() {
 
   const [statuses, setStatuses] = useState<StatusItem[]>([])
   const [loading, setLoading] = useState(false)
-  const [permissionGranted, setPermissionGranted] = useState(true)
+  const [permissionGranted, setPermissionGranted] = useState(() => !isNative)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [selectedPreview, setSelectedPreview] = useState<StatusItem | null>(null)
   const [installedApps, setInstalledApps] = useState<{
@@ -122,14 +122,15 @@ export default function WhatsappStatusDownloader() {
 
     // Modo Nativo en Teléfono Android
     try {
-      // Verificar permiso de almacenamiento
-      let isGranted = true
+      // Verificar permiso de almacenamiento (SAF por app en Android 11+)
+      let isGranted = false
       try {
-        const permCheck = await WhatsAppStatus.checkPermission()
-        isGranted = permCheck.granted
+        const permCheck = await WhatsAppStatus.checkPermission({ appType: appTypeToScan })
+        isGranted = Boolean(permCheck?.granted)
         setPermissionGranted(isGranted)
       } catch (err) {
         console.warn('Error verificando permisos WhatsApp:', err)
+        setPermissionGranted(false)
       }
 
       if (!isGranted) {
@@ -166,10 +167,14 @@ export default function WhatsappStatusDownloader() {
     }
   }, [isNative, selectedApp])
 
-  // 2. Solicitar permiso de almacenamiento (All Files Access en Android 11+)
+  // 2. Solicitar permiso de carpeta de estados (SAF oficial de Google Play en Android 11+)
   const handleRequestPermission = async () => {
     try {
-      await WhatsAppStatus.requestPermission()
+      const res = await WhatsAppStatus.requestPermission({ appType: selectedApp })
+      if (res?.granted) {
+        setPermissionGranted(true)
+      }
+      await scanStatuses(selectedApp)
     } catch (err) {
       console.warn('Error solicitando permisos:', err)
     }
@@ -492,13 +497,13 @@ export default function WhatsappStatusDownloader() {
 
           <div className="mt-4 p-3 bg-white/70 dark:bg-slate-900/80 rounded-xl border border-amber-500/20 text-[11px] text-gray-600 dark:text-slate-300 text-left space-y-1">
             <p className="font-semibold text-gray-800 dark:text-slate-200 flex items-center gap-1">
-              💡 ¿El interruptor aparece inhabilitado o en gris en Android?
+              💡 ¿Cómo conceder el permiso en 2 pasos?
             </p>
             <p>
-              1. Toca <b>"Conceder Permiso Ahora"</b> y activa el interruptor de Descargador Pro.
+              1. Toca <b>"Conceder Permiso Ahora"</b> (se abrirá automáticamente la carpeta <b>.Statuses</b> de {selectedApp === 'whatsapp' ? 'WhatsApp' : 'WhatsApp Business'}).
             </p>
             <p>
-              2. En celulares Xiaomi/Redmi/HyperOS con Android 13/14: Si dice <i>"Ajuste restringido"</i>, ve a <b>Ajustes &gt; Aplicaciones &gt; Descargador Pro</b>, toca los <b>tres puntos (⋮)</b> arriba a la derecha y selecciona <b>"Permitir ajustes restringidos"</b>.
+              2. En la parte inferior de la pantalla, toca el botón azul <b>"Usar esta carpeta"</b> y confirma en <b>"Permitir"</b>.
             </p>
           </div>
         </div>
@@ -636,19 +641,26 @@ export default function WhatsappStatusDownloader() {
           
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
             <button
-              onClick={() => handleOpenWhatsApp(selectedApp)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+              onClick={handleRequestPermission}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
             >
-              <ExternalLink className="w-4 h-4" />
-              <span>Abrir {selectedApp === 'whatsapp' ? 'WhatsApp' : 'WA Business'}</span>
+              <ShieldCheck className="w-4 h-4" />
+              <span>Conceder Permiso de Carpeta</span>
             </button>
             <button
               onClick={() => scanStatuses(selectedApp)}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 font-bold text-xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span>Actualizar Estados</span>
+            </button>
+            <button
+              onClick={() => handleOpenWhatsApp(selectedApp)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-gray-800 dark:text-slate-200 font-bold text-xs transition-all cursor-pointer"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span>Abrir {selectedApp === 'whatsapp' ? 'WhatsApp' : 'WA Business'}</span>
             </button>
           </div>
         </div>

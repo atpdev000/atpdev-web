@@ -1,5 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { useState, useEffect } from 'react';
+import { isPlayStoreBuild } from '@/lib/featureFlags';
+import { NativeWhatsAppStatus } from '@/lib/nativeBridge';
 
 export function detectNativePlatform(): boolean {
     if (typeof window === 'undefined') return false;
@@ -20,21 +22,40 @@ export function usePlatform() {
         if (typeof window === 'undefined') return false;
         return detectNativePlatform();
     });
+    const [isPlayStore, setIsPlayStore] = useState(() => isPlayStoreBuild());
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
-        const check = () => {
-            const nativeCheck = detectNativePlatform();
-            if (nativeCheck) {
-                setIsNative(true);
-            }
-            return nativeCheck;
-        };
-        if (!check()) {
-            const timer = setTimeout(check, 200);
+        const nativeDetected = detectNativePlatform();
+        if (nativeDetected) {
+            setIsNative(true);
+        }
+        if (isPlayStoreBuild()) {
+            setIsPlayStore(true);
+        }
+
+        if (nativeDetected && typeof NativeWhatsAppStatus?.getDistributionChannel === 'function') {
+            NativeWhatsAppStatus.getDistributionChannel()
+                .then((res) => {
+                    if (res?.channel === 'playstore' || res?.extendedMediaAllowed === false) {
+                        (window as any).__FTY_CHANNEL = 'playstore';
+                        setIsPlayStore(true);
+                    } else if (res?.channel === 'direct') {
+                        (window as any).__FTY_CHANNEL = 'direct';
+                    }
+                })
+                .catch(() => {});
+        }
+
+        if (!nativeDetected) {
+            const timer = setTimeout(() => {
+                if (detectNativePlatform()) {
+                    setIsNative(true);
+                }
+            }, 200);
             return () => clearTimeout(timer);
         }
     }, []);
 
-    return { isNative };
+    return { isNative, isPlayStore };
 }

@@ -18,7 +18,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({ onSelectPlatform, modules, branding }: HeroSectionProps) {
   const { t } = useI18n()
-  const { isNative } = usePlatform()
+  const { isNative, isPlayStore } = usePlatform()
 
   const heroBadge = branding?.hero_badge || t.hero.verifiedBadge
   const heroPrefix = branding?.hero_title_prefix || t.hero.titlePrefix
@@ -163,7 +163,7 @@ export default function HeroSection({ onSelectPlatform, modules, branding }: Her
           </button>
         )}
 
-        {isYoutubeVisible(modules, isNative) && (
+        {isYoutubeVisible(modules, isNative, isPlayStore) && (
           <button
             type="button"
             onClick={() => handlePlatformClick('youtube')}

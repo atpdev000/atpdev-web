@@ -15,7 +15,7 @@ import TwitterDownloader from '@/components/platforms/TwitterDownloader'
 import WhatsappStatusDownloader from '@/components/platforms/WhatsappStatusDownloader'
 
 export default function ToolsPage() {
-  const { isNative } = usePlatform()
+  const { isNative, isPlayStore } = usePlatform()
   const [activePlatform, setActivePlatform] = useState<Platform>('facebook')
   const [modules, setModules] = useState<Record<string, boolean>>({
     youtube_enabled: false,
@@ -26,6 +26,13 @@ export default function ToolsPage() {
     threads_enabled: true,
     whatsapp_enabled: true,
   })
+  const youtubeVisible = isYoutubeVisible(modules, isNative, isPlayStore)
+
+  useEffect(() => {
+    if (!youtubeVisible && activePlatform === 'youtube') {
+      setActivePlatform('facebook')
+    }
+  }, [youtubeVisible, activePlatform])
 
   useEffect(() => {
     fetch('/api/theme')
@@ -33,7 +40,7 @@ export default function ToolsPage() {
       .then(data => {
         if (data?.modules) setModules(data.modules)
       })
-      .catch(() => {})
+      .catch(() => { })
 
     try {
       const channel = new BroadcastChannel('descargador_theme_channel')
@@ -42,7 +49,7 @@ export default function ToolsPage() {
         if (event.data?.payload?.modules) setModules(event.data.payload.modules)
       }
       return () => channel.close()
-    } catch (e) {}
+    } catch (e) { }
   }, [])
 
   const renderPlatform = () => {
@@ -50,7 +57,7 @@ export default function ToolsPage() {
       case 'facebook':
         return <FacebookDownloader />
       case 'youtube':
-        return <YoutubeDownloader />
+        return youtubeVisible ? <YoutubeDownloader /> : <FacebookDownloader />
       case 'tiktok':
         return <TiktokDownloader />
       case 'instagram':
@@ -70,8 +77,8 @@ export default function ToolsPage() {
     <div className="container mx-auto px-4 max-w-5xl">
       {/* Botón Volver */}
       <div className="mb-6">
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -139,7 +146,7 @@ export default function ToolsPage() {
               <Link href="/tools/whatsapp" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
                 WhatsApp Estados →
               </Link>
-              {isYoutubeVisible(modules, isNative) && (
+              {youtubeVisible && (
                 <Link href="/tools/youtube" className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-700/80 border border-slate-200/60 dark:border-slate-700/60 text-center transition-all">
                   YouTube 4K & MP3 →
                 </Link>

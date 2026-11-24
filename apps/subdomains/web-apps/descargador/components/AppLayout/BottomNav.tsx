@@ -1,12 +1,16 @@
 'use client'
 
+import { isYoutubeVisible } from '@/lib/featureFlags'
+import { usePlatform } from '@/hooks/usePlatform'
+
 interface BottomNavProps {
     activePlatform: 'facebook' | 'youtube' | 'tiktok'
     onPlatformChange: (platform: 'facebook' | 'youtube' | 'tiktok') => void
 }
 
 export default function BottomNav({ activePlatform, onPlatformChange }: BottomNavProps) {
-    const tabs = [
+    const { isNative, isPlayStore } = usePlatform()
+    const allTabs = [
         {
             id: 'facebook',
             label: 'Facebook',
@@ -38,6 +42,8 @@ export default function BottomNav({ activePlatform, onPlatformChange }: BottomNa
             )
         }
     ] as const
+
+    const tabs = allTabs.filter(tab => tab.id !== 'youtube' || isYoutubeVisible(undefined, isNative, isPlayStore))
 
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 pb-safe z-50">

@@ -14,7 +14,7 @@ interface TopNavProps {
 
 export default function TopNav({ activePlatform, onPlatformChange, modules }: TopNavProps) {
     const { t } = useI18n()
-    const { isNative } = usePlatform()
+    const { isNative, isPlayStore } = usePlatform()
 
     const allTabs = [
         {
@@ -98,7 +98,7 @@ export default function TopNav({ activePlatform, onPlatformChange, modules }: To
 
     const tabs = allTabs.filter(tab => {
         if (tab.id === 'youtube') {
-            return isYoutubeVisible(modules, isNative)
+            return isYoutubeVisible(modules, isNative, isPlayStore)
         }
         if (!modules) return true
         const key = `${tab.id}_enabled`

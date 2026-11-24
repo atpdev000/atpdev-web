@@ -163,7 +163,7 @@ export async function generateMetadata({
 
   const allJobs = await getJobPostings();
   const todayIso = new Date().toISOString().split("T")[0];
-  const hasActiveRegionJobs = allJobs.some((job) => {
+  const activeRegionJobsCount = allJobs.filter((job) => {
     if (job.status !== "Vigente") return false;
     if (job.end_date && job.end_date.trim() < todayIso) return false;
     const jobRegion = (job.region || "").toLowerCase();
@@ -174,7 +174,8 @@ export async function generateMetadata({
       return jobRegion.includes("lima") || jobRegion.includes("callao");
     }
     return jobRegion.includes(regionInfo.name.toLowerCase());
-  });
+  }).length;
+  const hasEnoughRegionJobs = activeRegionJobsCount >= 5;
 
   const title = `Chamba en ${regionInfo.name} 2026 — Ofertas de Trabajo y Convocatorias`;
   const description = `Encuentra chamba y convocatorias de trabajo vigentes en ${regionInfo.name}, Perú. Convocatorias del Estado (CAS 1057, 728) y sector privado con bases oficiales en PDF.`;
@@ -184,10 +185,10 @@ export async function generateMetadata({
     title,
     description,
     robots: {
-      index: hasActiveRegionJobs,
+      index: hasEnoughRegionJobs,
       follow: true,
     },
-    ...(hasActiveRegionJobs && adsSettings.enabled && adsSettings.clientId
+    ...(hasEnoughRegionJobs && adsSettings.enabled && adsSettings.clientId
       ? { other: { "google-adsense-account": adsSettings.clientId } }
       : {}),
     keywords: [
@@ -347,7 +348,7 @@ export default async function RegionJobsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-      {regionJobs.length > 0 && adsSettings.enabled && adsSettings.clientId ? (
+      {regionJobs.length >= 5 && adsSettings.enabled && adsSettings.clientId ? (
         <ChambaAdSense clientId={adsSettings.clientId} />
       ) : null}
       {/* JSON-LD Schemas */}
@@ -476,11 +477,24 @@ export default async function RegionJobsPage({
       </div>
 
       {/* AdSense Leaderboard Slot — Solo se muestra cuando hay contenido real en la región (AdSense Policy) */}
-      {regionJobs.length > 0 && (
+      {regionJobs.length >= 5 && (
         <div className="pt-6">
           <AdBannerSlot type="leaderboard" />
         </div>
       )}
+
+      {/* Guía Regional de Empleo Público y Postulación en la Región */}
+      <section className="p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
+          Guía de Postulación a Convocatorias Públicas y Privadas en la Región {regionInfo.name}
+        </h2>
+        <p>
+          El mercado laboral institucional en <strong>{regionInfo.label}</strong> abarca procesos de selección convocados por el Gobierno Regional (GORE {regionInfo.name}), Direcciones Regionales de Salud (DIRESA / Redes de Salud), Direcciones Regionales de Educación (DRE y UGEL provinciales), Municipalidades Provinciales y Distritales, Cortes Superiores de Justicia, sedes desconcentradas de ministerios (MIDIS, MTC, MIDAGRI, MINJUS, SUNAT, SUNARP, EsSalud) y empresas privadas de alcance regional. Todas las plazas estatales bajo los regímenes <strong>D.L. N.° 1057 (CAS)</strong>, <strong>D.L. N.° 728</strong>, <strong>D.L. N.° 276</strong> y <strong>Ley N.° 30057 (SERVIR)</strong> se difunden de manera obligatoria conforme al Decreto Supremo N.° 003-2018-TR.
+        </p>
+        <p>
+          Para postular con éxito a una plaza en <strong>{regionInfo.name}</strong>, descarga siempre las bases integradas en PDF y verifica la modalidad de recepción del expediente: mesa de partes presencial en la sede institucional o mesa de partes virtual (sistema web o correo institucional habilitado dentro del horario oficial del cronograma). Recuerda foliarlo de atrás hacia adelante o según lo indiquen las bases, firmar cada anexo obligatorio y respaldar toda experiencia general y específica con constancias de trabajo, contratos u órdenes de servicio acompañadas de su respectiva conformidad. Utiliza gratuitamente nuestra <Link href="/calculadora-sueldo" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Calculadora Salarial</Link>, el <Link href="/match-cv" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Analizador de Compatibilidad de CV</Link> y el <Link href="/simulador-entrevista-ia" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Simulador de Entrevista CAS</Link> para preparar tu postulación.
+        </p>
+      </section>
     </div>
   );
 }

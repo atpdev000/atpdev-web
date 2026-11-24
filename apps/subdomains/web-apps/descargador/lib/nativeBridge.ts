@@ -2,8 +2,8 @@ import { registerPlugin, Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 
 export interface WhatsAppStatusPluginInterface {
-  checkPermission(): Promise<{ granted: boolean; isAllFiles: boolean; sdkVersion: number }>;
-  requestPermission(): Promise<{ openedSettings?: boolean; type?: string }>;
+  checkPermission(options?: { appType?: 'all' | 'whatsapp' | 'business' }): Promise<{ granted: boolean; isAllFiles: boolean; isSaf?: boolean; sdkVersion: number }>;
+  requestPermission(options?: { appType?: 'all' | 'whatsapp' | 'business' }): Promise<{ granted?: boolean; openedSettings?: boolean; type?: string; uri?: string }>;
   checkInstalledApps?(): Promise<{ whatsappInstalled: boolean; businessInstalled: boolean; anyInstalled: boolean }>;
   getStatuses(options?: { appType?: 'all' | 'whatsapp' | 'business' }): Promise<{
     statuses: Array<{
@@ -31,6 +31,7 @@ export interface WhatsAppStatusPluginInterface {
   openMedia(options: { filePath: string }): Promise<{ success: boolean }>;
   shareFile(options: { filePath: string; title?: string }): Promise<{ success: boolean }>;
   getClipboard(): Promise<{ text: string }>;
+  getDistributionChannel?(): Promise<{ channel: string; extendedMediaAllowed: boolean }>;
   extractYoutubeInfo?(options: { videoId: string }): Promise<{ success: boolean; clientUsed: string; payloadJson: string }>;
   nativeFetch?(options: {
     url: string;

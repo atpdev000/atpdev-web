@@ -6,13 +6,17 @@ import { detectPlatformFromUrl, extractUrlFromText, DetectedUrlInfo } from '@/li
 import { Sparkles, CheckCircle2, X } from 'lucide-react'
 import { readNativeClipboard } from '@/lib/nativeBridge'
 import { useHistoryStore } from '@/hooks/useDownloadHistory'
+import { usePlatform } from '@/hooks/usePlatform'
 
 interface SmartClipboardDetectorProps {
   activePlatform?: Platform
+  allowYoutube?: boolean
   onDetected: (info: DetectedUrlInfo, autoSearch: boolean) => void
 }
 
-export default function SmartClipboardDetector({ activePlatform, onDetected }: SmartClipboardDetectorProps) {
+export default function SmartClipboardDetector({ activePlatform, allowYoutube, onDetected }: SmartClipboardDetectorProps) {
+  const { isPlayStore } = usePlatform()
+  const youtubeAllowed = allowYoutube ?? !isPlayStore
   const [detectedToast, setDetectedToast] = useState<{
     info: DetectedUrlInfo
     isAutoSearching: boolean
@@ -45,8 +49,9 @@ export default function SmartClipboardDetector({ activePlatform, onDetected }: S
   const handleDetectedUrl = useCallback((rawText: string, isFromAutoCheck = true) => {
     if (!rawText || typeof rawText !== 'string') return false
 
-    const info = detectPlatformFromUrl(rawText)
+    const info = detectPlatformFromUrl(rawText, { allowYoutube: youtubeAllowed })
     if (!info) return false
+    if (!youtubeAllowed && info.platform === 'youtube') return false
 
     const now = Date.now()
 
@@ -91,7 +96,7 @@ export default function SmartClipboardDetector({ activePlatform, onDetected }: S
     showToast(info, true)
     onDetectedRef.current(info, true)
     return true
-  }, [showToast])
+  }, [showToast, youtubeAllowed])
 
   // 1. GLOBAL PASTE LISTENER (Ctrl+V o pegado manual explícito en cualquier lugar)
   useEffect(() => {

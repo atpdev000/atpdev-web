@@ -1,5 +1,8 @@
 import { Capacitor } from '@capacitor/core'
 
+export const PLAYSTORE_UA_TOKEN = 'FTYChannel/playstore'
+export const DIRECT_UA_TOKEN = 'FTYChannel/direct'
+
 export const FEATURES = {
     /**
      * Enable YouTube platform support
@@ -17,6 +20,11 @@ export const FEATURES = {
     APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || 'web',
 } as const
 
+export function isPlayStoreUserAgent(userAgent?: string | null): boolean {
+    if (!userAgent) return false
+    return userAgent.includes(PLAYSTORE_UA_TOKEN)
+}
+
 /**
  * Check if a feature is enabled
  */
@@ -28,27 +36,39 @@ export function isFeatureEnabled(feature: keyof typeof FEATURES): boolean {
  * Get app version
  */
 export function getAppVersion(): string {
-    return FEATURES.APP_VERSION
+    return isPlayStoreBuild() ? 'playstore' : FEATURES.APP_VERSION
 }
 
 /**
- * Check if running Play Store build
+ * Check if running Play Store build (compile-time env OR Android WebView User-Agent/native bridge marker)
  */
 export function isPlayStoreBuild(): boolean {
-    return FEATURES.APP_VERSION === 'playstore'
+    if (FEATURES.APP_VERSION === 'playstore') {
+        return true
+    }
+    if (typeof window !== 'undefined') {
+        if ((window as any).__FTY_CHANNEL === 'playstore') {
+            return true
+        }
+        if (typeof navigator !== 'undefined' && isPlayStoreUserAgent(navigator.userAgent)) {
+            return true
+        }
+    }
+    return false
 }
 
 /**
  * Determine whether YouTube UI/routes should be visible on the current client.
  * - Play Store builds always keep YouTube disabled.
- * - Native APK/Capacitor builds enable YouTube using on-device extraction.
+ * - Native APK/Capacitor builds (direct channel) enable YouTube using on-device extraction.
  * - Public web respects CMS modules.youtube_enabled (AdSense compliance).
  */
 export function isYoutubeVisible(
     modules?: Record<string, boolean>,
-    isNative: boolean = false
+    isNative: boolean = false,
+    isPlayStore: boolean = false
 ): boolean {
-    if (isPlayStoreBuild()) {
+    if (isPlayStore || isPlayStoreBuild()) {
         return false
     }
     if (isNative) {

@@ -1,9 +1,14 @@
 import { Platform } from '@/components/PlatformTabs'
+import { isPlayStoreBuild } from '@/lib/featureFlags'
 
 export interface DetectedUrlInfo {
   url: string
   platform: Platform
   platformName: string
+}
+
+export interface DetectPlatformOptions {
+  allowYoutube?: boolean
 }
 
 /**
@@ -28,28 +33,32 @@ export function extractUrlFromText(text: string): string | null {
 /**
  * Determina a qué red social pertenece una URL dada y retorna su información limpia.
  */
-export function detectPlatformFromUrl(inputUrl: string): DetectedUrlInfo | null {
+export function detectPlatformFromUrl(
+  inputUrl: string,
+  options?: DetectPlatformOptions
+): DetectedUrlInfo | null {
   if (!inputUrl || typeof inputUrl !== 'string') return null
+  const allowYoutube = options?.allowYoutube ?? !isPlayStoreBuild()
   const cleanUrl = extractUrlFromText(inputUrl) || inputUrl.trim()
   if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
     // Si el usuario ingresó sin http (ej: tiktok.com/@user/...)
     if (/^(www\.)?(tiktok\.com|vm\.tiktok\.com|vt\.tiktok\.com)/i.test(cleanUrl)) {
-      return detectPlatformFromUrl('https://' + cleanUrl)
+      return detectPlatformFromUrl('https://' + cleanUrl, options)
     }
     if (/^(www\.)?(threads\.(net|com))/i.test(cleanUrl)) {
-      return detectPlatformFromUrl('https://' + cleanUrl)
+      return detectPlatformFromUrl('https://' + cleanUrl, options)
     }
     if (/^(www\.)?(instagram\.com|instagr\.am)/i.test(cleanUrl)) {
-      return detectPlatformFromUrl('https://' + cleanUrl)
+      return detectPlatformFromUrl('https://' + cleanUrl, options)
     }
     if (/^(www\.)?(twitter\.com|x\.com|t\.co)/i.test(cleanUrl)) {
-      return detectPlatformFromUrl('https://' + cleanUrl)
+      return detectPlatformFromUrl('https://' + cleanUrl, options)
     }
     if (/^(www\.)?(facebook\.com|fb\.watch|fb\.me)/i.test(cleanUrl)) {
-      return detectPlatformFromUrl('https://' + cleanUrl)
+      return detectPlatformFromUrl('https://' + cleanUrl, options)
     }
-    if (/^(www\.)?(youtube\.com|youtu\.be)/i.test(cleanUrl)) {
-      return detectPlatformFromUrl('https://' + cleanUrl)
+    if (allowYoutube && /^(www\.)?(youtube\.com|youtu\.be)/i.test(cleanUrl)) {
+      return detectPlatformFromUrl('https://' + cleanUrl, options)
     }
     return null
   }
@@ -122,8 +131,8 @@ export function detectPlatformFromUrl(inputUrl: string): DetectedUrlInfo | null 
 
   // 6. YouTube (youtube.com, youtu.be, shorts, live)
   if (
-    lower.includes('youtube.com') ||
-    lower.includes('youtu.be')
+    allowYoutube &&
+    (lower.includes('youtube.com') || lower.includes('youtu.be'))
   ) {
     return {
       url: cleanUrl,

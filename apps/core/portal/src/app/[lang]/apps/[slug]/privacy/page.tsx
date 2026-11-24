@@ -129,6 +129,11 @@ export default async function DynamicAppPrivacyPage({
                 ? `De conformidad con la Ley N° 29733 de Protección de Datos Personales del Perú y el Reglamento General de Protección de Datos (RGPD / GDPR), los usuarios de ${project.title} pueden ejercer sus derechos de acceso, rectificación, cancelación y oposición (ARCO), así como gestionar o revocar su consentimiento de cookies y publicidad personalizada en cualquier momento desde los controles de privacidad de su dispositivo o navegador.`
                 : `In accordance with Peruvian Personal Data Protection Law No. 29733 and the General Data Protection Regulation (GDPR), users of ${project.title} may exercise their rights of access, rectification, erasure, and objection, as well as manage or revoke cookie and personalized advertising consent at any time via their device or browser privacy controls.`}
             </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? `Asimismo, ${project.title} aplica el principio de minimización de datos y aislamiento de permisos del sistema operativo: cualquier acceso opcional a almacenamiento local, cámara, red o sensores se ejecuta estrictamente bajo acción explícita del usuario en primer plano, sin telemetría oculta en segundo plano ni transferencia de archivos personales a terceros no autorizados.`
+                : `Furthermore, ${project.title} enforces data minimization and operating-system permission sandboxing: any optional access to local storage, camera, network, or hardware sensors runs strictly upon explicit foreground user interaction, with zero hidden background telemetry and zero transfer of personal files to unauthorized third parties.`}
+            </p>
           </section>
 
           <section className="bg-neutral-900/60 p-5 rounded-2xl border border-white/5">
@@ -153,14 +158,14 @@ export default async function DynamicAppPrivacyPage({
           </Link>
           <div className="flex gap-4 text-xs text-neutral-500">
             {legalConfig.has_terms !== false && (
-              <Link href={`/apps/${slug}/terms`} className="hover:underline">
+              <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}/terms`} className="hover:underline">
                 {lang === "es" ? "Términos" : "Terms"}
               </Link>
             )}
             {legalConfig.has_credits !== false && (
               <>
                 <span>•</span>
-                <Link href={`/apps/${slug}/credits`} className="hover:underline">
+                <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/${slug}/credits`} className="hover:underline">
                   {lang === "es" ? "Créditos" : "Credits"}
                 </Link>
               </>

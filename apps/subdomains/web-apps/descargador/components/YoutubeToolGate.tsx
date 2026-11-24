@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Capacitor } from '@capacitor/core'
 import { isPlayStoreBuild } from '@/lib/featureFlags'
+import { usePlatform } from '@/hooks/usePlatform'
 
 interface YoutubeToolGateProps {
   serverEnabled: boolean
@@ -16,9 +17,15 @@ interface YoutubeToolGateProps {
  */
 export default function YoutubeToolGate({ serverEnabled, children }: YoutubeToolGateProps) {
   const router = useRouter()
-  const [allowed, setAllowed] = useState<boolean>(serverEnabled)
+  const { isPlayStore } = usePlatform()
+  const [allowed, setAllowed] = useState<boolean>(() => serverEnabled && !isPlayStoreBuild())
 
   useEffect(() => {
+    if (isPlayStore || isPlayStoreBuild()) {
+      setAllowed(false)
+      router.replace('/')
+      return
+    }
     if (serverEnabled) {
       setAllowed(true)
       return
@@ -30,12 +37,12 @@ export default function YoutubeToolGate({ serverEnabled, children }: YoutubeTool
         cap?.getPlatform?.() === 'android' ||
         cap?.getPlatform?.() === 'ios'
     )
-    if (isNative && !isPlayStoreBuild()) {
+    if (isNative) {
       setAllowed(true)
     } else {
       router.replace('/')
     }
-  }, [serverEnabled, router])
+  }, [serverEnabled, isPlayStore, router])
 
   if (!allowed) {
     return null

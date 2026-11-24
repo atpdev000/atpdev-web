@@ -10,6 +10,7 @@ import { Share } from '@capacitor/share';
 import { Toast } from '@capacitor/toast';
 import { Capacitor } from '@capacitor/core';
 import { shareNativeMedia, NativeWhatsAppStatus } from '@/lib/nativeBridge';
+import { usePlatform } from '@/hooks/usePlatform';
 
 interface HistoryModalProps {
     isOpen: boolean;
@@ -20,6 +21,7 @@ interface HistoryModalProps {
 }
 
 export default function HistoryModal({ isOpen, onClose, history = [], onClear, onDelete }: HistoryModalProps) {
+    const { isPlayStore } = usePlatform();
     const [mounted, setMounted] = useState(false);
     const [selectedPreview, setSelectedPreview] = useState<HistoryItem | null>(null);
     const [videoError, setVideoError] = useState(false);
@@ -208,7 +210,9 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
         }
     };
 
-    const safeHistory = Array.isArray(history) ? history : [];
+    const safeHistory = (Array.isArray(history) ? history : []).filter(
+        (item) => !isPlayStore || item.platform !== 'youtube'
+    );
 
     const modalContent = (
         <div 

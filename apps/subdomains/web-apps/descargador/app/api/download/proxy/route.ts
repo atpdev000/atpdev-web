@@ -6,6 +6,7 @@ import os from 'os'
 import https from 'https'
 import { spawn } from 'child_process'
 import { findFfmpegBinary, getSafeContentDisposition } from '@/lib/server/binaries'
+import { isPlayStoreRequest, isYoutubeMediaUrl, playStoreBlockedResponse } from '@/lib/server/channelGuard'
 
 // ✅ TIMEOUTS EXTENDIDOS PARA VIDEOS GRANDES Y COMBINACIÓN
 const COMBINE_TIMEOUT = 300000 // 5 minutos para combinación
@@ -130,6 +131,13 @@ function getFfmpegHeadersString(url: string): string {
 export async function POST(request: NextRequest) {
   try {
     const { url, filename, quality, isAudio, isCombined = false, video_url, audio_url, thumbnailUrl } = await request.json()
+
+    if (
+      isPlayStoreRequest(request) &&
+      (isYoutubeMediaUrl(url) || isYoutubeMediaUrl(video_url) || isYoutubeMediaUrl(audio_url))
+    ) {
+      return playStoreBlockedResponse()
+    }
 
     console.log('🔧 [Proxy] Solicitud recibida:', {
       url: url?.substring(0, 100),
@@ -730,9 +738,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
     }
 
+    if (isPlayStoreRequest(request) && isYoutubeMediaUrl(url)) {
+      return playStoreBlockedResponse()
+    }
+
+    const forwardHeaders = new Headers({ 'Content-Type': 'application/json' })
+    const ua = request.headers.get('user-agent')
+    if (ua) forwardHeaders.set('user-agent', ua)
+
     return POST(new NextRequest(request.url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: forwardHeaders,
       body: JSON.stringify({ url, filename, quality, isAudio })
     }))
   } catch (error: any) {

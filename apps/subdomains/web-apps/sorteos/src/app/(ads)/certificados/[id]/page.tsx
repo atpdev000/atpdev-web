@@ -188,6 +188,22 @@ export default function CertificadoPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
       </div>
+
+      {/* Especificación Técnica del Certificado Criptográfico SHA-256 */}
+      <section className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-white/10 shadow-sm space-y-4 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold font-display text-slate-900 dark:text-white">
+          Protocolo de Integridad Criptográfica FIPS 180-4 (SHA-256) y Muestreo Web Crypto CSPRNG
+        </h2>
+        <p>
+          Cada certificado oficial emitido por <strong>Sorteos Pro</strong> constituye una prueba matemática verificable de que la selección de ganadores y suplentes se ejecutó sin intervención humana ni sesgos algorítmicos. Durante el sorteo, el motor de extracción invoca la interfaz criptográfica nativa <code>window.crypto.getRandomValues()</code> del estándar W3C Web Crypto API —alimentada por el generador de entropía física del sistema operativo— y aplica la permutación uniforme de Fisher-Yates sobre el padrón depurado de participantes.
+        </p>
+        <p>
+          De forma simultánea al cierre del sorteo, se serializa una cadena canónica que concatena el identificador único del certificado (<code>{cert.id}</code>), el título del evento, la marca temporal exacta en formato UTC ISO-8601, el número total de registros auditados y la lista ordenada de ganadores titulares y suplentes. Este bloque se procesa mediante la función resumen <strong>SHA-256</strong> (<code>crypto.subtle.digest</code>), generando una huella hexadecimal de 256 bits (64 caracteres) en la que cualquier modificación de un solo carácter produciría un hash completamente distinto por efecto avalancha.
+        </p>
+        <p>
+          Las marcas organizadoras, agencias de publicidad, instituciones educativas y participantes pueden contrastar este código en cualquier momento desde nuestro módulo de <Link href="/verificar" className="text-pink-600 dark:text-pink-400 underline font-semibold">Verificación Pública</Link> o conservar el acta exportada en formato PDF e imagen de alta resolución como respaldo auditable de transparencia digital.
+        </p>
+      </section>
     </div>
   );
 }

@@ -335,6 +335,18 @@ export default function SorteoPublicoPage({ params }: { params: Promise<{ id: st
           <span className="text-slate-500 dark:text-zinc-500 text-[11px] block">{t('audit_hash_label')}</span>
           <span className="text-emerald-700 dark:text-emerald-400 break-all select-all">{giveaway.verificationHash}</span>
         </div>
+
+        <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-2 text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+          <h3 className="font-bold text-slate-900 dark:text-white">
+            Metodología de Selección Aleatoria Criptográfica (CSPRNG) y Auditoría de Reglas
+          </h3>
+          <p>
+            Los resultados publicados en esta acta digital de <strong>Sorteos Pro</strong> fueron determinados aplicando filtros automatizados de depuración (exclusión de comentarios duplicados por usuario, validación de menciones mínimas etiquetadas y presencia de hashtags obligatorios) sobre el padrón total de participantes importados de la publicación oficial.
+          </p>
+          <p>
+            La elección de los ganadores titulares y suplentes se efectuó mediante el generador criptográfico <code>window.crypto.getRandomValues()</code> (Web Crypto API) con distribución uniforme sin reemplazo, sellando el resultado con una firma inmutable <strong>SHA-256</strong> que puede validarse en el <Link href="/verificar" className="text-pink-600 dark:text-pink-400 underline font-semibold">Verificador Oficial de Certificados</Link>.
+          </p>
+        </div>
       </div>
 
       {/* Bottom Pro Actions */}

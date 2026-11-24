@@ -16,7 +16,7 @@ interface PlatformTabsProps {
 
 export default function PlatformTabs({ activePlatform, onPlatformChange, modules }: PlatformTabsProps) {
   const { t } = useI18n()
-  const { isNative } = usePlatform()
+  const { isNative, isPlayStore } = usePlatform()
 
   const allPlatforms = [
     {
@@ -89,7 +89,7 @@ export default function PlatformTabs({ activePlatform, onPlatformChange, modules
 
   const platforms = allPlatforms.filter(p => {
     if (p.id === 'youtube') {
-      return isYoutubeVisible(modules, isNative);
+      return isYoutubeVisible(modules, isNative, isPlayStore);
     }
     if (!modules) return true;
     const key = `${p.id}_enabled`;

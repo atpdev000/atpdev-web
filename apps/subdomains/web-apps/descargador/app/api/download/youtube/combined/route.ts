@@ -9,6 +9,7 @@ import { Readable } from 'stream'
 import { finished } from 'stream/promises'
 import { getYtDlpWithFfmpeg, findFfmpegBinary, getSafeContentDisposition, getYoutubeCookiesArgs, getYtDlpJsRuntimeArgs, getYtDlpProxyArgs } from '@/lib/server/binaries'
 import { getBackendEndpoint } from '@/lib/server/backend-config'
+import { isPlayStoreRequest, playStoreBlockedResponse } from '@/lib/server/channelGuard'
 
 async function downloadStreamToDisk(
   sourceUrl: string,
@@ -194,6 +195,9 @@ function cleanUrl(inputUrl: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    if (isPlayStoreRequest(request)) {
+      return playStoreBlockedResponse()
+    }
     const body = await request.json().catch(() => ({}))
     const {
       url,

@@ -82,22 +82,32 @@ export default async function Cie10CreditsPage({
                 ? "La arquitectura técnica emplea bases de datos precompiladas con búsqueda de texto completo (Full-Text Search FTS4), normalización diacrítica en tiempo real y verificación de integridad SHA-256 para operar sin latencia en hospitales, postas médicas rurales y consultorios sin conectividad a internet. Para soporte o sugerencias de actualización normativa MINSA / EsSalud, escríbenos a contacto@atpdev.dev."
                 : "The technical architecture utilizes precompiled databases with Full-Text Search (FTS4), real-time diacritic normalization, and SHA-256 integrity verification to operate with zero latency in hospitals, rural health posts, and clinics without internet connectivity. For support or regulatory update suggestions, email contacto@atpdev.dev."}
             </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? "Pila Tecnológica y Licencias de Código Abierto: La aplicación móvil CIE-10 Pro ha sido construida íntegramente con Kotlin, Jetpack Compose Material 3, AndroidX Room Persistence Library, Coroutines / Flow para concurrencia reactiva y Ktor / OkHttp con fijación de certificados TLS para consultas opcionales asistidas por IA. Todos los componentes de software de terceros incluidos cumplen rigurosamente con las licencias Apache License 2.0 y MIT."
+                : "Technology Stack & Open-Source Licenses: The CIE-10 Pro mobile application is engineered natively with Kotlin, Jetpack Compose Material 3, AndroidX Room Persistence Library, Coroutines / Flow for reactive concurrency, and Ktor / OkHttp with TLS certificate validation for optional AI-assisted lookups. All bundled third-party software components strictly comply with Apache License 2.0 and MIT licenses."}
+            </p>
+            <p className="mt-3">
+              {lang === "es"
+                ? "Fuentes Nosológicas y Validación Editorial: El catálogo estructurado de capítulos, bloques y subcategorías diagnósticas se basa en la Clasificación Estadística Internacional de Enfermedades y Problemas Relacionados con la Salud (Décima Revisión — CIE-10) publicada por la Organización Mundial de la Salud (OMS / OPS) y adoptada en los sistemas de información hospitalaria del Ministerio de Salud (MINSA) y EsSalud. Agradecemos a la comunidad médica y de código abierto por su retroalimentación continua en la optimización del motor de búsqueda clínica."
+                : "Nosological Sources & Editorial Validation: The structured catalog of diagnostic chapters, blocks, and subcategories is based on the International Statistical Classification of Diseases and Related Health Problems (Tenth Revision — ICD-10) published by the World Health Organization (WHO / PAHO) and adopted across public and private healthcare information systems. We thank the medical and open-source communities for their continuous feedback in optimizing the clinical search engine."}
+            </p>
           </section>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/10 flex flex-wrap gap-4 items-center justify-between">
           <Link
-            href={lang === "es" ? "/" : `/${lang}`}
+            href={`${lang === "es" ? "" : `/${lang}`}/apps/buscador-clinico-cie-10-pro`}
             className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
-            ← {lang === "es" ? "Volver a ATP Dev" : "Back to ATP Dev"}
+            ← {lang === "es" ? "Volver a CIE-10 App" : "Back to CIE-10 App"}
           </Link>
           <div className="flex gap-4 text-xs text-neutral-500">
-            <Link href="/apps/cie10/privacy" className="hover:underline">
+            <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/cie10/privacy`} className="hover:underline">
               {lang === "es" ? "Privacidad" : "Privacy"}
             </Link>
             <span>•</span>
-            <Link href="/apps/cie10/terms" className="hover:underline">
+            <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/cie10/terms`} className="hover:underline">
               {lang === "es" ? "Términos" : "Terms"}
             </Link>
           </div>

@@ -97,12 +97,13 @@ export async function generateMetadata({
 
   const allJobs = await getJobPostings();
   const todayIso = new Date().toISOString().split("T")[0];
-  const hasMatchedJobs = allJobs.some((job) => {
+  const matchedJobsCount = allJobs.filter((job) => {
     if (job.status !== "Vigente") return false;
     if (job.end_date && job.end_date.trim() < todayIso) return false;
     const sector = (job.sector_type || "").toLowerCase();
     return sector.includes(catInfo.sector_match.toLowerCase());
-  });
+  }).length;
+  const hasEnoughJobs = matchedJobsCount >= 3;
 
   const title = `Convocatorias ${catInfo.name} 2026 — Empleos y Trabajo en Perú`;
   const description = `Consulta convocatorias vigentes de ${catInfo.name} en el Estado Peruano y sector privado. Bases oficiales en PDF, requisitos, cronograma y salarios.`;
@@ -112,10 +113,10 @@ export async function generateMetadata({
     title,
     description,
     robots: {
-      index: hasMatchedJobs,
+      index: hasEnoughJobs,
       follow: true,
     },
-    ...(hasMatchedJobs && adsSettings.enabled && adsSettings.clientId
+    ...(hasEnoughJobs && adsSettings.enabled && adsSettings.clientId
       ? { other: { "google-adsense-account": adsSettings.clientId } }
       : {}),
     keywords: [
@@ -410,11 +411,24 @@ export default async function ConvocatoriaCategoriaPage({
       </div>
 
       {/* AdSense Leaderboard Slot — Solo se renderiza cuando hay convocatorias del régimen (AdSense Policy) */}
-      {matchedJobs.length > 0 && (
+      {matchedJobs.length >= 3 && (
         <div className="pt-6">
           <AdBannerSlot type="leaderboard" />
         </div>
       )}
+
+      {/* Guía Normativa y Procedimiento de Postulación por Régimen Laboral */}
+      <section className="p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
+          Marco Normativo, Estructura Remunerativa y Etapas de Evaluación en {catInfo.name}
+        </h2>
+        <p>
+          Las convocatorias publicadas bajo la modalidad de <strong>{catInfo.name}</strong> en el Perú se rigen por las disposiciones de la Autoridad Nacional del Servicio Civil (<strong>SERVIR</strong>), la Ley Marco del Empleo Público (Ley N.° 28175) y la normativa laboral vigente del Ministerio de Trabajo y Promoción del Empleo (MTPE). Antes de remitir tu expediente de postulación virtual o físico, verifica en las bases integradas el perfil mínimo exigido: grado académico inscrito en SUNEDU o título técnico registrado en MINEDU, colegiatura y habilitación profesional vigente cuando las funciones del cargo lo requieran, así como el cómputo exacto de experiencia general y específica.
+        </p>
+        <p>
+          Todo proceso de selección público comprende etapas preclusivas y eliminatorias: publicación del aviso oficial en el portal <strong>Talento Perú de SERVIR</strong> durante al menos diez (10) días hábiles, inscripción documentada mediante ficha curricular y declaraciones juradas (Anexos de nepotismo, incompatibilidad, registro REDAM y REDERECI), evaluación curricular con puntaje verificable, evaluación de conocimientos técnicos y entrevista personal ante el Comité de Selección. Puedes calcular tu remuneración neta descontando AFP u ONP e Impuesto a la Renta de Quinta Categoría en nuestra <Link href="/calculadora-sueldo" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Calculadora de Sueldo Neto</Link>, estructurar tu expediente en el <Link href="/crear-cv-cas" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Generador de CV CAS</Link> y descargar formatos oficiales en la sección de <Link href="/plantillas-anexos" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Plantillas de Anexos</Link>.
+        </p>
+      </section>
     </div>
   );
 }

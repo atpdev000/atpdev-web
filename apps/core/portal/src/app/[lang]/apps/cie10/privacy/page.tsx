@@ -110,6 +110,11 @@ export default async function Cie10PrivacyPage({
                 : "If you have questions regarding this privacy policy or wish to exercise your privacy rights, email contacto@atpdev.dev or visit our official portal "}
               <a href="https://www.atpdev.dev/contacto" className="text-emerald-400 hover:underline">ATP Dev</a>.
             </p>
+            <p className="text-sm text-neutral-400">
+              {lang === "es"
+                ? "Arquitectura de Cero Telemetría Clínica: Todas las búsquedas por código alfanumérico, capítulo nosológico o término médico se resuelven localmente contra el índice SQLite FTS4 empaquetado en la aplicación. Puedes revocar o restablecer los permisos publicitarios de Google AdMob en cualquier momento desde la configuración de privacidad de tu sistema operativo Android."
+                : "Zero Clinical Telemetry Architecture: All lookups by alphanumeric code, nosological chapter, or medical term are resolved locally against the bundled SQLite FTS4 index inside the application. You can revoke or reset Google AdMob advertising permissions at any time from your Android operating system privacy settings."}
+            </p>
           </section>
         </div>
 
@@ -121,11 +126,11 @@ export default async function Cie10PrivacyPage({
             ← {lang === "es" ? "Volver a CIE-10 App" : "Back to CIE-10 App"}
           </Link>
           <div className="flex gap-4 text-xs text-neutral-500">
-            <Link href="/apps/cie10/credits" className="hover:underline">
+            <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/cie10/credits`} className="hover:underline">
               {lang === "es" ? "Créditos" : "Credits"}
             </Link>
             <span>•</span>
-            <Link href="/apps/cie10/terms" className="hover:underline">
+            <Link href={`${lang === "es" ? "" : `/${lang}`}/apps/cie10/terms`} className="hover:underline">
               {lang === "es" ? "Términos" : "Terms"}
             </Link>
           </div>
