@@ -192,6 +192,9 @@ export default function ContactoPage() {
           <p className="text-xs text-slate-400 pt-2 border-t border-slate-800">
             Todas las solicitudes técnicas, reportes de seguridad o consultas sobre integración de códigos QR en comercios, restaurantes e instituciones educativas son atendidas directamente por el equipo de ingeniería de <strong>ATP DEV</strong> desde Lima, Perú bajo estricto cumplimiento de la Ley N° 29733 de Protección de Datos Personales y normativas internacionales RGPD.
           </p>
+          <p className="text-xs text-slate-400">
+            Asimismo, si eres desarrollador o administrador de sistemas y deseas validar la estructura de tramas EMVCo para pagos interoperables, configuración de redes inalámbricas WPA3-Enterprise mediante cadena estándar WIFI o codificación de tarjetas corporativas vCard 4.0 con caracteres UTF-8 sin pérdida de compatibilidad en lectores láser e industriales 2D, incluye el payload de prueba en tu mensaje para remitirte el diagnóstico técnico correspondiente.
+          </p>
         </div>
       </section>
 

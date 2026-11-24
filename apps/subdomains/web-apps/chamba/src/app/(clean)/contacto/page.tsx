@@ -165,6 +165,12 @@ export default function ContactoPage() {
                 Las oficinas de Recursos Humanos u Oficinas de Talento Humano que deseen difundir gratuitamente sus convocatorias oficiales pueden solicitar su verificación institucional desde nuestra sección <Link href="/publicar-empleo" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Publicar Empleo</Link>. Todas las comunicaciones están protegidas bajo nuestra <Link href="/politica-de-privacidad" className="text-emerald-600 dark:text-emerald-400 underline font-semibold">Política de Privacidad</Link> y la Ley N° 29733.
               </p>
             </div>
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1.5 md:col-span-2">
+              <h3 className="font-bold text-slate-900 dark:text-white">Tiempos de Respuesta y Rectificación de Bases Integradas</h3>
+              <p>
+                Nuestro equipo técnico procesa solicitudes de actualización de cronogramas, fe de erratas, comunicados de reprogramación de entrevistas personales y publicación de resultados preliminares o finales en un plazo máximo de 24 horas hábiles. Para agilizar la validación, adjunta el enlace directo al portal de transparencia estándar o sede digital GOB.PE de la entidad convocante.
+              </p>
+            </div>
           </div>
         </section>
       </div>

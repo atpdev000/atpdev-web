@@ -272,6 +272,9 @@ export default function AjustesPage() {
             <p>
               El tono acústico de confirmación de 880 Hz se sintetiza en tiempo real mediante la <strong>Web Audio API</strong> nativa del navegador sin descargar archivos MP3 externos, garantizando respuesta instantánea con latencia cero incluso sin conexión a internet. Por su parte, la confirmación táctil emplea <code>navigator.vibrate</code> en teléfonos Android compatibles, permitiendo operar el lector en entornos industriales, almacenes logísticos o eventos con alto ruido ambiental donde la señal visual o sonora podría pasar desapercibida.
             </p>
+            <p>
+              Para restablecer simultáneamente todas las preferencias de cámara, alertas auditivas y permisos de copiado automático a su estado original de fábrica, puedes utilizar el botón de limpieza en la sección de <a href="/historial" className="text-cyan-400 underline font-semibold">Historial de Escaneos</a> o borrar el almacenamiento local del sitio desde la barra de direcciones de tu navegador web.
+            </p>
           </div>
         </section>
 

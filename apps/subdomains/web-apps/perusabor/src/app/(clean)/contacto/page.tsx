@@ -91,6 +91,9 @@ export default function ContactoPage() {
           <p>
             Si eres docente de gastronomía, jefe de cocina, propietario de restaurante o investigador culinario y deseas proponer la inclusión de una receta regional documentada o reportar una variación técnica en nuestros factores de merma, envíanos tu ficha técnica a contacto@atpdev.dev indicando la región de origen, el número de raciones base y el procedimiento térmico detallado. Todas las solicitudes son evaluadas por el equipo editorial de ATP DEV en Lima, Perú en un plazo máximo de 24 a 48 horas hábiles.
           </p>
+          <p>
+            De igual manera, atendemos consultas sobre el ejercicio de derechos ARCO (Acceso, Rectificación, Cancelación y Oposición) conforme a la Ley N° 29733 de Protección de Datos Personales y configuraciones de preferencias de Google Consent Mode v2 detalladas en nuestra <Link href="/politica-de-cookies" className="text-[#c22929] font-semibold underline">Política de Cookies</Link>.
+          </p>
         </div>
       </section>
     </main>

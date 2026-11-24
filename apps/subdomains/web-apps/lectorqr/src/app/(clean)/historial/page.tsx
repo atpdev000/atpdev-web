@@ -437,6 +437,9 @@ export default function HistorialPage() {
           <p>
             Además, la función de exportación estructurada en formatos <strong>CSV y JSON</strong> te permite respaldar tus lecturas de códigos de barras EAN-13, UPC-A, Code 128 e identificadores QR para integrarlos en hojas de cálculo de control de activos, auditorías de almacén o registros de asistencia sin depender de bases de datos externas ni suscripciones de pago.
           </p>
+          <p>
+            Cada registro exportado incluye marca de tiempo exacta en formato ISO, clasificación automática del protocolo detectado (URL HTTPS, credencial Wi-Fi WPA/WPA2, tarjeta de contacto vCard, correo electrónico o identificador numérico de producto) y el contenido íntegro decodificado en UTF-8 para su procesamiento directo en sistemas ERP, inventarios comerciales o auditorías técnicas.
+          </p>
         </div>
       </section>
 

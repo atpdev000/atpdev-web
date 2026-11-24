@@ -98,6 +98,9 @@ export default function PoliticaCookiesPage() {
             </a>
             .
           </p>
+          <p className="text-xs text-slate-400">
+            Asimismo, las preferencias técnicas del escáner (`lectorqr_sound`, `lectorqr_vibration`, `lectorqr_auto_open`, `lectorqr_auto_copy` y `lectorqr_history`) se gestionan mediante almacenamiento web local (`window.localStorage`) exclusivamente dentro de tu dispositivo, cumpliendo con los principios de minimización de datos de la Ley N° 29733 y el Reglamento General de Protección de Datos (RGPD).
+          </p>
         </section>
 
       </div>
