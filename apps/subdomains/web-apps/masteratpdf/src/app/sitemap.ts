@@ -20,5 +20,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     ...toolUrls,
+    {
+      url: `${baseUrl}/sobre-nosotros`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
   ];
 }

@@ -396,14 +396,33 @@ function RegistroContent() {
 
 export default function RegistroPage() {
   return (
-    <React.Suspense
-      fallback={
-        <div className="min-h-[85vh] flex items-center justify-center text-slate-400 dark:text-zinc-500 font-mono text-xs">
-          Cargando...
+    <div className="space-y-10 pb-12">
+      <React.Suspense
+        fallback={
+          <div className="min-h-[40vh] flex items-center justify-center text-slate-400 dark:text-zinc-500 font-mono text-xs">
+            Cargando formulario de registro seguro...
+          </div>
+        }
+      >
+        <RegistroContent />
+      </React.Suspense>
+
+      <section className="max-w-3xl mx-auto px-4">
+        <div className="rounded-3xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 p-6 sm:p-8 space-y-4 text-xs sm:text-sm text-slate-600 dark:text-zinc-300 leading-relaxed shadow-xs">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
+            Ventajas de tu Cuenta en Sorteos Pro y Uso de Herramientas 100% Gratuitas sin Registro
+          </h2>
+          <p>
+            En <strong>Sorteos Pro</strong> todas nuestras herramientas de selección aleatoria —incluyendo la <Link href="/herramientas/ruleta" className="text-pink-600 dark:text-pink-400 underline font-semibold">Ruleta Aleatoria</Link>, <Link href="/herramientas/lista" className="text-pink-600 dark:text-pink-400 underline font-semibold">Sorteo por Lista de Nombres</Link>, <Link href="/herramientas/equipos" className="text-pink-600 dark:text-pink-400 underline font-semibold">Generador de Equipos</Link>, <Link href="/herramientas/dados" className="text-pink-600 dark:text-pink-400 underline font-semibold">Dados 3D</Link>, <Link href="/herramientas/moneda" className="text-pink-600 dark:text-pink-400 underline font-semibold">Cara o Cruz</Link>, <Link href="/herramientas/numeros" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lotería de Números</Link>, <Link href="/herramientas/amigo-invisible" className="text-pink-600 dark:text-pink-400 underline font-semibold">Amigo Invisible</Link> y <Link href="/herramientas/bases-legales" className="text-pink-600 dark:text-pink-400 underline font-semibold">Redactor de Bases Legales</Link>— están disponibles de forma inmediata y gratuita sin necesidad de crear una cuenta ni vincular tarjetas bancarias.
+          </p>
+          <p>
+            El registro opcional de una cuenta de organizador está diseñado para agencias de marketing digital, creadores de contenido, marcas comerciales e instituciones educativas que desean sincronizar su historial de sorteos multiplataforma (Instagram, TikTok, YouTube, Facebook, X y Threads) en la nube, emitir y respaldar certificados públicos de transparencia con huella criptográfica <strong>SHA-256 (FIPS 180-4)</strong> generados mediante <code>window.crypto.getRandomValues()</code> (CSPRNG), programar dinámicas recurrentes y exportar actas de auditoría en formatos PDF, Excel e imagen de alta resolución.
+          </p>
+          <p>
+            Tus credenciales se transmiten exclusivamente bajo cifrado <strong>TLS 1.3</strong>, las contraseñas se almacenan mediante funciones de derivación criptográfica con sal única y puedes ejercer en cualquier momento tus derechos de acceso, rectificación o cancelación conforme a nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link> y <Link href="/terminos-y-condiciones" className="text-pink-600 dark:text-pink-400 underline font-semibold">Términos y Condiciones</Link>.
+          </p>
         </div>
-      }
-    >
-      <RegistroContent />
-    </React.Suspense>
+      </section>
+    </div>
   );
 }

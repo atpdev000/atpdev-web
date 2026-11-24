@@ -5,11 +5,14 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
+        userAgent: ['Mediapartners-Google', 'Google-Display-Ads-Bot'],
+        allow: '/',
+      },
+      {
         userAgent: [
           'Googlebot',
           'Googlebot-Image',
           'Google-InspectionTool',
-          'Mediapartners-Google',
           'AdsBot-Google',
           'AdsBot-Google-Mobile',
           'Screaming Frog SEO Spider',
@@ -36,6 +39,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
   };
 }

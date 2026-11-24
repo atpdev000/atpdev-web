@@ -324,6 +324,20 @@ export default function LoginPage() {
             {t('auth_register_link')}
           </Link>
         </p>
+
+        <section className="pt-4">
+          <div className="rounded-3xl bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 p-6 space-y-3 text-xs text-slate-600 dark:text-zinc-300 leading-relaxed shadow-xs">
+            <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white font-display">
+              Acceso al Panel de Organizador y Uso de Herramientas Gratuitas sin Cuenta
+            </h2>
+            <p>
+              Recuerda que en <strong>Sorteos Pro</strong> puedes utilizar todas nuestras utilidades públicas —como la <Link href="/herramientas/ruleta" className="text-pink-600 dark:text-pink-400 underline font-semibold">Ruleta Aleatoria</Link>, <Link href="/herramientas/lista" className="text-pink-600 dark:text-pink-400 underline font-semibold">Sorteo por Lista de Nombres</Link>, <Link href="/herramientas/equipos" className="text-pink-600 dark:text-pink-400 underline font-semibold">Generador de Equipos</Link>, <Link href="/herramientas/dados" className="text-pink-600 dark:text-pink-400 underline font-semibold">Dados 3D</Link>, <Link href="/herramientas/moneda" className="text-pink-600 dark:text-pink-400 underline font-semibold">Cara o Cruz</Link>, <Link href="/herramientas/numeros" className="text-pink-600 dark:text-pink-400 underline font-semibold">Lotería de Números</Link>, <Link href="/herramientas/amigo-invisible" className="text-pink-600 dark:text-pink-400 underline font-semibold">Amigo Invisible</Link> y el <Link href="/verificar" className="text-pink-600 dark:text-pink-400 underline font-semibold">Verificador Público SHA-256</Link>— de forma 100% gratuita e ilimitada sin necesidad de iniciar sesión.
+            </p>
+            <p>
+              El panel autenticado permite a creadores de contenido, agencias de marketing, comercios e instituciones gestionar su historial centralizado de sorteos en Instagram, TikTok, YouTube, Facebook y X, descargar certificados oficiales de transparencia firmados con <strong>SHA-256 (FIPS 180-4)</strong> mediante entropía criptográfica <code>window.crypto.getRandomValues()</code> (CSPRNG) y administrar integraciones OAuth oficiales bajo transporte cifrado TLS 1.3. Consulta nuestra <Link href="/politica-de-privacidad" className="text-pink-600 dark:text-pink-400 underline font-semibold">Política de Privacidad</Link> o escríbenos en <Link href="/contacto" className="text-pink-600 dark:text-pink-400 underline font-semibold">Contacto y Soporte</Link>.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );
