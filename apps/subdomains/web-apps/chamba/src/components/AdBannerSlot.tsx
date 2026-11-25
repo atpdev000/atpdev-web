@@ -11,7 +11,7 @@ interface AdBannerSlotProps {
   className?: string;
 }
 
-const EXCLUDED_AD_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|admin|contacto|publicar-empleo)(?:\/|$)/i;
+const EXCLUDED_AD_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|cookies|politica-de-cookies|admin|contacto|publicar-empleo|login|auth)(?:\/|$)/i;
 
 export function AdBannerSlot({ type, slotId, className = '' }: AdBannerSlotProps) {
   const pathname = usePathname() || '';
@@ -77,7 +77,7 @@ export function AdBannerSlot({ type, slotId, className = '' }: AdBannerSlotProps
     <div
       ref={adRef}
       className={`w-full my-6 sm:my-8 flex flex-col justify-center items-center overflow-hidden print:hidden ${className}`}
-      aria-label="Espacio publicitario patrocinado"
+      aria-label="Anuncios"
     >
       <span className="text-[10px] tracking-widest uppercase font-mono text-slate-400 dark:text-slate-500 mb-2 select-none pointer-events-none">
         Anuncios

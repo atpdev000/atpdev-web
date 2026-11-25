@@ -8,7 +8,7 @@ interface AdLateralRailProps {
   rightSlotId?: string;
 }
 
-const EXCLUDED_AD_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|admin|contacto|publicar-empleo)(?:\/|$)/i;
+const EXCLUDED_AD_ROUTES = /^\/(?:politica-de-privacidad|terminos-y-condiciones|cookies|politica-de-cookies|admin|contacto|publicar-empleo|login|auth)(?:\/|$)/i;
 
 export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
   const pathname = usePathname() || '';
@@ -24,6 +24,7 @@ export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
     left: leftSlotId || '',
     right: rightSlotId || '',
   });
+  const [pushed, setPushed] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -44,13 +45,23 @@ export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
         left: resolvedLeft,
         right: resolvedRight,
       });
-      try {
-        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-      } catch (err) {
-        // Ignorar bloqueadores de anuncios
-      }
     }
   }, [leftSlotId, rightSlotId]);
+
+  useEffect(() => {
+    if (isExcludedRoute || !railState.show || pushed || typeof window === 'undefined') return;
+    try {
+      if (railState.left) {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+      if (railState.right) {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      }
+      setPushed(true);
+    } catch {
+      // Ignorar bloqueadores de anuncios
+    }
+  }, [isExcludedRoute, railState.show, railState.left, railState.right, pushed]);
 
   if (isExcludedRoute || !railState.show || (!railState.left && !railState.right)) {
     return null;
@@ -60,11 +71,11 @@ export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
     <>
       {railState.left && (
         <aside
-          aria-label="Anuncio lateral izquierdo"
+          aria-label="Anuncios"
           className="fixed left-2 top-28 z-30 hidden min-[1440px]:block w-[120px] print:hidden text-center"
         >
           <span className="text-[9px] tracking-widest uppercase font-mono text-slate-400 dark:text-slate-500 mb-1 block select-none pointer-events-none">
-            Publicidad
+            Anuncios
           </span>
           <ins
             className="adsbygoogle"
@@ -77,11 +88,11 @@ export function AdLateralRail({ leftSlotId, rightSlotId }: AdLateralRailProps) {
 
       {railState.right && (
         <aside
-          aria-label="Anuncio lateral derecho"
+          aria-label="Anuncios"
           className="fixed right-2 top-28 z-30 hidden min-[1440px]:block w-[120px] print:hidden text-center"
         >
           <span className="text-[9px] tracking-widest uppercase font-mono text-slate-400 dark:text-slate-500 mb-1 block select-none pointer-events-none">
-            Publicidad
+            Anuncios
           </span>
           <ins
             className="adsbygoogle"
