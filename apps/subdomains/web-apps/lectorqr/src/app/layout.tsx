@@ -45,6 +45,12 @@ export const metadata: Metadata = {
     description: 'Escáner óptico en el navegador y generador vectorial de códigos QR con corrección Reed-Solomon.',
     images: ['https://www.atpdev.dev/og-image.png'],
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 const rootJsonLd = {

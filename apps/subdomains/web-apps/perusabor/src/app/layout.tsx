@@ -47,7 +47,10 @@ export const metadata: Metadata = {
     images: ['https://www.atpdev.dev/og-image.png'],
   },
   icons: {
-    icon: '/icon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
   },
 };
 

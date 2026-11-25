@@ -35,8 +35,10 @@ export const metadata: Metadata = {
     images: ['https://www.atpdev.dev/og-image.png'],
   },
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+    icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
     apple: '/favicon.svg',
   },
 }
@@ -71,10 +73,6 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="shortcut icon" href="/favicon.svg" />
-        <link rel="apple-touch-icon" href="/favicon.svg" />
-        
         {/* Consent Mode v2 Default (Must be loaded before GA4/AdSense) */}
         <Script id="consent-mode-default" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
           window.dataLayer = window.dataLayer || [];
