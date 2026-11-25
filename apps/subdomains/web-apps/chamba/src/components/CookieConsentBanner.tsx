@@ -11,14 +11,18 @@ export function CookieConsentBanner() {
     try {
       const consent = localStorage.getItem('chamba_cookie_consent');
       if (consent) {
+        const status = consent === 'all' ? 'granted' : 'denied';
         // Notificar a Google Consent Mode v2 si ya existe consentimiento previo
         if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('consent', 'update', {
-            'ad_storage': consent === 'all' ? 'granted' : 'denied',
-            'ad_user_data': consent === 'all' ? 'granted' : 'denied',
-            'ad_personalization': consent === 'all' ? 'granted' : 'denied',
-            'analytics_storage': 'granted',
+            'ad_storage': status,
+            'ad_user_data': status,
+            'ad_personalization': status,
+            'analytics_storage': status,
           });
+        }
+        if (typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
+          (window as any).clarity('consentv2', { ad_Storage: status, analytics_Storage: status });
         }
       } else {
         // Mostrar con un leve delay estético para no afectar el First Contentful Paint
@@ -33,14 +37,18 @@ export function CookieConsentBanner() {
   const handleAccept = (type: 'all' | 'essential') => {
     try {
       localStorage.setItem('chamba_cookie_consent', type);
+      const status = type === 'all' ? 'granted' : 'denied';
       // Actualizar Google Consent Mode v2 según elección del usuario
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('consent', 'update', {
-          'ad_storage': type === 'all' ? 'granted' : 'denied',
-          'ad_user_data': type === 'all' ? 'granted' : 'denied',
-          'ad_personalization': type === 'all' ? 'granted' : 'denied',
-          'analytics_storage': 'granted',
+          'ad_storage': status,
+          'ad_user_data': status,
+          'ad_personalization': status,
+          'analytics_storage': status,
         });
+      }
+      if (typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
+        (window as any).clarity('consentv2', { ad_Storage: status, analytics_Storage: status });
       }
       setShow(false);
     } catch (e) {

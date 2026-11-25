@@ -55,6 +55,8 @@ export default function ThirdPartyScripts({ ga4Id, clarityId }: ThirdPartyScript
           const y = l.getElementsByTagName(r)[0];
           y?.parentNode?.insertBefore(t, y);
         })(w, document, "clarity", "script", clarityId);
+        const currentConsent = localStorage.getItem("cookie_consent") === "accepted" ? "granted" : "denied";
+        w.clarity("consentv2", { ad_Storage: currentConsent, analytics_Storage: currentConsent });
       }
     };
 

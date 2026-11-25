@@ -30,15 +30,18 @@ export default function CookieBanner() {
     setVisible(false);
     
     // Consent Mode v2 update - Granted
-    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-      (window as any).gtag('consent', 'update', {
-        'ad_storage': 'granted',
-        'ad_user_data': 'granted',
-        'ad_personalization': 'granted',
-        'analytics_storage': 'granted'
-      });
-    }
     if (typeof window !== "undefined") {
+      if (typeof (window as any).gtag === "function") {
+        (window as any).gtag('consent', 'update', {
+          'ad_storage': 'granted',
+          'ad_user_data': 'granted',
+          'ad_personalization': 'granted',
+          'analytics_storage': 'granted'
+        });
+      }
+      if (typeof (window as any).clarity === "function") {
+        (window as any).clarity('consentv2', { ad_Storage: 'granted', analytics_Storage: 'granted' });
+      }
       window.dispatchEvent(new CustomEvent("atpdev:consent-accepted"));
     }
   };
@@ -48,13 +51,18 @@ export default function CookieBanner() {
     setVisible(false);
     
     // Consent Mode v2 update - Denied
-    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
-      (window as any).gtag('consent', 'update', {
-        'ad_storage': 'denied',
-        'ad_user_data': 'denied',
-        'ad_personalization': 'denied',
-        'analytics_storage': 'denied'
-      });
+    if (typeof window !== "undefined") {
+      if (typeof (window as any).gtag === "function") {
+        (window as any).gtag('consent', 'update', {
+          'ad_storage': 'denied',
+          'ad_user_data': 'denied',
+          'ad_personalization': 'denied',
+          'analytics_storage': 'denied'
+        });
+      }
+      if (typeof (window as any).clarity === "function") {
+        (window as any).clarity('consentv2', { ad_Storage: 'denied', analytics_Storage: 'denied' });
+      }
     }
   };
 

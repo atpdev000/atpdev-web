@@ -417,6 +417,7 @@ export default function RootLayout({
                 'analytics_storage': 'denied',
                 'wait_for_update': 500
               });
+              gtag('set', 'ads_data_redaction', true);
             `
           }}
         />
@@ -457,6 +458,7 @@ export default function RootLayout({
                     t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
                     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
                 })(window, document, "clarity", "script", "${clarityId}");
+                window.clarity("consentv2", { ad_Storage: "denied", analytics_Storage: "denied" });
               `
             }}
           />

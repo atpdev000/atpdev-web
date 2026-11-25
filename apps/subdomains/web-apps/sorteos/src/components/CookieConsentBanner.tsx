@@ -11,13 +11,17 @@ export function CookieConsentBanner() {
     try {
       const consent = localStorage.getItem('sorteos_cookie_consent');
       if (consent) {
+        const status = consent === 'all' ? 'granted' : 'denied';
         if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('consent', 'update', {
-            ad_storage: consent === 'all' ? 'granted' : 'denied',
-            ad_user_data: consent === 'all' ? 'granted' : 'denied',
-            ad_personalization: consent === 'all' ? 'granted' : 'denied',
-            analytics_storage: 'granted',
+            ad_storage: status,
+            ad_user_data: status,
+            ad_personalization: status,
+            analytics_storage: status,
           });
+        }
+        if (typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
+          (window as any).clarity('consentv2', { ad_Storage: status, analytics_Storage: status });
         }
       } else {
         const timer = setTimeout(() => setShow(true), 1200);
@@ -31,13 +35,17 @@ export function CookieConsentBanner() {
   const handleAccept = (type: 'all' | 'essential') => {
     try {
       localStorage.setItem('sorteos_cookie_consent', type);
+      const status = type === 'all' ? 'granted' : 'denied';
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('consent', 'update', {
-          ad_storage: type === 'all' ? 'granted' : 'denied',
-          ad_user_data: type === 'all' ? 'granted' : 'denied',
-          ad_personalization: type === 'all' ? 'granted' : 'denied',
-          analytics_storage: 'granted',
+          ad_storage: status,
+          ad_user_data: status,
+          ad_personalization: status,
+          analytics_storage: status,
         });
+      }
+      if (typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
+        (window as any).clarity('consentv2', { ad_Storage: status, analytics_Storage: status });
       }
       setShow(false);
     } catch {
