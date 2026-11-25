@@ -32,11 +32,31 @@ export function CookieConsentBanner() {
     } catch (e) {
       // Ignore localStorage unavailable
     }
+    let gdprApplies = false;
+    const w = window as any;
+    const bindTcf = () => {
+      if (typeof w.__tcfapi === 'function') {
+        w.__tcfapi('addEventListener', 2, (tcData: any, success: boolean) => {
+          if (success && tcData?.gdprApplies) {
+            gdprApplies = true;
+            setShow(false);
+          }
+        });
+      }
+    };
+    bindTcf();
+    w.googlefc = w.googlefc || {};
+    w.googlefc.callbackQueue = w.googlefc.callbackQueue || [];
+    w.googlefc.callbackQueue.push({ CONSENT_DATA_READY: bindTcf });
     const onDocClick = (ev: MouseEvent) => {
       const el = (ev.target as HTMLElement | null)?.closest?.('a[href="#cookies-config"]');
       if (el) {
         ev.preventDefault();
-        setShow(true);
+        if (gdprApplies && typeof w.googlefc?.showRevocationMessage === 'function') {
+          w.googlefc.showRevocationMessage();
+        } else {
+          setShow(true);
+        }
       }
     };
     document.addEventListener('click', onDocClick);

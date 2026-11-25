@@ -279,9 +279,32 @@
       var rej = document.getElementById('magic-cookie-reject');
       if (acc) acc.addEventListener('click', function(){ try { localStorage.setItem(key, 'granted'); } catch(e){} applyConsent(true); document.getElementById('magic-cookie-banner').style.display='none'; });
       if (rej) rej.addEventListener('click', function(){ try { localStorage.setItem(key, 'denied'); } catch(e){} applyConsent(false); document.getElementById('magic-cookie-banner').style.display='none'; });
+      var gdprApplies = false;
+      window.googlefc = window.googlefc || {};
+      window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
+      window.googlefc.callbackQueue.push({
+        CONSENT_DATA_READY: function() {
+          if (typeof window.__tcfapi === 'function') {
+            window.__tcfapi('addEventListener', 2, function(tcData, ok) {
+              if (ok && tcData && tcData.gdprApplies) {
+                gdprApplies = true;
+                var bn = document.getElementById('magic-cookie-banner');
+                if (bn) bn.style.display = 'none';
+              }
+            });
+          }
+        }
+      });
       document.addEventListener('click', function(ev){
         var t = ev.target && ev.target.closest ? ev.target.closest('a[href="#cookies-config"]') : null;
-        if (t) { ev.preventDefault(); var bn = document.getElementById('magic-cookie-banner'); if (bn) bn.style.display = 'block'; }
+        if (t) {
+          ev.preventDefault();
+          if (gdprApplies && window.googlefc && typeof window.googlefc.showRevocationMessage === 'function') {
+            window.googlefc.showRevocationMessage();
+          } else {
+            var bn = document.getElementById('magic-cookie-banner'); if (bn) bn.style.display = 'block';
+          }
+        }
       });
     })();
     if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
