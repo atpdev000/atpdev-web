@@ -23,6 +23,15 @@ export default function CookieBanner() {
         }
       }
     }
+    const onDocClick = (ev: MouseEvent) => {
+      const el = (ev.target as HTMLElement | null)?.closest?.('a[href="#cookies-config"]');
+      if (el) {
+        ev.preventDefault();
+        setVisible(true);
+      }
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
   }, []);
 
   const accept = () => {

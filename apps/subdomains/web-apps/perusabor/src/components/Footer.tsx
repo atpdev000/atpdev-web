@@ -120,6 +120,9 @@ export const Footer: React.FC = () => {
             <Link href="/politica-de-cookies" className="hover:text-[#c22929] transition-colors">
               Política de Cookies
             </Link>
+            <a href="#cookies-config" className="hover:text-[#c22929] transition-colors">
+              Configurar Cookies
+            </a>
             <Link href="/terminos" className="hover:text-[#c22929] transition-colors">
               Términos de Uso
             </Link>

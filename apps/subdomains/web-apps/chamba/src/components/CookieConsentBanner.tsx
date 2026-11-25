@@ -8,6 +8,7 @@ export function CookieConsentBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const consent = localStorage.getItem('chamba_cookie_consent');
       if (consent) {
@@ -26,12 +27,23 @@ export function CookieConsentBanner() {
         }
       } else {
         // Mostrar con un leve delay estético para no afectar el First Contentful Paint
-        const timer = setTimeout(() => setShow(true), 1200);
-        return () => clearTimeout(timer);
+        timer = setTimeout(() => setShow(true), 1200);
       }
     } catch (e) {
       // Ignore localStorage unavailable
     }
+    const onDocClick = (ev: MouseEvent) => {
+      const el = (ev.target as HTMLElement | null)?.closest?.('a[href="#cookies-config"]');
+      if (el) {
+        ev.preventDefault();
+        setShow(true);
+      }
+    };
+    document.addEventListener('click', onDocClick);
+    return () => {
+      if (timer !== undefined) clearTimeout(timer);
+      document.removeEventListener('click', onDocClick);
+    };
   }, []);
 
   const handleAccept = (type: 'all' | 'essential') => {

@@ -50,10 +50,10 @@
   <!-- Google Fonts (non-render-blocking) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" media="print" onload="this.media='all'" />
   <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
   </noscript>
 
@@ -234,6 +234,7 @@
           <a href="/sobre-nosotros.html">Sobre Nosotros</a>
           <a href="/politica-privacidad.html">Política de Privacidad</a>
           <a href="/cookies.html">Política de Cookies</a>
+          <a href="#cookies-config">Configurar Cookies</a>
           <a href="/terminos.html">Términos de Uso</a>
           <a href="/contacto.html">Contacto</a>
           <a href="https://www.atpdev.dev/apps/interactivo-magic">Ficha Técnica</a>
@@ -278,6 +279,10 @@
       var rej = document.getElementById('magic-cookie-reject');
       if (acc) acc.addEventListener('click', function(){ try { localStorage.setItem(key, 'granted'); } catch(e){} applyConsent(true); document.getElementById('magic-cookie-banner').style.display='none'; });
       if (rej) rej.addEventListener('click', function(){ try { localStorage.setItem(key, 'denied'); } catch(e){} applyConsent(false); document.getElementById('magic-cookie-banner').style.display='none'; });
+      document.addEventListener('click', function(ev){
+        var t = ev.target && ev.target.closest ? ev.target.closest('a[href="#cookies-config"]') : null;
+        if (t) { ev.preventDefault(); var bn = document.getElementById('magic-cookie-banner'); if (bn) bn.style.display = 'block'; }
+      });
     })();
     if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
       var guide = document.getElementById('editorial-guide');

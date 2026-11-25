@@ -36,6 +36,7 @@ export default function Footer({
           <ul className="space-y-3">
             <li><Link href={`${linkPrefix}/privacy`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkPrivacy}</Link></li>
             <li><Link href={`${linkPrefix}/cookies`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Cookie Policy" : "Política de Cookies"}</Link></li>
+            <li><a href="#cookies-config" className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Cookie Settings" : "Configurar Cookies"}</a></li>
             <li><Link href={`${linkPrefix}/terms`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkTerms}</Link></li>
             <li><Link href={`${linkPrefix}/sobre-mi`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "About Author" : "Sobre el Autor"}</Link></li>
           </ul>

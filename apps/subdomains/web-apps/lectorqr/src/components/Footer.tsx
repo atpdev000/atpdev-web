@@ -50,6 +50,7 @@ export const Footer: React.FC = () => {
             <Link href="/politica-de-privacidad" className="hover:text-cyan-400 transition-colors">Política de Privacidad</Link>
             <Link href="/terminos-y-condiciones" className="hover:text-cyan-400 transition-colors">Términos de Uso</Link>
             <Link href="/politica-de-cookies" className="hover:text-cyan-400 transition-colors">Cookies</Link>
+            <a href="#cookies-config" className="hover:text-cyan-400 transition-colors">Configurar Cookies</a>
             <Link href="/contacto" className="hover:text-cyan-400 transition-colors">Contacto</Link>
           </div>
 

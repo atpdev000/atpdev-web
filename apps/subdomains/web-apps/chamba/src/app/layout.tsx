@@ -396,6 +396,7 @@ export default function RootLayout({
                       }
                     });
                     obs.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+                    setTimeout(function() { try { obs.disconnect(); } catch (e) {} }, 3500);
                   } catch (e) {}
                 }
               })();
@@ -605,6 +606,12 @@ export default function RootLayout({
                       <Cookie size={12} className="text-emerald-600 dark:text-emerald-400" />
                       <span>Política de Cookies</span>
                     </Link>
+                  </li>
+                  <li>
+                    <a href="#cookies-config" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                      <Cookie size={12} className="text-emerald-600 dark:text-emerald-400" />
+                      <span>Configurar Cookies</span>
+                    </a>
                   </li>
                   <li>
                     <Link href="/terminos-y-condiciones" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5">

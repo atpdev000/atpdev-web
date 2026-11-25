@@ -144,6 +144,9 @@ export const Footer = () => {
                         <Link href="/politica-de-cookies" className="hover:text-brand transition-colors">
                             Política de Cookies
                         </Link>
+                        <a href="#cookies-config" className="hover:text-brand transition-colors">
+                            Configurar Cookies
+                        </a>
                         <Link href="/terminos" className="hover:text-brand transition-colors">
                             Términos de Uso
                         </Link>

@@ -212,6 +212,9 @@ export default function HomePage() {
               <Link href="/cookies" className="text-slate-300 hover:text-emerald-300">
                 Política de Cookies
               </Link>
+              <a href="#cookies-config" className="text-slate-300 hover:text-emerald-300">
+                Configurar Cookies
+              </a>
               <Link href="/terms" className="text-slate-300 hover:text-emerald-300">
                 Términos de Servicio
               </Link>

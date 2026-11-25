@@ -162,7 +162,18 @@
       document.head.appendChild(script);
     }
 
-    loadOpenCV();
+    let opencvStarted = false;
+    function startOpenCVOnce() {
+      if (opencvStarted) return;
+      opencvStarted = true;
+      loadOpenCV();
+    }
+    window.addEventListener('load', function() {
+      setTimeout(startOpenCVOnce, 1800);
+    });
+    ['pointerdown', 'keydown', 'change'].forEach(function(ev) {
+      window.addEventListener(ev, startOpenCVOnce, { once: true, passive: true });
+    });
   </script>
 </head>
 
@@ -262,6 +273,7 @@
           <a href="/sobre-nosotros.html">Sobre Nosotros</a>
           <a href="/privacidad.html">Política de Privacidad</a>
           <a href="/cookies.html">Política de Cookies</a>
+          <a href="#cookies-config">Configurar Cookies</a>
           <a href="/terminos.html">Términos de Uso</a>
           <a href="/contacto.html">Contacto</a>
           <a href="https://www.atpdev.dev/apps/dni-scanner-pro">Ficha Técnica</a>
@@ -306,6 +318,10 @@
       var rej = document.getElementById('dni-cookie-reject');
       if (acc) acc.addEventListener('click', function(){ try { localStorage.setItem(key, 'granted'); } catch(e){} applyConsent(true); document.getElementById('dni-cookie-banner').style.display='none'; });
       if (rej) rej.addEventListener('click', function(){ try { localStorage.setItem(key, 'denied'); } catch(e){} applyConsent(false); document.getElementById('dni-cookie-banner').style.display='none'; });
+      document.addEventListener('click', function(ev){
+        var t = ev.target && ev.target.closest ? ev.target.closest('a[href="#cookies-config"]') : null;
+        if (t) { ev.preventDefault(); var bn = document.getElementById('dni-cookie-banner'); if (bn) bn.style.display = 'block'; }
+      });
     })();
     if (window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform()) {
       var guide = document.getElementById('editorial-guide');

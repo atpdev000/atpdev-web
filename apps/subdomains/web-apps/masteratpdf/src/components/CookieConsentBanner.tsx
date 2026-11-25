@@ -28,8 +28,17 @@ export function CookieConsentBanner() {
     } catch {
       // ignore
     }
+    const onDocClick = (ev: MouseEvent) => {
+      const el = (ev.target as HTMLElement | null)?.closest?.('a[href="#cookies-config"]');
+      if (el) {
+        ev.preventDefault();
+        setVisible(true);
+      }
+    };
+    document.addEventListener('click', onDocClick);
     return () => {
       if (showTimer !== undefined) window.clearTimeout(showTimer);
+      document.removeEventListener('click', onDocClick);
     };
   }, []);
 

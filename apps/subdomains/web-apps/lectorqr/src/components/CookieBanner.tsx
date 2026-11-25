@@ -30,6 +30,15 @@ export function CookieBanner() {
     } catch {
       setAccepted(false);
     }
+    const onDocClick = (ev: MouseEvent) => {
+      const el = (ev.target as HTMLElement | null)?.closest?.('a[href="#cookies-config"]');
+      if (el) {
+        ev.preventDefault();
+        setAccepted(false);
+      }
+    };
+    document.addEventListener('click', onDocClick);
+    return () => document.removeEventListener('click', onDocClick);
   }, []);
 
   const handleAccept = () => {
