@@ -29,6 +29,7 @@ export function CvCasGenerator() {
   const [isPrinting, setIsPrinting] = useState(false);
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
   const [showClearModal, setShowClearModal] = useState(false);
+  const [showExampleModal, setShowExampleModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toast, setToast] = useState<{ message: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -124,14 +125,11 @@ export function CvCasGenerator() {
   const handleLoadFilledExample = () => {
     const isMostlyEmpty =
       !data.personal.fullName || (data.experiences.length === 0 && data.education.length === 0);
-    if (
-      isMostlyEmpty ||
-      confirm(
-        '¿Deseas cargar la plantilla con los datos del modelo de ejemplo? Podrás ver cómo luce el diseño 100% completo con foto, experiencia y formación.'
-      )
-    ) {
+    if (isMostlyEmpty) {
       handleDataChange(SAMPLE_CV_DATA);
       showToast('✓ Modelo de ejemplo cargado con éxito');
+    } else {
+      setShowExampleModal(true);
     }
   };
 
@@ -190,9 +188,11 @@ export function CvCasGenerator() {
           handleDataChange(parsed.data);
           if (parsed.templateId) handleTemplateChange(parsed.templateId);
           showToast('✓ Respaldo JSON cargado exitosamente');
+        } else {
+          showToast('⚠️ El archivo JSON no contiene datos válidos de CV.');
         }
       } catch (err) {
-        alert('Archivo JSON no válido.');
+        showToast('⚠️ Archivo JSON no válido.');
       }
     };
     reader.readAsText(file);
@@ -630,6 +630,49 @@ export function CvCasGenerator() {
               >
                 <Trash2 size={14} />
                 <span>Sí, Vaciar Todo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmación para Cargar Plantilla de Ejemplo */}
+      {showExampleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm print:hidden animate-in fade-in duration-200">
+          <div className="w-full max-w-md p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
+              ¿Cargar plantilla con datos de ejemplo?
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Podrás ver cómo luce el diseño 100% completo con foto, experiencia y formación. Si tienes cambios actuales sin guardar, puedes descargar antes una copia JSON.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleExportJson}
+                className="w-full sm:w-auto px-3 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 cursor-pointer"
+              >
+                <Download size={14} />
+                <span>Guardar JSON</span>
+              </button>
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={() => setShowExampleModal(false)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleDataChange(SAMPLE_CV_DATA);
+                  setShowExampleModal(false);
+                  showToast('✓ Modelo de ejemplo cargado con éxito');
+                }}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm cursor-pointer"
+              >
+                Sí, Cargar Ejemplo
               </button>
             </div>
           </div>

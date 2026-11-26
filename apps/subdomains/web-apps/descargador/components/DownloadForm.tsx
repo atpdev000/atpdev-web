@@ -8,10 +8,11 @@ export default function DownloadForm() {
   const [url, setUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!isValidFacebookUrl(url)) {
       setError('Por favor, ingresa un enlace válido de Facebook')
       return
@@ -19,20 +20,20 @@ export default function DownloadForm() {
 
     setIsLoading(true)
     setError(null)
+    setSuccessMessage(null)
 
     try {
       // ✅ USAR ESTA LÍNEA para servicio real (cuando tengas backend)
-       const videoInfo = await downloadVideo(url)
-      
+      const videoInfo = await downloadVideo(url)
+
       // ✅ USAR ESTA LÍNEA para simulación (mientras configuras backend)
       //const videoInfo = await simulateVideoProcessing(url)
-      
+
       // Mostrar resultados en la consola para debug
       console.log('Video info obtenida:', videoInfo)
-      
-      // Aquí podrías actualizar un estado global o mostrar los resultados
-      alert(`✅ Video procesado: ${videoInfo.title}\nFormatos disponibles: ${videoInfo.formats.length}`)
-      
+
+      setSuccessMessage(`✅ Video procesado: ${videoInfo.title} (${videoInfo.formats.length} formatos disponibles)`)
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
       setError(errorMessage)
@@ -78,8 +79,8 @@ export default function DownloadForm() {
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center"
           >
@@ -98,7 +99,7 @@ export default function DownloadForm() {
             )}
           </button>
         </div>
-        
+
         {/* Mostrar error */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -108,6 +109,12 @@ export default function DownloadForm() {
               </svg>
               <span className="font-medium">Error: {error}</span>
             </div>
+          </div>
+        )}
+
+        {successMessage && (
+          <div role="status" className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-sm font-medium text-emerald-800">
+            {successMessage}
           </div>
         )}
       </form>

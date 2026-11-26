@@ -25,6 +25,8 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
     const [mounted, setMounted] = useState(false);
     const [selectedPreview, setSelectedPreview] = useState<HistoryItem | null>(null);
     const [videoError, setVideoError] = useState(false);
+    const [confirmClearAll, setConfirmClearAll] = useState(false);
+    const [historyNotice, setHistoryNotice] = useState<string | null>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -148,10 +150,11 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
             // Fallback portapapeles
             if (typeof navigator !== 'undefined' && navigator.clipboard) {
                 await navigator.clipboard.writeText(shareUrl);
-                try {
-                    await Toast.show({ text: '📋 Enlace copiado al portapapeles', duration: 'short' });
-                } catch {
-                    alert('📋 Enlace copiado al portapapeles');
+                if (Capacitor.isNativePlatform()) {
+                    await Toast.show({ text: '📋 Enlace copiado al portapapeles', duration: 'short' }).catch(() => {});
+                } else {
+                    setHistoryNotice('📋 Enlace copiado al portapapeles');
+                    setTimeout(() => setHistoryNotice(null), 2500);
                 }
             }
         } catch (error: any) {
@@ -179,35 +182,31 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
     const handleClearAll = async (e: React.SyntheticEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        let confirmed = false;
-        try {
-            if (Capacitor.isNativePlatform()) {
-                const confirmPromise = Dialog.confirm({
+        if (Capacitor.isNativePlatform()) {
+            try {
+                const { value } = await Dialog.confirm({
                     title: '¿Borrar todo el historial?',
                     message: 'Se eliminarán todos los registros de descargas de la lista.',
                     okButtonTitle: 'Borrar Todo',
                     cancelButtonTitle: 'Cancelar'
                 });
-                const timeoutPromise = new Promise<{ value: boolean }>((res) => 
-                    setTimeout(() => res({ value: window.confirm('¿Borrar todo el historial?') }), 4000)
-                );
-                const { value } = await Promise.race([confirmPromise, timeoutPromise]);
-                confirmed = value;
-            } else {
-                confirmed = window.confirm('¿Deseas eliminar todo el historial de descargas?');
-            }
-        } catch {
-            confirmed = window.confirm('¿Deseas eliminar todo el historial de descargas?');
-        }
-
-        if (confirmed) {
-            onClear();
-            try {
-                if (Capacitor.isNativePlatform()) {
-                    await Toast.show({ text: 'Historial vaciado', duration: 'short' });
+                if (value) {
+                    onClear();
+                    await Toast.show({ text: 'Historial vaciado', duration: 'short' }).catch(() => {});
                 }
-            } catch {}
+                return;
+            } catch {
+                // fallback to inline confirmation UI below
+            }
         }
+        setConfirmClearAll(true);
+    };
+
+    const confirmClearInline = () => {
+        onClear();
+        setConfirmClearAll(false);
+        setHistoryNotice('✓ Historial vaciado');
+        setTimeout(() => setHistoryNotice(null), 2500);
     };
 
     const safeHistory = (Array.isArray(history) ? history : []).filter(
@@ -261,6 +260,12 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
                         <X className="w-5 h-5 pointer-events-none" />
                     </button>
                 </div>
+
+                {historyNotice && (
+                    <div role="status" className="mx-3.5 mt-3 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold text-center">
+                        {historyNotice}
+                    </div>
+                )}
 
                 {/* Lista de Descargas con Estilos Pro Dark & Light */}
                 <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2.5">
@@ -419,14 +424,38 @@ export default function HistoryModal({ isOpen, onClose, history = [], onClear, o
                 {/* Footer con Botón de Vaciar Historial */}
                 {safeHistory.length > 0 && (
                     <div className="p-3 sm:p-4 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/90 shrink-0">
-                        <button
-                            type="button"
-                            onClick={handleClearAll}
-                            className="w-full py-2.5 sm:py-3 flex items-center justify-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 active:bg-red-100 dark:active:bg-red-500/20 border border-red-200/60 dark:border-red-500/20 rounded-xl font-semibold text-xs sm:text-sm cursor-pointer touch-manipulation"
-                        >
-                            <Trash2 className="w-4 h-4 pointer-events-none" />
-                            Borrar Todo el Historial
-                        </button>
+                        {!confirmClearAll ? (
+                            <button
+                                type="button"
+                                onClick={handleClearAll}
+                                className="w-full py-2.5 sm:py-3 flex items-center justify-center gap-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 active:bg-red-100 dark:active:bg-red-500/20 border border-red-200/60 dark:border-red-500/20 rounded-xl font-semibold text-xs sm:text-sm cursor-pointer touch-manipulation"
+                            >
+                                <Trash2 className="w-4 h-4 pointer-events-none" />
+                                Borrar Todo el Historial
+                            </button>
+                        ) : (
+                            <div role="alert" className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800/60 p-3">
+                                <span className="text-xs font-bold text-red-800 dark:text-red-200">
+                                    ¿Eliminar todo el historial de descargas?
+                                </span>
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                        type="button"
+                                        onClick={() => setConfirmClearAll(false)}
+                                        className="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-700 dark:text-slate-200 cursor-pointer"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={confirmClearInline}
+                                        className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-xs font-bold text-white cursor-pointer"
+                                    >
+                                        Confirmar
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

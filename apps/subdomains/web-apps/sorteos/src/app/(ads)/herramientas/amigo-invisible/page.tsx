@@ -45,6 +45,7 @@ export default function AmigoInvisiblePage() {
   const [muted, setMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [showLiveStream, setShowLiveStream] = useState<boolean>(false);
+  const [friendNotice, setFriendNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setMuted(isAudioMuted());
@@ -67,18 +68,22 @@ export default function AmigoInvisiblePage() {
     const clean = newPerson.trim();
     if (!clean) return;
     if (participants.some((p) => p.toLowerCase() === clean.toLowerCase())) {
-      alert('Esta persona ya está en la lista');
+      setFriendNotice('Esta persona ya está en la lista de participantes.');
+      setTimeout(() => setFriendNotice(null), 4000);
       return;
     }
+    setFriendNotice(null);
     setParticipants([...participants, clean]);
     setNewPerson('');
   };
 
   const handleRemovePerson = (idx: number) => {
     if (participants.length <= 3) {
-      alert('Se requieren al menos 3 personas para el amigo invisible.');
+      setFriendNotice('Se requieren al menos 3 personas para el sorteo de amigo invisible.');
+      setTimeout(() => setFriendNotice(null), 4000);
       return;
     }
+    setFriendNotice(null);
     setParticipants(participants.filter((_, i) => i !== idx));
   };
 
@@ -155,6 +160,13 @@ export default function AmigoInvisiblePage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <ToolSwitcher />
       <ConfettiEffect active={matches.length > 0 && !isDrawing} />
+
+      {friendNotice && (
+        <div role="alert" className="max-w-lg mx-auto p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs font-bold flex items-center justify-between gap-2">
+          <span>{friendNotice}</span>
+          <button type="button" onClick={() => setFriendNotice(null)} className="cursor-pointer opacity-75 hover:opacity-100">✕</button>
+        </div>
+      )}
 
       {/* 3D Countdown Modal */}
       <Countdown3DOverlay

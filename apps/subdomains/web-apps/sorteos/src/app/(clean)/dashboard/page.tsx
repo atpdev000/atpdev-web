@@ -118,6 +118,12 @@ export default function DashboardPage() {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [customSaving, setCustomSaving] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
+  const [pendingConfirm, setPendingConfirm] = useState<
+    | { type: 'disconnect'; id: string }
+    | { type: 'clear_all' }
+    | { type: 'delete_giveaway'; id: string }
+    | null
+  >(null);
 
   const commentLimit = usage.limit;
   const commentsUsed = usage.used;
@@ -292,28 +298,13 @@ export default function DashboardPage() {
   };
 
   // Desconectar cuenta social
-  const handleDisconnectAccount = async (id: string) => {
-    if (!confirm('¿Deseas desconectar esta cuenta social de tu panel?')) return;
-    setSocialAccounts((prev) => prev.filter((a) => a.id !== id));
-    try {
-      await api(`/api/v1/social-accounts/${id}`, { method: 'DELETE' });
-    } catch {
-      // noop
-    }
+  const handleDisconnectAccount = (id: string) => {
+    setPendingConfirm({ type: 'disconnect', id });
   };
 
   // Desconectar todas las cuentas y reiniciar a cero
-  const handleClearAllAccounts = async () => {
-    if (!confirm('¿Deseas desconectar todas las cuentas vinculadas para sincronizar tus cuentas reales?')) return;
-    try {
-      await api('/api/v1/social-accounts', {
-        method: 'POST',
-        body: { action: 'clear_all' }
-      });
-      setSocialAccounts([]);
-    } catch {
-      // noop
-    }
+  const handleClearAllAccounts = () => {
+    setPendingConfirm({ type: 'clear_all' });
   };
 
   // Duplicar sorteo como plantilla
@@ -338,21 +329,47 @@ export default function DashboardPage() {
   };
 
   // Eliminar sorteo del historial
-  const handleDeleteGiveaway = async (id: string) => {
-    if (!confirm('¿Estás seguro de que deseas eliminar este sorteo de tu historial?')) return;
-    try {
-      await api(`/api/v1/giveaways/${id}`, { method: 'DELETE' });
-    } catch {
-      // noop
-    }
-    setGiveaways((prev) => prev.filter((g) => g.id !== id));
-    if (typeof window !== 'undefined') {
+  const handleDeleteGiveaway = (id: string) => {
+    setPendingConfirm({ type: 'delete_giveaway', id });
+  };
+
+  const executePendingConfirm = async () => {
+    if (!pendingConfirm) return;
+    const action = pendingConfirm;
+    setPendingConfirm(null);
+
+    if (action.type === 'disconnect') {
+      setSocialAccounts((prev) => prev.filter((a) => a.id !== action.id));
       try {
-        const stored = JSON.parse(localStorage.getItem('sorteos_pro_db') || '{}');
-        delete stored[id];
-        localStorage.setItem('sorteos_pro_db', JSON.stringify(stored));
+        await api(`/api/v1/social-accounts/${action.id}`, { method: 'DELETE' });
       } catch {
         // noop
+      }
+    } else if (action.type === 'clear_all') {
+      try {
+        await api('/api/v1/social-accounts', {
+          method: 'POST',
+          body: { action: 'clear_all' }
+        });
+        setSocialAccounts([]);
+      } catch {
+        // noop
+      }
+    } else if (action.type === 'delete_giveaway') {
+      try {
+        await api(`/api/v1/giveaways/${action.id}`, { method: 'DELETE' });
+      } catch {
+        // noop
+      }
+      setGiveaways((prev) => prev.filter((g) => g.id !== action.id));
+      if (typeof window !== 'undefined') {
+        try {
+          const stored = JSON.parse(localStorage.getItem('sorteos_pro_db') || '{}');
+          delete stored[action.id];
+          localStorage.setItem('sorteos_pro_db', JSON.stringify(stored));
+        } catch {
+          // noop
+        }
       }
     }
   };
@@ -680,6 +697,44 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de Confirmación Integrado en Dashboard */}
+      {pendingConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-[#0f172a] rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-white/10 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
+              {pendingConfirm.type === 'disconnect'
+                ? '¿Desconectar esta cuenta social?'
+                : pendingConfirm.type === 'clear_all'
+                ? '¿Desconectar todas las cuentas vinculadas?'
+                : '¿Eliminar este sorteo de tu historial?'}
+            </h3>
+            <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed">
+              {pendingConfirm.type === 'clear_all'
+                ? 'Se desvincularán todas tus cuentas para que puedas volver a sincronizar cuentas reales.'
+                : pendingConfirm.type === 'delete_giveaway'
+                ? 'Esta acción eliminará el registro del sorteo de tu historial.'
+                : 'Dejarás de usar esta cuenta social en el panel hasta que vuelvas a vincularla.'}
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setPendingConfirm(null)}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-bold text-slate-700 dark:text-zinc-300 cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={executePendingConfirm}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white cursor-pointer"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Dialog para Conectar Cuenta Social Oficial */}
       {connectModalPlatform && (

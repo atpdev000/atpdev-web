@@ -11,6 +11,7 @@ export default function AdminIngestaPage() {
   const [isParsing, setIsParsing] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
+  const [errorNotice, setErrorNotice] = useState<string | null>(null);
 
   // Form State
   const [jobForm, setJobForm] = useState<{
@@ -32,6 +33,7 @@ export default function AdminIngestaPage() {
     if (!rawText.trim()) return;
     setIsParsing(true);
     setPublishSuccess(null);
+    setErrorNotice(null);
 
     try {
       const res = await fetch('/api/ai/parse-bases', {
@@ -44,10 +46,10 @@ export default function AdminIngestaPage() {
       if (data.success && data.extractedJob) {
         setJobForm(data.extractedJob);
       } else {
-        alert(data.error || 'Error al extraer campos del texto');
+        setErrorNotice(data.error || 'Error al extraer campos del texto');
       }
     } catch (err) {
-      alert('Excepción al conectar con el asistente de IA');
+      setErrorNotice('Excepción al conectar con el asistente de IA');
     } finally {
       setIsParsing(false);
     }
@@ -56,6 +58,7 @@ export default function AdminIngestaPage() {
   const handlePublishJob = async () => {
     if (!jobForm) return;
     setIsPublishing(true);
+    setErrorNotice(null);
 
     try {
       const res = await publishIngestaJobAction({
@@ -69,10 +72,10 @@ export default function AdminIngestaPage() {
         setApplyUrl('');
         setPdfUrl('');
       } else {
-        alert(res.error || 'Error al guardar la convocatoria');
+        setErrorNotice(res.error || 'Error al guardar la convocatoria');
       }
     } catch (err) {
-      alert('Error al publicar la convocatoria');
+      setErrorNotice('Error al publicar la convocatoria');
     } finally {
       setIsPublishing(false);
     }
@@ -102,6 +105,19 @@ export default function AdminIngestaPage() {
             ← Volver al Portal de Empleos
           </Link>
         </div>
+
+        {errorNotice && (
+          <div role="alert" className="p-4 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-200 flex items-center justify-between gap-3 text-xs">
+            <span><strong>Error:</strong> {errorNotice}</span>
+            <button
+              type="button"
+              onClick={() => setErrorNotice(null)}
+              className="px-2.5 py-1 rounded-md bg-rose-900/60 hover:bg-rose-800/80 text-rose-100 font-semibold cursor-pointer"
+            >
+              Cerrar
+            </button>
+          </div>
+        )}
 
         {/* Notificación de Éxito */}
         {publishSuccess && (

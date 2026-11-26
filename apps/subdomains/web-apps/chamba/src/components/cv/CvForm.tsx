@@ -27,6 +27,7 @@ const SECTIONS: { id: SectionId; label: string; icon: React.ElementType }[] = [
 export function CvForm({ data, onChange }: Props) {
   const [activeSection, setActiveSection] = useState<SectionId>('personal');
   const [newSkillInput, setNewSkillInput] = useState('');
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   // Helpers to update state immutably
   const updatePersonal = (field: keyof CvData['personal'], value: string) => {
@@ -44,9 +45,10 @@ export function CvForm({ data, onChange }: Props) {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen válido (JPG, PNG o WebP).');
+      setPhotoError('Por favor selecciona un archivo de imagen válido (JPG, PNG o WebP).');
       return;
     }
+    setPhotoError(null);
 
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -494,6 +496,11 @@ export function CvForm({ data, onChange }: Props) {
                   className="hidden"
                 />
               </label>
+              {photoError && (
+                <p role="alert" className="text-[11px] font-medium text-rose-400 pt-1">
+                  {photoError}
+                </p>
+              )}
             </div>
           </div>
 

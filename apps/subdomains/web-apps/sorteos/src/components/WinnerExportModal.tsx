@@ -27,6 +27,7 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isRecordingVideo, setIsRecordingVideo] = useState<boolean>(false);
   const [videoProgress, setVideoProgress] = useState<number>(0);
+  const [modalNotice, setModalNotice] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const drawCard = useCallback(() => {
@@ -189,9 +190,10 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
     if (!canvas) return;
 
     if (typeof window === 'undefined' || !(canvas as any).captureStream || typeof MediaRecorder === 'undefined') {
-      alert('Tu navegador no soporta grabación directa de video. Te recomendamos usar Google Chrome o Microsoft Edge.');
+      setModalNotice('Tu navegador no soporta grabación directa de video. Te recomendamos usar Google Chrome o Microsoft Edge.');
       return;
     }
+    setModalNotice(null);
 
     setIsRecordingVideo(true);
     setVideoProgress(5);
@@ -373,7 +375,7 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
 
       setVideoProgress(100);
     } catch (err: any) {
-      alert(`Error al generar video: ${err.message || 'Error desconocido'}`);
+      setModalNotice(`Error al generar video: ${err.message || 'Error desconocido'}`);
     } finally {
       setIsRecordingVideo(false);
       setVideoProgress(0);
@@ -395,7 +397,7 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
           setCopied(true);
           setTimeout(() => setCopied(false), 2500);
         } catch {
-          alert('No se pudo copiar directo. Utiliza el botón de Descargar.');
+          setModalNotice('No se pudo copiar directo al portapapeles. Utiliza el botón de Descargar Imagen.');
         } finally {
           setIsGenerating(false);
         }
@@ -482,6 +484,15 @@ export const WinnerExportModal: React.FC<WinnerExportModalProps> = ({
             </div>
           )}
         </div>
+
+        {modalNotice && (
+          <div role="alert" className="rounded-xl bg-amber-500/15 border border-amber-400/35 px-4 py-2.5 text-xs text-amber-200 flex items-center justify-between gap-2">
+            <span>{modalNotice}</span>
+            <button type="button" onClick={() => setModalNotice(null)} className="text-amber-300 hover:text-white cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3">

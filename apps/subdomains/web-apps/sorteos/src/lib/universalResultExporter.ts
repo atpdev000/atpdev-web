@@ -215,8 +215,7 @@ export function exportSecretSantaToPdf(data: SecretSantaExportData) {
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    alert('Permite las ventanas emergentes en tu navegador para generar el PDF.');
-    return;
+    throw new Error('Permite las ventanas emergentes en tu navegador para generar el PDF.');
   }
 
   const tableRows = data.matches.map((m, idx) => `
@@ -590,8 +589,7 @@ export function exportDrawListToPdf(data: DrawListExportData) {
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    alert('Permite las ventanas emergentes en tu navegador para generar el PDF.');
-    return;
+    throw new Error('Permite las ventanas emergentes en tu navegador para generar el PDF.');
   }
 
   const winnersHtml = data.winners.map((w, idx) => `
@@ -952,8 +950,7 @@ export function exportNumbersToPdf(data: NumbersExportData) {
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    alert('Permite las ventanas emergentes en tu navegador para generar el PDF.');
-    return;
+    throw new Error('Permite las ventanas emergentes en tu navegador para generar el PDF.');
   }
 
   const ballsHtml = data.numbers.map((num, idx) => `

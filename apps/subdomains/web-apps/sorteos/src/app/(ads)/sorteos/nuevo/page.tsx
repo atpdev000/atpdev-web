@@ -145,6 +145,8 @@ interface AdditionalSource {
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
   const [rawComments, setRawComments] = useState<Participant[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [wizardNotice, setWizardNotice] = useState<{ tone: 'error' | 'success'; text: string } | null>(null);
+  const [confirmClearComments, setConfirmClearComments] = useState<boolean>(false);
   const [commentSourceMode, setCommentSourceMode] = useState<'live' | 'mock-verified' | 'manual'>('live');
   const [postMeta, setPostMeta] = useState<{
     title?: string;
@@ -2197,7 +2199,7 @@ interface AdditionalSource {
       setShowConfetti(true);
       setStep(4);
     } catch (err: any) {
-      alert(err.message || 'Error al ejecutar el sorteo');
+      setWizardNotice({ tone: 'error', text: err.message || 'Error al ejecutar el sorteo' });
     } finally {
       setIsDrawing(false);
     }
@@ -2206,6 +2208,22 @@ interface AdditionalSource {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-10">
       {showConfetti && <ConfettiEffect />}
+
+      {wizardNotice && (
+        <div
+          role="alert"
+          className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between gap-3 ${
+            wizardNotice.tone === 'error'
+              ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+              : 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+          }`}
+        >
+          <span>{wizardNotice.text}</span>
+          <button type="button" onClick={() => setWizardNotice(null)} className="cursor-pointer opacity-75 hover:opacity-100">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Header & Steps Breadcrumb */}
       <div className="text-center space-y-4">
@@ -3608,21 +3626,39 @@ interface AdditionalSource {
                 <span>📋 Pegar / Reemplazar lista</span>
               </button>
 
-              {rawComments.length > 0 && (
+              {rawComments.length > 0 && !confirmClearComments && (
                 <button
                   type="button"
-                  onClick={() => {
-                    if (window.confirm('¿Deseas vaciar la lista actual para cargar las respuestas reales?')) {
-                      setRawComments([]);
-                      setCommentSourceMode('manual');
-                    }
-                  }}
+                  onClick={() => setConfirmClearComments(true)}
                   className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 border border-rose-400/30 font-mono text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
                   title="Vaciar la lista actual"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-300" />
                   <span>🗑️ Limpiar lista</span>
                 </button>
+              )}
+              {rawComments.length > 0 && confirmClearComments && (
+                <div className="flex items-center gap-1.5 bg-rose-950/80 border border-rose-400/40 px-2.5 py-1 rounded-xl text-[11px] font-mono text-rose-100">
+                  <span>¿Vaciar lista?</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRawComments([]);
+                      setCommentSourceMode('manual');
+                      setConfirmClearComments(false);
+                    }}
+                    className="px-2 py-0.5 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold cursor-pointer"
+                  >
+                    Sí
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmClearComments(false)}
+                    className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                  >
+                    No
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -3959,9 +3995,10 @@ interface AdditionalSource {
                       <button
                         type="button"
                         onClick={() => {
-                          const snippet = `(() => { const list = []; const seen = new Set(); document.querySelectorAll('article').forEach(a => { const userEl = a.querySelector('[data-testid="User-Name"]'); const textEl = a.querySelector('[data-testid="tweetText"]'); if (userEl) { const match = userEl.innerText.match(/@([a-zA-Z0-9_]{1,15})/); const handle = match ? match[1] : ''; const text = textEl ? textEl.innerText.trim() : 'Comentario en X'; if (handle && !seen.has(handle.toLowerCase())) { seen.add(handle.toLowerCase()); list.push({ username: handle, commentText: text }); } } }); navigator.clipboard.writeText(JSON.stringify(list, null, 2)); alert('✅ ' + list.length + ' respuestas copiadas al portapapeles. Vuelve a Sorteos Pro y pulsa Pegar portapapeles.'); })();`;
+                          const snippet = `(() => { const list = []; const seen = new Set(); document.querySelectorAll('article').forEach(a => { const userEl = a.querySelector('[data-testid="User-Name"]'); const textEl = a.querySelector('[data-testid="tweetText"]'); if (userEl) { const match = userEl.innerText.match(/@([a-zA-Z0-9_]{1,15})/); const handle = match ? match[1] : ''; const text = textEl ? textEl.innerText.trim() : 'Comentario en X'; if (handle && !seen.has(handle.toLowerCase())) { seen.add(handle.toLowerCase()); list.push({ username: handle, commentText: text }); } } }); navigator.clipboard.writeText(JSON.stringify(list, null, 2)); })();`;
                           navigator.clipboard.writeText(snippet);
-                          alert('⚡ Script copiado. Pégalo en la consola de la pestaña de X (F12) y presiona Enter.');
+                          setWizardNotice({ tone: 'success', text: '⚡ Script copiado. Pégalo en la consola de la pestaña de X (F12) y presiona Enter.' });
+                          setTimeout(() => setWizardNotice(null), 5000);
                         }}
                         className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[10px] font-bold transition-all cursor-pointer border border-white/20 flex items-center gap-1 shadow-xs"
                       >

@@ -12,6 +12,7 @@ import { LanguageSelector } from '@/components/Layout/LanguageSelector'
 
 export default function AppHeader() {
     const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+    const [shareNotice, setShareNotice] = useState<string | null>(null)
     const { history, unreadCount, markAllAsRead, clearHistory, deleteItem } = useDownloadHistory()
 
     const handleShareApp = async () => {
@@ -44,7 +45,8 @@ export default function AppHeader() {
         if (typeof navigator !== 'undefined' && navigator.clipboard) {
             try {
                 await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`)
-                alert('¡Enlace de Descargador Pro copiado al portapapeles!')
+                setShareNotice('¡Enlace de Descargador Pro copiado!')
+                setTimeout(() => setShareNotice(null), 2600)
             } catch (err) {
                 console.error('Error al copiar:', err)
             }
@@ -119,6 +121,15 @@ export default function AppHeader() {
                 onClear={clearHistory}
                 onDelete={deleteItem}
             />
+
+            {shareNotice && (
+                <div
+                    role="status"
+                    className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-lg animate-in fade-in duration-150"
+                >
+                    {shareNotice}
+                </div>
+            )}
         </>
     )
 }

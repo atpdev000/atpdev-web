@@ -776,6 +776,7 @@ function App() {
   const [copied, setCopied] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState('');
+  const [shortenerNotice, setShortenerNotice] = useState(null);
   const [legalModal, setLegalModal] = useState(null); // 'privacy', 'terms'
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobileApp, setIsMobileApp] = useState(false);
@@ -1367,7 +1368,9 @@ function App() {
             setGeneratedUrl(shortUrl || longUrl);
             
             if (!shortUrl || shortUrl === longUrl) {
-              alert("⚠️ El acortador personalizado está en mantenimiento. Se ha generado un link largo, pero podría no funcionar bien en algunas aplicaciones. Por favor, intenta de nuevo en unos minutos.");
+              setShortenerNotice("El acortador personalizado está en mantenimiento. Se generó un enlace largo como respaldo; si falla en alguna app, vuelve a intentarlo en unos minutos.");
+            } else {
+              setShortenerNotice(null);
             }
           }
         }
@@ -3788,6 +3791,33 @@ function App() {
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  {shortenerNotice && (
+                    <div role="alert" style={{
+                      background: 'rgba(245, 158, 11, 0.14)',
+                      border: '1px solid rgba(245, 158, 11, 0.45)',
+                      borderRadius: '14px',
+                      padding: '0.85rem 1rem',
+                      color: '#b45309',
+                      fontSize: '0.85rem',
+                      lineHeight: '1.45',
+                      textAlign: 'left',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      gap: '0.75rem'
+                    }}>
+                      <span><strong>Aviso:</strong> {shortenerNotice}</span>
+                      <button
+                        type="button"
+                        onClick={() => setShortenerNotice(null)}
+                        aria-label="Cerrar aviso"
+                        style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontWeight: 700 }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
                   <button
                     onClick={() => setShowResult(false)}
                     style={{

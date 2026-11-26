@@ -404,6 +404,8 @@ export default function TriviaPage() {
   // CSV Import Modal
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvRawText, setCsvRawText] = useState('');
+  const [csvError, setCsvError] = useState<string | null>(null);
+  const [triviaNotice, setTriviaNotice] = useState<{ tone: 'success' | 'warning'; text: string } | null>(null);
 
   // Modales adicionales
   const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
@@ -633,9 +635,11 @@ export default function TriviaPage() {
       handleRestart();
       setShowCsvModal(false);
       setCsvRawText('');
-      alert(`¡Se importaron ${imported.length} preguntas exitosamente!`);
+      setCsvError(null);
+      setTriviaNotice({ tone: 'success', text: `¡Se importaron ${imported.length} preguntas exitosamente!` });
+      setTimeout(() => setTriviaNotice(null), 5000);
     } else {
-      alert('Formato CSV requerido: Pregunta,Opción 1,Opción 2,Opción 3,ÍndiceCorrecto (0-3)');
+      setCsvError('Formato CSV requerido: Pregunta,Opción 1,Opción 2,Opción 3,ÍndiceCorrecto (0-3)');
     }
   };
 
@@ -680,7 +684,8 @@ export default function TriviaPage() {
     }
 
     if (names.length === 0) {
-      alert('No hay participantes registrados para sortear.');
+      setTriviaNotice({ tone: 'warning', text: 'No hay participantes registrados para sortear.' });
+      setTimeout(() => setTriviaNotice(null), 4000);
       return;
     }
 
@@ -733,6 +738,24 @@ export default function TriviaPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <ToolSwitcher />
       </div>
+
+      {triviaNotice && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <div
+            role="alert"
+            className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between gap-3 ${
+              triviaNotice.tone === 'success'
+                ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
+                : 'bg-amber-50 dark:bg-amber-950/60 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
+            }`}
+          >
+            <span>{triviaNotice.text}</span>
+            <button type="button" onClick={() => setTriviaNotice(null)} className="cursor-pointer opacity-75 hover:opacity-100">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ─── BANNER DE AUTENTICACIÓN / ORGANIZADOR OFICIAL ─────────────────── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
@@ -1848,6 +1871,12 @@ export default function TriviaPage() {
             <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[11px] font-mono text-slate-600 dark:text-zinc-300">
               Formato: Pregunta,Opción 1,Opción 2,Opción 3,Opción 4,ÍndiceCorrecto(0-3)
             </div>
+
+            {csvError && (
+              <div role="alert" className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-200 text-xs font-bold">
+                {csvError}
+              </div>
+            )}
 
             <textarea
               rows={5}

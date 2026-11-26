@@ -46,6 +46,7 @@ export default function RuletaPage() {
   const [showExportModal, setShowExportModal] = useState<boolean>(false);
   const [muted, setMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [ruletaNotice, setRuletaNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setMuted(isAudioMuted());
@@ -85,9 +86,11 @@ export default function RuletaPage() {
 
   const handleRemoveOption = (index: number) => {
     if (options.length <= 2) {
-      alert('La ruleta necesita al menos 2 opciones para girar.');
+      setRuletaNotice('La ruleta necesita al menos 2 opciones para girar.');
+      setTimeout(() => setRuletaNotice(null), 4000);
       return;
     }
+    setRuletaNotice(null);
     setOptions(options.filter((_, i) => i !== index));
   };
 
@@ -114,6 +117,13 @@ export default function RuletaPage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <ToolSwitcher />
       <ConfettiEffect active={winner !== null && !isSpinning} />
+
+      {ruletaNotice && (
+        <div role="alert" className="max-w-lg mx-auto p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200 text-xs font-bold flex items-center justify-between gap-2">
+          <span>{ruletaNotice}</span>
+          <button type="button" onClick={() => setRuletaNotice(null)} className="cursor-pointer opacity-75 hover:opacity-100">✕</button>
+        </div>
+      )}
 
       {/* Hero Header Estilo AppSorteos */}
       <div className="text-center pt-2 sm:pt-4">

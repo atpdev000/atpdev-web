@@ -215,8 +215,7 @@ export function exportTeamsToPdf(
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    alert('Permite las ventanas emergentes en tu navegador para generar el PDF.');
-    return;
+    throw new Error('Permite las ventanas emergentes en tu navegador para generar el PDF.');
   }
 
   const teamsHtml = teams.map((team) => `

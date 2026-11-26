@@ -52,6 +52,7 @@ const Scanner = ({
     const [aiLoading, setAiLoading] = useState(false);
     const [aiStatus, setAiStatus] = useState('');
     const [aiProgress, setAiProgress] = useState(0);
+    const [aiError, setAiError] = useState(null);
 
     const fileInputRef = useRef(null);
     const videoRef = useRef(null);
@@ -393,6 +394,7 @@ const Scanner = ({
     const handleRunOnWebRemoveBg = async () => {
         const raw = rawImages[currentSide];
         if (!raw) return;
+        setAiError(null);
         setAiLoading(true);
         setAiStatus('Inicializando red neuronal BEN2 (runonweb)...');
         setAiProgress(0);
@@ -410,7 +412,7 @@ const Scanner = ({
             setRawImages(prev => ({ ...prev, [currentSide]: resultPng }));
         } catch (err) {
             console.error("runonweb error:", err);
-            alert("Error al ejecutar runonweb BEN2: " + (err.message || 'Verifica compatibilidad WebGPU'));
+            setAiError("Error al ejecutar IA local (BEN2): " + (err.message || 'Verifica compatibilidad WebGPU/WebGL en tu navegador'));
         } finally {
             setAiLoading(false);
         }
@@ -653,6 +655,20 @@ const Scanner = ({
                                     <RotateCw size={13} /> Girar 90°
                                 </button>
                             </div>
+
+                            {aiError && !aiLoading && (
+                                <div role="alert" className="absolute top-16 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:max-w-md z-30 bg-rose-950/90 border border-rose-500/40 text-rose-100 rounded-2xl px-4 py-2.5 shadow-xl flex items-center justify-between gap-3 text-xs">
+                                    <span className="font-medium leading-snug">{aiError}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAiError(null)}
+                                        aria-label="Cerrar aviso"
+                                        className="p-1 rounded-lg hover:bg-white/10 text-rose-200 shrink-0"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            )}
 
                             {/* SVG Dimming Mask */}
                             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden">

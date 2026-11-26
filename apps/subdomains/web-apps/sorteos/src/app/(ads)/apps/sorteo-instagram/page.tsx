@@ -65,6 +65,7 @@ export default function SorteoInstagramPage() {
   const [postUrl, setPostUrl] = useState<string>('');
   const [isLoadingComments, setIsLoadingComments] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [drawNotice, setDrawNotice] = useState<string | null>(null);
 
   // Comments & Participants
   const [rawComments, setRawComments] = useState<Participant[]>([]);
@@ -197,9 +198,10 @@ export default function SorteoInstagramPage() {
     setIsDrawing(true);
 
     try {
+      setDrawNotice(null);
       const { eligible } = filterParticipants(rawComments, rules);
       if (eligible.length === 0) {
-        alert('Ningún comentario cumple con los filtros seleccionados. Por favor relaja los filtros.');
+        setDrawNotice('Ningún comentario cumple con los filtros seleccionados. Relaja los filtros para continuar.');
         setIsDrawing(false);
         return;
       }
@@ -237,7 +239,7 @@ export default function SorteoInstagramPage() {
       setShowConfetti(true);
       setStep(4);
     } catch (err: any) {
-      alert(err.message || 'Error al ejecutar el sorteo');
+      setDrawNotice(err.message || 'Error al ejecutar el sorteo');
     } finally {
       setIsDrawing(false);
     }
@@ -290,6 +292,13 @@ export default function SorteoInstagramPage() {
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-normal">
             Elige un ganador al azar de los comentarios de tu publicación, reels o fotos de Instagram de forma rápida, segura y 100% transparente.
           </p>
+
+          {drawNotice && (
+            <div role="alert" className="max-w-lg mx-auto p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs font-bold flex items-center justify-between gap-2 text-left">
+              <span className="flex items-center gap-2"><AlertCircle className="w-4 h-4 shrink-0" />{drawNotice}</span>
+              <button type="button" onClick={() => setDrawNotice(null)} className="cursor-pointer opacity-75 hover:opacity-100">✕</button>
+            </div>
+          )}
 
           {/* Stepper progress indicator */}
           <div className="flex items-center justify-center gap-2 sm:gap-4 pt-2">
