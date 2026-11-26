@@ -22,6 +22,7 @@ export default function AjustesPage() {
   const [autoOpenUrl, setAutoOpenUrl] = useState(false);
   const [autoCopy, setAutoCopy] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   useEffect(() => {
     try {
@@ -57,22 +58,21 @@ export default function AjustesPage() {
   };
 
   const clearAllData = () => {
-    if (window.confirm('¿Deseas restablecer todos los ajustes y borrar el historial de escaneos?')) {
-      try {
-        localStorage.removeItem('lectorqr_history');
-        localStorage.removeItem('lectorqr_sound');
-        localStorage.removeItem('lectorqr_vibration');
-        localStorage.removeItem('lectorqr_auto_open');
-        localStorage.removeItem('lectorqr_auto_copy');
-        setSoundEnabled(true);
-        setVibrationEnabled(true);
-        setAutoOpenUrl(false);
-        setAutoCopy(false);
-        setStatusMessage('Datos y ajustes restablecidos con éxito.');
-        setTimeout(() => setStatusMessage(null), 2500);
-      } catch (e) {
-        console.warn('Error clearing data', e);
-      }
+    try {
+      localStorage.removeItem('lectorqr_history');
+      localStorage.removeItem('lectorqr_sound');
+      localStorage.removeItem('lectorqr_vibration');
+      localStorage.removeItem('lectorqr_auto_open');
+      localStorage.removeItem('lectorqr_auto_copy');
+      setSoundEnabled(true);
+      setVibrationEnabled(true);
+      setAutoOpenUrl(false);
+      setAutoCopy(false);
+      setConfirmReset(false);
+      setStatusMessage('Datos y ajustes restablecidos con éxito.');
+      setTimeout(() => setStatusMessage(null), 3000);
+    } catch (e) {
+      console.warn('Error clearing data', e);
     }
   };
 
@@ -220,14 +220,41 @@ export default function AjustesPage() {
           </div>
 
           <div className="pt-2">
-            <button
-              type="button"
-              onClick={clearAllData}
-              className="py-3 px-4 rounded-2xl bg-rose-950/40 border border-rose-900/40 hover:bg-rose-900/60 text-rose-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Restablecer Ajustes y Vaciar Todo</span>
-            </button>
+            {!confirmReset ? (
+              <button
+                type="button"
+                onClick={() => setConfirmReset(true)}
+                className="py-3 px-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-700 dark:text-rose-300 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Restablecer Ajustes y Vaciar Todo</span>
+              </button>
+            ) : (
+              <div
+                role="alert"
+                className="rounded-2xl border border-rose-200 dark:border-rose-800/70 bg-rose-50 dark:bg-rose-950/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn"
+              >
+                <p className="text-xs font-bold text-rose-950 dark:text-rose-100">
+                  ¿Deseas restablecer todos los ajustes y borrar el historial de escaneos?
+                </p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmReset(false)}
+                    className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={clearAllData}
+                    className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white cursor-pointer shadow-sm transition-all"
+                  >
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

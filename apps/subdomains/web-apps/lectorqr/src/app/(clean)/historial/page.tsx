@@ -24,12 +24,15 @@ import {
 } from 'lucide-react';
 import { ScannedCode, CodeType } from '@/types';
 import Link from 'next/link';
+import InlineNotice from '@/components/InlineNotice';
 
 export default function HistorialPage() {
   const [history, setHistory] = useState<ScannedCode[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites' | CodeType>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [confirmClearAll, setConfirmClearAll] = useState(false);
+  const [historyNotice, setHistoryNotice] = useState<string | null>(null);
 
   // Cargar historial
   const loadHistory = () => {
@@ -74,11 +77,12 @@ export default function HistorialPage() {
     updateStorage(updated);
   };
 
-  // Borrar todo el historial
-  const clearAll = () => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar todo tu historial de escaneos? Esta acción no se puede deshacer.')) {
-      updateStorage([]);
-    }
+  // Borrar todo el historial (confirmación integrada en pantalla)
+  const confirmAndClearAll = () => {
+    updateStorage([]);
+    setConfirmClearAll(false);
+    setHistoryNotice('Todo tu historial local de escaneos ha sido eliminado.');
+    setTimeout(() => setHistoryNotice(null), 4000);
   };
 
   // Copiar texto
@@ -194,8 +198,8 @@ export default function HistorialPage() {
             </button>
             <button
               type="button"
-              onClick={clearAll}
-              className="py-2.5 px-3.5 rounded-xl bg-rose-950/40 border border-rose-900/40 hover:bg-rose-900/60 text-xs font-bold text-rose-300 flex items-center gap-1.5 cursor-pointer transition-all"
+              onClick={() => setConfirmClearAll(true)}
+              className="py-2.5 px-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-xs font-bold text-rose-700 dark:text-rose-300 flex items-center gap-1.5 cursor-pointer transition-all"
               title="Vaciar todo el historial"
             >
               <Trash2 className="w-4 h-4" />
@@ -204,6 +208,47 @@ export default function HistorialPage() {
           </div>
         )}
       </div>
+
+      {historyNotice && (
+        <InlineNotice
+          tone="success"
+          title="Historial vaciado"
+          message={historyNotice}
+          onClose={() => setHistoryNotice(null)}
+        />
+      )}
+
+      {confirmClearAll && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-rose-200 dark:border-rose-800/70 bg-rose-50 dark:bg-rose-950/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn"
+        >
+          <div className="space-y-0.5">
+            <p className="text-xs sm:text-sm font-extrabold text-rose-950 dark:text-rose-100">
+              ¿Eliminar todo tu historial de escaneos?
+            </p>
+            <p className="text-xs text-rose-800 dark:text-rose-200/80">
+              Esta acción borrará los registros guardados en este dispositivo y no se puede deshacer.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setConfirmClearAll(false)}
+              className="px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-all"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={confirmAndClearAll}
+              className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-xs font-bold text-white cursor-pointer shadow-sm transition-all"
+            >
+              Sí, vaciar todo
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Search & Filters */}
       <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-xl space-y-4">

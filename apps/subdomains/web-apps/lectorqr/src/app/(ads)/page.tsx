@@ -5,6 +5,7 @@ import CameraScanner from '@/components/CameraScanner';
 import ScanResultCard from '@/components/ScanResultCard';
 import MultiScanResultCard from '@/components/MultiScanResultCard';
 import AdBanner from '@/components/AdBanner';
+import InlineNotice, { InlineNoticeTone } from '@/components/InlineNotice';
 import { ScannedCode } from '@/types';
 import { 
   Sparkles, 
@@ -32,6 +33,17 @@ export default function HomePage() {
   const [recentScans, setRecentScans] = useState<ScannedCode[]>([]);
   const [isDraggingGlobal, setIsDraggingGlobal] = useState<boolean>(false);
   const [isProcessingDrop, setIsProcessingDrop] = useState<boolean>(false);
+  const [scanNotice, setScanNotice] = useState<{
+    tone: InlineNoticeTone;
+    title: string;
+    message: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!scanNotice) return;
+    const timer = setTimeout(() => setScanNotice(null), 6500);
+    return () => clearTimeout(timer);
+  }, [scanNotice]);
 
   // Cargar historial reciente
   useEffect(() => {
@@ -50,6 +62,7 @@ export default function HomePage() {
 
   // Manejar resultado de escaneo (sea 1 código o varios)
   const handleScanSuccess = useCallback((result: ScannedCode | ScannedCode[]) => {
+    setScanNotice(null);
     setIsScanningActive(false);
 
     if (Array.isArray(result)) {
@@ -100,6 +113,7 @@ export default function HomePage() {
   // Procesar archivos arrastrados o pegados (soporta múltiples QR en 1 imagen o varios archivos)
   const processFiles = useCallback(async (files: FileList | File[]) => {
     if (!files || files.length === 0) return;
+    setScanNotice(null);
     setIsProcessingDrop(true);
     try {
       const detected = await decodeImageFiles(files);
@@ -107,10 +121,19 @@ export default function HomePage() {
         playScanSuccessBeep();
         handleScanSuccess(detected.length === 1 ? detected[0] : detected);
       } else {
-        alert('No se detectó ningún código QR o de barras en la imagen. Intenta con una imagen más nítida o con mayor contraste.');
+        setScanNotice({
+          tone: 'warning',
+          title: 'No se detectó ningún código QR o de barras',
+          message: 'Intenta con una imagen más nítida, centrada o con mayor contraste.',
+        });
       }
     } catch (err) {
       console.warn('Error processing files', err);
+      setScanNotice({
+        tone: 'error',
+        title: 'No pudimos leer la imagen',
+        message: 'Asegúrate de subir o pegar una captura o foto válida (PNG, JPG o WebP).',
+      });
     } finally {
       setIsProcessingDrop(false);
     }
@@ -228,6 +251,18 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Aviso integrado en pantalla (sin popups nativos del navegador) */}
+      {scanNotice && !isProcessingDrop && (
+        <div className="max-w-lg mx-auto">
+          <InlineNotice
+            tone={scanNotice.tone}
+            title={scanNotice.title}
+            message={scanNotice.message}
+            onClose={() => setScanNotice(null)}
+          />
+        </div>
+      )}
+
       {/* Main Scanner or Result Display */}
       <div className="w-full flex justify-center">
         {multiResults && multiResults.length > 1 ? (
@@ -245,6 +280,7 @@ export default function HomePage() {
         ) : (
           <CameraScanner
             onScanSuccess={handleScanSuccess}
+            onScanNotice={setScanNotice}
             isScanningActive={isScanningActive}
           />
         )}

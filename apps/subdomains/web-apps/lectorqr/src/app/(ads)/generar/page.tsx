@@ -51,6 +51,7 @@ import {
 import { COUNTRIES, CountryItem } from '@/data/countries';
 import { renderCustomQRCode, renderCustomQRSVG } from '@/lib/qrRenderer';
 import { BRAND_LOGOS } from '@/lib/brandLogos';
+import InlineNotice from '@/components/InlineNotice';
 
 function BrandLogoBadge({ id }: { id: QROptionLogo }) {
   const spec = BRAND_LOGOS[id];
@@ -219,6 +220,13 @@ export default function GenerarStudioPage() {
   const [downloading, setDownloading] = useState(false);
   const [exportResolution, setExportResolution] = useState<number>(1024);
   const [isDraggingLogo, setIsDraggingLogo] = useState(false);
+  const [logoNotice, setLogoNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!logoNotice) return;
+    const timer = setTimeout(() => setLogoNotice(null), 5000);
+    return () => clearTimeout(timer);
+  }, [logoNotice]);
 
   // Manejador de cambio de formato con sincronización inteligente de logo y CTA
   const handleSelectType = (type: CodeType) => {
@@ -414,9 +422,10 @@ export default function GenerarStudioPage() {
   // Manejador de subida de logo con drag & drop
   const handleLogoFile = (file: File) => {
     if (!file || !file.type.startsWith('image/')) {
-      alert('Por favor selecciona una imagen válida (PNG, JPG, SVG o WebP).');
+      setLogoNotice('Selecciona una imagen válida (PNG, JPG, SVG o WebP) para usarla como logotipo central.');
       return;
     }
+    setLogoNotice(null);
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
@@ -1519,6 +1528,15 @@ export default function GenerarStudioPage() {
               {/* SUB-PESTAÑA 4: LOGO (optionlogo, no_logo_bg, upload) */}
               {designTab === 'logo' && (
                 <div className="space-y-4">
+                  {logoNotice && (
+                    <InlineNotice
+                      tone="warning"
+                      title="Formato de logotipo no válido"
+                      message={logoNotice}
+                      onClose={() => setLogoNotice(null)}
+                    />
+                  )}
+
                   {/* Drag & Drop Zone */}
                   <div
                     onDragOver={(e) => { e.preventDefault(); setIsDraggingLogo(true); }}

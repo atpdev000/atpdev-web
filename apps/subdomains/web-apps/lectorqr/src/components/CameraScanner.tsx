@@ -17,14 +17,23 @@ import { playScanSuccessBeep } from '../lib/sound';
 import { parseScannedContent } from '../lib/parser';
 import { detectAllQRsInCanvas, decodeImageFiles } from '../lib/multiDecoder';
 import { ScannedCode } from '../types';
+import InlineNotice, { InlineNoticeTone } from './InlineNotice';
+
+interface ScanNoticePayload {
+  tone: InlineNoticeTone;
+  title: string;
+  message: string;
+}
 
 interface CameraScannerProps {
   onScanSuccess: (code: ScannedCode | ScannedCode[]) => void;
+  onScanNotice?: (notice: ScanNoticePayload | null) => void;
   isScanningActive: boolean;
 }
 
 export const CameraScanner: React.FC<CameraScannerProps> = ({
   onScanSuccess,
+  onScanNotice,
   isScanningActive,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -37,6 +46,24 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   const [hasTorch, setHasTorch] = useState<boolean>(false);
   const [isTorchOn, setIsTorchOn] = useState<boolean>(false);
   const [isProcessingImage, setIsProcessingImage] = useState<boolean>(false);
+  const [localNotice, setLocalNotice] = useState<ScanNoticePayload | null>(null);
+
+  const reportNotice = useCallback(
+    (notice: ScanNoticePayload | null) => {
+      if (onScanNotice) {
+        onScanNotice(notice);
+      } else {
+        setLocalNotice(notice);
+      }
+    },
+    [onScanNotice]
+  );
+
+  useEffect(() => {
+    if (!localNotice) return;
+    const timer = setTimeout(() => setLocalNotice(null), 6000);
+    return () => clearTimeout(timer);
+  }, [localNotice]);
 
   // Iniciar cámara con permisos
   const startCamera = useCallback(async () => {
@@ -213,6 +240,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    reportNotice(null);
     setIsProcessingImage(true);
     try {
       const detected = await decodeImageFiles(files);
@@ -224,10 +252,19 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
           onScanSuccess(detected);
         }
       } else {
-        alert('No se detectó ningún código QR o de barras en la imagen seleccionada. Prueba con una imagen más nítida o centrada.');
+        reportNotice({
+          tone: 'warning',
+          title: 'No se detectó ningún código QR o de barras',
+          message: 'Prueba con una imagen más nítida, centrada o con mayor contraste.',
+        });
       }
     } catch (err) {
       console.warn('Error processing image files:', err);
+      reportNotice({
+        tone: 'error',
+        title: 'Error al procesar la imagen',
+        message: 'Verifica que el archivo sea una imagen válida (PNG, JPG o WebP).',
+      });
     } finally {
       setIsProcessingImage(false);
       e.target.value = '';
@@ -236,6 +273,17 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
 
   return (
     <div className="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden bg-black border-4 border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px]">
+
+      {localNotice && (
+        <div className="absolute top-3 left-3 right-3 z-30">
+          <InlineNotice
+            tone={localNotice.tone}
+            title={localNotice.title}
+            message={localNotice.message}
+            onClose={() => setLocalNotice(null)}
+          />
+        </div>
+      )}
       
       {/* Video Stream Element */}
       <video
