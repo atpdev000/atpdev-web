@@ -160,14 +160,14 @@ export default function HistorialPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider font-mono mb-2">
-            <History className="w-3.5 h-3.5 text-cyan-400" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider font-mono mb-2">
+            <History className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400" />
             <span>Registro Local en Dispositivo</span>
           </div>
-          <h1 className="text-3xl font-black text-white font-display">
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white font-display">
             Historial de Escaneos
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 font-medium">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
             Consulta, filtra o exporta tus códigos escaneados guardados de forma segura en tu navegador.
           </p>
         </div>
@@ -177,19 +177,19 @@ export default function HistorialPage() {
             <button
               type="button"
               onClick={exportCSV}
-              className="py-2.5 px-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5 cursor-pointer transition-all"
+              className="py-2.5 px-3.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-all"
               title="Descargar reporte en formato Excel / CSV"
             >
-              <Download className="w-4 h-4 text-emerald-400" />
+              <Download className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               <span>CSV</span>
             </button>
             <button
               type="button"
               onClick={exportJSON}
-              className="py-2.5 px-3.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5 cursor-pointer transition-all"
+              className="py-2.5 px-3.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 cursor-pointer transition-all"
               title="Descargar copia de seguridad en JSON"
             >
-              <Download className="w-4 h-4 text-blue-400" />
+              <Download className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               <span>JSON</span>
             </button>
             <button
@@ -206,17 +206,17 @@ export default function HistorialPage() {
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-4 shadow-xl space-y-4">
+      <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-xl space-y-4">
         
         {/* Search Input */}
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-600 dark:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar por contenido, enlace o tipo..."
-            className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-sm font-medium focus:border-blue-500 focus:outline-none"
+            className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-medium focus:border-blue-500 focus:outline-none"
           />
         </div>
 
@@ -228,7 +228,7 @@ export default function HistorialPage() {
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
               activeFilter === 'all'
                 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                : 'bg-slate-950 text-slate-400 hover:text-white'
+                : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Todos ({history.length})
@@ -240,7 +240,7 @@ export default function HistorialPage() {
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap flex items-center gap-1 cursor-pointer transition-all ${
               activeFilter === 'favorites'
                 ? 'bg-amber-600 text-white shadow-md shadow-amber-600/30'
-                : 'bg-slate-950 text-slate-400 hover:text-white'
+                : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Star className="w-3.5 h-3.5 fill-current" />
@@ -251,7 +251,7 @@ export default function HistorialPage() {
             type="button"
             onClick={() => setActiveFilter('url')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
-              activeFilter === 'url' ? 'bg-blue-600 text-white' : 'bg-slate-950 text-slate-400 hover:text-white'
+              activeFilter === 'url' ? 'bg-blue-600 text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Enlaces Web
@@ -261,7 +261,7 @@ export default function HistorialPage() {
             type="button"
             onClick={() => setActiveFilter('wifi')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
-              activeFilter === 'wifi' ? 'bg-emerald-600 text-white' : 'bg-slate-950 text-slate-400 hover:text-white'
+              activeFilter === 'wifi' ? 'bg-emerald-600 text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Wi-Fi
@@ -271,7 +271,7 @@ export default function HistorialPage() {
             type="button"
             onClick={() => setActiveFilter('contact')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
-              activeFilter === 'contact' ? 'bg-purple-600 text-white' : 'bg-slate-950 text-slate-400 hover:text-white'
+              activeFilter === 'contact' ? 'bg-purple-600 text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Contactos
@@ -281,7 +281,7 @@ export default function HistorialPage() {
             type="button"
             onClick={() => setActiveFilter('whatsapp')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
-              activeFilter === 'whatsapp' ? 'bg-green-600 text-white' : 'bg-slate-950 text-slate-400 hover:text-white'
+              activeFilter === 'whatsapp' ? 'bg-green-600 text-white' : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             WhatsApp
@@ -303,29 +303,29 @@ export default function HistorialPage() {
             return (
               <div
                 key={item.id}
-                className="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                  <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-cyan-400 shrink-0 mt-0.5">
+                  <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-cyan-700 dark:text-cyan-400 shrink-0 mt-0.5">
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 font-mono">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 font-mono">
                         {item.type}
                       </span>
                       <span className="text-slate-600 text-xs">•</span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-slate-600 dark:text-slate-400">
                         {dateStr}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-white break-all line-clamp-2">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white break-all line-clamp-2">
                       {item.rawText}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800/80">
+                <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-800/80">
                   
                   {/* Favorite Toggle */}
                   <button
@@ -334,8 +334,8 @@ export default function HistorialPage() {
                     aria-label="Alternar Favorito"
                     className={`p-2 rounded-xl transition-all cursor-pointer ${
                       item.isFavorite 
-                        ? 'bg-amber-500/20 text-amber-400' 
-                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                        ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400' 
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <Star className={`w-4 h-4 ${item.isFavorite ? 'fill-amber-400' : ''}`} />
@@ -346,10 +346,10 @@ export default function HistorialPage() {
                     type="button"
                     onClick={() => copyText(item.id, item.rawText)}
                     aria-label="Copiar Contenido"
-                    className="p-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all cursor-pointer"
+                    className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                   >
                     {copiedId === item.id ? (
-                      <Check className="w-4 h-4 text-emerald-400" />
+                      <Check className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                     ) : (
                       <Copy className="w-4 h-4" />
                     )}
@@ -359,7 +359,7 @@ export default function HistorialPage() {
                   <Link
                     href={`/generar?text=${encodeURIComponent(item.rawText)}&type=${item.type}`}
                     aria-label="Abrir en Generador"
-                    className="p-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-cyan-400 transition-all"
+                    className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-cyan-400 transition-all"
                   >
                     <QrCode className="w-4 h-4" />
                   </Link>
@@ -381,14 +381,14 @@ export default function HistorialPage() {
         </div>
       ) : (
         /* Empty State */
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-12 text-center space-y-4 max-w-md mx-auto">
-          <div className="w-16 h-16 rounded-3xl bg-slate-800/80 text-slate-400 flex items-center justify-center mx-auto">
+        <div className="bg-white dark:bg-slate-900/50 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center space-y-4 max-w-md mx-auto">
+          <div className="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 flex items-center justify-center mx-auto">
             <History className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-black text-white font-display">
+          <h3 className="text-lg font-black text-slate-900 dark:text-white font-display">
             {searchTerm || activeFilter !== 'all' ? 'Sin resultados para tu filtro' : 'Aún no tienes escaneos guardados'}
           </h3>
-          <p className="text-xs text-slate-400 leading-relaxed font-medium">
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
             {searchTerm || activeFilter !== 'all' 
               ? 'Prueba modificando la búsqueda o seleccionando otro filtro de categoría.'
               : 'Los códigos QR o de barras que escanees con tu cámara o subas como imagen aparecerán organizados aquí.'}
@@ -404,33 +404,33 @@ export default function HistorialPage() {
       )}
 
       {/* Guía informativa del Historial y Privacidad */}
-      <section className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
-        <h2 className="text-base sm:text-lg font-bold text-white font-display">
+      <section className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-display">
           Cómo Funciona tu Historial Local de Códigos Escaneados
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400">
-          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
-            <h3 className="text-white font-bold">Clasificación Inteligente</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600 dark:text-slate-400">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-1.5">
+            <h3 className="text-slate-900 dark:text-white font-bold">Clasificación Inteligente</h3>
             <p>
               Cada código QR o de barras decodificado (EAN-13, UPC, Code 128, DataMatrix o QR vCard/Wi-Fi) se organiza cronológicamente y se etiqueta según su esquema de datos para facilitar búsquedas posteriores.
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
-            <h3 className="text-white font-bold">Exportación CSV y Reutilización</h3>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-1.5">
+            <h3 className="text-slate-900 dark:text-white font-bold">Exportación CSV y Reutilización</h3>
             <p>
               Cuando registras códigos en inventario o eventos, puedes exportar toda la tabla a formato CSV compatible con Excel y Google Sheets, o reabrir cualquier entrada directamente en el{' '}
-              <Link href="/generar" className="text-cyan-400 underline font-semibold">Generador QR</Link>.
+              <Link href="/generar" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Generador QR</Link>.
             </p>
           </div>
-          <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5">
-            <h3 className="text-white font-bold">Privacidad Sin Servidores</h3>
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-1.5">
+            <h3 className="text-slate-900 dark:text-white font-bold">Privacidad Sin Servidores</h3>
             <p>
-              El historial vive únicamente dentro del almacenamiento local de tu dispositivo. Ninguna URL ni clave Wi-Fi se sincroniza en la nube. Si deseas limpiar los registros, utiliza las acciones de borrado individual o limpieza total desde <Link href="/ajustes" className="text-cyan-400 underline font-semibold">Ajustes</Link>.
+              El historial vive únicamente dentro del almacenamiento local de tu dispositivo. Ninguna URL ni clave Wi-Fi se sincroniza en la nube. Si deseas limpiar los registros, utiliza las acciones de borrado individual o limpieza total desde <Link href="/ajustes" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Ajustes</Link>.
             </p>
           </div>
         </div>
-        <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1.5 text-xs text-slate-400">
-          <h3 className="text-white font-bold">Búsqueda, Marcado de Favoritos y Prevención de Enlaces Maliciosos</h3>
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+          <h3 className="text-slate-900 dark:text-white font-bold">Búsqueda, Marcado de Favoritos y Prevención de Enlaces Maliciosos</h3>
           <p>
             Utiliza los filtros superiores para separar códigos de tipo web (URL), redes inalámbricas, contactos vCard o etiquetas comerciales de un vistazo, y destaca los registros frecuentes con la estrella de favoritos. Antes de abrir enlaces acortados almacenados previamente, verifica siempre que el dominio mostrado comience con protocolo seguro HTTPS y pertenezca a una fuente confiable.
           </p>

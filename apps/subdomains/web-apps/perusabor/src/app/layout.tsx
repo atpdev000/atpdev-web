@@ -88,6 +88,24 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <head>
         <Script
+          id="perusabor-theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var s = localStorage.getItem('perusabor_theme');
+                  if (s === 'dark' || (!s && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <Script
           id="google-consent-default"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{

@@ -13,23 +13,23 @@ export const metadata: Metadata = {
 export default function SobreNosotrosQrPage() {
   return (
     <div className="max-w-4xl mx-auto py-8 sm:py-12 space-y-8">
-      <div className="space-y-3 pb-6 border-b border-slate-800">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
-          <QrCode className="w-4 h-4 text-cyan-400" />
+      <div className="space-y-3 pb-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <QrCode className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
           <span>Transparencia e Ingeniería Óptica Client-Side</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-white font-display">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-display">
           Sobre Nosotros: Lector QR Pro Web
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
           Desarrollado por Percy Acha Taipe (ATP DEV Perú) • lectorqr.atpdev.dev
         </p>
       </div>
 
-      <section className="space-y-6 text-sm leading-relaxed text-slate-300">
-        <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
-          <div className="flex items-center gap-2 text-white font-bold text-base">
-            <Lock className="w-4 h-4 text-cyan-400" />
+      <section className="space-y-6 text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+        <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-3">
+          <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-base">
+            <Lock className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
             <h2>1. Procesamiento Óptico 100% en tu Dispositivo</h2>
           </div>
           <p>
@@ -41,9 +41,9 @@ export default function SobreNosotrosQrPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
-            <div className="flex items-center gap-2 text-white font-bold">
-              <Cpu className="w-4 h-4 text-cyan-400" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
+              <Cpu className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
               <h2>2. Prevención de Quishing (QR Phishing)</h2>
             </div>
             <p>
@@ -51,38 +51,38 @@ export default function SobreNosotrosQrPage() {
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
-            <div className="flex items-center gap-2 text-white font-bold">
-              <Award className="w-4 h-4 text-cyan-400" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
+              <Award className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
               <h2>3. Responsable Editorial y Técnico</h2>
             </div>
             <p>
-              Lector QR Pro pertenece al ecosistema de herramientas web de <strong>ATP DEV</strong>, liderado por el Ing. <strong>Percy Acha Taipe</strong> en Lima, Perú. Puedes contactarnos en cualquier momento desde nuestra página de <Link href="/contacto" className="text-cyan-400 underline font-semibold">Contacto</Link>.
+              Lector QR Pro pertenece al ecosistema de herramientas web de <strong>ATP DEV</strong>, liderado por el Ing. <strong>Percy Acha Taipe</strong> en Lima, Perú. Puedes contactarnos en cualquier momento desde nuestra página de <Link href="/contacto" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Contacto</Link>.
             </p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
-            <div className="flex items-center gap-2 text-white font-bold">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
+              <ShieldCheck className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
               <h2>4. Casos de Uso Profesionales y Educativos</h2>
             </div>
             <p>
-              Nuestro <Link href="/" className="text-cyan-400 underline font-semibold">Escáner QR en vivo</Link> y nuestro{' '}
-              <Link href="/generar" className="text-cyan-400 underline font-semibold">Generador de Códigos QR Personalizados</Link>{' '}
+              Nuestro <Link href="/" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Escáner QR en vivo</Link> y nuestro{' '}
+              <Link href="/generar" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Generador de Códigos QR Personalizados</Link>{' '}
               son utilizados a diario por restaurantes que digitalizan cartas sin comisiones, docentes que comparten recursos en aula, comercios que generan credenciales Wi-Fi seguras para invitados y profesionales que distribuyen tarjetas vCard en eventos corporativos.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-3">
-            <div className="flex items-center gap-2 text-white font-bold">
-              <QrCode className="w-4 h-4 text-purple-400" />
+          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900/70 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
+              <QrCode className="w-4 h-4 text-purple-700 dark:text-purple-400" />
               <h2>5. Compromiso Técnico y Publicidad Responsable</h2>
             </div>
             <p>
               Mantenemos la herramienta gratuita, rápida y libre de registros forzados mediante publicidad contextual supervisada con Google AdSense únicamente en páginas con contenido editorial y herramientas públicas. El historial local de escaneos y los ajustes de cámara se excluyen estrictamente de anuncios y quedan bajo control exclusivo del usuario conforme a nuestra{' '}
-              <Link href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</Link>.
+              <Link href="/politica-de-privacidad" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Política de Privacidad</Link>.
             </p>
             <p>
               Asimismo, nuestro generador soporta corrección de errores Reed-Solomon en sus cuatro niveles estándar (L 7%, M 15%, Q 25% y H 30%), exportación vectorial SVG de alta definición para imprenta y validación automática de cargas útiles para redes Wi-Fi WPA2/WPA3, tarjetas de contacto vCard 3.0, enlaces universales HTTPS y coordenadas geolocalizadas.

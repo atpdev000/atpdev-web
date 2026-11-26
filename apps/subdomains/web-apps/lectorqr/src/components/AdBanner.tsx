@@ -33,7 +33,7 @@ export function AdBanner({
 
   return (
     <div
-      className={`w-full max-w-4xl mx-auto my-8 p-4 rounded-3xl bg-slate-900/60 border border-slate-800 text-center relative overflow-hidden backdrop-blur-md ${className}`}
+      className={`w-full max-w-4xl mx-auto my-8 p-4 rounded-3xl bg-white/95 dark:bg-slate-900/60 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden backdrop-blur-md ${className}`}
     >
       <div className="flex items-center justify-center mb-2 px-1">
         <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 font-bold select-none pointer-events-none">
@@ -42,7 +42,7 @@ export function AdBanner({
       </div>
 
       {/* Contenedor del anuncio con etiqueta de política Google */}
-      <div className="py-3 px-2 rounded-2xl bg-slate-950/80 border border-slate-800/80 flex flex-col items-center justify-center min-h-[90px] overflow-hidden">
+      <div className="py-3 px-2 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/80 flex flex-col items-center justify-center min-h-[90px] overflow-hidden">
         <ins
           className="adsbygoogle"
           style={{ display: 'block', minHeight: '90px', width: '100%' }}

@@ -15,7 +15,7 @@ export default function Footer({
 
   return (
     <footer className="pt-16 pb-8 border-t transition-colors" style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)', backdropFilter: 'blur(12px)' }}>
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
         <div>
           <h3 className="text-2xl font-black mb-4" style={{ color: 'var(--text-color)' }}>ATP DEV</h3>
           <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'var(--text-muted)' }}>{ui.footerBio}</p>
@@ -29,6 +29,20 @@ export default function Footer({
             <li><a href={`${linkPrefix}/#experience`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkExperience}</a></li>
             <li><a href={`${linkPrefix}/#portfolio`} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkProjects}</a></li>
             <li><Link href={`${linkPrefix}/${isEn ? 'contact' : 'contacto'}`} prefetch={false} className="hover:text-[var(--accent-text)] text-sm transition-colors" style={{ color: 'var(--text-muted)' }}>{ui.linkContact || (isEn ? "Contact" : "Contacto")}</Link></li>
+          </ul>
+        </div>
+        <div>
+          <h4 className="font-bold mb-4 uppercase tracking-widest text-xs" style={{ color: 'var(--text-color)' }}>{isEn ? "Web Tools & Ecosystem" : "Herramientas & Ecosistema"}</h4>
+          <ul className="space-y-2.5 text-sm">
+            <li><a href="https://dni.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "DNI Scanner Online (A4 PDF)" : "DNI Scanner Online (PDF A4)"}</a></li>
+            <li><a href="https://lectorqr.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "QR Code Scanner & Generator" : "Lector y Generador QR Pro"}</a></li>
+            <li><a href="https://masteratpdf.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "MasterAtPDF — 23 PDF Tools" : "MasterAtPDF — Unir y Convertir PDF"}</a></li>
+            <li><a href="https://chamba.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Chamba Pro — Peru Jobs" : "Chamba Pro — Convocatorias Perú"}</a></li>
+            <li><a href="https://sorteos.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Sorteos Pro — Giveaways" : "Sorteos Pro — Ruleta y Sorteos"}</a></li>
+            <li><a href="https://perusabor.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "Perú Sabor — Recipes & Costing" : "Perú Sabor — Recetas Peruanas"}</a></li>
+            <li><a href="https://magic.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>{isEn ? "InteractivoMagic — 3D Cards" : "InteractivoMagic — Tarjetas 3D"}</a></li>
+            <li><a href="https://almaniq.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>Almaniq — Historia Universal</a></li>
+            <li><a href="https://codehistory.atpdev.dev" className="hover:text-[var(--accent-text)] transition-colors" style={{ color: 'var(--text-muted)' }}>CodeHistory — Efemérides Dev</a></li>
           </ul>
         </div>
         <div>

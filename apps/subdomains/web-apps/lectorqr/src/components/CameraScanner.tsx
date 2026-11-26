@@ -235,7 +235,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({
   };
 
   return (
-    <div className="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden bg-black border-4 border-slate-800 shadow-2xl flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px]">
+    <div className="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden bg-black border-4 border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px]">
       
       {/* Video Stream Element */}
       <video

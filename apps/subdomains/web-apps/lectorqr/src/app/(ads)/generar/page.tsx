@@ -466,14 +466,14 @@ export default function GenerarStudioPage() {
       
       {/* Page Title */}
       <div className="text-center space-y-2 max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <Sparkles className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400" />
           <span>Generador Profesional de Códigos QR estilo QR.io</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-white font-display">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-display">
           Estudio de Creación y Diseño QR
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 font-medium">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-medium">
           Personaliza tu código en 2 pasos con marcos interactivos, formas de puntos, logos oficiales (TikTok, WhatsApp, etc.) y API para desarrolladores.
         </p>
       </div>
@@ -484,17 +484,17 @@ export default function GenerarStudioPage() {
         <div className="lg:col-span-7 space-y-8">
           
           {/* ==================== PASO 1: COMPLETA EL CONTENIDO ==================== */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+          <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
             
-            <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
               <span className="w-7 h-7 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center font-mono">
                 1
               </span>
               <div>
-                <h2 className="text-base font-bold text-white font-display">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
                   Completa el contenido
                 </h2>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Selecciona el formato y rellena los datos correspondientes.
                 </p>
               </div>
@@ -512,8 +512,8 @@ export default function GenerarStudioPage() {
                     onClick={() => handleSelectType(t.id as CodeType)}
                     className={`p-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 text-xs font-bold transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-400 shadow-md'
-                        : 'bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 text-slate-300 hover:text-white'
+                        ? 'bg-emerald-500/15 border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 shadow-md'
+                        : 'bg-slate-50 dark:bg-slate-950/70 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -524,22 +524,22 @@ export default function GenerarStudioPage() {
             </div>
 
             {/* Formularios Dinámicos para los 15 Formatos */}
-            <div className="bg-slate-950/80 p-5 rounded-2xl border border-slate-800 space-y-4">
+            <div className="bg-slate-50 dark:bg-slate-950/80 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-4">
               
               {/* 1. ENLACE URL */}
               {activeType === 'url' && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
                     Introduce tu sitio web (URL):
                   </label>
                   <div className="relative">
-                    <Globe className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Globe className="w-4 h-4 text-slate-600 dark:text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="url"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       placeholder="https://tudominio.com"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm focus:border-blue-500 focus:outline-none"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -548,7 +548,7 @@ export default function GenerarStudioPage() {
               {/* 2. TEXTO PLANO */}
               {activeType === 'text' && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
                     Texto Libre o Mensaje:
                   </label>
                   <textarea
@@ -556,7 +556,7 @@ export default function GenerarStudioPage() {
                     value={textVal}
                     onChange={(e) => setTextVal(e.target.value)}
                     placeholder="Introduce el texto que deseas codificar..."
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm resize-none focus:border-blue-500 focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm resize-none focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               )}
@@ -565,7 +565,7 @@ export default function GenerarStudioPage() {
               {activeType === 'email' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Correo Destinatario:
                     </label>
                     <input
@@ -573,11 +573,11 @@ export default function GenerarStudioPage() {
                       value={emailTo}
                       onChange={(e) => setEmailTo(e.target.value)}
                       placeholder="contacto@ejemplo.com"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Asunto:
                     </label>
                     <input
@@ -585,11 +585,11 @@ export default function GenerarStudioPage() {
                       value={emailSubject}
                       onChange={(e) => setEmailSubject(e.target.value)}
                       placeholder="Consulta Comercial"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Mensaje Predefinido:
                     </label>
                     <textarea
@@ -597,7 +597,7 @@ export default function GenerarStudioPage() {
                       value={emailBody}
                       onChange={(e) => setEmailBody(e.target.value)}
                       placeholder="Hola, me gustaría solicitar información..."
-                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                      className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                     />
                   </div>
                 </div>
@@ -606,7 +606,7 @@ export default function GenerarStudioPage() {
               {/* 4. LLAMADA & 5. SMS & 7. WHATSAPP */}
               {(activeType === 'phone' || activeType === 'sms' || activeType === 'whatsapp') && (
                 <div className="space-y-3">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
                     Número de Teléfono Internacional (Universal para cualquier país):
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
@@ -620,7 +620,7 @@ export default function GenerarStudioPage() {
                             else setSelectedCountry(found);
                           }
                         }}
-                        className="w-full px-3 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-medium cursor-pointer"
+                        className="w-full px-3 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-medium cursor-pointer"
                       >
                         {COUNTRIES.map((c) => (
                           <option key={c.code} value={c.code}>
@@ -635,35 +635,35 @@ export default function GenerarStudioPage() {
                         value={activeType === 'whatsapp' ? waPhone : phoneNumber}
                         onChange={(e) => activeType === 'whatsapp' ? setWaPhone(e.target.value) : setPhoneNumber(e.target.value)}
                         placeholder="Ej. 987654321"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                        className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-mono"
                       />
                     </div>
                   </div>
 
                   {activeType === 'whatsapp' && (
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Mensaje Pre-escrito de WhatsApp:
                       </label>
                       <textarea
                         rows={2}
                         value={waMessage}
                         onChange={(e) => setWaMessage(e.target.value)}
-                        className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                        className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                       />
                     </div>
                   )}
 
                   {activeType === 'sms' && (
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Mensaje de Texto SMS:
                       </label>
                       <textarea
                         rows={2}
                         value={smsMessage}
                         onChange={(e) => setSmsMessage(e.target.value)}
-                        className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs resize-none"
+                        className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs resize-none"
                       />
                     </div>
                   )}
@@ -675,7 +675,7 @@ export default function GenerarStudioPage() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Nombre Completo:
                       </label>
                       <input
@@ -691,11 +691,11 @@ export default function GenerarStudioPage() {
                           }
                         }}
                         placeholder="Carlos Mendoza"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Empresa / Organización:
                       </label>
                       <input
@@ -703,11 +703,11 @@ export default function GenerarStudioPage() {
                         value={vcardOrg}
                         onChange={(e) => setVcardOrg(e.target.value)}
                         placeholder="ATP DEV Perú"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Cargo / Título:
                       </label>
                       <input
@@ -715,11 +715,11 @@ export default function GenerarStudioPage() {
                         value={vcardTitle}
                         onChange={(e) => setVcardTitle(e.target.value)}
                         placeholder="Director de Tecnología"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Teléfono Móvil:
                       </label>
                       <input
@@ -727,11 +727,11 @@ export default function GenerarStudioPage() {
                         value={vcardPhone}
                         onChange={(e) => setVcardPhone(e.target.value)}
                         placeholder="987654321"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Correo Electrónico:
                       </label>
                       <input
@@ -739,11 +739,11 @@ export default function GenerarStudioPage() {
                         value={vcardEmail}
                         onChange={(e) => setVcardEmail(e.target.value)}
                         placeholder="carlos@atpdev.pe"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Sitio Web:
                       </label>
                       <input
@@ -751,7 +751,7 @@ export default function GenerarStudioPage() {
                         value={vcardWebsite}
                         onChange={(e) => setVcardWebsite(e.target.value)}
                         placeholder="https://atpdev.pe"
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                       />
                     </div>
                   </div>
@@ -762,7 +762,7 @@ export default function GenerarStudioPage() {
               {activeType === 'wifi' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Nombre de la Red Wi-Fi (SSID):
                     </label>
                     <input
@@ -777,29 +777,29 @@ export default function GenerarStudioPage() {
                           }));
                         }
                       }}
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-bold"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-bold"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Contraseña:
                       </label>
                       <input
                         type="text"
                         value={wifiPass}
                         onChange={(e) => setWifiPass(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-mono"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Tipo de Seguridad:
                       </label>
                       <select
                         value={wifiAuth}
                         onChange={(e) => setWifiAuth(e.target.value as any)}
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold cursor-pointer"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold cursor-pointer"
                       >
                         <option value="WPA">WPA / WPA2 / WPA3 (Estándar)</option>
                         <option value="WEP">WEP (Antiguo)</option>
@@ -813,7 +813,7 @@ export default function GenerarStudioPage() {
               {/* 9. DOCUMENTO PDF */}
               {activeType === 'pdf' && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
                     Enlace Directo al Archivo PDF:
                   </label>
                   <input
@@ -821,9 +821,9 @@ export default function GenerarStudioPage() {
                     value={pdfUrl}
                     onChange={(e) => setPdfUrl(e.target.value)}
                     placeholder="https://tudominio.com/documento.pdf"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-mono"
                   />
-                  <span className="text-[11px] text-slate-400 block">
+                  <span className="text-[11px] text-slate-600 dark:text-slate-400 block">
                     Al escanear el QR se abrirá o descargará el documento PDF directamente.
                   </span>
                 </div>
@@ -833,7 +833,7 @@ export default function GenerarStudioPage() {
               {activeType === 'app' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Nombre de la App:
                     </label>
                     <input
@@ -847,11 +847,11 @@ export default function GenerarStudioPage() {
                         }));
                       }}
                       placeholder="Mi App Pro"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-bold"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-bold"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Enlace a Apple App Store (iOS):
                     </label>
                     <input
@@ -859,11 +859,11 @@ export default function GenerarStudioPage() {
                       value={appIosUrl}
                       onChange={(e) => setAppIosUrl(e.target.value)}
                       placeholder="https://apps.apple.com/app/id123456789"
-                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Enlace a Google Play Store (Android):
                     </label>
                     <input
@@ -871,7 +871,7 @@ export default function GenerarStudioPage() {
                       value={appAndroidUrl}
                       onChange={(e) => setAppAndroidUrl(e.target.value)}
                       placeholder="https://play.google.com/store/apps/details?id=com.atpdev.app"
-                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                     />
                   </div>
                 </div>
@@ -880,7 +880,7 @@ export default function GenerarStudioPage() {
               {/* 11. IMÁGENES */}
               {activeType === 'images' && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
                     Enlace al Álbum o Galería de Fotos:
                   </label>
                   <input
@@ -888,7 +888,7 @@ export default function GenerarStudioPage() {
                     value={imagesUrl}
                     onChange={(e) => setImagesUrl(e.target.value)}
                     placeholder="https://photos.app.goo.gl/album-demo"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-mono"
                   />
                 </div>
               )}
@@ -896,7 +896,7 @@ export default function GenerarStudioPage() {
               {/* 12. VÍDEO */}
               {activeType === 'video' && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block">
                     Enlace de YouTube o Vídeo Web:
                   </label>
                   <input
@@ -904,7 +904,7 @@ export default function GenerarStudioPage() {
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
                     placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                    className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-mono"
+                    className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-mono"
                   />
                 </div>
               )}
@@ -914,7 +914,7 @@ export default function GenerarStudioPage() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Plataforma Oficial:
                       </label>
                       <select
@@ -928,7 +928,7 @@ export default function GenerarStudioPage() {
                             framelabel: `SEGUIR EN ${net.toUpperCase()}`
                           }));
                         }}
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs cursor-pointer font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-bold"
                       >
                         <option value="tiktok">🎵 TikTok Oficial</option>
                         <option value="instagram">📸 Instagram</option>
@@ -938,7 +938,7 @@ export default function GenerarStudioPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Usuario (@handle):
                       </label>
                       <input
@@ -946,7 +946,7 @@ export default function GenerarStudioPage() {
                         value={socialHandle}
                         onChange={(e) => setSocialHandle(e.target.value)}
                         placeholder="tuusuario"
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold"
                       />
                     </div>
                   </div>
@@ -957,7 +957,7 @@ export default function GenerarStudioPage() {
               {activeType === 'event' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Título del Evento:
                     </label>
                     <input
@@ -973,11 +973,11 @@ export default function GenerarStudioPage() {
                         }
                       }}
                       placeholder="Conferencia Tech 2026"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-sm font-bold"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm font-bold"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Ubicación / Lugar:
                     </label>
                     <input
@@ -985,30 +985,30 @@ export default function GenerarStudioPage() {
                       value={eventLocation}
                       onChange={(e) => setEventLocation(e.target.value)}
                       placeholder="Lima Convention Center"
-                      className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                      className="w-full px-4 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs"
                     />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Fecha y Hora Inicio:
                       </label>
                       <input
                         type="datetime-local"
                         value={eventStart}
                         onChange={(e) => setEventStart(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Fecha y Hora Fin:
                       </label>
                       <input
                         type="datetime-local"
                         value={eventEnd}
                         onChange={(e) => setEventEnd(e.target.value)}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                        className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                       />
                     </div>
                   </div>
@@ -1020,7 +1020,7 @@ export default function GenerarStudioPage() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Criptomoneda:
                       </label>
                       <select
@@ -1033,7 +1033,7 @@ export default function GenerarStudioPage() {
                             optionlogo: coin === 'bitcoin' ? 'btc' : 'link'
                           }));
                         }}
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs cursor-pointer font-bold"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-bold"
                       >
                         <option value="bitcoin">₿ Bitcoin (BTC)</option>
                         <option value="ethereum">Ξ Ethereum (ETH)</option>
@@ -1042,7 +1042,7 @@ export default function GenerarStudioPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Monto Sugerido (opcional):
                       </label>
                       <input
@@ -1050,12 +1050,12 @@ export default function GenerarStudioPage() {
                         value={cryptoAmount}
                         onChange={(e) => setCryptoAmount(e.target.value)}
                         placeholder="0.05"
-                        className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                        className="w-full px-3 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                       Dirección de Billetera (Wallet Address):
                     </label>
                     <input
@@ -1063,7 +1063,7 @@ export default function GenerarStudioPage() {
                       value={cryptoAddress}
                       onChange={(e) => setCryptoAddress(e.target.value)}
                       placeholder="bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq"
-                      className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs font-mono"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-mono"
                     />
                   </div>
                 </div>
@@ -1074,29 +1074,29 @@ export default function GenerarStudioPage() {
           </div>
 
           {/* ==================== PASO 2: DISEÑA TU CÓDIGO QR ==================== */}
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
+          <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl space-y-6">
             
-            <div className="flex items-center gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-slate-800">
               <span className="w-7 h-7 rounded-xl bg-cyan-600 text-white font-black text-xs flex items-center justify-center font-mono">
                 2
               </span>
               <div>
-                <h2 className="text-base font-bold text-white font-display">
+                <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
                   Diseña tu código QR
                 </h2>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-600 dark:text-slate-400">
                   Personaliza marco, forma de puntos, colores y logotipo.
                 </p>
               </div>
             </div>
 
             {/* Pestañas de diseño: Marco | Forma | Color | Logo */}
-            <div className="grid grid-cols-4 gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+            <div className="grid grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-950 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setDesignTab('marco')}
                 className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'marco' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                  designTab === 'marco' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Marco
@@ -1105,7 +1105,7 @@ export default function GenerarStudioPage() {
                 type="button"
                 onClick={() => setDesignTab('forma')}
                 className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'forma' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                  designTab === 'forma' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Forma
@@ -1114,7 +1114,7 @@ export default function GenerarStudioPage() {
                 type="button"
                 onClick={() => setDesignTab('color')}
                 className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'color' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                  designTab === 'color' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Color
@@ -1123,7 +1123,7 @@ export default function GenerarStudioPage() {
                 type="button"
                 onClick={() => setDesignTab('logo')}
                 className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  designTab === 'logo' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                  designTab === 'logo' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 Logo
@@ -1136,7 +1136,7 @@ export default function GenerarStudioPage() {
               {/* SUB-PESTAÑA 1: MARCO (outer_frame) */}
               {designTab === 'marco' && (
                 <div className="space-y-4">
-                  <span className="text-xs font-semibold text-slate-400 block">
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block">
                     Estilos de Marco:
                   </span>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -1158,8 +1158,8 @@ export default function GenerarStudioPage() {
                         onClick={() => setDesignConfig({ ...designConfig, outer_frame: m.id as QROuterFrame })}
                         className={`p-2.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
                           designConfig.outer_frame === m.id
-                            ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-sm'
-                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                            ? 'bg-blue-600/20 border-blue-500 text-blue-700 dark:text-blue-400 shadow-sm'
+                            : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
                         {m.label}
@@ -1168,9 +1168,9 @@ export default function GenerarStudioPage() {
                   </div>
 
                   {designConfig.outer_frame !== 'none' && (
-                    <div className="space-y-3 pt-3 border-t border-slate-800">
+                    <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                       <div>
-                        <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                           Texto del Marco (CTA):
                         </label>
                         <input
@@ -1178,49 +1178,49 @@ export default function GenerarStudioPage() {
                           value={designConfig.framelabel}
                           onChange={(e) => setDesignConfig({ ...designConfig, framelabel: e.target.value })}
                           placeholder="ESCÁNAME"
-                          className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-bold focus:border-blue-500 focus:outline-none"
+                          className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-blue-500 focus:outline-none"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                             Color Marco:
                           </label>
-                          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
                             <input
                               type="color"
                               value={designConfig.framecolor}
                               onChange={(e) => setDesignConfig({ ...designConfig, framecolor: e.target.value, custom_frame_color: true })}
                               className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
                             />
-                            <span className="text-xs font-mono font-bold text-white uppercase">{designConfig.framecolor}</span>
+                            <span className="text-xs font-mono font-bold text-slate-900 dark:text-white uppercase">{designConfig.framecolor}</span>
                           </div>
                         </div>
 
                         <div>
-                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                             Color Texto:
                           </label>
-                          <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
                             <input
                               type="color"
                               value={designConfig.frame_text_color || '#ffffff'}
                               onChange={(e) => setDesignConfig({ ...designConfig, frame_text_color: e.target.value })}
                               className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
                             />
-                            <span className="text-xs font-mono font-bold text-white uppercase">{designConfig.frame_text_color || '#ffffff'}</span>
+                            <span className="text-xs font-mono font-bold text-slate-900 dark:text-white uppercase">{designConfig.frame_text_color || '#ffffff'}</span>
                           </div>
                         </div>
 
                         <div>
-                          <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                             Tipografía:
                           </label>
                           <select
                             value={designConfig.label_font}
                             onChange={(e) => setDesignConfig({ ...designConfig, label_font: e.target.value as QRLabelFont })}
-                            className="w-full px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs cursor-pointer font-medium"
+                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-medium"
                           >
                             <option value="Arial, Helvetica, sans-serif">Arial / Sans-serif</option>
                             <option value="'Times New Roman', Times, serif">Times New Roman / Serif</option>
@@ -1238,7 +1238,7 @@ export default function GenerarStudioPage() {
                 <div className="space-y-4">
                   {/* Pattern */}
                   <div>
-                    <span className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-2">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-2">
                       Patrón de Puntos (pattern):
                     </span>
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -1262,8 +1262,8 @@ export default function GenerarStudioPage() {
                           onClick={() => setDesignConfig({ ...designConfig, pattern: p.id as QRPattern })}
                           className={`p-2 rounded-xl border text-[11px] font-bold text-center truncate transition-all cursor-pointer ${
                             designConfig.pattern === p.id
-                              ? 'bg-blue-600/20 border-blue-500 text-blue-400'
-                              : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                              ? 'bg-blue-600/20 border-blue-500 text-blue-700 dark:text-blue-400'
+                              : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
                           {p.label}
@@ -1273,15 +1273,15 @@ export default function GenerarStudioPage() {
                   </div>
 
                   {/* Marker (outer corners) */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Marco Exterior de Esquinas (marker):
                       </label>
                       <select
                         value={designConfig.marker}
                         onChange={(e) => setDesignConfig({ ...designConfig, marker: e.target.value as QRMarkerOut })}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs cursor-pointer font-bold"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-bold"
                       >
                         <option value="default">default (Cuadrado estándar)</option>
                         <option value="circle">circle (Círculo)</option>
@@ -1294,13 +1294,13 @@ export default function GenerarStudioPage() {
 
                     {/* Marker_in (inner pupil) */}
                     <div>
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                         Pupila Interior de Esquinas (marker_in):
                       </label>
                       <select
                         value={designConfig.marker_in}
                         onChange={(e) => setDesignConfig({ ...designConfig, marker_in: e.target.value as QRMarkerIn })}
-                        className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs cursor-pointer font-bold"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-bold"
                       >
                         <option value="default">default (Cuadrado 3x3)</option>
                         <option value="circle">circle (Círculo sólido)</option>
@@ -1319,7 +1319,7 @@ export default function GenerarStudioPage() {
               {designTab === 'color' && (
                 <div className="space-y-4">
                   {/* Toggles de Degradado, Radial y Transparencia */}
-                  <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-300">
+                  <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-slate-700 dark:text-slate-300">
                     <label className="flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
@@ -1331,7 +1331,7 @@ export default function GenerarStudioPage() {
                     </label>
 
                     {designConfig.gradient && (
-                      <label className="flex items-center gap-1.5 cursor-pointer text-cyan-400">
+                      <label className="flex items-center gap-1.5 cursor-pointer text-cyan-700 dark:text-cyan-400">
                         <input
                           type="checkbox"
                           checked={designConfig.radial}
@@ -1342,7 +1342,7 @@ export default function GenerarStudioPage() {
                       </label>
                     )}
 
-                    <label className="flex items-center gap-1.5 cursor-pointer text-amber-400">
+                    <label className="flex items-center gap-1.5 cursor-pointer text-amber-700 dark:text-amber-400">
                       <input
                         type="checkbox"
                         checked={designConfig.transparent}
@@ -1356,81 +1356,81 @@ export default function GenerarStudioPage() {
                   {/* Pickers */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1">
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                         Puntos (frontcolor):
                       </span>
-                      <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                      <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
                         <input
                           type="color"
                           value={designConfig.frontcolor}
                           onChange={(e) => setDesignConfig({ ...designConfig, frontcolor: e.target.value })}
                           className="w-7 h-7 rounded cursor-pointer bg-transparent"
                         />
-                        <span className="text-xs font-mono font-bold text-white">{designConfig.frontcolor}</span>
+                        <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">{designConfig.frontcolor}</span>
                       </div>
                     </div>
 
                     {designConfig.gradient && (
                       <div>
-                        <span className="text-xs font-semibold text-slate-400 block mb-1">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                           Degradado (gradient_color):
                         </span>
-                        <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
                           <input
                             type="color"
                             value={designConfig.gradient_color}
                             onChange={(e) => setDesignConfig({ ...designConfig, gradient_color: e.target.value })}
                             className="w-7 h-7 rounded cursor-pointer bg-transparent"
                           />
-                          <span className="text-xs font-mono font-bold text-white">{designConfig.gradient_color}</span>
+                          <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">{designConfig.gradient_color}</span>
                         </div>
                       </div>
                     )}
 
                     {!designConfig.transparent && (
                       <div>
-                        <span className="text-xs font-semibold text-slate-400 block mb-1">
+                        <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                           Fondo (backcolor):
                         </span>
-                        <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
                           <input
                             type="color"
                             value={designConfig.backcolor}
                             onChange={(e) => setDesignConfig({ ...designConfig, backcolor: e.target.value })}
                             className="w-7 h-7 rounded cursor-pointer bg-transparent"
                           />
-                          <span className="text-xs font-mono font-bold text-white">{designConfig.backcolor}</span>
+                          <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">{designConfig.backcolor}</span>
                         </div>
                       </div>
                     )}
 
                     <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1">
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                         Esquinas (marker_out_color):
                       </span>
-                      <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                      <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
                         <input
                           type="color"
                           value={designConfig.marker_out_color}
                           onChange={(e) => setDesignConfig({ ...designConfig, marker_out_color: e.target.value })}
                           className="w-7 h-7 rounded cursor-pointer bg-transparent"
                         />
-                        <span className="text-xs font-mono font-bold text-white">{designConfig.marker_out_color}</span>
+                        <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">{designConfig.marker_out_color}</span>
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-xs font-semibold text-slate-400 block mb-1">
+                      <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                         Pupilas (marker_in_color):
                       </span>
-                      <div className="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+                      <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800">
                         <input
                           type="color"
                           value={designConfig.marker_in_color}
                           onChange={(e) => setDesignConfig({ ...designConfig, marker_in_color: e.target.value })}
                           className="w-7 h-7 rounded cursor-pointer bg-transparent"
                         />
-                        <span className="text-xs font-mono font-bold text-white">{designConfig.marker_in_color}</span>
+                        <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">{designConfig.marker_in_color}</span>
                       </div>
                     </div>
                   </div>
@@ -1449,7 +1449,7 @@ export default function GenerarStudioPage() {
                     className={`border-2 border-dashed rounded-2xl p-4 text-center transition-all cursor-pointer ${
                       isDraggingLogo 
                         ? 'border-blue-400 bg-blue-500/10' 
-                        : 'border-slate-800 hover:border-slate-700 bg-slate-950/60'
+                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-slate-50 dark:bg-slate-950/60'
                     }`}
                   >
                     <input
@@ -1462,19 +1462,19 @@ export default function GenerarStudioPage() {
                       }}
                       className="hidden"
                     />
-                    <Upload className="w-6 h-6 text-cyan-400 mx-auto mb-1" />
-                    <p className="text-xs font-bold text-white">
+                    <Upload className="w-6 h-6 text-cyan-700 dark:text-cyan-400 mx-auto mb-1" />
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
                       Arrastra y suelta tu propio logo aquí o haz clic para subir
                     </p>
                   </div>
 
                   {/* Toggle Fondo del Logo */}
-                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                     <div>
-                      <span className="text-xs font-bold text-white block">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white block">
                         Fondo Protector Detrás del Logo:
                       </span>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-[11px] text-slate-600 dark:text-slate-400 block">
                         Dibuja un círculo de protección para garantizar que el código QR sea 100% legible.
                       </span>
                     </div>
@@ -1485,17 +1485,17 @@ export default function GenerarStudioPage() {
                         onChange={(e) => setDesignConfig({ ...designConfig, no_logo_bg: !e.target.checked })}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                      <div className="w-11 h-6 bg-slate-100 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                     </label>
                   </div>
 
                   {/* Logos Oficiales y Redes Sociales con Diseño de Alto Contraste */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-200 uppercase tracking-wide">
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide">
                         Selecciona un Logotipo Oficial:
                       </span>
-                      <span className="text-[11px] text-cyan-400 font-medium">
+                      <span className="text-[11px] text-cyan-700 dark:text-cyan-400 font-medium">
                         Logos vectoriales HD
                       </span>
                     </div>
@@ -1534,7 +1534,7 @@ export default function GenerarStudioPage() {
                             className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center gap-3 relative group ${
                               isSelected
                                 ? 'bg-blue-950/80 border-cyan-400 shadow-lg shadow-cyan-500/25 ring-1 ring-cyan-400'
-                                : 'bg-slate-950/90 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                                : 'bg-white/95 dark:bg-slate-950/90 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-900'
                             }`}
                           >
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shadow-md flex-shrink-0 ${item.badgeBg}`}>
@@ -1542,14 +1542,14 @@ export default function GenerarStudioPage() {
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-1">
-                                <span className={`text-xs font-bold truncate block ${isSelected ? 'text-white' : 'text-slate-200 group-hover:text-white'}`}>
+                                <span className={`text-xs font-bold truncate block ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
                                   {item.name}
                                 </span>
                                 {isSelected && (
                                   <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0" />
                                 )}
                               </div>
-                              <span className="text-[10px] text-slate-400 font-medium truncate block">
+                              <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium truncate block">
                                 {item.category}
                               </span>
                             </div>
@@ -1570,19 +1570,19 @@ export default function GenerarStudioPage() {
         {/* ==================== COLUMNA DERECHA: VISTA PREVIA Y EXPORTACIÓN (5 cols) ==================== */}
         <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
           
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center space-y-6">
+          <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center space-y-6">
             
-            <div className="w-full flex items-center justify-between pb-3 border-b border-slate-800">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-400 font-mono">
+            <div className="w-full flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 font-mono">
                 Vista Previa en Vivo
               </span>
-              <span className="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+              <span className="text-[11px] font-bold text-cyan-700 dark:text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
                 HD Render
               </span>
             </div>
 
             {/* Canvas Box */}
-            <div className="p-4 rounded-3xl bg-slate-950 border-2 border-slate-800 shadow-inner flex items-center justify-center max-w-full overflow-hidden">
+            <div className="p-4 rounded-3xl bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-800 shadow-inner flex items-center justify-center max-w-full overflow-hidden">
               <canvas
                 ref={canvasRef}
                 className="rounded-2xl max-w-full h-auto shadow-md"
@@ -1590,16 +1590,16 @@ export default function GenerarStudioPage() {
             </div>
 
             {/* Selector de Resolución de Exportación */}
-            <div className="w-full flex items-center justify-between bg-slate-950 px-4 py-2.5 rounded-2xl border border-slate-800 text-xs">
-              <span className="font-semibold text-slate-400">Resolución de Exportación:</span>
+            <div className="w-full flex items-center justify-between bg-slate-50 dark:bg-slate-950 px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs">
+              <span className="font-semibold text-slate-600 dark:text-slate-400">Resolución de Exportación:</span>
               <select
                 value={exportResolution}
                 onChange={(e) => setExportResolution(Number(e.target.value))}
-                className="bg-transparent font-bold text-cyan-400 focus:outline-none cursor-pointer"
+                className="bg-transparent font-bold text-cyan-700 dark:text-cyan-400 focus:outline-none cursor-pointer"
               >
-                <option value={512} className="bg-slate-900 text-white">512 px (Estándar)</option>
-                <option value={1024} className="bg-slate-900 text-white">1024 px (Alta Definición HD)</option>
-                <option value={2048} className="bg-slate-900 text-white">2048 px (Ultra HD)</option>
+                <option value={512} className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none text-slate-900 dark:text-white">512 px (Estándar)</option>
+                <option value={1024} className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none text-slate-900 dark:text-white">1024 px (Alta Definición HD)</option>
+                <option value={2048} className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none text-slate-900 dark:text-white">2048 px (Ultra HD)</option>
               </select>
             </div>
 
@@ -1619,30 +1619,30 @@ export default function GenerarStudioPage() {
                 <button
                   type="button"
                   onClick={downloadSVG}
-                  className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   title="Descargar en formato vectorial sin pérdida"
                 >
-                  <Download className="w-3.5 h-3.5 text-cyan-400" />
+                  <Download className="w-3.5 h-3.5 text-cyan-700 dark:text-cyan-400" />
                   <span>SVG</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={copyToClipboard}
-                  className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   title="Copiar imagen al portapapeles"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? '¡Copiado!' : 'Copiar'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={printQR}
-                  className="py-2.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="py-2.5 px-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   title="Imprimir código QR listo para usar"
                 >
-                  <Printer className="w-3.5 h-3.5 text-purple-400" />
+                  <Printer className="w-3.5 h-3.5 text-purple-700 dark:text-purple-400" />
                   <span>Imprimir</span>
                 </button>
               </div>

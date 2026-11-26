@@ -139,24 +139,24 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
   });
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden animate-fadeIn">
+    <div className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden animate-fadeIn">
       {/* Decorative accent top line */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500" />
 
       {/* Header with Type & Actions */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+      <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
           <div className={`p-2.5 rounded-2xl border ${meta.color}`}>
             <IconComponent className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] uppercase font-black tracking-widest text-blue-400 font-mono">
+            <span className="text-[10px] uppercase font-black tracking-widest text-blue-700 dark:text-blue-400 font-mono">
               {code.format}
             </span>
-            <h3 className="text-base font-bold text-white flex items-center gap-1.5 font-display">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-1.5 font-display">
               {meta.label}
             </h3>
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] text-slate-600 dark:text-slate-400">
               {formattedDate}
             </span>
           </div>
@@ -168,7 +168,7 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
             onClick={handleToggleFav}
             aria-label="Marcar como favorito"
             className={`p-2 rounded-xl transition-all cursor-pointer ${
-              isFav ? 'bg-amber-500/20 text-amber-400' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+              isFav ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Star className={`w-5 h-5 ${isFav ? 'fill-amber-400' : ''}`} />
@@ -177,7 +177,7 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
             type="button"
             onClick={handleShare}
             aria-label="Compartir resultado"
-            className="p-2 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
           >
             <Share2 className="w-5 h-5" />
           </button>
@@ -190,15 +190,15 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: URL / VIDEO / PDF */}
         {(code.type === 'url' || code.type === 'video' || code.type === 'pdf') && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 break-all">
-              <span className="text-xs text-slate-400 font-semibold block mb-1">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 break-all">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block mb-1">
                 {code.type === 'pdf' ? 'Documento PDF:' : code.type === 'video' ? 'Vídeo en Línea:' : 'Destino Web:'}
               </span>
               <a
                 href={code.parsedData.url || code.rawText}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm font-bold text-blue-400 hover:underline flex items-center gap-1.5"
+                className="text-sm font-bold text-blue-700 dark:text-blue-400 hover:underline flex items-center gap-1.5"
               >
                 <span>{code.parsedData.url || code.rawText}</span>
                 <ExternalLink className="w-3.5 h-3.5 shrink-0" />
@@ -220,23 +220,23 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: EVENTO DE CALENDARIO */}
         {code.type === 'event' && code.parsedData.event && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
-              <h4 className="text-base font-bold text-white font-display">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+              <h4 className="text-base font-bold text-slate-900 dark:text-white font-display">
                 {code.parsedData.event.title}
               </h4>
               {code.parsedData.event.location && (
-                <div className="flex items-center gap-1.5 text-xs text-slate-300">
+                <div className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300">
                   <MapPin className="w-3.5 h-3.5 text-rose-400" />
                   <span>{code.parsedData.event.location}</span>
                 </div>
               )}
               {code.parsedData.event.startDate && (
-                <div className="text-xs text-cyan-400 font-mono">
+                <div className="text-xs text-cyan-700 dark:text-cyan-400 font-mono">
                   Fecha: {code.parsedData.event.startDate}
                 </div>
               )}
               {code.parsedData.event.description && (
-                <p className="text-xs text-slate-400 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+                <p className="text-xs text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 shadow-xs dark:shadow-none p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
                   {code.parsedData.event.description}
                 </p>
               )}
@@ -245,7 +245,7 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
             <button
               type="button"
               onClick={downloadICS}
-              className="w-full py-3.5 px-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition-all cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-2xl bg-sky-600 hover:bg-sky-500 text-slate-900 dark:text-white font-black text-sm uppercase tracking-wide flex items-center justify-center gap-2 shadow-lg shadow-sky-600/30 transition-all cursor-pointer"
             >
               <Calendar className="w-4 h-4" />
               <span>Añadir a mi Calendario (.ics)</span>
@@ -256,30 +256,30 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: WI-FI */}
         {code.type === 'wifi' && code.parsedData.wifi && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
               <div>
-                <span className="text-xs text-slate-400 font-semibold block">Nombre de Red (SSID):</span>
-                <p className="text-base font-bold text-white font-mono">{code.parsedData.wifi.ssid}</p>
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block">Nombre de Red (SSID):</span>
+                <p className="text-base font-bold text-slate-900 dark:text-white font-mono">{code.parsedData.wifi.ssid}</p>
               </div>
 
               {code.parsedData.wifi.password ? (
                 <div>
-                  <span className="text-xs text-slate-400 font-semibold block">Contraseña:</span>
-                  <div className="flex items-center justify-between mt-1 bg-slate-900 px-3 py-2 rounded-xl border border-slate-800">
-                    <span className="text-sm font-mono font-bold text-emerald-400">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block">Contraseña:</span>
+                  <div className="flex items-center justify-between mt-1 bg-white dark:bg-slate-900 shadow-xs dark:shadow-none px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span className="text-sm font-mono font-bold text-emerald-700 dark:text-emerald-400">
                       {showPassword ? code.parsedData.wifi.password : '••••••••••••'}
                     </span>
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-slate-400 hover:text-white p-1"
+                      className="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white p-1"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold">
+                <div className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
                   <ShieldCheck className="w-4 h-4" />
                   <span>Red Abierta (Sin Contraseña)</span>
                 </div>
@@ -306,28 +306,28 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: CONTACT VCARD */}
         {code.type === 'contact' && code.parsedData.contact && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
-              <h4 className="text-lg font-black text-white font-display">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+              <h4 className="text-lg font-black text-slate-900 dark:text-white font-display">
                 {code.parsedData.contact.name}
               </h4>
               {code.parsedData.contact.title && (
-                <p className="text-xs text-cyan-400 font-semibold">{code.parsedData.contact.title}</p>
+                <p className="text-xs text-cyan-700 dark:text-cyan-400 font-semibold">{code.parsedData.contact.title}</p>
               )}
               {code.parsedData.contact.org && (
-                <p className="text-xs text-slate-400 font-medium">{code.parsedData.contact.org}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">{code.parsedData.contact.org}</p>
               )}
               {code.parsedData.contact.phone && (
                 <div className="flex items-center justify-between text-sm pt-2">
-                  <span className="text-slate-400 font-medium">Teléfono:</span>
-                  <a href={`tel:${code.parsedData.contact.phone}`} className="font-bold text-blue-400 hover:underline">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Teléfono:</span>
+                  <a href={`tel:${code.parsedData.contact.phone}`} className="font-bold text-blue-700 dark:text-blue-400 hover:underline">
                     {code.parsedData.contact.phone}
                   </a>
                 </div>
               )}
               {code.parsedData.contact.email && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-400 font-medium">Email:</span>
-                  <a href={`mailto:${code.parsedData.contact.email}`} className="font-bold text-blue-400 hover:underline">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Email:</span>
+                  <a href={`mailto:${code.parsedData.contact.email}`} className="font-bold text-blue-700 dark:text-blue-400 hover:underline">
                     {code.parsedData.contact.email}
                   </a>
                 </div>
@@ -348,13 +348,13 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: WHATSAPP */}
         {code.type === 'whatsapp' && code.parsedData.whatsapp && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
-              <span className="text-xs text-slate-400 font-semibold block">Número de WhatsApp:</span>
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block">Número de WhatsApp:</span>
               <p className="text-base font-bold text-green-400 font-mono">+{code.parsedData.whatsapp.phone}</p>
               {code.parsedData.whatsapp.message && (
-                <div className="pt-2 border-t border-slate-800">
-                  <span className="text-xs text-slate-400 font-semibold block mb-1">Mensaje preparado:</span>
-                  <p className="text-sm text-slate-300 italic bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block mb-1">Mensaje preparado:</span>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 italic bg-white dark:bg-slate-900/80 shadow-xs dark:shadow-none p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
                     "{code.parsedData.whatsapp.message}"
                   </p>
                 </div>
@@ -376,15 +376,15 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: EMAIL */}
         {code.type === 'email' && code.parsedData.email && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
               <div>
-                <span className="text-xs text-slate-400 font-semibold block">Para:</span>
-                <p className="text-sm font-bold text-white font-mono">{code.parsedData.email.address}</p>
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block">Para:</span>
+                <p className="text-sm font-bold text-slate-900 dark:text-white font-mono">{code.parsedData.email.address}</p>
               </div>
               {code.parsedData.email.subject && (
                 <div>
-                  <span className="text-xs text-slate-400 font-semibold block">Asunto:</span>
-                  <p className="text-sm text-slate-300 font-medium">{code.parsedData.email.subject}</p>
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block">Asunto:</span>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">{code.parsedData.email.subject}</p>
                 </div>
               )}
             </div>
@@ -402,9 +402,9 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: PHONE */}
         {code.type === 'phone' && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
-              <span className="text-xs text-slate-400 font-semibold block mb-1">Número a llamar:</span>
-              <p className="text-xl font-bold text-cyan-400 font-mono">{code.parsedData.phone || code.rawText}</p>
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block mb-1">Número a llamar:</span>
+              <p className="text-xl font-bold text-cyan-700 dark:text-cyan-400 font-mono">{code.parsedData.phone || code.rawText}</p>
             </div>
 
             <a
@@ -420,15 +420,15 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: SMS */}
         {code.type === 'sms' && code.parsedData.sms && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-2">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
               <div>
-                <span className="text-xs text-slate-400 font-semibold block">Destinatario SMS:</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block">Destinatario SMS:</span>
                 <p className="text-base font-bold text-indigo-400 font-mono">{code.parsedData.sms.phone}</p>
               </div>
               {code.parsedData.sms.message && (
                 <div>
-                  <span className="text-xs text-slate-400 font-semibold block mb-1">Texto del Mensaje:</span>
-                  <p className="text-sm text-slate-300 bg-slate-900 p-2.5 rounded-xl border border-slate-800">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block mb-1">Texto del Mensaje:</span>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 shadow-xs dark:shadow-none p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
                     {code.parsedData.sms.message}
                   </p>
                 </div>
@@ -448,9 +448,9 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: CRIPTO / 2D */}
         {code.type === 'crypto' && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
-              <span className="text-xs text-slate-400 font-semibold block mb-1">Dirección Cripto / Billetera:</span>
-              <p className="text-xs font-mono font-bold text-amber-400 break-all">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block mb-1">Dirección Cripto / Billetera:</span>
+              <p className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 break-all">
                 {code.rawText}
               </p>
             </div>
@@ -469,9 +469,9 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         {/* CASE: RAW TEXT / GENERIC FALLBACK */}
         {(code.type === 'text' || code.type === 'geo') && (
           <div className="space-y-3">
-            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800">
-              <span className="text-xs text-slate-400 font-semibold block mb-1">Texto detectado:</span>
-              <p className="text-sm font-mono text-slate-200 whitespace-pre-wrap break-all max-h-48 overflow-y-auto">
+            <div className="bg-slate-50 dark:bg-slate-950/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold block mb-1">Texto detectado:</span>
+              <p className="text-sm font-mono text-slate-800 dark:text-slate-200 whitespace-pre-wrap break-all max-h-48 overflow-y-auto">
                 {code.rawText}
               </p>
             </div>
@@ -481,21 +481,21 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
       </div>
 
       {/* Secondary Actions (Copy & Generator Shortcut) */}
-      <div className="pt-2 border-t border-slate-800/80 grid grid-cols-2 gap-2.5">
+      <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80 grid grid-cols-2 gap-2.5">
         <button
           type="button"
           onClick={() => handleCopy(code.rawText)}
-          className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
+          className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
         >
-          {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+          {copied ? <Check className="w-4 h-4 text-emerald-700 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
           <span>{copied ? '¡Copiado!' : 'Copiar Texto'}</span>
         </button>
 
         <Link
           href={`/generar?text=${encodeURIComponent(code.rawText)}&type=${code.type}`}
-          className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
+          className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all"
         >
-          <QrCode className="w-4 h-4 text-cyan-400" />
+          <QrCode className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
           <span>Editar como QR</span>
         </Link>
       </div>
@@ -505,7 +505,7 @@ export const ScanResultCard: React.FC<ScanResultCardProps> = ({
         <button
           type="button"
           onClick={onNewScan}
-          className="w-full py-3 rounded-2xl bg-slate-950 hover:bg-black text-slate-300 hover:text-white font-bold text-xs uppercase tracking-wider border border-slate-800 flex items-center justify-center gap-2 cursor-pointer transition-all"
+          className="w-full py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 hover:bg-black text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-xs uppercase tracking-wider border border-slate-200 dark:border-slate-800 flex items-center justify-center gap-2 cursor-pointer transition-all"
         >
           <RotateCcw className="w-4 h-4" />
           <span>Escanear Otro Código</span>

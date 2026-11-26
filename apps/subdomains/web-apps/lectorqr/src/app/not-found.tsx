@@ -10,18 +10,18 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="min-h-[65vh] flex items-center justify-center px-4 py-16">
-      <div className="max-w-lg w-full text-center space-y-6 p-8 sm:p-10 rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-500/10 border border-blue-500/20 text-cyan-400 flex items-center justify-center">
+      <div className="max-w-lg w-full text-center space-y-6 p-8 sm:p-10 rounded-3xl bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 shadow-2xl">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-500/10 border border-blue-500/20 text-cyan-700 dark:text-cyan-400 flex items-center justify-center">
           <QrCode className="w-7 h-7" />
         </div>
         <div className="space-y-2">
-          <span className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-mono font-bold uppercase">
+          <span className="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-mono font-bold uppercase">
             Error 404
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-white font-display">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display">
             Página no encontrada
           </h1>
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
             La ruta solicitada no existe dentro de Lector QR Pro.
           </p>
         </div>
@@ -35,7 +35,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/guias"
-            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold inline-flex items-center justify-center gap-2 transition-colors"
+            className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold inline-flex items-center justify-center gap-2 transition-colors"
           >
             <BookOpen className="w-4 h-4" />
             <span>Ver Guías Técnicas</span>

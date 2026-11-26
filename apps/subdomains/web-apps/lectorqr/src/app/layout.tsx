@@ -94,13 +94,38 @@ const rootJsonLd = {
       url: 'https://www.atpdev.dev',
       logo: 'https://www.atpdev.dev/og-image.png',
     },
+    {
+      '@type': 'FAQPage',
+      '@id': 'https://lectorqr.atpdev.dev/#faq',
+      mainEntity: [
+        {
+          '@type': 'Question',
+          name: '¿Cómo escanear un código QR desde una imagen o captura de pantalla?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'En Lector QR Pro puedes arrastrar la imagen, subir una foto desde tu galería o presionar Ctrl+V directamente. El motor óptico detecta uno o múltiples códigos QR al instante 100% en tu navegador.',
+          },
+        },
+        {
+          '@type': 'Question',
+          name: '¿Los códigos QR generados son gratuitos y sin fecha de caducidad?',
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: 'Sí. Todos los códigos QR para URL, Wi-Fi, WhatsApp y tarjetas vCard son estáticos y gratuitos: no caducan nunca ni tienen límite de escaneos.',
+          },
+        },
+      ],
+    },
   ],
 };
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#090d16',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
+    { media: '(prefers-color-scheme: dark)', color: '#090d16' },
+  ],
 };
 
 export default function RootLayout({
@@ -109,8 +134,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={`dark ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}>
+    <html lang="es" suppressHydrationWarning className={`dark ${outfit.variable} ${plusJakarta.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <Script
+          id="lectorqr-theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var t = localStorage.getItem('lectorqr_theme');
+                  if (t === 'light') {
+                    document.documentElement.classList.remove('dark');
+                  } else {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <Script
           id="google-consent-default"
           strategy="beforeInteractive"
@@ -130,7 +173,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black antialiased">
+      <body className="min-h-screen bg-slate-50 dark:bg-[#0a0f1d] text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black antialiased transition-colors duration-200">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(rootJsonLd) }}

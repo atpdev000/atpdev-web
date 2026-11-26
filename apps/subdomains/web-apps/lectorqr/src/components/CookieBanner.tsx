@@ -94,16 +94,16 @@ export function CookieBanner() {
   if (accepted !== false) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 p-5 rounded-3xl bg-slate-900/95 border border-slate-800 shadow-2xl backdrop-blur-xl animate-fadeIn space-y-3">
+    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 p-5 rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-2xl backdrop-blur-xl animate-fadeIn space-y-3">
       <div className="flex items-start gap-3">
-        <div className="p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 shrink-0">
+        <div className="p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 dark:text-cyan-400 shrink-0">
           <Cookie className="w-5 h-5" />
         </div>
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-white font-display">Aviso de Privacidad y Cookies</h4>
-          <p className="text-xs text-slate-300 leading-relaxed font-medium">
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white font-display">Aviso de Privacidad y Cookies</h4>
+          <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
             Utilizamos cookies propias y de terceros (Google AdSense y analítica) para ofrecerte la mejor experiencia, procesar tus códigos QR localmente y mostrar publicidad personalizada.{' '}
-            <Link href="/politica-de-cookies" className="text-cyan-400 hover:underline">
+            <Link href="/politica-de-cookies" className="text-cyan-700 dark:text-cyan-400 hover:underline">
               Más información
             </Link>.
           </p>
@@ -114,7 +114,7 @@ export function CookieBanner() {
         <button
           type="button"
           onClick={handleDecline}
-          className="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer"
+          className="py-2.5 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all cursor-pointer"
         >
           Solo necesarias
         </button>

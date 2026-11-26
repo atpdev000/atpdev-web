@@ -5,14 +5,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="/favicon.ico" sizes="48x48" />
-  <title>DNI Master - Scanner Digital HD y Exportación A4 Oficial</title>
-  <meta name="description" content="Escanea, corrige la perspectiva y exporta tu DNI o documento de identidad en PDF A4 oficial o Word a tamaño real (85.60 x 53.98 mm) 100% en tu navegador, sin subir archivos a servidores." />
+  <title>DNI Scanner Online Gratis — Escanear DNI Ambas Caras en PDF A4 y Word | DNI Master</title>
+  <meta name="description" content="DNI Scanner online gratis: escanea tu DNI por ambas caras desde foto o cámara, corrige la perspectiva automática y descarga en una sola hoja PDF A4 o Word (.docx) a tamaño real oficial (85.6 × 54 mm) 100% en tu navegador." />
+  <meta name="keywords" content="dni scanner, escanear dni online, escanear dni ambas caras pdf, scanner de dni gratis, pasar foto de dni a pdf tamaño real, dni en una hoja a4, escanear carnet extranjeria, dni master scanner" />
   <link rel="canonical" href="https://dni.atpdev.dev/" />
   <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_PE" />
+  <meta property="og:site_name" content="DNI Master Scanner" />
   <meta property="og:url" content="https://dni.atpdev.dev/" />
-  <meta property="og:title" content="DNI Master - Scanner Digital HD y Exportación A4 Oficial" />
-  <meta property="og:description" content="Escanea, corrige la perspectiva y exporta tu DNI o documento de identidad en PDF A4 oficial o Word a tamaño real 100% en tu navegador." />
+  <meta property="og:title" content="DNI Scanner Online Gratis — Escanear DNI Ambas Caras en PDF A4 y Word" />
+  <meta property="og:description" content="Escanea tu DNI por ambas caras, elimina fondos y exporta en una hoja PDF A4 o Word a tamaño real oficial 100% privado en tu navegador." />
   <meta property="og:image" content="https://www.atpdev.dev/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DNI Scanner Online Gratis — Escanear DNI en PDF A4 y Word" />
+  <meta name="twitter:description" content="Convierte fotos de tu DNI (anverso y reverso) a PDF A4 oficial a escala real 1:1 sin subir archivos a servidores." />
+  <meta name="twitter:image" content="https://www.atpdev.dev/og-image.png" />
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -20,12 +27,19 @@
       {
         "@type": "WebApplication",
         "@id": "https://dni.atpdev.dev/#webapp",
-        "name": "DNI Master Scanner",
+        "name": "DNI Scanner — DNI Master",
+        "alternateName": ["DNI Scanner Online", "Scanner de DNI", "DNI Master Scanner"],
         "url": "https://dni.atpdev.dev/",
         "applicationCategory": "UtilitiesApplication",
         "operatingSystem": "All",
         "inLanguage": "es-PE",
-        "description": "Escáner digital de documentos de identidad con corrección de perspectiva homográfica OpenCV.js y exportación PDF A4 a escala real ISO/IEC 7810 ID-1 (85.60 x 53.98 mm).",
+        "description": "DNI Scanner online gratuito para escanear documentos de identidad por ambas caras con corrección de perspectiva homográfica y exportación en PDF A4 o Word a escala real ISO/IEC 7810 ID-1 (85.60 x 53.98 mm).",
+        "featureList": [
+          "Escaneo de DNI por ambas caras (anverso y reverso) en una sola hoja A4",
+          "Corrección automática de perspectiva homográfica y recorte de bordes",
+          "Exportación a tamaño real oficial ISO/IEC 7810 ID-1 (85.60 × 53.98 mm) en PDF A4 y Word (.docx)",
+          "Procesamiento 100% local en el navegador sin subir fotos a servidores externos"
+        ],
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "PEN" },
         "publisher": { "@id": "https://www.atpdev.dev/#organization" }
       },
@@ -35,6 +49,36 @@
         "name": "ATP Dev",
         "url": "https://www.atpdev.dev",
         "logo": "https://www.atpdev.dev/og-image.png"
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://dni.atpdev.dev/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Cómo escanear un DNI por ambas caras en una sola hoja PDF A4?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Abre DNI Scanner (dni.atpdev.dev), captura o sube la foto del anverso y del reverso, verifica el recorte automático de las 4 esquinas y pulsa PDF A4 Oficial para descargar ambas caras alineadas a tamaño real (85.60 × 53.98 mm)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Las fotografías de mi DNI se guardan en algún servidor externo?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. Todo el procesamiento óptico, recorte de perspectiva y generación del PDF A4 o Word (.docx) ocurre 100% en la memoria local de tu navegador web."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Sirve para carné de extranjería, licencia de conducir o brevete?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí. Cualquier documento rectangular estándar (formato ISO ID-1 como DNI azul, DNI electrónico, carné de extranjería, brevete o carné universitario) se rectifica y exporta a escala exacta 1:1."
+            }
+          }
+        ]
       }
     ]
   }
@@ -125,6 +169,34 @@
       color: #94a3b8;
     }
     .dni-footer-links a { color: #93c5fd; text-decoration: underline; text-underline-offset: 3px; }
+    body.light-theme { background: #f8fafc !important; color: #0f172a !important; }
+    body.light-theme .dni-editorial {
+      background: #f1f5f9;
+      color: #334155;
+      border-top: 1px solid #e2e8f0;
+    }
+    body.light-theme .dni-editorial h2 { color: #0f172a; }
+    body.light-theme .dni-editorial h3 { color: #1d4ed8; }
+    body.light-theme .dni-editorial p { color: #334155; }
+    body.light-theme .dni-card,
+    body.light-theme .dni-faq {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+    }
+    body.light-theme .dni-card strong,
+    body.light-theme .dni-faq strong { color: #0f172a; }
+    body.light-theme .dni-card span { color: #475569; }
+    body.light-theme .dni-badge {
+      background: rgba(37, 99, 235, 0.1);
+      border-color: rgba(37, 99, 235, 0.25);
+      color: #1d4ed8;
+    }
+    body.light-theme .dni-footer-links {
+      border-top-color: #cbd5e1;
+      color: #475569;
+    }
+    body.light-theme .dni-footer-links a { color: #1d4ed8; }
   </style>
   <script>
     // OpenCV Non-Blocking Multi-CDN Loader
@@ -178,10 +250,17 @@
 </head>
 
 <body class="bg-[#090d16] text-white">
+  <script>
+    try {
+      if (localStorage.getItem('dni_theme') === 'light') {
+        document.body.classList.add('light-theme');
+      }
+    } catch (e) {}
+  </script>
   <div id="root">
     <header style="max-width:56rem;margin:0 auto;padding:4rem 1.25rem 2rem;text-align:center;font-family:ui-sans-serif,system-ui,-apple-system,sans-serif;">
-      <h1 style="font-size:2rem;font-weight:800;line-height:1.2;margin:0 0 0.75rem;color:#f8fafc;">DNI Master Scanner — Escáner HD de DNI y Documentos en A4</h1>
-      <p style="font-size:1rem;color:#94a3b8;max-width:40rem;margin:0 auto;line-height:1.6;">Digitaliza, rectifica la perspectiva y exporta tu documento de identidad en PDF A4 o Word (.docx) 100% desde tu navegador.</p>
+      <h1 style="font-size:2rem;font-weight:800;line-height:1.2;margin:0 0 0.75rem;color:#f8fafc;">DNI Scanner Online Gratis — Escanear DNI Ambas Caras en PDF A4 y Word</h1>
+      <p style="font-size:1rem;color:#94a3b8;max-width:40rem;margin:0 auto;line-height:1.6;">Digitaliza, rectifica la perspectiva y exporta tu DNI o documento de identidad en una hoja PDF A4 o Word (.docx) a tamaño real 100% desde tu navegador.</p>
     </header>
   </div>
 

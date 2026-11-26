@@ -25,15 +25,15 @@ export default function ContactoPage() {
     <div className="max-w-4xl mx-auto py-8 sm:py-12 space-y-8">
       
       {/* Header */}
-      <div className="space-y-3 pb-6 border-b border-slate-800 text-center sm:text-left">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
-          <MessageSquare className="w-4 h-4 text-cyan-400" />
+      <div className="space-y-3 pb-6 border-b border-slate-200 dark:border-slate-800 text-center sm:text-left">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-bold uppercase tracking-wider font-mono">
+          <MessageSquare className="w-4 h-4 text-cyan-700 dark:text-cyan-400" />
           <span>Atención al Usuario & Soporte Técnico</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-white font-display">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white font-display">
           Centro de Contacto
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
           ¿Tienes consultas, sugerencias o requieres soporte corporativo para Lector QR Pro? Escríbenos directamente.
         </p>
       </div>
@@ -42,19 +42,19 @@ export default function ContactoPage() {
         
         {/* Info Column (5 cols) */}
         <div className="md:col-span-5 space-y-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5">
-            <h3 className="text-base font-bold text-white font-display">
+          <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-5">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
               Información del Editor
             </h3>
             
             <div className="space-y-4 text-xs">
               <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-cyan-400 shrink-0">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-cyan-700 dark:text-cyan-400 shrink-0">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Correo Oficial:</span>
-                  <a href="mailto:contacto@atpdev.dev" className="text-white font-bold hover:underline">
+                  <span className="text-slate-600 dark:text-slate-400 font-semibold block">Correo Oficial:</span>
+                  <a href="mailto:contacto@atpdev.dev" className="text-slate-900 dark:text-white font-bold hover:underline">
                     contacto@atpdev.dev
                   </a>
                   <p className="text-[11px] text-slate-500">Atención técnica y soporte editorial</p>
@@ -62,12 +62,12 @@ export default function ContactoPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 shrink-0">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 shrink-0">
                   <Globe className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Portal Corporativo:</span>
-                  <a href="https://www.atpdev.dev/#contact" target="_blank" rel="noopener noreferrer" className="text-white font-bold hover:underline">
+                  <span className="text-slate-600 dark:text-slate-400 font-semibold block">Portal Corporativo:</span>
+                  <a href="https://www.atpdev.dev/#contact" target="_blank" rel="noopener noreferrer" className="text-slate-900 dark:text-white font-bold hover:underline">
                     www.atpdev.dev/#contact
                   </a>
                   <p className="text-[11px] text-slate-500">Lunes a Viernes de 9:00 a 18:00 (GMT-5)</p>
@@ -75,19 +75,19 @@ export default function ContactoPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-purple-400 shrink-0">
+                <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 shrink-0">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-slate-400 font-semibold block">Ubicación Corporativa:</span>
-                  <p className="text-white font-bold">ATP DEV Perú</p>
+                  <span className="text-slate-600 dark:text-slate-400 font-semibold block">Ubicación Corporativa:</span>
+                  <p className="text-slate-900 dark:text-white font-bold">ATP DEV Perú</p>
                   <p className="text-[11px] text-slate-500">Lima, Perú</p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800">
-              <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-semibold">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2 text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Ecosistema ATP DEV Perú</span>
               </div>
@@ -97,20 +97,20 @@ export default function ContactoPage() {
 
         {/* Contact Form (7 cols) */}
         <div className="md:col-span-7">
-          <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
-            <h3 className="text-base font-bold text-white font-display">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-display">
               Envíanos un Mensaje
             </h3>
 
             {submitted && (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
                 <CheckCircle2 className="w-5 h-5 shrink-0" />
                 <span>¡Mensaje recibido con éxito! Nos comunicaremos contigo a la brevedad posible.</span>
               </div>
             )}
 
             <div>
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                 Tu Nombre o Empresa:
               </label>
               <input
@@ -119,12 +119,12 @@ export default function ContactoPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ej. Juan Pérez"
-                className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 focus:outline-none"
+                className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                 Tu Correo Electrónico:
               </label>
               <input
@@ -133,12 +133,12 @@ export default function ContactoPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="juan@ejemplo.com"
-                className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 focus:outline-none"
+                className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wide block mb-1">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
                 Consulta o Mensaje:
               </label>
               <textarea
@@ -147,7 +147,7 @@ export default function ContactoPage() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Escribe tu mensaje o sugerencia aquí..."
-                className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-blue-500 focus:outline-none resize-none"
+                className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-sm focus:border-blue-500 focus:outline-none resize-none"
               />
             </div>
 
@@ -164,35 +164,35 @@ export default function ContactoPage() {
       </div>
 
       {/* Alcance de Soporte y Preguntas Frecuentes */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-300 leading-relaxed pt-2">
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-          <h2 className="text-base font-bold text-white font-display">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed pt-2">
+        <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
             Qué consultas atendemos prioritariamente
           </h2>
           <p>
             Brindamos soporte gratuito sobre compatibilidad de cámaras WebRTC en Android e iOS, exportación vectorial SVG y PNG en el{' '}
-            <a href="/generar" className="text-cyan-400 underline font-semibold">Generador de Códigos QR</a>, niveles de corrección de errores Reed-Solomon (L, M, Q, H) y avisos de privacidad o publicidad.
+            <a href="/generar" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Generador de Códigos QR</a>, niveles de corrección de errores Reed-Solomon (L, M, Q, H) y avisos de privacidad o publicidad.
           </p>
-          <p className="text-slate-400">
+          <p className="text-slate-600 dark:text-slate-400">
             Si reportas un error de lectura óptica, por favor especifica el navegador utilizado, el tipo de enfoque de tu cámara y el formato del código (QR, DataMatrix, EAN-13, UPC-A, Code 128 o Aztec) para reproducirlo con precisión. Respondemos normalmente entre 24 y 48 horas hábiles.
           </p>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-3">
-          <h2 className="text-base font-bold text-white font-display">
+        <div className="bg-white dark:bg-slate-900 shadow-xs dark:shadow-none border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-3">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white font-display">
             Documentación Legal y Privacidad Local
           </h2>
           <p>
             El escaneo óptico desde cámara o archivo local y la creación de códigos QR (enlaces URL, acceso Wi-Fi, vCard y texto plano) se procesan íntegramente en la memoria de tu navegador sin almacenar capturas ni credenciales en servidores externos.
           </p>
-          <ul className="space-y-1.5 text-xs text-slate-400">
-            <li>• Revisa nuestra <a href="/politica-de-privacidad" className="text-cyan-400 underline font-semibold">Política de Privacidad</a> y <a href="/politica-de-cookies" className="text-cyan-400 underline font-semibold">Política de Cookies</a>.</li>
-            <li>• Consulta las condiciones en <a href="/terminos-y-condiciones" className="text-cyan-400 underline font-semibold">Términos y Condiciones</a> o explora nuestras <a href="/guias" className="text-cyan-400 underline font-semibold">Guías de Uso Seguro</a> y <a href="/sobre-nosotros" className="text-cyan-400 underline font-semibold">Sobre Nosotros</a>.</li>
+          <ul className="space-y-1.5 text-xs text-slate-600 dark:text-slate-400">
+            <li>• Revisa nuestra <a href="/politica-de-privacidad" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Política de Privacidad</a> y <a href="/politica-de-cookies" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Política de Cookies</a>.</li>
+            <li>• Consulta las condiciones en <a href="/terminos-y-condiciones" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Términos y Condiciones</a> o explora nuestras <a href="/guias" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Guías de Uso Seguro</a> y <a href="/sobre-nosotros" className="text-cyan-700 dark:text-cyan-400 underline font-semibold">Sobre Nosotros</a>.</li>
           </ul>
-          <p className="text-xs text-slate-400 pt-2 border-t border-slate-800">
+          <p className="text-xs text-slate-600 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-800">
             Todas las solicitudes técnicas, reportes de seguridad o consultas sobre integración de códigos QR en comercios, restaurantes e instituciones educativas son atendidas directamente por el equipo de ingeniería de <strong>ATP DEV</strong> desde Lima, Perú bajo estricto cumplimiento de la Ley N° 29733 de Protección de Datos Personales y normativas internacionales RGPD.
           </p>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-600 dark:text-slate-400">
             Asimismo, si eres desarrollador o administrador de sistemas y deseas validar la estructura de tramas EMVCo para pagos interoperables, configuración de redes inalámbricas WPA3-Enterprise mediante cadena estándar WIFI o codificación de tarjetas corporativas vCard 4.0 con caracteres UTF-8 sin pérdida de compatibilidad en lectores láser e industriales 2D, incluye el payload de prueba en tu mensaje para remitirte el diagnóstico técnico correspondiente.
           </p>
         </div>
