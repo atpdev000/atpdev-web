@@ -178,6 +178,7 @@ export type QROptionLogo =
 
 export type QROuterFrame = 
   | 'none'
+  | 'frame-only'
   | 'rounded-card'
   | 'bottom'
   | 'top'

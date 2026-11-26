@@ -7,6 +7,7 @@ import {
   QROptionLogo, 
   QROuterFrame 
 } from '../types';
+import { drawBrandLogoOnCanvas, renderBrandLogoSVGMarkup } from './brandLogos';
 
 /**
  * Motor universal de renderizado de Códigos QR con soporte integral para todos los parámetros de API:
@@ -87,6 +88,14 @@ export async function renderCustomQRCode(
     qrHeight = targetWidth;
     qrX = 12;
     qrY = 12;
+  } else if (outerFrame === 'frame-only') {
+    const pad = Math.max(12, Math.round(targetWidth * 0.055));
+    canvasWidth = targetWidth + pad * 2;
+    canvasHeight = targetWidth + pad * 2;
+    qrWidth = targetWidth;
+    qrHeight = targetWidth;
+    qrX = pad;
+    qrY = pad;
   } else if (outerFrame === 'badge') {
     const bannerH = Math.round(targetWidth * 0.2);
     canvasHeight = targetWidth + bannerH + 16;
@@ -225,7 +234,7 @@ export async function renderCustomQRCode(
       } catch (e) {
         console.warn('Could not draw uploaded logo', e);
       }
-    } else {
+    } else if (!drawBrandLogoOnCanvas(ctx, config.optionlogo, centerX, centerY, logoAreaSize)) {
       drawVectorPlatformLogo(ctx, config.optionlogo, centerX, centerY, logoAreaSize);
     }
   }
@@ -281,6 +290,26 @@ export async function renderCustomQRCode(
       ctx.font = `900 ${fontSize}px ${labelFont}`;
       ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, bannerY + bannerH / 2);
 
+    } else if (outerFrame === 'balloon-top') {
+      const bannerH = qrY;
+      ctx.fillStyle = frameBg;
+      roundRect(ctx, 12, 6, canvasWidth - 24, bannerH - 12, 16);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(canvasWidth / 2 - 10, bannerH - 6);
+      ctx.lineTo(canvasWidth / 2, bannerH + 4);
+      ctx.lineTo(canvasWidth / 2 + 10, bannerH - 6);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = frameTextColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fontSize = Math.max(13, Math.round(canvasWidth * 0.048));
+      ctx.font = `900 ${fontSize}px ${labelFont}`;
+      ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, bannerH / 2);
+
     } else if (outerFrame === 'ribbon-bottom') {
       const bannerY = qrHeight;
       const bannerH = canvasHeight - qrHeight;
@@ -293,6 +322,26 @@ export async function renderCustomQRCode(
       const fontSize = Math.max(13, Math.round(canvasWidth * 0.046));
       ctx.font = `900 ${fontSize}px ${labelFont}`;
       ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, bannerY + bannerH / 2);
+
+    } else if (outerFrame === 'ribbon-top') {
+      const bannerH = qrY;
+      ctx.fillStyle = frameBg;
+      ctx.fillRect(16, 6, canvasWidth - 32, bannerH - 10);
+
+      ctx.fillStyle = frameTextColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const fontSize = Math.max(13, Math.round(canvasWidth * 0.046));
+      ctx.font = `900 ${fontSize}px ${labelFont}`;
+      ctx.fillText(frameText.toUpperCase(), canvasWidth / 2, bannerH / 2 + 1);
+
+    } else if (outerFrame === 'frame-only') {
+      const strokeW = Math.max(4, Math.round(targetWidth * 0.022));
+      ctx.strokeStyle = frameBg;
+      ctx.lineWidth = strokeW;
+      const inset = strokeW / 2 + 3;
+      roundRect(ctx, inset, inset, canvasWidth - inset * 2, canvasHeight - inset * 2, Math.round(targetWidth * 0.075));
+      ctx.stroke();
 
     } else if (outerFrame === 'phone') {
       // Mockup de celular con notch superior y texto inferior
@@ -796,4 +845,95 @@ function drawImageOnCanvas(ctx: CanvasRenderingContext2D, src: string, x: number
     img.onerror = reject;
     img.src = src;
   });
+}
+
+/**
+ * Genera SVG vectorial 100% fiel con marco (incluido Solo Marco) y logotipo oficial real.
+ */
+export async function renderCustomQRSVG(
+  text: string,
+  config: QRDesignConfig
+): Promise<string> {
+  const content = text.trim() || 'https://lectorqr.atpdev.dev';
+  const qr = QRCode.create(content, {
+    errorCorrectionLevel: config.errorCorrection || 'H',
+  });
+
+  const targetWidth = 400;
+  const matrixSize = qr.modules.size;
+  const margin = config.margin ?? 2;
+  const totalModules = matrixSize + margin * 2;
+  const outerFrame = config.outer_frame || 'none';
+  const frameBg = config.framecolor || '#0284c7';
+  const frameTextColor = config.frame_text_color || '#ffffff';
+  const frameText = (config.framelabel?.trim() || 'ESCÁNAME').toUpperCase()
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  let canvasWidth = targetWidth;
+  let canvasHeight = targetWidth;
+  let qrX = 0;
+  let qrY = 0;
+
+  if (outerFrame === 'frame-only') {
+    const pad = 22;
+    canvasWidth = targetWidth + pad * 2;
+    canvasHeight = targetWidth + pad * 2;
+    qrX = pad;
+    qrY = pad;
+  } else if (outerFrame === 'rounded-card') {
+    canvasWidth = targetWidth + 24;
+    canvasHeight = targetWidth + 120;
+    qrX = 12;
+    qrY = 12;
+  } else if (outerFrame === 'bottom' || outerFrame === 'balloon-bottom' || outerFrame === 'ribbon-bottom') {
+    canvasHeight = targetWidth + 88;
+  } else if (outerFrame === 'top' || outerFrame === 'balloon-top' || outerFrame === 'ribbon-top' || outerFrame === 'badge') {
+    canvasHeight = targetWidth + 88;
+    qrY = 88;
+  }
+
+  const cellSize = targetWidth / totalModules;
+  const startX = qrX + margin * cellSize;
+  const startY = qrY + margin * cellSize;
+
+  let pathD = '';
+  for (let r = 0; r < matrixSize; r++) {
+    for (let c = 0; c < matrixSize; c++) {
+      if (qr.modules.get(r, c) === 1) {
+        const x = (startX + c * cellSize).toFixed(2);
+        const y = (startY + r * cellSize).toFixed(2);
+        const s = cellSize.toFixed(2);
+        pathD += `M${x} ${y}h${s}v${s}h-${s}z`;
+      }
+    }
+  }
+
+  const bgRect = config.transparent
+    ? ''
+    : `<rect width="${canvasWidth}" height="${canvasHeight}" fill="${config.backcolor || '#FFFFFF'}"/>`;
+
+  let frameMarkup = '';
+  if (outerFrame === 'frame-only') {
+    frameMarkup = `<rect x="7" y="7" width="${canvasWidth - 14}" height="${canvasHeight - 14}" rx="28" fill="none" stroke="${frameBg}" stroke-width="9"/>`;
+  } else if (outerFrame === 'rounded-card') {
+    frameMarkup = `<rect x="4" y="4" width="${canvasWidth - 8}" height="${canvasHeight - 8}" rx="24" fill="none" stroke="${frameBg}" stroke-width="6"/><rect x="44" y="${canvasHeight - 66}" width="${canvasWidth - 88}" height="52" rx="26" fill="${frameBg}"/><text x="${canvasWidth / 2}" y="${canvasHeight - 34}" text-anchor="middle" fill="${frameTextColor}" font-family="Arial,sans-serif" font-weight="900" font-size="21">${frameText}</text>`;
+  } else if (outerFrame === 'bottom' || outerFrame === 'balloon-bottom' || outerFrame === 'ribbon-bottom') {
+    frameMarkup = `<rect x="0" y="${targetWidth}" width="${canvasWidth}" height="88" rx="${outerFrame === 'bottom' ? 0 : 14}" fill="${frameBg}"/><text x="${canvasWidth / 2}" y="${targetWidth + 52}" text-anchor="middle" fill="${frameTextColor}" font-family="Arial,sans-serif" font-weight="900" font-size="22">${frameText}</text>`;
+  } else if (outerFrame === 'top' || outerFrame === 'balloon-top' || outerFrame === 'ribbon-top' || outerFrame === 'badge') {
+    frameMarkup = `<rect x="0" y="0" width="${canvasWidth}" height="88" rx="${outerFrame === 'top' || outerFrame === 'badge' ? 0 : 14}" fill="${frameBg}"/><text x="${canvasWidth / 2}" y="52" text-anchor="middle" fill="${frameTextColor}" font-family="Arial,sans-serif" font-weight="900" font-size="22">${frameText}</text>`;
+  }
+
+  let logoMarkup = '';
+  if (config.optionlogo && config.optionlogo !== 'none' && config.optionlogo !== 'upload') {
+    const logoRatio = (config.logoSize || 22) / 100;
+    const logoAreaSize = Math.round(targetWidth * logoRatio);
+    const cx = qrX + targetWidth / 2;
+    const cy = qrY + targetWidth / 2;
+    if (!config.no_logo_bg) {
+      logoMarkup += `<circle cx="${cx}" cy="${cy}" r="${logoAreaSize / 2 + cellSize * 0.6}" fill="${config.backcolor || '#FFFFFF'}" stroke="${config.frontcolor || '#000000'}" stroke-width="2"/>`;
+    }
+    logoMarkup += renderBrandLogoSVGMarkup(config.optionlogo, cx, cy, logoAreaSize);
+  }
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasWidth} ${canvasHeight}" width="${canvasWidth}" height="${canvasHeight}">${bgRect}<path d="${pathD}" fill="${config.frontcolor || '#000000'}"/>${logoMarkup}${frameMarkup}</svg>`;
 }

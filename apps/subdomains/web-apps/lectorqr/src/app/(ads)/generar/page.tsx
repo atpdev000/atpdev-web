@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import QRCode from 'qrcode';
 import { 
   Globe, 
   FileText, 
@@ -50,7 +49,87 @@ import {
   QRLabelFont
 } from '@/types';
 import { COUNTRIES, CountryItem } from '@/data/countries';
-import { renderCustomQRCode } from '@/lib/qrRenderer';
+import { renderCustomQRCode, renderCustomQRSVG } from '@/lib/qrRenderer';
+import { BRAND_LOGOS } from '@/lib/brandLogos';
+
+function BrandLogoBadge({ id }: { id: QROptionLogo }) {
+  const spec = BRAND_LOGOS[id];
+  if (!spec) return null;
+  const pad = Math.round((spec.viewBoxPaddingRatio ?? 0.18) * 24 * 10) / 10;
+  const inner = 24 - pad * 2;
+  const scale = inner / 24;
+  const gradId = `qr-ui-grad-${id}`;
+
+  return (
+    <svg viewBox="0 0 24 24" className="w-10 h-10 shrink-0 shadow-sm" aria-hidden="true">
+      {spec.gradient && (
+        <defs>
+          <linearGradient id={gradId} x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={spec.gradient[0]} />
+            <stop offset="50%" stopColor={spec.gradient[1]} />
+            <stop offset="100%" stopColor={spec.gradient[2]} />
+          </linearGradient>
+        </defs>
+      )}
+      {spec.shape === 'circle' ? (
+        <circle cx="12" cy="12" r="11.5" fill={spec.gradient ? `url(#${gradId})` : spec.bg} />
+      ) : (
+        <rect x="0.5" y="0.5" width="23" height="23" rx="6" fill={spec.gradient ? `url(#${gradId})` : spec.bg} />
+      )}
+      <g transform={`translate(${pad} ${pad}) scale(${scale})`}>
+        {spec.layers.map((layer, idx) => {
+          const tr = layer.dx || layer.dy ? `translate(${layer.dx || 0} ${layer.dy || 0})` : undefined;
+          if (layer.circle) {
+            return (
+              <circle
+                key={idx}
+                cx={layer.circle.cx}
+                cy={layer.circle.cy}
+                r={layer.circle.r}
+                fill={layer.fill || 'none'}
+                stroke={layer.stroke}
+                strokeWidth={layer.strokeWidth}
+                transform={tr}
+              />
+            );
+          }
+          if (layer.rect) {
+            return (
+              <rect
+                key={idx}
+                x={layer.rect.x}
+                y={layer.rect.y}
+                width={layer.rect.w}
+                height={layer.rect.h}
+                rx={layer.rect.rx}
+                fill={layer.fill || 'none'}
+                stroke={layer.stroke}
+                strokeWidth={layer.strokeWidth}
+                transform={tr}
+              />
+            );
+          }
+          if (layer.d) {
+            return (
+              <path
+                key={idx}
+                d={layer.d}
+                fill={layer.fill || 'none'}
+                fillRule="evenodd"
+                stroke={layer.stroke}
+                strokeWidth={layer.strokeWidth}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                transform={tr}
+              />
+            );
+          }
+          return null;
+        })}
+      </g>
+    </svg>
+  );
+}
 
 export default function GenerarStudioPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -378,19 +457,11 @@ export default function GenerarStudioPage() {
     }
   };
 
-  // Descarga SVG
+  // Descarga SVG vectorial con marco y logotipo real
   const downloadSVG = async () => {
     try {
       const rawData = computeRawData();
-      const svg = await QRCode.toString(rawData, {
-        type: 'svg',
-        margin: designConfig.margin,
-        color: {
-          dark: designConfig.frontcolor,
-          light: designConfig.transparent ? '#00000000' : designConfig.backcolor,
-        },
-        errorCorrectionLevel: designConfig.errorCorrection,
-      });
+      const svg = await renderCustomQRSVG(rawData, designConfig);
 
       const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
       const a = document.createElement('a');
@@ -1139,8 +1210,9 @@ export default function GenerarStudioPage() {
                   <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 block">
                     Estilos de Marco:
                   </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
+                      { id: 'frame-only', label: 'Solo Marco' },
                       { id: 'rounded-card', label: 'Tarjeta Redondeada' },
                       { id: 'none', label: 'Sin Marco' },
                       { id: 'bottom', label: 'Banner Inferior' },
@@ -1151,6 +1223,7 @@ export default function GenerarStudioPage() {
                       { id: 'ribbon-top', label: 'Cinta Superior' },
                       { id: 'phone', label: 'Marco Celular' },
                       { id: 'cine', label: 'Marco Cine' },
+                      { id: 'badge', label: 'Insignia Superior' },
                     ].map((m) => (
                       <button
                         key={m.id}
@@ -1158,7 +1231,7 @@ export default function GenerarStudioPage() {
                         onClick={() => setDesignConfig({ ...designConfig, outer_frame: m.id as QROuterFrame })}
                         className={`p-2.5 rounded-xl border text-[11px] font-bold text-center transition-all cursor-pointer ${
                           designConfig.outer_frame === m.id
-                            ? 'bg-blue-600/20 border-blue-500 text-blue-700 dark:text-blue-400 shadow-sm'
+                            ? 'bg-blue-600/15 border-blue-600 dark:border-blue-500 text-blue-700 dark:text-blue-400 shadow-sm'
                             : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                       >
@@ -1169,18 +1242,20 @@ export default function GenerarStudioPage() {
 
                   {designConfig.outer_frame !== 'none' && (
                     <div className="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
-                      <div>
-                        <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
-                          Texto del Marco (CTA):
-                        </label>
-                        <input
-                          type="text"
-                          value={designConfig.framelabel}
-                          onChange={(e) => setDesignConfig({ ...designConfig, framelabel: e.target.value })}
-                          placeholder="ESCÁNAME"
-                          className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-blue-500 focus:outline-none"
-                        />
-                      </div>
+                      {designConfig.outer_frame !== 'frame-only' && (
+                        <div>
+                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
+                            Texto del Marco (CTA):
+                          </label>
+                          <input
+                            type="text"
+                            value={designConfig.framelabel}
+                            onChange={(e) => setDesignConfig({ ...designConfig, framelabel: e.target.value })}
+                            placeholder="ESCÁNAME"
+                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs font-bold focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
@@ -1198,35 +1273,39 @@ export default function GenerarStudioPage() {
                           </div>
                         </div>
 
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
-                            Color Texto:
-                          </label>
-                          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                            <input
-                              type="color"
-                              value={designConfig.frame_text_color || '#ffffff'}
-                              onChange={(e) => setDesignConfig({ ...designConfig, frame_text_color: e.target.value })}
-                              className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
-                            />
-                            <span className="text-xs font-mono font-bold text-slate-900 dark:text-white uppercase">{designConfig.frame_text_color || '#ffffff'}</span>
-                          </div>
-                        </div>
+                        {designConfig.outer_frame !== 'frame-only' && (
+                          <>
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
+                                Color Texto:
+                              </label>
+                              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                                <input
+                                  type="color"
+                                  value={designConfig.frame_text_color || '#ffffff'}
+                                  onChange={(e) => setDesignConfig({ ...designConfig, frame_text_color: e.target.value })}
+                                  className="w-7 h-7 rounded-lg cursor-pointer bg-transparent border-0"
+                                />
+                                <span className="text-xs font-mono font-bold text-slate-900 dark:text-white uppercase">{designConfig.frame_text_color || '#ffffff'}</span>
+                              </div>
+                            </div>
 
-                        <div>
-                          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
-                            Tipografía:
-                          </label>
-                          <select
-                            value={designConfig.label_font}
-                            onChange={(e) => setDesignConfig({ ...designConfig, label_font: e.target.value as QRLabelFont })}
-                            className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-medium"
-                          >
-                            <option value="Arial, Helvetica, sans-serif">Arial / Sans-serif</option>
-                            <option value="'Times New Roman', Times, serif">Times New Roman / Serif</option>
-                            <option value="'Courier New', Courier, monospace">Courier New / Mono</option>
-                          </select>
-                        </div>
+                            <div>
+                              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide block mb-1">
+                                Tipografía:
+                              </label>
+                              <select
+                                value={designConfig.label_font}
+                                onChange={(e) => setDesignConfig({ ...designConfig, label_font: e.target.value as QRLabelFont })}
+                                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white text-xs cursor-pointer font-medium"
+                              >
+                                <option value="Arial, Helvetica, sans-serif">Arial / Sans-serif</option>
+                                <option value="'Times New Roman', Times, serif">Times New Roman / Serif</option>
+                                <option value="'Courier New', Courier, monospace">Courier New / Mono</option>
+                              </select>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1502,28 +1581,32 @@ export default function GenerarStudioPage() {
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                       {[
-                        { id: 'app', name: 'App Móvil', category: 'iOS / Android', badgeBg: 'bg-sky-500 text-white', symbol: '📱' },
-                        { id: 'pdf', name: 'Documento PDF', category: 'Archivo Digital', badgeBg: 'bg-red-600 text-white font-black', symbol: 'PDF' },
-                        { id: 'tiktok', name: 'TikTok', category: 'Red Oficial', badgeBg: 'bg-black text-cyan-300 border border-pink-500/80', symbol: '🎵' },
-                        { id: 'whatsapp', name: 'WhatsApp', category: 'Chat Directo', badgeBg: 'bg-emerald-600 text-white', symbol: 'WA' },
-                        { id: 'instagram', name: 'Instagram', category: 'Fotos & Reels', badgeBg: 'bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white', symbol: 'IG' },
-                        { id: 'facebook', name: 'Facebook', category: 'Red Social', badgeBg: 'bg-blue-600 text-white', symbol: 'f' },
-                        { id: 'youtube', name: 'YouTube', category: 'Canal de Video', badgeBg: 'bg-red-600 text-white', symbol: '▶' },
-                        { id: 'twitter', name: 'X / Twitter', category: 'Microblogging', badgeBg: 'bg-black text-white border border-slate-700', symbol: '𝕏' },
-                        { id: 'spotify', name: 'Spotify', category: 'Música & Podcast', badgeBg: 'bg-[#1DB954] text-black font-black', symbol: '♫' },
-                        { id: 'linkedin', name: 'LinkedIn', category: 'Red Profesional', badgeBg: 'bg-[#0A66C2] text-white', symbol: 'in' },
-                        { id: 'telegram', name: 'Telegram', category: 'Mensajería', badgeBg: 'bg-[#26A5E4] text-white', symbol: '✈' },
-                        { id: 'pinterest', name: 'Pinterest', category: 'Tableros', badgeBg: 'bg-[#E60023] text-white font-serif', symbol: 'P' },
-                        { id: 'paypal', name: 'PayPal', category: 'Pagos Online', badgeBg: 'bg-[#003087] text-cyan-400 font-bold', symbol: '🅿' },
-                        { id: 'btc', name: 'Bitcoin (BTC)', category: 'Criptomoneda', badgeBg: 'bg-[#F7931A] text-white font-bold', symbol: '₿' },
-                        { id: 'wifi', name: 'Wi-Fi', category: 'Red Inalámbrica', badgeBg: 'bg-cyan-600 text-white font-bold', symbol: 'WiFi' },
-                        { id: 'vcard', name: 'V-Card Contacto', category: 'Ficha Personal', badgeBg: 'bg-indigo-600 text-white', symbol: '📇' },
-                        { id: 'email', name: 'E-mail', category: 'Correo Electrónico', badgeBg: 'bg-rose-600 text-white', symbol: '@' },
-                        { id: 'link', name: 'Enlace Web', category: 'URL / Dominio', badgeBg: 'bg-blue-600 text-white', symbol: '🔗' },
-                        { id: 'location', name: 'Ubicación', category: 'Google Maps / GPS', badgeBg: 'bg-red-500 text-white', symbol: '📍' },
-                        { id: 'calendar', name: 'Evento Agenda', category: 'Fecha y Hora', badgeBg: 'bg-amber-600 text-white', symbol: '📅' },
-                        { id: 'images', name: 'Galería Fotos', category: 'Álbum Digital', badgeBg: 'bg-emerald-600 text-white', symbol: '🖼' },
-                        { id: 'none', name: 'Sin Logotipo', category: 'Solo Código QR', badgeBg: 'bg-slate-800 text-slate-300', symbol: '✖' },
+                        { id: 'whatsapp', name: 'WhatsApp', category: 'Chat Directo' },
+                        { id: 'instagram', name: 'Instagram', category: 'Fotos & Reels' },
+                        { id: 'facebook', name: 'Facebook', category: 'Red Social' },
+                        { id: 'tiktok', name: 'TikTok', category: 'Video Corto' },
+                        { id: 'youtube', name: 'YouTube', category: 'Canal de Video' },
+                        { id: 'twitter', name: 'X / Twitter', category: 'Microblogging' },
+                        { id: 'spotify', name: 'Spotify', category: 'Música & Podcast' },
+                        { id: 'linkedin', name: 'LinkedIn', category: 'Red Profesional' },
+                        { id: 'telegram', name: 'Telegram', category: 'Mensajería' },
+                        { id: 'pinterest', name: 'Pinterest', category: 'Tableros' },
+                        { id: 'paypal', name: 'PayPal', category: 'Pagos Online' },
+                        { id: 'btc', name: 'Bitcoin (BTC)', category: 'Criptomoneda' },
+                        { id: 'discord', name: 'Discord', category: 'Comunidad' },
+                        { id: 'twitch', name: 'Twitch', category: 'Streaming' },
+                        { id: 'appstore', name: 'App Store', category: 'iOS App' },
+                        { id: 'googleplay', name: 'Google Play', category: 'Android App' },
+                        { id: 'wifi', name: 'Wi-Fi', category: 'Red Inalámbrica' },
+                        { id: 'vcard', name: 'V-Card Contacto', category: 'Ficha Personal' },
+                        { id: 'email', name: 'E-mail', category: 'Correo Electrónico' },
+                        { id: 'link', name: 'Enlace Web', category: 'URL / Dominio' },
+                        { id: 'location', name: 'Ubicación', category: 'Google Maps / GPS' },
+                        { id: 'calendar', name: 'Evento Agenda', category: 'Fecha y Hora' },
+                        { id: 'pdf', name: 'Documento PDF', category: 'Archivo Digital' },
+                        { id: 'images', name: 'Galería Fotos', category: 'Álbum Digital' },
+                        { id: 'app', name: 'App Móvil', category: 'iOS / Android' },
+                        { id: 'none', name: 'Sin Logotipo', category: 'Solo Código QR' },
                       ].map((item) => {
                         const isSelected = designConfig.optionlogo === item.id;
                         return (
@@ -1533,20 +1616,18 @@ export default function GenerarStudioPage() {
                             onClick={() => setDesignConfig({ ...designConfig, optionlogo: item.id as QROptionLogo })}
                             className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-center gap-3 relative group ${
                               isSelected
-                                ? 'bg-blue-950/80 border-cyan-400 shadow-lg shadow-cyan-500/25 ring-1 ring-cyan-400'
-                                : 'bg-white/95 dark:bg-slate-950/90 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-900'
+                                ? 'bg-blue-50 dark:bg-blue-950/80 border-blue-600 dark:border-cyan-400 shadow-lg shadow-blue-500/15 dark:shadow-cyan-500/25 ring-1 ring-blue-500 dark:ring-cyan-400'
+                                : 'bg-white dark:bg-slate-950/90 border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900'
                             }`}
                           >
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shadow-md flex-shrink-0 ${item.badgeBg}`}>
-                              {item.symbol}
-                            </div>
+                            <BrandLogoBadge id={item.id as QROptionLogo} />
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-1">
-                                <span className={`text-xs font-bold truncate block ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
+                                <span className={`text-xs font-bold truncate block ${isSelected ? 'text-blue-950 dark:text-white' : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white'}`}>
                                   {item.name}
                                 </span>
                                 {isSelected && (
-                                  <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 ring-4 ring-cyan-400/20 flex-shrink-0" />
+                                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 dark:bg-cyan-400 ring-4 ring-blue-500/20 dark:ring-cyan-400/20 flex-shrink-0" />
                                 )}
                               </div>
                               <span className="text-[10px] text-slate-600 dark:text-slate-400 font-medium truncate block">
