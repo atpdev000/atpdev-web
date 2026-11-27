@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     // Notificación opcional a Telegram si el servidor tiene bot configurado
     const tgToken = process.env.TELEGRAM_BOT_TOKEN;
     const tgChat = process.env.TELEGRAM_CHAT_ID;
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || 'https://colorear.atpdev.dev').replace(/\/+$/, '');
     if (tgToken && tgChat) {
       const msg = [
         `🎨 Nueva orden ${method.toUpperCase()} en Colorear Pro`,
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
         `Monto: S/ ${amountPen} ($${amountUsd})`,
         `N° Operación: ${operationCode}`,
         payerPhone ? `Tel: ${payerPhone}` : '',
+        `Aprobar en 1 clic: ${siteUrl}/admin-pagos`,
       ]
         .filter(Boolean)
         .join('\n');

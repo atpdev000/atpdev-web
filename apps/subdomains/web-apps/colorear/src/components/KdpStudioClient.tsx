@@ -34,6 +34,7 @@ import {
 import { COLORING_SHEETS, svgToDataUrl } from '@/data/catalog';
 import InlineNotice from './InlineNotice';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PlannedPage {
   pageNumber: number;
@@ -45,6 +46,7 @@ type StudioTab = 'planner' | 'pages' | 'interior' | 'cover';
 
 export default function KdpStudioClient() {
   const { setUserCreditsLocal } = useAuth();
+  const { isEn } = useLanguage();
   const [activeTab, setActiveTab] = useState<StudioTab>('planner');
   const [notice, setNotice] = useState<{ tone: 'info' | 'warning' | 'error' | 'success'; title: string; message: string } | null>(null);
 
@@ -420,10 +422,10 @@ export default function KdpStudioClient() {
   };
 
   const TABS: Array<{ id: StudioTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
-    { id: 'planner', label: '1. Planificador IA', icon: Sparkles },
-    { id: 'pages', label: `2. Páginas y Line-Art (${pages.length})`, icon: Sliders },
-    { id: 'interior', label: '3. Interior PDF 300 DPI', icon: BookOpen },
-    { id: 'cover', label: '4. Portada y Lomo KDP', icon: Ruler },
+    { id: 'planner', label: isEn ? '1. AI Book Planner' : '1. Planificador IA', icon: Sparkles },
+    { id: 'pages', label: isEn ? `2. Pages & Line-Art (${pages.length})` : `2. Páginas y Line-Art (${pages.length})`, icon: Sliders },
+    { id: 'interior', label: isEn ? '3. 300 DPI Interior PDF' : '3. Interior PDF 300 DPI', icon: BookOpen },
+    { id: 'cover', label: isEn ? '4. Cover & KDP Spine' : '4. Portada y Lomo KDP', icon: Ruler },
   ];
 
   return (
@@ -432,12 +434,14 @@ export default function KdpStudioClient() {
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
         <div className="space-y-2 max-w-3xl">
           <h1 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-white leading-tight">
-            Estudio de Libros para Colorear — Amazon KDP
+            {isEn
+              ? 'Amazon KDP Coloring Book Studio'
+              : 'Estudio de Libros para Colorear — Amazon KDP'}
           </h1>
           <p className="text-sm text-zinc-600 dark:text-slate-300 leading-relaxed">
-            Planifica tu libro con IA, limpia ilustraciones a blanco y negro puro, escala a 300 DPI
-            reales y descarga el manuscrito interior con reversos en blanco + portada completa con
-            cálculo exacto del lomo.
+            {isEn
+              ? 'Plan your book with AI, clean illustrations to pure black & white, upscale to true 300 DPI, and export your interior PDF with blank anti-bleed verso pages plus exact spine-calculated full-wrap paperback cover.'
+              : 'Planifica tu libro con IA, limpia ilustraciones a blanco y negro puro, escala a 300 DPI reales y descarga el manuscrito interior con reversos en blanco + portada completa con cálculo exacto del lomo.'}
           </p>
         </div>
 
@@ -447,7 +451,7 @@ export default function KdpStudioClient() {
             onClick={handleLoadSampleBook}
             className="px-4 py-2.5 rounded-xl border border-zinc-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-zinc-50 dark:hover:bg-slate-800 text-xs font-bold text-zinc-800 dark:text-slate-200 cursor-pointer"
           >
-            Cargar 12 páginas de prueba
+            {isEn ? 'Load 12 sample pages' : 'Cargar 12 páginas de prueba'}
           </button>
           <button
             type="button"
@@ -458,7 +462,7 @@ export default function KdpStudioClient() {
             className="px-4 py-2.5 rounded-xl text-xs font-bold btn-studio-primary inline-flex items-center gap-1.5 cursor-pointer"
           >
             <Upload className="w-4 h-4" />
-            <span>Subir mis imágenes (ChatGPT / Canva)</span>
+            <span>{isEn ? 'Upload my drawings (ChatGPT / Canva)' : 'Subir mis imágenes (ChatGPT / Canva)'}</span>
           </button>
         </div>
       </div>
@@ -503,16 +507,17 @@ export default function KdpStudioClient() {
             className="lg:col-span-5 sheet-card rounded-3xl bg-white dark:bg-slate-900 p-6 space-y-4"
           >
             <h2 className="font-display font-bold text-xl text-zinc-900 dark:text-white">
-              Planificador de estructura KDP
+              {isEn ? 'KDP Book Outline Planner' : 'Planificador de estructura KDP'}
             </h2>
             <p className="text-xs text-zinc-600 dark:text-slate-400">
-              Genera el título SEO, subtítulo, contraportada, 7 palabras clave y la lista coherente de
-              escenas para que tu libro mantenga un mismo estilo de principio a fin.
+              {isEn
+                ? 'Generate your SEO title, subtitle, back-cover blurb, 7 KDP backend keywords, and consistent scene prompts.'
+                : 'Genera el título SEO, subtítulo, contraportada, 7 palabras clave y la lista coherente de escenas para que tu libro mantenga un mismo estilo de principio a fin.'}
             </p>
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-800 dark:text-slate-200 block">
-                Nicho o temática del libro
+                {isEn ? 'Book niche or theme' : 'Nicho o temática del libro'}
               </label>
               <input
                 type="text"
@@ -589,15 +594,15 @@ export default function KdpStudioClient() {
               disabled={planning}
               className="w-full py-3.5 px-4 rounded-2xl text-sm font-bold btn-studio-primary flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
-              {planning ? (
+                {planning ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Creando plan de libro con IA...</span>
+                  <span>{isEn ? 'Generating KDP outline...' : 'Creando plan de libro con IA...'}</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span>Generar plan y {plannedCount} prompts</span>
+                  <span>{isEn ? `Generate plan & ${plannedCount} prompts` : `Generar plan y ${plannedCount} prompts`}</span>
                 </>
               )}
             </button>
@@ -1099,7 +1104,13 @@ export default function KdpStudioClient() {
                 <Download className="w-4 h-4" />
               )}
               <span>
-                {buildingPdf ? 'Compilando PDF 300 DPI...' : 'Descargar Interior PDF para KDP'}
+                {buildingPdf
+                  ? isEn
+                    ? 'Compiling 300 DPI PDF...'
+                    : 'Compilando PDF 300 DPI...'
+                  : isEn
+                    ? 'Download KDP Interior PDF (300 DPI)'
+                    : 'Descargar Interior PDF para KDP'}
               </span>
             </button>
 
@@ -1108,7 +1119,7 @@ export default function KdpStudioClient() {
               onClick={() => setActiveTab('cover')}
               className="w-full py-3 px-4 rounded-2xl text-xs font-bold btn-studio-sun cursor-pointer"
             >
-              Ir al Paso 4: Generar Portada Full-Wrap →
+              {isEn ? 'Go to Step 4: Generate Full-Wrap Cover →' : 'Ir al Paso 4: Generar Portada Full-Wrap →'}
             </button>
           </div>
         </div>
@@ -1119,7 +1130,7 @@ export default function KdpStudioClient() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-5 sheet-card rounded-3xl bg-white dark:bg-slate-900 p-6 space-y-4">
             <h2 className="font-display font-bold text-xl text-zinc-900 dark:text-white">
-              Calculadora de Lomo y Portada KDP
+              {isEn ? 'KDP Spine Calculator & Paperback Cover' : 'Calculadora de Lomo y Portada KDP'}
             </h2>
 
             <div className="grid grid-cols-2 gap-3">
@@ -1223,7 +1234,15 @@ export default function KdpStudioClient() {
               ) : (
                 <Download className="w-4 h-4" />
               )}
-              <span>{buildingCover ? 'Generando Portada PDF...' : 'Descargar Portada Full-Wrap PDF'}</span>
+              <span>
+                {buildingCover
+                  ? isEn
+                    ? 'Building Cover PDF...'
+                    : 'Generando Portada PDF...'
+                  : isEn
+                    ? 'Download Full-Wrap KDP Cover PDF'
+                    : 'Descargar Portada Full-Wrap PDF'}
+              </span>
             </button>
           </div>
 

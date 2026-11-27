@@ -6,6 +6,7 @@ import { Download, Paintbrush, PlusCircle, Check, Loader2 } from 'lucide-react';
 import { ColoringSheet, svgToDataUrl } from '@/data/catalog';
 import { buildSingleSheetPdf, triggerPdfDownload } from '@/lib/kdpPdfBuilder';
 import InteractiveColoringModal from './InteractiveColoringModal';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SheetCardProps {
   sheet: ColoringSheet;
@@ -13,6 +14,7 @@ interface SheetCardProps {
 }
 
 export default function SheetCard({ sheet, onAddedToStudio }: SheetCardProps) {
+  const { isEn } = useLanguage();
   const [downloading, setDownloading] = useState(false);
   const [paintOpen, setPaintOpen] = useState(false);
   const [added, setAdded] = useState(false);
@@ -100,7 +102,7 @@ export default function SheetCard({ sheet, onAddedToStudio }: SheetCardProps) {
                 className="py-2 px-2.5 rounded-xl border border-zinc-300 dark:border-slate-700 bg-zinc-50 dark:bg-slate-800 hover:bg-yellow-50 dark:hover:bg-slate-700 text-xs font-bold text-zinc-900 dark:text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
               >
                 <Paintbrush className="w-3.5 h-3.5 text-amber-500" />
-                <span>Pintar</span>
+                <span>{isEn ? 'Color' : 'Pintar'}</span>
               </button>
 
               <button
@@ -126,12 +128,14 @@ export default function SheetCard({ sheet, onAddedToStudio }: SheetCardProps) {
               {added ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-emerald-600" />
-                  <span className="text-emerald-700 dark:text-emerald-400">Añadido al Estudio KDP</span>
+                  <span className="text-emerald-700 dark:text-emerald-400">
+                    {isEn ? 'Added to KDP Studio' : 'Añadido al Estudio KDP'}
+                  </span>
                 </>
               ) : (
                 <>
                   <PlusCircle className="w-3.5 h-3.5" />
-                  <span>Enviar al Estudio KDP</span>
+                  <span>{isEn ? 'Send to KDP Studio' : 'Enviar al Estudio KDP'}</span>
                 </>
               )}
             </button>

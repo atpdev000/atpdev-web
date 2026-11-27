@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -16,6 +16,8 @@ import {
   X,
   Zap,
   CheckCircle2,
+  Copy,
+  MessageCircle,
 } from 'lucide-react';
 import { COLOREAR_PLANS, ColorearPlan } from '@/lib/plans';
 import { useAuth } from '@/context/AuthContext';
@@ -34,6 +36,35 @@ export default function PlanesClient() {
   const [operationCode, setOperationCode] = useState('');
   const [payerPhone, setPayerPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [copiedNum, setCopiedNum] = useState(false);
+  const [lastOrderWhatsappUrl, setLastOrderWhatsappUrl] = useState<string | null>(null);
+  const [billingCfg, setBillingCfg] = useState<{
+    yapePhone: string | null;
+    plinPhone: string | null;
+    yapeHolder: string;
+    whatsappPhone: string | null;
+  }>({
+    yapePhone: null,
+    plinPhone: null,
+    yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
+    whatsappPhone: null,
+  });
+
+  useEffect(() => {
+    fetch('/api/billing/config', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d) {
+          setBillingCfg({
+            yapePhone: d.yapePhone || null,
+            plinPhone: d.plinPhone || null,
+            yapeHolder: d.yapeHolder || 'Percy Acha Taipe (ATP Dev Perú)',
+            whatsappPhone: d.whatsappPhone || null,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [notice, setNotice] = useState<{
     tone: 'info' | 'warning' | 'error' | 'success';
     title: string;
@@ -131,12 +162,20 @@ export default function PlanesClient() {
       }
 
       await refresh();
+      const createdCode = data.order?.orderCode || '';
+      if (billingCfg.whatsappPhone && createdCode) {
+        const waDigits = billingCfg.whatsappPhone.startsWith('51')
+          ? billingCfg.whatsappPhone
+          : `51${billingCfg.whatsappPhone}`;
+        const waMsg = `Hola ATP Dev, acabo de pagar mi ${selectedPlan.es.name} en Colorear Pro por ${yapeApp.toUpperCase()} (Orden: ${createdCode}, Operación: ${operationCode.trim()}, Correo: ${user?.email || ''}).`;
+        setLastOrderWhatsappUrl(`https://wa.me/${waDigits}?text=${encodeURIComponent(waMsg)}`);
+      }
       setOperationCode('');
       setPayerPhone('');
       setSelectedPlan(null);
       setNotice({
         tone: 'success',
-        title: isEn ? `Order ${data.order?.orderCode} submitted` : `Orden ${data.order?.orderCode} registrada`,
+        title: isEn ? `Order ${createdCode} submitted` : `Orden ${createdCode} registrada`,
         message: data.message,
       });
     } catch {
@@ -276,13 +315,29 @@ export default function PlanesClient() {
       </header>
 
       {notice && (
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-3">
           <InlineNotice
             tone={notice.tone}
             title={notice.title}
             message={notice.message}
-            onClose={() => setNotice(null)}
+            onClose={() => {
+              setNotice(null);
+              setLastOrderWhatsappUrl(null);
+            }}
           />
+          {lastOrderWhatsappUrl && (
+            <div className="flex justify-center">
+              <a
+                href={lastOrderWhatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-2 shadow-sm"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Enviar comprobante por WhatsApp para activación express</span>
+              </a>
+            </div>
+          )}
         </div>
       )}
 
@@ -579,10 +634,42 @@ export default function PlanesClient() {
                       </span>
                     </div>
                     <p className="text-violet-800 dark:text-violet-300 leading-relaxed">
-                      Titular: <strong>Percy Acha Taipe (ATP Dev Perú)</strong> • Concepto:{' '}
-                      <strong>Colorear Pro ({user?.email})</strong>. Luego registra abajo tu número de operación
-                      para acreditar tus <strong>+{selectedPlan.credits} créditos</strong> en tu cuenta.
+                      Titular: <strong>{billingCfg.yapeHolder}</strong> • Concepto:{' '}
+                      <strong>Colorear Pro ({user?.email})</strong>.
                     </p>
+                    {(yapeApp === 'yape' ? billingCfg.yapePhone : billingCfg.plinPhone) ? (
+                      <div className="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-slate-900 border border-violet-300 dark:border-violet-700 px-3 py-2">
+                        <div>
+                          <span className="text-[10px] uppercase font-bold text-zinc-500 block">
+                            Número {yapeApp.toUpperCase()} oficial
+                          </span>
+                          <span className="font-mono font-bold text-base text-zinc-900 dark:text-white">
+                            {yapeApp === 'yape' ? billingCfg.yapePhone : billingCfg.plinPhone}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const num = (yapeApp === 'yape' ? billingCfg.yapePhone : billingCfg.plinPhone) || '';
+                            navigator.clipboard?.writeText(num.replace(/\s+/g, ''));
+                            setCopiedNum(true);
+                            setTimeout(() => setCopiedNum(false), 2000);
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedNum ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                          <span>{copiedNum ? 'Copiado' : 'Copiar'}</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-violet-700 dark:text-violet-300">
+                        Solicita el número QR/Yape en{' '}
+                        <Link href="/contacto" className="underline font-bold">
+                          /contacto
+                        </Link>{' '}
+                        o registra aquí tu número de operación apenas realices la transferencia.
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-2">

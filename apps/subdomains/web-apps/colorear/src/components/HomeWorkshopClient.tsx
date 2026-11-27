@@ -23,6 +23,7 @@ import InteractiveColoringModal from './InteractiveColoringModal';
 import InlineNotice from './InlineNotice';
 import AdBanner from './AdBanner';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 const STYLE_OPTIONS = [
   { id: 'kawaii', label: 'Kawaii Bold & Easy' },
@@ -41,6 +42,7 @@ const QUICK_IDEAS = [
 
 export default function HomeWorkshopClient() {
   const { setUserCreditsLocal } = useAuth();
+  const { isEn } = useLanguage();
   const defaultSheet = COLORING_SHEETS[0];
   const [prompt, setPrompt] = useState('Un osito tierno leyendo un libro gigante bajo un árbol');
   const [style, setStyle] = useState('kawaii');
@@ -195,12 +197,14 @@ export default function HomeWorkshopClient() {
           <div className="lg:col-span-7 space-y-6">
             <div className="space-y-3">
               <h1 className="font-display font-bold text-3xl sm:text-5xl text-zinc-900 dark:text-white tracking-tight leading-[1.08]">
-                Crea dibujos para colorear en PDF y libros listos para Amazon KDP
+                {isEn
+                  ? 'Create 300 DPI printable coloring pages & Amazon KDP books'
+                  : 'Crea dibujos para colorear en PDF y libros listos para Amazon KDP'}
               </h1>
               <p className="text-base text-zinc-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-                Descarga láminas infantiles y mandalas gratis a 300 DPI, píntalos en pantalla o arma un
-                libro completo 8.5×11&quot; con trazos negros limpios, reversos en blanco y portada con
-                cálculo exacto del lomo.
+                {isEn
+                  ? 'Download free 300 DPI kids sheets and mandalas, paint online, or compile a complete 8.5×11" paperback with pure black outlines, blank verso backs, and exact spine-calculated cover.'
+                  : 'Descarga láminas infantiles y mandalas gratis a 300 DPI, píntalos en pantalla o arma un libro completo 8.5×11" con trazos negros limpios, reversos en blanco y portada con cálculo exacto del lomo.'}
               </p>
             </div>
 
@@ -278,12 +282,12 @@ export default function HomeWorkshopClient() {
                   {isGenerating ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Dibujando trazos limpios...</span>
+                      <span>{isEn ? 'Drawing crisp outlines...' : 'Dibujando trazos limpios...'}</span>
                     </>
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      <span>Generar lámina gratis</span>
+                      <span>{isEn ? 'Generate free sheet' : 'Generar lámina gratis'}</span>
                     </>
                   )}
                 </button>
@@ -293,7 +297,7 @@ export default function HomeWorkshopClient() {
                   className="py-3.5 px-5 rounded-2xl text-sm font-bold btn-studio-sun flex items-center justify-center gap-2"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Abrir Estudio KDP</span>
+                  <span>{isEn ? 'Open KDP Studio' : 'Abrir Estudio KDP'}</span>
                 </Link>
               </div>
             </form>

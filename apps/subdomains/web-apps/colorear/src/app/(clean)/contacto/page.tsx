@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Mail, Globe, BookOpen } from 'lucide-react';
+import ContactoFormClient from '@/components/ContactoFormClient';
 
 export const metadata: Metadata = {
   title: 'Contacto y Activación de Créditos',
@@ -56,6 +57,8 @@ export default function ContactoPage() {
           </a>
         </div>
       </div>
+
+      <ContactoFormClient />
 
       <div className="sheet-card rounded-2xl bg-zinc-50 dark:bg-slate-900/60 p-5 flex items-start gap-3 text-xs text-zinc-600 dark:text-slate-400">
         <BookOpen className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
