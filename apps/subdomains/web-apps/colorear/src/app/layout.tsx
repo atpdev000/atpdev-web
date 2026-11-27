@@ -8,14 +8,12 @@ import CookieBanner from '@/components/CookieBanner';
 
 const fredoka = Fredoka({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
   variable: '--font-fredoka',
   display: 'swap',
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-jakarta',
   display: 'swap',
 });
