@@ -84,11 +84,18 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const model = process.env.GEMINI_TEXT_MODEL || 'gemini-3.8-flash';
+    const candidateModels = Array.from(
+      new Set([
+        ...(process.env.GEMINI_TEXT_MODEL ? [process.env.GEMINI_TEXT_MODEL] : []),
+        'gemini-flash-lite-latest',
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash',
+        'gemini-3.6-flash',
+      ])
+    );
 
     if (apiKey) {
-      try {
-        const promptText = `Actúa como editor experto de libros para colorear en Amazon KDP.
+      const promptText = `Actúa como editor experto de libros para colorear en Amazon KDP.
 Crea la estructura comercial de un libro para colorear sobre: "${topic}".
 Público objetivo: ${ageGroup}.
 Estilo visual: ${style}.
@@ -110,23 +117,25 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin explicaciones
   ]
 }`;
 
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }] }],
-              generationConfig: {
-                temperature: 0.75,
-                responseMimeType: 'application/json',
-              },
-            }),
-            signal: AbortSignal.timeout(25000),
-          }
-        );
+      for (const model of candidateModels) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: promptText }] }],
+                generationConfig: {
+                  temperature: 0.75,
+                  responseMimeType: 'application/json',
+                },
+              }),
+              signal: AbortSignal.timeout(15000),
+            }
+          );
 
-        if (res.ok) {
+          if (!res.ok) continue;
           const data = await res.json();
           const rawText: string = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
           const cleaned = rawText.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
@@ -145,9 +154,9 @@ Responde ÚNICAMENTE con un objeto JSON válido (sin markdown, sin explicaciones
               provider: model,
             });
           }
+        } catch (err) {
+          console.warn(`[generate-outline] Modelo ${model} falló, probando siguiente:`, err);
         }
-      } catch (err) {
-        console.warn('[generate-outline] Fallback activado:', err);
       }
     }
 
