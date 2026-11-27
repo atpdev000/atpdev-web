@@ -43,17 +43,6 @@ function GoogleLogo() {
   );
 }
 
-function FacebookLogo() {
-  return (
-    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#FFFFFF"
-        d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07c0 6.02 4.39 11.01 10.13 11.92v-8.43H7.08v-3.49h3.05V9.41c0-3.03 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.27h3.33l-.53 3.49h-2.8v8.43C19.61 23.08 24 18.09 24 12.07Z"
-      />
-    </svg>
-  );
-}
-
 export default function CuentaClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -67,34 +56,32 @@ export default function CuentaClient() {
   const oauthSuccess = searchParams.get('oauth');
   const oauthWelcome = searchParams.get('welcome');
   const oauthError = searchParams.get('oauth_error');
-  const oauthErrorProvider = searchParams.get('provider');
 
   const [mode, setMode] = useState<'login' | 'register'>(initialMode);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [oauthRedirecting, setOauthRedirecting] = useState<'google' | 'facebook' | null>(null);
+  const [googleRedirecting, setGoogleRedirecting] = useState(false);
   const [notice, setNotice] = useState<{
     tone: 'info' | 'warning' | 'error' | 'success';
     title: string;
     message: string;
   } | null>(null);
 
-  // Avisos de retorno de OAuth Google / Facebook
+  // Avisos de retorno de Google OAuth
   useEffect(() => {
-    if (oauthSuccess === 'google' || oauthSuccess === 'facebook') {
-      const label = oauthSuccess === 'google' ? 'Google' : 'Facebook';
+    if (oauthSuccess === 'google') {
       setNotice({
         tone: 'success',
         title:
           oauthWelcome === '1'
             ? isEn
-              ? `Welcome with ${label}! (+15 free credits)`
-              : `¡Bienvenido con ${label}! (+15 créditos gratis)`
+              ? 'Welcome with Google! (+15 free credits)'
+              : '¡Bienvenido con Google! (+15 créditos gratis)'
             : isEn
-              ? `Signed in with ${label}`
-              : `Sesión iniciada con ${label}`,
+              ? 'Signed in with Google'
+              : 'Sesión iniciada con Google',
         message:
           oauthWelcome === '1'
             ? isEn
@@ -109,27 +96,26 @@ export default function CuentaClient() {
     }
 
     if (oauthError) {
-      const pName = oauthErrorProvider === 'facebook' ? 'Facebook' : 'Google';
       const friendly =
         oauthError === 'access_denied'
           ? isEn
-            ? `You cancelled the ${pName} sign-in dialog.`
-            : `Cancelaste el inicio de sesión con ${pName}.`
+            ? 'You cancelled the Google sign-in dialog.'
+            : 'Cancelaste el inicio de sesión con Google.'
           : oauthError === 'not_configured'
             ? isEn
-              ? `${pName} OAuth is not active on this environment yet. You can still sign in with email.`
-              : `El acceso con ${pName} aún no está configurado en este servidor. Puedes usar tu correo mientras tanto.`
+              ? 'Google sign-in is not active on this environment yet. You can still sign in with email.'
+              : 'El acceso con Google aún no está configurado en este servidor. Puedes usar tu correo mientras tanto.'
             : isEn
-              ? `Could not finish ${pName} authentication (${oauthError}). Try again or sign in with email.`
-              : `No pudimos completar la autenticación con ${pName} (${oauthError}). Intenta nuevamente o usa tu correo.`;
+              ? `Could not finish Google authentication (${oauthError}). Try again or sign in with email.`
+              : `No pudimos completar la autenticación con Google (${oauthError}). Intenta nuevamente o usa tu correo.`;
 
       setNotice({
         tone: 'warning',
-        title: isEn ? `${pName} Sign-In Notice` : `Aviso de acceso con ${pName}`,
+        title: isEn ? 'Google Sign-In Notice' : 'Aviso de acceso con Google',
         message: friendly,
       });
     }
-  }, [oauthSuccess, oauthWelcome, oauthError, oauthErrorProvider, isEn, refresh]);
+  }, [oauthSuccess, oauthWelcome, oauthError, isEn, refresh]);
 
   // Confirmar automáticamente Stripe session_id cuando regresa del checkout
   useEffect(() => {
@@ -161,10 +147,10 @@ export default function CuentaClient() {
     };
   }, [user, paymentStatus, sessionId, refresh, isEn]);
 
-  const handleOAuthStart = (provider: 'google' | 'facebook') => {
-    setOauthRedirecting(provider);
+  const handleGoogleStart = () => {
+    setGoogleRedirecting(true);
     const returnTo = requestedPlan && requestedPlan !== 'free' ? '/planes' : '/cuenta';
-    window.location.href = `/api/auth/oauth/${provider}?returnTo=${encodeURIComponent(returnTo)}`;
+    window.location.href = `/api/auth/oauth/google?returnTo=${encodeURIComponent(returnTo)}`;
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -228,8 +214,6 @@ export default function CuentaClient() {
   }
 
   if (!user) {
-    const hasSocial = oauthProviders.google || oauthProviders.facebook;
-
     return (
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
@@ -249,8 +233,8 @@ export default function CuentaClient() {
           <p className="text-xs text-zinc-600 dark:text-slate-400">
             {requestedPlan
               ? isEn
-                ? 'Sign in with Google, Facebook, or email so your credit pack stays linked permanently.'
-                : 'Entra en 1 clic con Google, Facebook o correo para vincular tus créditos y pedidos de forma segura.'
+                ? 'Sign in with Google or email so your credit pack stays linked permanently.'
+                : 'Entra en 1 clic con Google o correo para vincular tus créditos y pedidos de forma segura.'
               : isEn
                 ? 'Manage your KDP credits, order receipts, and priority AI generations.'
                 : 'Administra tus créditos IA, historial de pedidos Stripe/Yape y acceso prioritario al Estudio KDP.'}
@@ -267,40 +251,22 @@ export default function CuentaClient() {
         )}
 
         <div className="sheet-card rounded-3xl bg-white dark:bg-slate-900 p-6 space-y-5">
-          {/* Botones oficiales OAuth 2.0 Google & Facebook */}
-          {hasSocial && (
+          {/* Botón oficial OAuth 2.0 Google */}
+          {oauthProviders.google && (
             <div className="space-y-2.5">
-              {oauthProviders.google && (
-                <button
-                  type="button"
-                  disabled={oauthRedirecting !== null}
-                  onClick={() => handleOAuthStart('google')}
-                  className="w-full py-3 px-4 rounded-2xl border-2 border-zinc-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-zinc-50 dark:hover:bg-slate-800 text-sm font-bold text-zinc-900 dark:text-white flex items-center justify-center gap-2.5 cursor-pointer transition-colors disabled:opacity-60"
-                >
-                  {oauthRedirecting === 'google' ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                  ) : (
-                    <GoogleLogo />
-                  )}
-                  <span>{isEn ? 'Continue with Google' : 'Continuar con Google'}</span>
-                </button>
-              )}
-
-              {oauthProviders.facebook && (
-                <button
-                  type="button"
-                  disabled={oauthRedirecting !== null}
-                  onClick={() => handleOAuthStart('facebook')}
-                  className="w-full py-3 px-4 rounded-2xl bg-[#1877F2] hover:bg-[#166FE5] text-sm font-bold text-white flex items-center justify-center gap-2.5 cursor-pointer transition-colors shadow-xs disabled:opacity-60"
-                >
-                  {oauthRedirecting === 'facebook' ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  ) : (
-                    <FacebookLogo />
-                  )}
-                  <span>{isEn ? 'Continue with Facebook' : 'Continuar con Facebook'}</span>
-                </button>
-              )}
+              <button
+                type="button"
+                disabled={googleRedirecting}
+                onClick={handleGoogleStart}
+                className="w-full py-3.5 px-4 rounded-2xl border-2 border-zinc-200 dark:border-slate-700 bg-white dark:bg-slate-950 hover:bg-zinc-50 dark:hover:bg-slate-800 text-sm font-bold text-zinc-900 dark:text-white flex items-center justify-center gap-2.5 cursor-pointer transition-colors disabled:opacity-60"
+              >
+                {googleRedirecting ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                ) : (
+                  <GoogleLogo />
+                )}
+                <span>{isEn ? 'Continue with Google' : 'Continuar con Google'}</span>
+              </button>
 
               <div className="relative py-1 flex items-center">
                 <div className="flex-1 border-t border-zinc-200 dark:border-slate-800" />
@@ -405,8 +371,8 @@ export default function CuentaClient() {
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
             <span>
               {isEn
-                ? 'OAuth 2.0 CSRF-protected login • Zero spam'
-                : 'Autenticación OAuth 2.0 segura con CSRF • Cero spam'}
+                ? 'Google OAuth 2.0 CSRF-protected login • Zero spam'
+                : 'Acceso seguro con Google OAuth 2.0 • Cero spam'}
             </span>
           </p>
         </div>

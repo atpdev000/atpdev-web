@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'node:crypto';
 import {
-  exchangeCodeForProfile,
+  exchangeGoogleCodeForProfile,
   getSiteUrl,
   OAUTH_STATE_COOKIE,
-  OAuthProvider,
   verifySignedOAuthState,
 } from '@/lib/server/oauth';
 import { hashPassword, signJwt } from '@/lib/server/crypto';
-import { upsertOAuthUser } from '@/lib/server/store';
+import { upsertGoogleOAuthUser } from '@/lib/server/store';
 import { attachSessionCookie } from '@/lib/server/session';
 
 export async function GET(
@@ -16,19 +15,17 @@ export async function GET(
   { params }: { params: Promise<{ provider: string }> }
 ) {
   const { provider: rawProvider } = await params;
-  const provider = rawProvider.toLowerCase() as OAuthProvider;
+  const provider = rawProvider.toLowerCase();
   const siteUrl = getSiteUrl();
 
-  if (provider !== 'google' && provider !== 'facebook') {
+  if (provider !== 'google') {
     return NextResponse.redirect(`${siteUrl}/cuenta?oauth_error=invalid_provider`);
   }
 
   const url = req.nextUrl;
   const oauthErr = url.searchParams.get('error');
   if (oauthErr) {
-    return NextResponse.redirect(
-      `${siteUrl}/cuenta?oauth_error=${encodeURIComponent(oauthErr)}&provider=${provider}`
-    );
+    return NextResponse.redirect(`${siteUrl}/cuenta?oauth_error=${encodeURIComponent(oauthErr)}`);
   }
 
   const code = url.searchParams.get('code');
@@ -36,25 +33,24 @@ export async function GET(
   const stateCookie = req.cookies.get(OAUTH_STATE_COOKIE)?.value || '';
 
   if (!code || !stateParam || !stateCookie || stateParam !== stateCookie) {
-    return NextResponse.redirect(`${siteUrl}/cuenta?oauth_error=invalid_state&provider=${provider}`);
+    return NextResponse.redirect(`${siteUrl}/cuenta?oauth_error=invalid_state`);
   }
 
-  const verifiedState = verifySignedOAuthState(stateParam, provider);
+  const verifiedState = verifySignedOAuthState(stateParam);
   if (!verifiedState) {
-    return NextResponse.redirect(`${siteUrl}/cuenta?oauth_error=expired_state&provider=${provider}`);
+    return NextResponse.redirect(`${siteUrl}/cuenta?oauth_error=expired_state`);
   }
 
-  const { profile, errorReason } = await exchangeCodeForProfile(provider, code);
+  const { profile, errorReason } = await exchangeGoogleCodeForProfile(code);
   if (!profile) {
     return NextResponse.redirect(
-      `${siteUrl}/cuenta?oauth_error=${encodeURIComponent(errorReason || 'exchange_failed')}&provider=${provider}`
+      `${siteUrl}/cuenta?oauth_error=${encodeURIComponent(errorReason || 'exchange_failed')}`
     );
   }
 
-  const { hash, salt } = hashPassword(`oauth-${provider}-${randomBytes(24).toString('hex')}`);
-  const { user, isNew } = upsertOAuthUser({
-    provider,
-    providerUserId: profile.providerUserId,
+  const { hash, salt } = hashPassword(`oauth-google-${randomBytes(24).toString('hex')}`);
+  const { user, isNew } = upsertGoogleOAuthUser({
+    googleUserId: profile.providerUserId,
     email: profile.email,
     name: profile.name,
     avatarUrl: profile.avatarUrl,
@@ -65,7 +61,7 @@ export async function GET(
   const token = signJwt(user.id, user.email, user.role);
   const targetPath = verifiedState.returnTo || '/cuenta';
   const sep = targetPath.includes('?') ? '&' : '?';
-  const redirectUrl = `${siteUrl}${targetPath}${sep}oauth=${provider}&welcome=${isNew ? '1' : '0'}`;
+  const redirectUrl = `${siteUrl}${targetPath}${sep}oauth=google&welcome=${isNew ? '1' : '0'}`;
 
   const res = NextResponse.redirect(redirectUrl);
   attachSessionCookie(res, token);

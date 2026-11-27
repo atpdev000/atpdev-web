@@ -14,10 +14,9 @@ export interface StoredUser {
   credits: number;
   totalGenerated: number;
   avatarUrl?: string;
-  authProviders?: Array<'email' | 'google' | 'facebook'>;
+  authProviders?: Array<'email' | 'google'>;
   providerIds?: {
     google?: string;
-    facebook?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -155,9 +154,8 @@ export function createUser(input: {
   return user;
 }
 
-export function upsertOAuthUser(input: {
-  provider: 'google' | 'facebook';
-  providerUserId: string;
+export function upsertGoogleOAuthUser(input: {
+  googleUserId: string;
   email: string;
   name: string;
   avatarUrl?: string;
@@ -170,17 +168,19 @@ export function upsertOAuthUser(input: {
 
   let user = db.users.find(
     (u) =>
-      u.providerIds?.[input.provider] === input.providerUserId ||
+      u.providerIds?.google === input.googleUserId ||
       u.email.toLowerCase() === cleanEmail
   );
 
   if (user) {
-    const providers = new Set<'email' | 'google' | 'facebook'>(user.authProviders || ['email']);
-    providers.add(input.provider);
+    const providers = new Set<'email' | 'google'>(
+      (user.authProviders || ['email']).filter((p): p is 'email' | 'google' => p === 'email' || p === 'google')
+    );
+    providers.add('google');
     user.authProviders = Array.from(providers);
     user.providerIds = {
       ...(user.providerIds || {}),
-      [input.provider]: input.providerUserId,
+      google: input.googleUserId,
     };
     if (input.name && (!user.name || user.name === 'Creador KDP')) {
       user.name = input.name.trim().slice(0, 80);
@@ -193,7 +193,7 @@ export function upsertOAuthUser(input: {
     db.audit.push({
       id: generateId('aud'),
       userId: user.id,
-      action: `auth.oauth_login.${input.provider}`,
+      action: 'auth.oauth_login.google',
       createdAt: now,
     });
     writeDb(db);
@@ -202,7 +202,7 @@ export function upsertOAuthUser(input: {
 
   user = {
     id: generateId('usr'),
-    name: input.name.trim().slice(0, 80) || `Usuario ${input.provider === 'google' ? 'Google' : 'Facebook'}`,
+    name: input.name.trim().slice(0, 80) || 'Usuario Google',
     email: cleanEmail,
     passwordHash: input.passwordHash,
     salt: input.salt,
@@ -211,9 +211,9 @@ export function upsertOAuthUser(input: {
     credits: WELCOME_FREE_CREDITS,
     totalGenerated: 0,
     avatarUrl: input.avatarUrl,
-    authProviders: [input.provider],
+    authProviders: ['google'],
     providerIds: {
-      [input.provider]: input.providerUserId,
+      google: input.googleUserId,
     },
     createdAt: now,
     updatedAt: now,
@@ -222,7 +222,7 @@ export function upsertOAuthUser(input: {
   db.audit.push({
     id: generateId('aud'),
     userId: user.id,
-    action: `auth.oauth_register.${input.provider}`,
+    action: 'auth.oauth_register.google',
     meta: { welcomeCredits: WELCOME_FREE_CREDITS },
     createdAt: now,
   });

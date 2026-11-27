@@ -12,7 +12,7 @@ export interface AuthUser {
   credits: number;
   totalGenerated: number;
   avatarUrl?: string | null;
-  authProviders?: Array<'email' | 'google' | 'facebook'>;
+  authProviders?: Array<'email' | 'google'>;
   createdAt: string;
 }
 
@@ -33,7 +33,6 @@ export interface UserOrder {
 
 export interface OAuthProvidersStatus {
   google: boolean;
-  facebook: boolean;
 }
 
 interface AuthContextValue {
@@ -51,7 +50,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   orders: [],
   stripeConfigured: false,
-  oauthProviders: { google: false, facebook: false },
+  oauthProviders: { google: false },
   loading: true,
   refresh: async () => {},
   logout: async () => {},
@@ -64,7 +63,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [stripeConfigured, setStripeConfigured] = useState(false);
   const [oauthProviders, setOauthProviders] = useState<OAuthProvidersStatus>({
     google: false,
-    facebook: false,
   });
   const [loading, setLoading] = useState(true);
 
@@ -76,7 +74,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data?.oauthProviders) {
         setOauthProviders({
           google: Boolean(data.oauthProviders.google),
-          facebook: Boolean(data.oauthProviders.facebook),
         });
       }
       if (data?.authenticated && data.user) {
