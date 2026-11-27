@@ -5,6 +5,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CookieBanner from '@/components/CookieBanner';
+import Providers from '@/components/Providers';
 
 const fredoka = Fredoka({
   subsets: ['latin'],
@@ -44,6 +45,11 @@ export const metadata: Metadata = {
   authors: [{ name: 'ATP Dev Perú', url: 'https://www.atpdev.dev' }],
   alternates: {
     canonical: 'https://colorear.atpdev.dev',
+    languages: {
+      es: 'https://colorear.atpdev.dev/',
+      en: 'https://colorear.atpdev.dev/en',
+      'x-default': 'https://colorear.atpdev.dev/',
+    },
   },
   openGraph: {
     title: 'Colorear Pro — Láminas Gratis en PDF y Estudio de Libros Amazon KDP',
@@ -55,7 +61,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://www.atpdev.dev/og-image.png',
+        url: 'https://colorear.atpdev.dev/opengraph-image',
         width: 1200,
         height: 630,
         alt: 'Colorear Pro — Láminas PDF 300 DPI y Estudio KDP',
@@ -67,7 +73,7 @@ export const metadata: Metadata = {
     title: 'Colorear Pro — Dibujos PDF Gratis y Estudio Amazon KDP',
     description:
       'Láminas infantiles y mandalas gratis a 300 DPI + compilador de libros para colorear listos para Amazon KDP.',
-    images: ['https://www.atpdev.dev/og-image.png'],
+    images: ['https://colorear.atpdev.dev/opengraph-image'],
   },
 };
 
@@ -143,10 +149,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(rootJsonLd) }}
         />
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
-        <CookieBanner />
+        <Providers>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <CookieBanner />
+        </Providers>
       </body>
     </html>
   );

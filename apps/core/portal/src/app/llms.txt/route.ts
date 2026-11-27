@@ -48,6 +48,7 @@ ${blogLines}
 ## Proyectos y Aplicaciones Publicadas
 
 ${projectLines || `- [Proyectos ATP Dev](${BASE_URL}/#portfolio): Catálogo de aplicaciones y sistemas web.`}
+- [Colorear Pro & Estudio Amazon KDP](https://colorear.atpdev.dev): Biblioteca gratuita de dibujos para colorear en PDF 300 DPI, pizarra interactiva online y estudio editorial para libros Amazon KDP con limpieza line-art y cálculo exacto de lomo.
 
 ## Información Legal y Políticas
 

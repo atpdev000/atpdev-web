@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuthenticatedUser } from '@/lib/server/session';
+import { consumeUserCredit, recordFreeGeneration } from '@/lib/server/store';
 
 const STYLE_MODIFIERS: Record<string, string> = {
   kawaii: 'cute kawaii bold and easy style, very thick uniform black outlines, simple charming shapes, cozy storybook look',
@@ -158,18 +160,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const authUser = getAuthenticatedUser(request);
+    const hasProCredits = Boolean(authUser && authUser.credits > 0);
+
     const forwarded = request.headers.get('x-forwarded-for') || '';
     const ip = forwarded.split(',')[0].trim() || 'local';
-    const quota = checkIpQuota(ip);
-    if (!quota.allowed) {
-      return NextResponse.json(
-        {
-          error:
-            'Alcanzaste el límite gratuito diario de generaciones IA (25/día). Puedes seguir usando la biblioteca gratuita, subir tus propias imágenes al Estudio KDP o activar un paquete de créditos Pro.',
-        },
-        { status: 429 }
-      );
+    let remainingToday: number | undefined;
+
+    if (!hasProCredits) {
+      const quota = checkIpQuota(ip);
+      if (!quota.allowed) {
+        return NextResponse.json(
+          {
+            error:
+              'Alcanzaste el límite gratuito diario de generaciones IA (25/día). Crea una cuenta gratuita para recibir 15 créditos extra o activa un Pack Creador KDP en /planes.',
+          },
+          { status: 429 }
+        );
+      }
+      remainingToday = quota.remaining;
     }
+
+    const finalizeResponse = (imageDataUrl: string, provider: string) => {
+      if (authUser && hasProCredits) {
+        const updated = consumeUserCredit(authUser.id, 1);
+        return NextResponse.json({
+          imageDataUrl,
+          provider,
+          usedCredit: true,
+          creditsRemaining: updated ? updated.credits : Math.max(0, authUser.credits - 1),
+          plan: updated?.plan || authUser.plan,
+        });
+      }
+      if (authUser) {
+        recordFreeGeneration(authUser.id);
+      }
+      return NextResponse.json({
+        imageDataUrl,
+        provider,
+        usedCredit: false,
+        remainingToday,
+      });
+    };
 
     const fullPrompt = buildStrictColoringPrompt(rawPrompt, style);
     const width = aspect === 'square' ? 1024 : 832;
@@ -196,11 +228,7 @@ export async function POST(request: NextRequest) {
           const data = await res.json();
           const b64 = data?.data?.[0]?.b64_json;
           if (b64) {
-            return NextResponse.json({
-              imageDataUrl: `data:image/png;base64,${b64}`,
-              provider: 'openai',
-              remainingToday: quota.remaining,
-            });
+            return finalizeResponse(`data:image/png;base64,${b64}`, 'openai');
           }
         }
       } catch (e) {
@@ -231,11 +259,7 @@ export async function POST(request: NextRequest) {
           const imgPart = parts.find((p: any) => p?.inlineData?.data);
           if (imgPart?.inlineData?.data) {
             const mime = imgPart.inlineData.mimeType || 'image/png';
-            return NextResponse.json({
-              imageDataUrl: `data:${mime};base64,${imgPart.inlineData.data}`,
-              provider: imgModel,
-              remainingToday: quota.remaining,
-            });
+            return finalizeResponse(`data:${mime};base64,${imgPart.inlineData.data}`, imgModel);
           }
         }
       } catch (e) {
@@ -246,11 +270,7 @@ export async function POST(request: NextRequest) {
     // 3. Motor vectorial IA en vivo con Gemini (SVG puro 300 DPI, cero marcas de agua, trazos limpios)
     const vectorResult = await generateVectorSvgWithGemini(rawPrompt, style, aspect);
     if (vectorResult) {
-      return NextResponse.json({
-        imageDataUrl: vectorResult.dataUrl,
-        provider: vectorResult.model,
-        remainingToday: quota.remaining,
-      });
+      return finalizeResponse(vectorResult.dataUrl, vectorResult.model);
     }
 
     // 4. Respaldo raster gratuito (Pollinations, si está disponible)
@@ -272,11 +292,7 @@ export async function POST(request: NextRequest) {
           const arrayBuffer = await pollRes.arrayBuffer();
           if (arrayBuffer.byteLength > 2000) {
             const b64 = Buffer.from(arrayBuffer).toString('base64');
-            return NextResponse.json({
-              imageDataUrl: `data:${contentType};base64,${b64}`,
-              provider: 'ia-raster',
-              remainingToday: quota.remaining,
-            });
+            return finalizeResponse(`data:${contentType};base64,${b64}`, 'ia-raster');
           }
         }
       }

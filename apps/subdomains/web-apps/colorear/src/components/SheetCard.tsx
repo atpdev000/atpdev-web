@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Download, Paintbrush, PlusCircle, Check, Loader2 } from 'lucide-react';
 import { ColoringSheet, svgToDataUrl } from '@/data/catalog';
 import { buildSingleSheetPdf, triggerPdfDownload } from '@/lib/kdpPdfBuilder';
@@ -55,14 +56,17 @@ export default function SheetCard({ sheet, onAddedToStudio }: SheetCardProps) {
     <>
       <article className="sheet-card rounded-2xl bg-white dark:bg-slate-900 overflow-hidden flex flex-col">
         <div className="p-3 bg-zinc-50 dark:bg-slate-950/70 border-b border-zinc-200 dark:border-slate-800">
-          <div className="aspect-[8.5/11] w-full rounded-xl bg-white overflow-hidden border border-zinc-200 flex items-center justify-center p-1">
+          <Link
+            href={`/dibujos/${sheet.category}/${sheet.id}`}
+            className="aspect-[8.5/11] w-full rounded-xl bg-white overflow-hidden border border-zinc-200 flex items-center justify-center p-1 hover:border-blue-500 transition-colors"
+          >
             <img
               src={previewUrl}
               alt={`${sheet.title} — lámina para colorear gratis`}
               className="w-full h-full object-contain"
               loading="lazy"
             />
-          </div>
+          </Link>
         </div>
 
         <div className="p-4 flex-1 flex flex-col justify-between gap-3">
@@ -76,7 +80,12 @@ export default function SheetCard({ sheet, onAddedToStudio }: SheetCardProps) {
               </span>
             </div>
             <h3 className="font-display font-bold text-base text-zinc-900 dark:text-white leading-snug">
-              {sheet.title}
+              <Link
+                href={`/dibujos/${sheet.category}/${sheet.id}`}
+                className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                {sheet.title}
+              </Link>
             </h3>
             <p className="text-xs text-zinc-600 dark:text-slate-400 leading-relaxed">
               {sheet.description}

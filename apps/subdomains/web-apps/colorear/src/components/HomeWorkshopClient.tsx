@@ -22,6 +22,7 @@ import SheetCard from './SheetCard';
 import InteractiveColoringModal from './InteractiveColoringModal';
 import InlineNotice from './InlineNotice';
 import AdBanner from './AdBanner';
+import { useAuth } from '@/context/AuthContext';
 
 const STYLE_OPTIONS = [
   { id: 'kawaii', label: 'Kawaii Bold & Easy' },
@@ -39,6 +40,7 @@ const QUICK_IDEAS = [
 ];
 
 export default function HomeWorkshopClient() {
+  const { setUserCreditsLocal } = useAuth();
   const defaultSheet = COLORING_SHEETS[0];
   const [prompt, setPrompt] = useState('Un osito tierno leyendo un libro gigante bajo un árbol');
   const [style, setStyle] = useState('kawaii');
@@ -82,6 +84,9 @@ export default function HomeWorkshopClient() {
         return;
       }
 
+      if (typeof data.creditsRemaining === 'number') {
+        setUserCreditsLocal(data.creditsRemaining);
+      }
       setRawGeneratedSrc(data.imageDataUrl);
       const cleaned = await processImageToLineArt300Dpi(
         data.imageDataUrl,
@@ -100,9 +105,11 @@ export default function HomeWorkshopClient() {
         tone: 'success',
         title: 'Lámina lista para imprimir o pintar',
         message:
-          typeof data.remainingToday === 'number'
-            ? `Ilustración generada y limpiada en blanco y negro puro. Te quedan ${data.remainingToday} generaciones gratuitas hoy.`
-            : 'Ilustración generada y optimizada a blanco y negro puro.',
+          typeof data.creditsRemaining === 'number'
+            ? `Ilustración generada y limpiada en blanco y negro puro (-1 crédito). Saldo restante: ${data.creditsRemaining} créditos.`
+            : typeof data.remainingToday === 'number'
+              ? `Ilustración generada y limpiada en blanco y negro puro. Te quedan ${data.remainingToday} generaciones gratuitas hoy.`
+              : 'Ilustración generada y optimizada a blanco y negro puro.',
       });
     } catch {
       setNotice({

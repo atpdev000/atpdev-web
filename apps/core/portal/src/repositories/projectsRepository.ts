@@ -70,6 +70,17 @@ const projectsMock: Project[] = [
     status: "En producción",
     demoLink: "https://masteratpdf.atpdev.dev",
   },
+  {
+    id: 7,
+    title: "Colorear Pro & Estudio KDP",
+    description: "Biblioteca gratuita de dibujos para colorear en PDF 300 DPI con pizarra interactiva y estudio completo para compilar libros Amazon KDP (limpieza line-art, reversos anti-traspaso y portada con lomo exacto).",
+    category: "Web",
+    image: "https://colorear.atpdev.dev/opengraph-image",
+    stack: ["Next.js", "pdf-lib", "Canvas 300 DPI", "Gemini AI", "Stripe"],
+    metrics: "300 DPI & Amazon KDP",
+    status: "En producción",
+    demoLink: "https://colorear.atpdev.dev",
+  },
 ];
 
 export async function getAllProjects(): Promise<Project[]> {

@@ -33,6 +33,7 @@ import {
 } from '@/lib/kdpPdfBuilder';
 import { COLORING_SHEETS, svgToDataUrl } from '@/data/catalog';
 import InlineNotice from './InlineNotice';
+import { useAuth } from '@/context/AuthContext';
 
 interface PlannedPage {
   pageNumber: number;
@@ -43,6 +44,7 @@ interface PlannedPage {
 type StudioTab = 'planner' | 'pages' | 'interior' | 'cover';
 
 export default function KdpStudioClient() {
+  const { setUserCreditsLocal } = useAuth();
   const [activeTab, setActiveTab] = useState<StudioTab>('planner');
   const [notice, setNotice] = useState<{ tone: 'info' | 'warning' | 'error' | 'success'; title: string; message: string } | null>(null);
 
@@ -221,6 +223,9 @@ export default function KdpStudioClient() {
         });
         return;
       }
+      if (typeof data.creditsRemaining === 'number') {
+        setUserCreditsLocal(data.creditsRemaining);
+      }
       const nextPages = [
         ...pages,
         {
@@ -233,7 +238,10 @@ export default function KdpStudioClient() {
       setNotice({
         tone: 'success',
         title: `Ilustración "${item.title}" añadida`,
-        message: `Ahora tienes ${nextPages.length} página(s) en tu libro. Revísalas en la pestaña "2. Páginas y Line-Art".`,
+        message:
+          typeof data.creditsRemaining === 'number'
+            ? `Ahora tienes ${nextPages.length} página(s) en tu libro (-1 crédito • saldo: ${data.creditsRemaining}). Revísalas en "2. Páginas y Line-Art".`
+            : `Ahora tienes ${nextPages.length} página(s) en tu libro. Revísalas en la pestaña "2. Páginas y Line-Art".`,
       });
     } catch {
       setNotice({ tone: 'error', title: 'Error de red', message: 'No pudimos generar la imagen.' });
