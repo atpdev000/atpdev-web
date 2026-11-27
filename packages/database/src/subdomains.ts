@@ -141,6 +141,7 @@ export interface SubdomainPayments {
   annual_discount_percent?: number;
   // WhatsApp VIP / Yape / Plin
   yape_holder?: string;
+  yape_qr_url?: string;
   whatsapp_number?: string;
   whatsapp_message_pro?: string;
   whatsapp_message_business?: string;
@@ -591,6 +592,7 @@ export const DEFAULT_COLOREAR_CONFIG: SubdomainConfig = {
     mercadopago_pro_monthly_url: 'https://mpago.la/32Qtynr',
     mercadopago_pro_annual_url: 'https://mpago.la/2VEfsvU',
     yape_holder: 'Percy Acha Taipe (ATP Dev Perú)',
+    yape_qr_url: '/yape-qr.jpg',
     whatsapp_number: '+51987006572',
     whatsapp_message_pro: 'Hola ATP Dev, deseo activar el Pack Creador KDP en Colorear Pro.',
     whatsapp_message_business: 'Hola ATP Dev, deseo activar el Estudio Editorial Pro en Colorear Pro.',

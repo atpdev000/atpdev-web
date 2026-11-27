@@ -13,6 +13,7 @@ export async function GET() {
     yapePhone: cfg.yapePhoneDisplay,
     plinPhone: cfg.yapePhoneDisplay,
     yapeHolder: cfg.yapeHolder,
+    yapeQrUrl: cfg.yapeQrUrl,
     whatsappPhone: cfg.whatsappNumber,
     notificationEmail: cfg.notificationEmail,
     stripeMonthlyUrl: cfg.stripeMonthlyUrl,

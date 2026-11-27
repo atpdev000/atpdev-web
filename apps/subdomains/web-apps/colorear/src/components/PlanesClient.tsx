@@ -20,6 +20,7 @@ import {
   MessageCircle,
   KeyRound,
   ExternalLink,
+  Download,
 } from 'lucide-react';
 import { COLOREAR_PLANS, ColorearPlan } from '@/lib/plans';
 import { useAuth } from '@/context/AuthContext';
@@ -31,6 +32,7 @@ interface BillingConfigState {
   yapePhone: string;
   plinPhone: string;
   yapeHolder: string;
+  yapeQrUrl: string;
   whatsappPhone: string;
   stripeMonthlyUrl: string;
   stripeAnnualUrl: string;
@@ -63,6 +65,7 @@ export default function PlanesClient() {
     yapePhone: '987 006 572',
     plinPhone: '987 006 572',
     yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
+    yapeQrUrl: '/yape-qr.jpg',
     whatsappPhone: '51987006572',
     stripeMonthlyUrl: 'https://buy.stripe.com/test_6oUaEX1u63t25U1gJ51kA02',
     stripeAnnualUrl: 'https://buy.stripe.com/test_9B69ATegS4x6fuB3Wj1kA03',
@@ -90,6 +93,7 @@ export default function PlanesClient() {
             yapePhone: d.yapePhone || '987 006 572',
             plinPhone: d.plinPhone || d.yapePhone || '987 006 572',
             yapeHolder: d.yapeHolder || 'Percy Acha Taipe (ATP Dev Perú)',
+            yapeQrUrl: d.yapeQrUrl || '/yape-qr.jpg',
             whatsappPhone: d.whatsappPhone || '51987006572',
             stripeMonthlyUrl: d.stripeMonthlyUrl || '',
             stripeAnnualUrl: d.stripeAnnualUrl || '',
@@ -329,7 +333,7 @@ export default function PlanesClient() {
         },
         {
           q: 'How do payments work internationally and in Peru?',
-          a: `You can pay via Stripe card checkout (USD), MercadoPago Yape/Plin QR, direct Yape/Plin transfer (${billingCfg.yapePhone}), WhatsApp VIP, or redeem an activation license code.`,
+          a: 'You can pay via Stripe card checkout (USD), MercadoPago Yape/Plin QR, direct Yape/Plin QR scan, WhatsApp VIP, or redeem an activation license code.',
         },
       ]
     : [
@@ -343,7 +347,7 @@ export default function PlanesClient() {
         },
         {
           q: '¿Cómo funcionan los pagos con Yape/Plin, MercadoPago QR y Tarjeta Stripe?',
-          a: `Usamos la pasarela oficial de ATP Dev: paga al instante por MercadoPago QR (Yape/Plin/PagoEfectivo), Yape/Plin directo al ${billingCfg.yapePhone}, Tarjeta Stripe o canjea tu código de licencia.`,
+          a: 'Usamos la pasarela oficial de ATP Dev: escanea nuestro código QR oficial compatible con Yape y Plin, paga con MercadoPago QR, Tarjeta Stripe o canjea tu código de licencia al instante.',
         },
       ];
 
@@ -632,8 +636,8 @@ export default function PlanesClient() {
             </h2>
             <p className="text-xs text-zinc-600 dark:text-slate-400 max-w-2xl leading-relaxed">
               {isEn
-                ? `Pay securely via Stripe (USD), MercadoPago Yape/Plin QR, direct Yape/Plin (${billingCfg.yapePhone}), WhatsApp VIP, or redeem a license code.`
-                : `Paga con Tarjeta (Stripe USD), QR oficial de MercadoPago (Yape/Plin/PagoEfectivo), Yape/Plin directo al ${billingCfg.yapePhone} o canjea tu código de licencia.`}
+                ? 'Pay securely via Stripe (USD), MercadoPago Yape/Plin QR, direct Yape/Plin QR scan, WhatsApp VIP, or redeem a license code.'
+                : 'Paga con Tarjeta (Stripe USD), QR oficial de MercadoPago (Yape/Plin/PagoEfectivo), escaneando nuestro QR oficial de Yape/Plin o canjeando tu código de licencia.'}
             </p>
           </div>
         </div>
@@ -768,41 +772,41 @@ export default function PlanesClient() {
                     </a>
                   )}
 
-                  {/* Yape / Plin directo + N° oficial ATP Dev */}
-                  <div className="rounded-2xl bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 p-4 space-y-2.5 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-violet-900 dark:text-violet-200">
-                        O yapea / plinea directo (S/ {selectedAmountPen}.00)
+                  {/* Tarjeta QR Oficial Yape / Plin (estilo limpio sin exponer número personal) */}
+                  <div className="rounded-2xl bg-white dark:bg-slate-950 border border-zinc-200 dark:border-slate-800 shadow-sm p-4 space-y-3 text-center">
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-zinc-100 dark:border-slate-800">
+                      <span className="text-xs font-bold text-zinc-700 dark:text-slate-300">
+                        Escanea y paga con Yape o Plin
                       </span>
-                      <span className="font-display font-bold text-base text-violet-900 dark:text-white">
+                      <span className="px-2.5 py-0.5 rounded-full bg-violet-100 dark:bg-violet-950/60 text-violet-800 dark:text-violet-200 font-display font-bold text-sm">
                         S/ {selectedAmountPen}.00
                       </span>
                     </div>
-                    <p className="text-violet-800 dark:text-violet-300 leading-relaxed">
-                      Titular: <strong>{billingCfg.yapeHolder}</strong>
-                    </p>
-                    <div className="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-slate-900 border border-violet-300 dark:border-violet-700 px-3 py-2">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-zinc-500 block">
-                          Número {yapeApp.toUpperCase()} / WhatsApp oficial
-                        </span>
-                        <span className="font-mono font-bold text-base text-zinc-900 dark:text-white">
-                          {yapeApp === 'yape' ? billingCfg.yapePhone : billingCfg.plinPhone}
-                        </span>
+
+                    <div className="flex flex-col items-center justify-center pt-1">
+                      <div className="p-2 rounded-2xl bg-white border border-zinc-200 shadow-md inline-block">
+                        <img
+                          src={billingCfg.yapeQrUrl || '/yape-qr.jpg'}
+                          alt="Código QR oficial de pago Yape / Plin"
+                          className="w-44 h-44 sm:w-48 sm:h-48 object-contain rounded-xl"
+                        />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const num = (yapeApp === 'yape' ? billingCfg.yapePhone : billingCfg.plinPhone) || '';
-                          navigator.clipboard?.writeText(num.replace(/\s+/g, ''));
-                          setCopiedNum(true);
-                          setTimeout(() => setCopiedNum(false), 2000);
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-bold inline-flex items-center gap-1 cursor-pointer"
+                      <p className="mt-2.5 font-display font-black text-xs sm:text-sm tracking-wide uppercase text-zinc-900 dark:text-white">
+                        {billingCfg.yapeHolder}
+                      </p>
+                      <a
+                        href={billingCfg.yapeQrUrl || '/yape-qr.jpg'}
+                        download="yape-qr-colorear-pro.jpg"
+                        className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold text-violet-700 dark:text-violet-400 hover:underline"
                       >
-                        {copiedNum ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span>{copiedNum ? 'Copiado' : 'Copiar'}</span>
-                      </button>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Descargar QR para abrir desde tu galería</span>
+                      </a>
+                    </div>
+
+                    <div className="rounded-xl bg-amber-50/70 dark:bg-slate-900 border border-amber-200/70 dark:border-slate-800 px-3 py-2 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-zinc-700 dark:text-slate-300">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Tu pago está 100% protegido • Compatible con Yape y Plin</span>
                     </div>
                   </div>
 

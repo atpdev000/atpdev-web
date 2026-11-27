@@ -1128,7 +1128,7 @@ export default function ColorearAdminClient({
               </h3>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 block">Titular Yape / Plin (Mostrado al cliente)</label>
+                <label className="text-xs font-bold text-slate-300 block">Titular Yape / Plin (Mostrado debajo del QR)</label>
                 <input
                   type="text"
                   value={payments.yape_holder || 'Percy Acha Taipe (ATP Dev Perú)'}
@@ -1142,8 +1142,31 @@ export default function ColorearAdminClient({
                 />
               </div>
 
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-300 block">Imagen QR Oficial Yape / Plin (Ruta o URL)</label>
+                <div className="flex items-center gap-3">
+                  <img
+                    src={payments.yape_qr_url || '/yape-qr.jpg'}
+                    alt="Vista previa QR Yape"
+                    className="w-14 h-14 rounded-xl bg-white p-1 border border-slate-700 object-contain shrink-0"
+                  />
+                  <input
+                    type="text"
+                    value={payments.yape_qr_url || '/yape-qr.jpg'}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, yape_qr_url: e.target.value },
+                      })
+                    }
+                    placeholder="/yape-qr.jpg"
+                    className="flex-1 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-violet-300 font-mono text-xs focus:border-violet-500 outline-none"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300 block">Número WhatsApp / Yape / Plin</label>
+                <label className="text-xs font-bold text-slate-300 block">Número WhatsApp Soporte (Solo botón WhatsApp, no visible en modal)</label>
                 <input
                   type="text"
                   value={payments.whatsapp_number || config.contact?.whatsapp || '+51987006572'}

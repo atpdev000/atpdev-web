@@ -19,7 +19,9 @@ import {
   MessageCircle,
   Copy,
   ExternalLink,
-  X
+  X,
+  Download,
+  ShieldCheck
 } from 'lucide-react';
 import { PRICING_PLANS, PricingPlan } from '@/lib/types';
 import { api, getToken } from '@/lib/api';
@@ -49,6 +51,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     whatsappNumber: '51987006572',
     yapePhoneDisplay: '987 006 572',
     yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
+    yapeQrUrl: '/yape-qr.jpg',
     stripeMonthlyUrl: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
     stripeAnnualUrl: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
     stripeBusinessMonthlyUrl: '',
@@ -470,26 +473,38 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                     <span>Pagar S/ {getCheckoutPenPrice(checkoutPlan)} con MercadoPago QR (Yape / Plin)</span>
                   </a>
 
-                  <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 space-y-2">
-                    <p className="text-purple-900 dark:text-purple-200 font-semibold">
-                      O yapea/plinea <strong>S/ {getCheckoutPenPrice(checkoutPlan)}</strong> directo a <strong>{payCfg.yapeHolder}</strong>:
-                    </p>
-                    <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 rounded-xl border border-purple-200 dark:border-purple-700 px-3 py-2">
-                      <span className="font-mono font-black text-base text-slate-900 dark:text-white">
-                        {payCfg.yapePhoneDisplay}
+                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5 text-center">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                      <span className="font-bold text-slate-700 dark:text-slate-300">
+                        Escanea y paga con Yape o Plin
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard?.writeText(payCfg.yapePhoneDisplay.replace(/\s+/g, ''));
-                          setCopiedYape(true);
-                          setTimeout(() => setCopiedYape(false), 2000);
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-bold text-[11px] inline-flex items-center gap-1 cursor-pointer"
+                      <span className="px-2.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-200 font-black text-sm">
+                        S/ {getCheckoutPenPrice(checkoutPlan)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center pt-1">
+                      <div className="p-2 rounded-2xl bg-white border border-slate-200 shadow-md inline-block">
+                        <img
+                          src={payCfg.yapeQrUrl || '/yape-qr.jpg'}
+                          alt="Código QR oficial Yape / Plin"
+                          className="w-40 h-40 object-contain rounded-xl"
+                        />
+                      </div>
+                      <p className="mt-2 font-black text-xs uppercase tracking-wide text-slate-900 dark:text-white">
+                        {payCfg.yapeHolder}
+                      </p>
+                      <a
+                        href={payCfg.yapeQrUrl || '/yape-qr.jpg'}
+                        download="yape-qr-sorteos-pro.jpg"
+                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
                       >
-                        {copiedYape ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedYape ? 'Copiado' : 'Copiar'}</span>
-                      </button>
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Descargar QR</span>
+                      </a>
+                    </div>
+                    <div className="rounded-xl bg-amber-50/70 dark:bg-slate-900 border border-amber-200/70 dark:border-slate-800 px-3 py-1.5 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Tu pago está 100% protegido • Yape y Plin</span>
                     </div>
                   </div>
 

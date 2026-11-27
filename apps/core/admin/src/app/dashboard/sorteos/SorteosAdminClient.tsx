@@ -1826,6 +1826,25 @@ export default function SorteosAdminClient({
                     className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs"
                   />
                 </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 font-bold block mb-1">Imagen QR Yape / Plin</label>
+                  <div className="flex items-center gap-2">
+                    <img
+                      src={siteConfig.payments?.yape_qr_url || '/yape-qr.jpg'}
+                      alt="QR Yape"
+                      className="w-10 h-10 rounded-lg bg-white p-0.5 border border-slate-700 object-contain shrink-0"
+                    />
+                    <input
+                      type="text"
+                      value={siteConfig.payments?.yape_qr_url ?? '/yape-qr.jpg'}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), yape_qr_url: e.target.value }
+                      })}
+                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-violet-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

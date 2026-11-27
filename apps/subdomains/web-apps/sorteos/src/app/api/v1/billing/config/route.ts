@@ -65,6 +65,7 @@ export async function GET() {
     whatsappNumber,
     yapePhoneDisplay: formatPeruPhone(rawPhone),
     yapeHolder: (pay.yape_holder || 'Percy Acha Taipe (ATP Dev Perú)').trim(),
+    yapeQrUrl: (pay.yape_qr_url || '/yape-qr.jpg').trim(),
     stripeMonthlyUrl,
     stripeAnnualUrl,
     stripeBusinessMonthlyUrl: pay.stripe_business_monthly_url || stripeMonthlyUrl,

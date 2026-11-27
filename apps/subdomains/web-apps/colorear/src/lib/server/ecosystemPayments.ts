@@ -6,6 +6,7 @@ export interface EcosystemPaymentsConfig {
   whatsappNumber: string;
   yapePhoneDisplay: string;
   yapeHolder: string;
+  yapeQrUrl: string;
   notificationEmail: string;
   whatsappMessagePro: string;
   whatsappMessageBusiness: string;
@@ -149,6 +150,7 @@ export function getColorearPaymentsConfig(): EcosystemPaymentsConfig {
       process.env.YAPE_HOLDER ||
       'Percy Acha Taipe (ATP Dev Perú)'
     ).trim(),
+    yapeQrUrl: (colorearPay.yape_qr_url || '/yape-qr.jpg').trim(),
     notificationEmail: (colorearPay.notification_email || 'contacto@atpdev.dev').trim(),
     whatsappMessagePro: (
       colorearPay.whatsapp_message_pro ||
