@@ -11,6 +11,8 @@ export interface AuthUser {
   plan: ColorearPlanId;
   credits: number;
   totalGenerated: number;
+  avatarUrl?: string | null;
+  authProviders?: Array<'email' | 'google' | 'facebook'>;
   createdAt: string;
 }
 
@@ -29,10 +31,16 @@ export interface UserOrder {
   paidAt?: string;
 }
 
+export interface OAuthProvidersStatus {
+  google: boolean;
+  facebook: boolean;
+}
+
 interface AuthContextValue {
   user: AuthUser | null;
   orders: UserOrder[];
   stripeConfigured: boolean;
+  oauthProviders: OAuthProvidersStatus;
   loading: boolean;
   refresh: () => Promise<void>;
   logout: () => Promise<void>;
@@ -43,6 +51,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   orders: [],
   stripeConfigured: false,
+  oauthProviders: { google: false, facebook: false },
   loading: true,
   refresh: async () => {},
   logout: async () => {},
@@ -53,16 +62,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [orders, setOrders] = useState<UserOrder[]>([]);
   const [stripeConfigured, setStripeConfigured] = useState(false);
+  const [oauthProviders, setOauthProviders] = useState<OAuthProvidersStatus>({
+    google: false,
+    facebook: false,
+  });
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
     try {
       const res = await fetch('/api/auth/me', { cache: 'no-store' });
       const data = await res.json();
+      setStripeConfigured(Boolean(data?.stripeConfigured));
+      if (data?.oauthProviders) {
+        setOauthProviders({
+          google: Boolean(data.oauthProviders.google),
+          facebook: Boolean(data.oauthProviders.facebook),
+        });
+      }
       if (data?.authenticated && data.user) {
         setUser(data.user);
         setOrders(Array.isArray(data.orders) ? data.orders : []);
-        setStripeConfigured(Boolean(data.stripeConfigured));
       } else {
         setUser(null);
         setOrders([]);
@@ -94,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         orders,
         stripeConfigured,
+        oauthProviders,
         loading,
         refresh,
         logout,
@@ -108,4 +128,3 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   return useContext(AuthContext);
 }
-

@@ -13,6 +13,12 @@ export interface StoredUser {
   plan: ColorearPlanId;
   credits: number;
   totalGenerated: number;
+  avatarUrl?: string;
+  authProviders?: Array<'email' | 'google' | 'facebook'>;
+  providerIds?: {
+    google?: string;
+    facebook?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -96,6 +102,8 @@ export function sanitizeUser(user: StoredUser) {
     plan: user.plan,
     credits: user.credits,
     totalGenerated: user.totalGenerated,
+    avatarUrl: user.avatarUrl || null,
+    authProviders: user.authProviders || ['email'],
     createdAt: user.createdAt,
   };
 }
@@ -131,6 +139,7 @@ export function createUser(input: {
     plan: 'free',
     credits: WELCOME_FREE_CREDITS,
     totalGenerated: 0,
+    authProviders: ['email'],
     createdAt: now,
     updatedAt: now,
   };
@@ -144,6 +153,81 @@ export function createUser(input: {
   });
   writeDb(db);
   return user;
+}
+
+export function upsertOAuthUser(input: {
+  provider: 'google' | 'facebook';
+  providerUserId: string;
+  email: string;
+  name: string;
+  avatarUrl?: string;
+  passwordHash: string;
+  salt: string;
+}): { user: StoredUser; isNew: boolean } {
+  const db = readDb();
+  const cleanEmail = input.email.trim().toLowerCase();
+  const now = new Date().toISOString();
+
+  let user = db.users.find(
+    (u) =>
+      u.providerIds?.[input.provider] === input.providerUserId ||
+      u.email.toLowerCase() === cleanEmail
+  );
+
+  if (user) {
+    const providers = new Set<'email' | 'google' | 'facebook'>(user.authProviders || ['email']);
+    providers.add(input.provider);
+    user.authProviders = Array.from(providers);
+    user.providerIds = {
+      ...(user.providerIds || {}),
+      [input.provider]: input.providerUserId,
+    };
+    if (input.name && (!user.name || user.name === 'Creador KDP')) {
+      user.name = input.name.trim().slice(0, 80);
+    }
+    if (input.avatarUrl) {
+      user.avatarUrl = input.avatarUrl;
+    }
+    user.updatedAt = now;
+
+    db.audit.push({
+      id: generateId('aud'),
+      userId: user.id,
+      action: `auth.oauth_login.${input.provider}`,
+      createdAt: now,
+    });
+    writeDb(db);
+    return { user, isNew: false };
+  }
+
+  user = {
+    id: generateId('usr'),
+    name: input.name.trim().slice(0, 80) || `Usuario ${input.provider === 'google' ? 'Google' : 'Facebook'}`,
+    email: cleanEmail,
+    passwordHash: input.passwordHash,
+    salt: input.salt,
+    role: 'user',
+    plan: 'free',
+    credits: WELCOME_FREE_CREDITS,
+    totalGenerated: 0,
+    avatarUrl: input.avatarUrl,
+    authProviders: [input.provider],
+    providerIds: {
+      [input.provider]: input.providerUserId,
+    },
+    createdAt: now,
+    updatedAt: now,
+  };
+  db.users.push(user);
+  db.audit.push({
+    id: generateId('aud'),
+    userId: user.id,
+    action: `auth.oauth_register.${input.provider}`,
+    meta: { welcomeCredits: WELCOME_FREE_CREDITS },
+    createdAt: now,
+  });
+  writeDb(db);
+  return { user, isNew: true };
 }
 
 export function consumeUserCredit(userId: string, amount = 1): StoredUser | null {

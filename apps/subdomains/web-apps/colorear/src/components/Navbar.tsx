@@ -133,7 +133,16 @@ export default function Navbar() {
           >
             {user ? (
               <>
-                <Zap className="w-3.5 h-3.5 text-amber-500" />
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    referrerPolicy="no-referrer"
+                    className="w-4 h-4 rounded-full object-cover"
+                  />
+                ) : (
+                  <Zap className="w-3.5 h-3.5 text-amber-500" />
+                )}
                 <span>{user.credits} {isEn ? 'cr' : 'créd.'}</span>
               </>
             ) : (
