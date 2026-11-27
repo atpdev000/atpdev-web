@@ -141,3 +141,53 @@ export async function updateSorteosConfigAction(updates: Partial<SubdomainConfig
   revalidatePath('/dashboard/sorteos');
   return res;
 }
+
+export async function syncSorteosPaymentsFromDescargadorAction(): Promise<{
+  success: boolean;
+  config: SubdomainConfig;
+  error?: string;
+}> {
+  try {
+    const descargador = getSubdomainConfig('descargador');
+    const sorteos = getSubdomainConfig('sorteos');
+    const dp = descargador.payments || {};
+    const sp = sorteos.payments || {};
+
+    const mergedLicenseKeys = Array.from(
+      new Set([
+        ...(Array.isArray(sp.license_keys) ? sp.license_keys : ['SORTEOS-PRO-VIP']),
+        ...(Array.isArray(dp.license_keys) ? dp.license_keys.filter((k) => k === 'VIP-ATP-2026') : []),
+      ])
+    );
+
+    const res = saveSubdomainConfig('sorteos', {
+      contact: {
+        ...sorteos.contact,
+        whatsapp: dp.whatsapp_number || descargador.contact?.whatsapp || '+51987006572',
+        email: dp.notification_email || descargador.contact?.email || 'contacto@atpdev.dev',
+      },
+      payments: {
+        ...sp,
+        enabled: true,
+        provider: dp.provider || 'multi',
+        stripe_pro_monthly_url: dp.stripe_pro_monthly_url || sp.stripe_pro_monthly_url || '',
+        stripe_pro_annual_url: dp.stripe_pro_annual_url || sp.stripe_pro_annual_url || '',
+        mercadopago_pro_monthly_url: dp.mercadopago_pro_monthly_url || sp.mercadopago_pro_monthly_url || 'https://mpago.la/1HfK5w8',
+        mercadopago_pro_annual_url: dp.mercadopago_pro_annual_url || sp.mercadopago_pro_annual_url || 'https://mpago.la/2EJNTrd',
+        whatsapp_number: dp.whatsapp_number || descargador.contact?.whatsapp || '+51987006572',
+        notification_email: dp.notification_email || descargador.contact?.email || 'contacto@atpdev.dev',
+        stripe_account_email: dp.stripe_account_email || sp.stripe_account_email || '',
+        mercadopago_account_email: dp.mercadopago_account_email || sp.mercadopago_account_email || '',
+        license_keys: mergedLicenseKeys,
+      },
+    });
+    revalidatePath('/dashboard/sorteos');
+    return res;
+  } catch (err: unknown) {
+    return {
+      success: false,
+      config: getSubdomainConfig('sorteos'),
+      error: err instanceof Error ? err.message : 'Error al sincronizar pagos',
+    };
+  }
+}

@@ -26,7 +26,8 @@ import {
   UtensilsCrossed,
   QrCode,
   ScanLine,
-  Server
+  Server,
+  Palette
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -159,6 +160,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           icon: <ScanLine size={17} />, 
           href: "/dashboard/dni",
           badge: "3012"
+        },
+        {
+          label: "Colorear Pro",
+          icon: <Palette size={17} />,
+          href: "/dashboard/colorear",
+          badge: "KDP"
         },
       ]
     },

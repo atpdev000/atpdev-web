@@ -14,6 +14,7 @@ export const OFFICIAL_APP_URLS = {
   pdf: 'https://masteratpdf.atpdev.dev',
   almaniq: 'https://almaniq.atpdev.dev',
   codehistory: 'https://codehistory.atpdev.dev',
+  colorear: 'https://colorear.atpdev.dev',
 } as const;
 
 export type PreviewSource = 'local' | 'official';

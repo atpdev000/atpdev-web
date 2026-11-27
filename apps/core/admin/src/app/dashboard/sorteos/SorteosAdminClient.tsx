@@ -79,7 +79,8 @@ import {
   toggleUserStatusAction,
   resetUserCommentsAction,
   updateFeatureFlagAction,
-  updateSorteosConfigAction
+  updateSorteosConfigAction,
+  syncSorteosPaymentsFromDescargadorAction
 } from './actions';
 
 // ==========================================
@@ -181,7 +182,9 @@ export default function SorteosAdminClient({
   const [metrics] = useState<SorteosMetricsRecord>(initialMetrics);
   const [siteConfig, setSiteConfig] = useState<SubdomainConfig>(initialConfig || DEFAULT_SORTEOS_CONFIG);
 
-  const [activeTab, setActiveTab] = useState<'giveaways' | 'users' | 'create' | 'theme' | 'settings' | 'flags' | 'metrics'>('giveaways');
+  const [activeTab, setActiveTab] = useState<'giveaways' | 'users' | 'create' | 'theme' | 'settings' | 'payments' | 'flags' | 'metrics'>('giveaways');
+  const [newSorteosLicenseKey, setNewSorteosLicenseKey] = useState('');
+  const [isSyncingSorteosPayments, setIsSyncingSorteosPayments] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -706,6 +709,47 @@ export default function SorteosAdminClient({
     }
   };
 
+  const handleSaveSorteosPayments = async () => {
+    setIsSavingConfig(true);
+    try {
+      const res = await updateSorteosConfigAction({
+        payments: siteConfig.payments,
+        contact: {
+          ...siteConfig.contact,
+          whatsapp: siteConfig.payments?.whatsapp_number || siteConfig.contact?.whatsapp || '+51987006572',
+          email: siteConfig.payments?.notification_email || siteConfig.contact?.email || 'contacto@atpdev.dev',
+        }
+      });
+      if (res.success) {
+        setSiteConfig(res.config);
+        notify('¡Pasarelas de pago, WhatsApp y licencias de Sorteos Pro guardadas en vivo!');
+      } else {
+        notify('Error al guardar pasarelas de pago', 'error');
+      }
+    } catch {
+      notify('Error al guardar pasarelas de pago', 'error');
+    } finally {
+      setIsSavingConfig(false);
+    }
+  };
+
+  const handleSyncSorteosPayments = async () => {
+    setIsSyncingSorteosPayments(true);
+    try {
+      const res = await syncSorteosPaymentsFromDescargadorAction();
+      if (res.success) {
+        setSiteConfig(res.config);
+        notify('Pasarelas de Sorteos Pro sincronizadas desde Descargador Pro.');
+      } else {
+        notify(res.error || 'No se pudo sincronizar pagos', 'error');
+      }
+    } catch {
+      notify('Error al sincronizar pagos', 'error');
+    } finally {
+      setIsSyncingSorteosPayments(false);
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-16">
       {/* Toast Feedback */}
@@ -816,6 +860,18 @@ export default function SorteosAdminClient({
           >
             <Settings2 size={15} className="text-blue-400" />
             <span>Configuración & SEO</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('payments')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === 'payments'
+                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 shadow-sm'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <DollarSign size={15} className="text-emerald-400" />
+            <span>Pagos & Licencias</span>
           </button>
 
           <button
@@ -1550,6 +1606,243 @@ export default function SorteosAdminClient({
                 <span>Guardar Configuración General</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 5B: PAGOS, PASARELAS & LICENCIAS (SYNC DESCARGADOR) */}
+      {/* ========================================================= */}
+      {activeTab === 'payments' && (
+        <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-cyan-950/40 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h2 className="text-sm font-black text-white flex items-center gap-2">
+                <ShieldCheck size={16} className="text-emerald-400" />
+                <span>Pasarelas de Pago Unificadas — Sorteos Pro</span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Sincronizado con <code className="text-emerald-300">sorteos.atpdev.dev/planes</code> y <code className="text-emerald-300">/api/v1/billing/config</code>. Los cambios se aplican al instante.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSyncSorteosPayments}
+              disabled={isSyncingSorteosPayments}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={isSyncingSorteosPayments ? 'animate-spin' : ''} />
+              <span>{isSyncingSorteosPayments ? 'Sincronizando...' : 'Copiar desde Descargador Pro'}</span>
+            </button>
+          </div>
+
+          {/* Stripe Payment Links */}
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-indigo-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white">Stripe Payment Links (Tarjeta Internacional)</h3>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                    ((siteConfig.payments?.stripe_pro_monthly_url || '').includes('/test_') ||
+                     (siteConfig.payments?.stripe_pro_annual_url || '').includes('/test_'))
+                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                      : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                  }`}>
+                    {((siteConfig.payments?.stripe_pro_monthly_url || '').includes('/test_') ||
+                      (siteConfig.payments?.stripe_pro_annual_url || '').includes('/test_'))
+                      ? 'MODO TEST'
+                      : 'MODO LIVE'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">Enlaces usados en la página de planes de Sorteos Pro.</p>
+              </div>
+              <a
+                href="https://dashboard.stripe.com/payment-links"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shrink-0"
+              >
+                <ExternalLink size={13} />
+                <span>Stripe Dashboard</span>
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Mensual (Pro)</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.stripe_pro_monthly_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), stripe_pro_monthly_url: e.target.value }
+                  })}
+                  placeholder="https://buy.stripe.com/..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Anual / Business</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.stripe_pro_annual_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), stripe_pro_annual_url: e.target.value }
+                  })}
+                  placeholder="https://buy.stripe.com/..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* MercadoPago Yape/Plin */}
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-cyan-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-white">Mercado Pago Perú (Yape & Plin QR)</h3>
+                <p className="text-xs text-slate-400 mt-0.5">Cobros automáticos en Soles mediante enlaces mpago.la.</p>
+              </div>
+              <a
+                href="https://www.mercadopago.com.pe/payment-links"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#009ee3] hover:bg-[#0089c7] text-white text-xs font-bold transition shrink-0"
+              >
+                <ExternalLink size={13} />
+                <span>Consola Mercado Pago</span>
+              </a>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Mensual</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.mercadopago_pro_monthly_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), mercadopago_pro_monthly_url: e.target.value }
+                  })}
+                  placeholder="https://mpago.la/1HfK5w8"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Anual</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.mercadopago_pro_annual_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), mercadopago_pro_annual_url: e.target.value }
+                  })}
+                  placeholder="https://mpago.la/2EJNTrd"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* WhatsApp + Licencias */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Phone size={15} className="text-emerald-400" />
+                <span>WhatsApp / Yape Directo & Correo</span>
+              </h3>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Número WhatsApp / Yape / Plin</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.whatsapp_number || siteConfig.contact?.whatsapp || '+51987006572'}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), whatsapp_number: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-emerald-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Correo de Notificaciones</label>
+                <input
+                  type="email"
+                  value={siteConfig.payments?.notification_email || siteConfig.contact?.email || 'contacto@atpdev.dev'}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), notification_email: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs"
+                />
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Key size={15} className="text-amber-400" />
+                <span>Claves de Licencia (Canje en /planes)</span>
+              </h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newSorteosLicenseKey}
+                  onChange={e => setNewSorteosLicenseKey(e.target.value.toUpperCase())}
+                  placeholder="EJ: SORTEOS-VIP-2026"
+                  className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clean = newSorteosLicenseKey.trim().toUpperCase();
+                    if (!clean) return;
+                    const existing = siteConfig.payments?.license_keys || [];
+                    if (!existing.includes(clean)) {
+                      setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), license_keys: [...existing, clean] }
+                      });
+                    }
+                    setNewSorteosLicenseKey('');
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer"
+                >
+                  Agregar
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(siteConfig.payments?.license_keys || []).map(k => (
+                  <span key={k} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold">
+                    <span>{k}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSiteConfig({
+                        ...siteConfig,
+                        payments: {
+                          ...(siteConfig.payments || {}),
+                          license_keys: (siteConfig.payments?.license_keys || []).filter(item => item !== k)
+                        }
+                      })}
+                      className="text-amber-400 hover:text-rose-400 cursor-pointer"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleSaveSorteosPayments}
+              disabled={isSavingConfig}
+              className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 inline-flex items-center gap-2 transition cursor-pointer disabled:opacity-50"
+            >
+              {isSavingConfig ? <RefreshCw size={14} className="animate-spin" /> : <Check size={14} />}
+              <span>{isSavingConfig ? 'Guardando...' : 'Guardar Pagos & Licencias'}</span>
+            </button>
           </div>
         </div>
       )}

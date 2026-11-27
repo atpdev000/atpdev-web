@@ -52,6 +52,9 @@ function getDomainBadge(domain: string) {
   if (d.includes('sorteos')) {
     return { name: 'Sorteos Pro', sub: domain, color: 'bg-purple-500/10 text-purple-400 border-purple-500/30' };
   }
+  if (d.includes('colorear')) {
+    return { name: 'Colorear Pro', sub: domain, color: 'bg-pink-500/10 text-pink-400 border-pink-500/30' };
+  }
   if (d.includes('atpdev.dev') || d.includes('atpdev-cms-portal')) {
     return { name: 'Portal Principal', sub: 'atpdev.dev', color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' };
   }
