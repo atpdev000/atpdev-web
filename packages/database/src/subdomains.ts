@@ -108,23 +108,39 @@ export interface SubdomainPayments {
   enabled?: boolean;
   provider?: 'multi' | 'stripe' | 'paypal' | 'mercadopago' | 'whatsapp';
   currency?: string; // 'USD' | 'PEN'
-  // Pro Creador
+  // Pro Creador / Pack KDP
+  pro_plan_name?: string;
+  pro_credits?: number;
   pro_monthly_price?: number;
   pro_annual_price?: number;
+  pro_monthly_price_pen?: number;
+  pro_annual_price_pen?: number;
   stripe_pro_monthly_url?: string;
   stripe_pro_annual_url?: string;
   mercadopago_pro_monthly_url?: string;
   mercadopago_pro_annual_url?: string;
   paypal_pro_monthly_url?: string;
   paypal_pro_annual_url?: string;
-  // Business VIP
+  // Business VIP / Editorial Pro
+  business_plan_name?: string;
+  business_credits?: number;
   business_monthly_price?: number;
   business_annual_price?: number;
+  business_monthly_price_pen?: number;
+  business_annual_price_pen?: number;
   stripe_business_monthly_url?: string;
   stripe_business_annual_url?: string;
+  mercadopago_business_monthly_url?: string;
+  mercadopago_business_annual_url?: string;
   paypal_business_monthly_url?: string;
   paypal_business_annual_url?: string;
+  // Enterprise & Bienvenida / Descuentos
+  enterprise_monthly_price?: number;
+  enterprise_annual_price?: number;
+  welcome_credits?: number;
+  annual_discount_percent?: number;
   // WhatsApp VIP / Yape / Plin
+  yape_holder?: string;
   whatsapp_number?: string;
   whatsapp_message_pro?: string;
   whatsapp_message_business?: string;
@@ -556,13 +572,28 @@ export const DEFAULT_COLOREAR_CONFIG: SubdomainConfig = {
     enabled: true,
     provider: 'multi',
     currency: 'USD',
+    welcome_credits: 15,
+    annual_discount_percent: 20,
+    pro_plan_name: 'Pack Creador KDP',
+    pro_credits: 120,
     pro_monthly_price: 9,
-    pro_annual_price: 19,
-    stripe_pro_monthly_url: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
-    stripe_pro_annual_url: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
-    mercadopago_pro_monthly_url: 'https://mpago.la/1HfK5w8',
-    mercadopago_pro_annual_url: 'https://mpago.la/2EJNTrd',
+    pro_annual_price: 9,
+    pro_monthly_price_pen: 29,
+    pro_annual_price_pen: 29,
+    business_plan_name: 'Estudio Editorial Pro',
+    business_credits: 400,
+    business_monthly_price: 19,
+    business_annual_price: 182,
+    business_monthly_price_pen: 59,
+    business_annual_price_pen: 564,
+    stripe_pro_monthly_url: 'https://buy.stripe.com/test_6oUaEX1u63t25U1gJ51kA02',
+    stripe_pro_annual_url: 'https://buy.stripe.com/test_9B69ATegS4x6fuB3Wj1kA03',
+    mercadopago_pro_monthly_url: 'https://mpago.la/32Qtynr',
+    mercadopago_pro_annual_url: 'https://mpago.la/2VEfsvU',
+    yape_holder: 'Percy Acha Taipe (ATP Dev Perú)',
     whatsapp_number: '+51987006572',
+    whatsapp_message_pro: 'Hola ATP Dev, deseo activar el Pack Creador KDP en Colorear Pro.',
+    whatsapp_message_business: 'Hola ATP Dev, deseo activar el Estudio Editorial Pro en Colorear Pro.',
     license_keys: ['VIP-ATP-2026', 'COLOREAR-KDP-120', 'COLOREAR-EDITORIAL-400'],
     notification_email: 'contacto@atpdev.dev'
   },

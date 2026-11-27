@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const isEditorial = rawCode.includes('EDITORIAL') || rawCode.includes('400');
+  const isEditorial = rawCode.includes('EDITORIAL') || rawCode.includes('400') || rawCode.includes('VIP');
   const planId = isEditorial ? 'editorial' : 'creador';
-  const credits = isEditorial ? 400 : 120;
+  const credits = isEditorial ? cfg.editorialCredits : cfg.kdpCredits;
 
   const result = redeemLicenseForUser({
     userId: user.id,

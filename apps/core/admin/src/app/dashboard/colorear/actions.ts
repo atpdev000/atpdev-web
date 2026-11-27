@@ -10,7 +10,7 @@ import {
   SubdomainConfig,
 } from '@atpdev/database';
 
-export type ColorearPlanId = 'free' | 'pack_kdp' | 'editorial';
+export type ColorearPlanId = 'free' | 'creador' | 'editorial';
 
 export interface ColorearAdminUser {
   id: string;
@@ -244,10 +244,11 @@ export async function syncColorearPaymentsFromDescargadorAction(): Promise<{
         ...cp,
         enabled: true,
         provider: dp.provider || 'multi',
-        stripe_pro_monthly_url: dp.stripe_pro_monthly_url || cp.stripe_pro_monthly_url || '',
-        stripe_pro_annual_url: dp.stripe_pro_annual_url || cp.stripe_pro_annual_url || '',
-        mercadopago_pro_monthly_url: dp.mercadopago_pro_monthly_url || cp.mercadopago_pro_monthly_url || 'https://mpago.la/1HfK5w8',
-        mercadopago_pro_annual_url: dp.mercadopago_pro_annual_url || cp.mercadopago_pro_annual_url || 'https://mpago.la/2EJNTrd',
+        stripe_pro_monthly_url: cp.stripe_pro_monthly_url || dp.stripe_pro_monthly_url || '',
+        stripe_pro_annual_url: cp.stripe_pro_annual_url || dp.stripe_pro_annual_url || '',
+        mercadopago_pro_monthly_url: cp.mercadopago_pro_monthly_url || dp.mercadopago_pro_monthly_url || 'https://mpago.la/32Qtynr',
+        mercadopago_pro_annual_url: cp.mercadopago_pro_annual_url || dp.mercadopago_pro_annual_url || 'https://mpago.la/2VEfsvU',
+        yape_holder: dp.yape_holder || cp.yape_holder || 'Percy Acha Taipe (ATP Dev Perú)',
         whatsapp_number: dp.whatsapp_number || descargador.contact?.whatsapp || '+51987006572',
         notification_email: dp.notification_email || descargador.contact?.email || 'contacto@atpdev.dev',
         stripe_account_email: dp.stripe_account_email || cp.stripe_account_email || '',

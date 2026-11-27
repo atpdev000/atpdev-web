@@ -51,9 +51,62 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
     stripeMonthlyUrl: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
     stripeAnnualUrl: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
+    stripeBusinessMonthlyUrl: '',
+    stripeBusinessAnnualUrl: '',
     mercadopagoMonthlyUrl: 'https://mpago.la/1HfK5w8',
     mercadopagoAnnualUrl: 'https://mpago.la/2EJNTrd',
+    mercadopagoBusinessMonthlyUrl: '',
+    mercadopagoBusinessAnnualUrl: '',
+    proMonthlyPrice: 9.99,
+    proAnnualPrice: 95.9,
+    proMonthlyPricePen: 37,
+    proAnnualPricePen: 355,
+    businessMonthlyPrice: 24.99,
+    businessAnnualPrice: 239.9,
+    businessMonthlyPricePen: 92,
+    businessAnnualPricePen: 890,
+    enterpriseMonthlyPrice: 79.99,
+    enterpriseAnnualPrice: 769.9,
+    annualDiscountPercent: 20,
   });
+
+  const dynamicPlans: PricingPlan[] = PRICING_PLANS.map((p) => {
+    if (p.id === 'pro') {
+      return { ...p, priceMonthly: payCfg.proMonthlyPrice, priceAnnual: payCfg.proAnnualPrice };
+    }
+    if (p.id === 'business') {
+      return { ...p, priceMonthly: payCfg.businessMonthlyPrice, priceAnnual: payCfg.businessAnnualPrice };
+    }
+    if (p.id === 'enterprise') {
+      return { ...p, priceMonthly: payCfg.enterpriseMonthlyPrice, priceAnnual: payCfg.enterpriseAnnualPrice };
+    }
+    return p;
+  });
+
+  const getCheckoutPenPrice = (plan: PricingPlan) => {
+    if (plan.id === 'business') {
+      return billingCycle === 'annual' ? payCfg.businessAnnualPricePen : payCfg.businessMonthlyPricePen;
+    }
+    return billingCycle === 'annual' ? payCfg.proAnnualPricePen : payCfg.proMonthlyPricePen;
+  };
+
+  const getCheckoutStripeUrl = (plan: PricingPlan) => {
+    if (plan.id === 'business') {
+      return billingCycle === 'annual'
+        ? payCfg.stripeBusinessAnnualUrl || payCfg.stripeAnnualUrl
+        : payCfg.stripeBusinessMonthlyUrl || payCfg.stripeMonthlyUrl;
+    }
+    return billingCycle === 'annual' ? payCfg.stripeAnnualUrl : payCfg.stripeMonthlyUrl;
+  };
+
+  const getCheckoutMercadoPagoUrl = (plan: PricingPlan) => {
+    if (plan.id === 'business') {
+      return billingCycle === 'annual'
+        ? payCfg.mercadopagoBusinessAnnualUrl || payCfg.mercadopagoAnnualUrl
+        : payCfg.mercadopagoBusinessMonthlyUrl || payCfg.mercadopagoMonthlyUrl;
+    }
+    return billingCycle === 'annual' ? payCfg.mercadopagoAnnualUrl : payCfg.mercadopagoMonthlyUrl;
+  };
 
   useEffect(() => {
     fetch('/api/v1/billing/config', { cache: 'no-store' })
@@ -183,13 +236,13 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
         </div>
         <p className="text-xs font-semibold text-pink-600 dark:text-pink-400 flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
-          <span>Ahorra 20% en facturación anual. Cancela en cualquier momento con 1 clic.</span>
+          <span>Ahorra {payCfg.annualDiscountPercent}% en facturación anual. Cancela en cualquier momento con 1 clic.</span>
         </p>
       </div>
 
       {/* ─── Grid de Tarjetas Táctiles 3D (Paleta de Marca Sorteos Pro) ───────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch pt-2">
-        {PRICING_PLANS.map((plan) => {
+        {dynamicPlans.map((plan) => {
           const price = billingCycle === 'annual' 
             ? (plan.priceAnnual / 12).toFixed(2) 
             : plan.priceMonthly.toFixed(2);
@@ -273,7 +326,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                   </div>
                   {billingCycle === 'annual' && plan.priceAnnual > 0 ? (
                     <div className="text-[11px] font-semibold text-pink-600 dark:text-pink-400 mt-1 flex items-center gap-1">
-                      <span>✓ Facturado ${plan.priceAnnual}/año (ahorras 20%)</span>
+                      <span>✓ Facturado ${plan.priceAnnual}/año (ahorras {payCfg.annualDiscountPercent}%)</span>
                     </div>
                   ) : plan.priceMonthly === 0 ? (
                     <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1">
@@ -408,18 +461,18 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               {payTab === 'yape' && (
                 <div className="space-y-3 text-xs">
                   <a
-                    href={billingCycle === 'annual' ? payCfg.mercadopagoAnnualUrl : payCfg.mercadopagoMonthlyUrl}
+                    href={getCheckoutMercadoPagoUrl(checkoutPlan)}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full py-3 px-4 rounded-xl bg-[#009ee3] hover:bg-[#0089c7] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    <span>Pagar con MercadoPago QR (Yape / Plin)</span>
+                    <span>Pagar S/ {getCheckoutPenPrice(checkoutPlan)} con MercadoPago QR (Yape / Plin)</span>
                   </a>
 
                   <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 space-y-2">
                     <p className="text-purple-900 dark:text-purple-200 font-semibold">
-                      O yapea/plinea directo a <strong>{payCfg.yapeHolder}</strong>:
+                      O yapea/plinea <strong>S/ {getCheckoutPenPrice(checkoutPlan)}</strong> directo a <strong>{payCfg.yapeHolder}</strong>:
                     </p>
                     <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 rounded-xl border border-purple-200 dark:border-purple-700 px-3 py-2">
                       <span className="font-mono font-black text-base text-slate-900 dark:text-white">
@@ -460,7 +513,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                     Paga con Visa, Mastercard, Amex o Apple/Google Pay en nuestra pasarela segura de Stripe. Al confirmar, recibirás tu licencia para activar tu cuenta al instante.
                   </p>
                   <a
-                    href={billingCycle === 'annual' ? payCfg.stripeAnnualUrl : payCfg.stripeMonthlyUrl}
+                    href={getCheckoutStripeUrl(checkoutPlan)}
                     target="_blank"
                     rel="noreferrer"
                     className="w-full py-3.5 px-4 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"

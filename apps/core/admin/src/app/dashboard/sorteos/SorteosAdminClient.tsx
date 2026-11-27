@@ -1636,6 +1636,200 @@ export default function SorteosAdminClient({
             </button>
           </div>
 
+          {/* Precios de Planes Editables en Vivo */}
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-violet-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-black text-white flex items-center gap-2">
+                  <DollarSign size={16} className="text-emerald-400" />
+                  <span>Precios de Planes en Vivo (USD & PEN)</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Modifica los precios mostrados en <code className="text-violet-300">sorteos.atpdev.dev/planes</code> y el modal de pago Yape/Plin.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-[11px] font-bold text-slate-400">Ahorro Anual (%):</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={80}
+                  value={siteConfig.payments?.annual_discount_percent ?? 20}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), annual_discount_percent: Number(e.target.value) }
+                  })}
+                  className="w-16 px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs text-center"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Pro Creador */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-pink-500/30 space-y-2.5">
+                <p className="text-xs font-black text-pink-400 uppercase tracking-wider">Plan Pro Creador</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Mes USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={siteConfig.payments?.pro_monthly_price ?? 9.99}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), pro_monthly_price: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Año Total USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={siteConfig.payments?.pro_annual_price ?? 95.9}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), pro_annual_price: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Mes S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={siteConfig.payments?.pro_monthly_price_pen ?? 37}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), pro_monthly_price_pen: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Año S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={siteConfig.payments?.pro_annual_price_pen ?? 355}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), pro_annual_price_pen: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Business */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-purple-500/30 space-y-2.5">
+                <p className="text-xs font-black text-purple-400 uppercase tracking-wider">Plan Business</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Mes USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={siteConfig.payments?.business_monthly_price ?? 24.99}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), business_monthly_price: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Año Total USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={siteConfig.payments?.business_annual_price ?? 239.9}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), business_annual_price: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Mes S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={siteConfig.payments?.business_monthly_price_pen ?? 92}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), business_monthly_price_pen: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Año S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      value={siteConfig.payments?.business_annual_price_pen ?? 890}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), business_annual_price_pen: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Enterprise & Titular */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-amber-500/30 space-y-2.5">
+                <p className="text-xs font-black text-amber-400 uppercase tracking-wider">Enterprise & Titular Yape</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Mes USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={siteConfig.payments?.enterprise_monthly_price ?? 79.99}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), enterprise_monthly_price: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-1">Año Total USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={siteConfig.payments?.enterprise_annual_price ?? 769.9}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), enterprise_annual_price: Number(e.target.value) }
+                      })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 font-bold block mb-1">Titular Yape / Plin</label>
+                  <input
+                    type="text"
+                    value={siteConfig.payments?.yape_holder ?? 'Percy Acha Taipe (ATP Dev Perú)'}
+                    onChange={e => setSiteConfig({
+                      ...siteConfig,
+                      payments: { ...(siteConfig.payments || {}), yape_holder: e.target.value }
+                    })}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Stripe Payment Links */}
           <div className="p-5 rounded-2xl bg-slate-900/70 border border-indigo-500/30 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1669,7 +1863,7 @@ export default function SorteosAdminClient({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Mensual (Pro)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Pro Mensual (${siteConfig.payments?.pro_monthly_price ?? 9.99})</label>
                 <input
                   type="text"
                   value={siteConfig.payments?.stripe_pro_monthly_url || ''}
@@ -1682,7 +1876,7 @@ export default function SorteosAdminClient({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Anual / Business</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Pro Anual (${siteConfig.payments?.pro_annual_price ?? 95.9})</label>
                 <input
                   type="text"
                   value={siteConfig.payments?.stripe_pro_annual_url || ''}
@@ -1691,6 +1885,32 @@ export default function SorteosAdminClient({
                     payments: { ...(siteConfig.payments || {}), stripe_pro_annual_url: e.target.value }
                   })}
                   placeholder="https://buy.stripe.com/..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Business Mensual (${siteConfig.payments?.business_monthly_price ?? 24.99})</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.stripe_business_monthly_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), stripe_business_monthly_url: e.target.value }
+                  })}
+                  placeholder="Opcional (usa Pro Mensual si está vacío)"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link Stripe Business Anual (${siteConfig.payments?.business_annual_price ?? 239.9})</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.stripe_business_annual_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), stripe_business_annual_url: e.target.value }
+                  })}
+                  placeholder="Opcional (usa Pro Anual si está vacío)"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs"
                 />
               </div>
@@ -1717,7 +1937,7 @@ export default function SorteosAdminClient({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Mensual</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Pro Mensual (S/ {siteConfig.payments?.pro_monthly_price_pen ?? 37})</label>
                 <input
                   type="text"
                   value={siteConfig.payments?.mercadopago_pro_monthly_url || ''}
@@ -1730,7 +1950,7 @@ export default function SorteosAdminClient({
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Anual</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Pro Anual (S/ {siteConfig.payments?.pro_annual_price_pen ?? 355})</label>
                 <input
                   type="text"
                   value={siteConfig.payments?.mercadopago_pro_annual_url || ''}
@@ -1739,6 +1959,32 @@ export default function SorteosAdminClient({
                     payments: { ...(siteConfig.payments || {}), mercadopago_pro_annual_url: e.target.value }
                   })}
                   placeholder="https://mpago.la/2EJNTrd"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Business Mensual (S/ {siteConfig.payments?.business_monthly_price_pen ?? 92})</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.mercadopago_business_monthly_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), mercadopago_business_monthly_url: e.target.value }
+                  })}
+                  placeholder="Opcional (usa Pro Mensual si está vacío)"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1">Link MercadoPago Business Anual (S/ {siteConfig.payments?.business_annual_price_pen ?? 890})</label>
+                <input
+                  type="text"
+                  value={siteConfig.payments?.mercadopago_business_annual_url || ''}
+                  onChange={e => setSiteConfig({
+                    ...siteConfig,
+                    payments: { ...(siteConfig.payments || {}), mercadopago_business_annual_url: e.target.value }
+                  })}
+                  placeholder="Opcional (usa Pro Anual si está vacío)"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs"
                 />
               </div>

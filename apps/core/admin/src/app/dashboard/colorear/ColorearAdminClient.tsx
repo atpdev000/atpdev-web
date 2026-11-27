@@ -620,17 +620,17 @@ export default function ColorearAdminClient({
                           </div>
                         </td>
                         <td className="py-3 px-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
-                              u.plan === 'editorial'
-                                ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                                : u.plan === 'pack_kdp'
-                                ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
-                            }`}
-                          >
-                            {u.plan}
-                          </span>
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                                u.plan === 'editorial'
+                                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                                  : u.plan === 'creador'
+                                  ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                                  : 'bg-slate-800 text-slate-400 border-slate-700'
+                              }`}
+                            >
+                              {u.plan}
+                            </span>
                         </td>
                         <td className="py-3 px-3 font-mono font-black text-emerald-300 text-sm">
                           {u.credits}
@@ -649,18 +649,18 @@ export default function ColorearAdminClient({
                             <button
                               type="button"
                               disabled={busyKey !== null}
-                              onClick={() => handleAdjustCredits(u.id, 120, 'pack_kdp')}
+                              onClick={() => handleAdjustCredits(u.id, Number(payments.pro_credits ?? 120), 'creador')}
                               className="px-2 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 font-bold text-[11px] transition cursor-pointer disabled:opacity-50"
                             >
-                              +120 KDP
+                              +{payments.pro_credits ?? 120} KDP
                             </button>
                             <button
                               type="button"
                               disabled={busyKey !== null}
-                              onClick={() => handleAdjustCredits(u.id, 400, 'editorial')}
+                              onClick={() => handleAdjustCredits(u.id, Number(payments.business_credits ?? 400), 'editorial')}
                               className="px-2 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/30 font-bold text-[11px] transition cursor-pointer disabled:opacity-50"
                             >
-                              +400 Edit.
+                              +{payments.business_credits ?? 400} Edit.
                             </button>
                           </div>
                         </td>
@@ -684,10 +684,10 @@ export default function ColorearAdminClient({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <ShieldCheck size={16} className="text-emerald-400" />
-                <h2 className="text-sm font-black text-white">Pasarelas Unificadas con Descargador Pro</h2>
+                <h2 className="text-sm font-black text-white">Precios, Créditos & Pasarelas en Vivo</h2>
               </div>
               <p className="text-xs text-slate-400">
-                Cualquier cambio aquí se refleja en vivo en <code className="text-emerald-300">colorear.atpdev.dev/planes</code> y <code className="text-emerald-300">/api/billing/config</code> sin reiniciar el servidor.
+                Todo cambio en precios, créditos, nombres de planes o enlaces se aplica al instante en <code className="text-emerald-300">colorear.atpdev.dev/planes</code>, órdenes Yape/Plin y Checkout sin reiniciar el servidor.
               </p>
             </div>
             <button
@@ -697,8 +697,251 @@ export default function ColorearAdminClient({
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 shrink-0"
             >
               <RefreshCw size={14} className={isSyncingPayments ? 'animate-spin' : ''} />
-              <span>{isSyncingPayments ? 'Sincronizando...' : 'Copiar desde Descargador Pro'}</span>
+              <span>{isSyncingPayments ? 'Sincronizando...' : 'Sincronizar Datos Base'}</span>
             </button>
+          </div>
+
+          {/* Precios, Créditos y Nombres de Planes Editables */}
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-pink-500/30 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-black text-white flex items-center gap-2">
+                  <Coins size={16} className="text-amber-400" />
+                  <span>Precios, Créditos y Nombres de Planes (USD & PEN)</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Modifica aquí tus tarifas comerciales en Dólares y Soles, créditos por paquete y bono de bienvenida.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const disc = Number(payments.annual_discount_percent ?? 20);
+                  const factor = Math.max(0.2, 1 - disc / 100);
+                  const usdM = Number(payments.business_monthly_price ?? 19);
+                  const penM = Number(payments.business_monthly_price_pen ?? 59);
+                  setConfig({
+                    ...config,
+                    payments: {
+                      ...payments,
+                      business_annual_price: Math.round(usdM * 12 * factor),
+                      business_annual_price_pen: Math.round(penM * 12 * factor),
+                    },
+                  });
+                }}
+                className="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition cursor-pointer shrink-0"
+              >
+                Auto-calcular Anual (-{payments.annual_discount_percent ?? 20}%)
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Plan Gratuito + Descuento Global */}
+              <div className="p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
+                <p className="text-xs font-black text-slate-300 uppercase tracking-wider">Plan Gratis & Descuento</p>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-400 block">Créditos de Bienvenida (Registro)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={payments.welcome_credits ?? 15}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, welcome_credits: Number(e.target.value) },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-400 block">Descuento Facturación Anual (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={80}
+                    value={payments.annual_discount_percent ?? 20}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, annual_discount_percent: Number(e.target.value) },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-amber-300 font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Pack Creador KDP */}
+              <div className="p-4 rounded-xl bg-slate-950/90 border border-indigo-500/30 space-y-3">
+                <p className="text-xs font-black text-indigo-300 uppercase tracking-wider">Pack 1 — Pago Único KDP</p>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-400 block">Nombre del Plan</label>
+                  <input
+                    type="text"
+                    value={payments.pro_plan_name ?? 'Pack Creador KDP'}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, pro_plan_name: e.target.value },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Créditos</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={payments.pro_credits ?? 120}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, pro_credits: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-indigo-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Precio USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={payments.pro_monthly_price ?? 9}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, pro_monthly_price: Number(e.target.value), pro_annual_price: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Precio S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min={0}
+                      value={payments.pro_monthly_price_pen ?? 29}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, pro_monthly_price_pen: Number(e.target.value), pro_annual_price_pen: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Plan Editorial Pro */}
+              <div className="p-4 rounded-xl bg-slate-950/90 border border-amber-500/30 space-y-3">
+                <p className="text-xs font-black text-amber-300 uppercase tracking-wider">Pack 2 — Estudio Editorial</p>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-400 block">Nombre del Plan</label>
+                  <input
+                    type="text"
+                    value={payments.business_plan_name ?? 'Estudio Editorial Pro'}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, business_plan_name: e.target.value },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold"
+                  />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Créd./Mes</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={payments.business_credits ?? 400}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, business_credits: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-amber-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Mes USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={payments.business_monthly_price ?? 19}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, business_monthly_price: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Mes S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min={0}
+                      value={payments.business_monthly_price_pen ?? 59}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, business_monthly_price_pen: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Anual Total USD</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={payments.business_annual_price ?? 182}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, business_annual_price: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-emerald-300 font-mono text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-400 block mb-1">Anual Total S/ PEN</label>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min={0}
+                      value={payments.business_annual_price_pen ?? 564}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, business_annual_price_pen: Number(e.target.value) },
+                        })
+                      }
+                      className="w-full px-2.5 py-2 rounded-lg bg-slate-900 border border-slate-700 text-cyan-300 font-mono text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Stripe Card */}
@@ -737,10 +980,10 @@ export default function ColorearAdminClient({
               </a>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300 block">
-                  Link Stripe — Pack KDP ($9 USD / 120 cr.)
+                  Link Stripe — {payments.pro_plan_name ?? 'Pack KDP'} (${payments.pro_monthly_price ?? 9} USD / {payments.pro_credits ?? 120} cr.)
                 </label>
                 <input
                   type="text"
@@ -758,7 +1001,7 @@ export default function ColorearAdminClient({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300 block">
-                  Link Stripe — Plan Editorial ($19 USD / 400 cr.)
+                  Link Stripe — {payments.business_plan_name ?? 'Plan Editorial'} Mensual (${payments.business_monthly_price ?? 19} USD)
                 </label>
                 <input
                   type="text"
@@ -770,6 +1013,24 @@ export default function ColorearAdminClient({
                     })
                   }
                   placeholder="https://buy.stripe.com/..."
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs focus:border-indigo-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 block">
+                  Link Stripe — Editorial Anual Opcional (${payments.business_annual_price ?? 182} USD)
+                </label>
+                <input
+                  type="text"
+                  value={payments.stripe_business_annual_url || ''}
+                  onChange={(e) =>
+                    setConfig({
+                      ...config,
+                      payments: { ...payments, stripe_business_annual_url: e.target.value },
+                    })
+                  }
+                  placeholder="Opcional (usa el mensual si está vacío)"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-indigo-300 font-mono text-xs focus:border-indigo-500 outline-none"
                 />
               </div>
@@ -801,10 +1062,10 @@ export default function ColorearAdminClient({
               </a>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300 block">
-                  Link MercadoPago QR — Pack KDP (S/ 29)
+                  Link MercadoPago QR — {payments.pro_plan_name ?? 'Pack KDP'} (S/ {payments.pro_monthly_price_pen ?? 29})
                 </label>
                 <input
                   type="text"
@@ -815,14 +1076,14 @@ export default function ColorearAdminClient({
                       payments: { ...payments, mercadopago_pro_monthly_url: e.target.value },
                     })
                   }
-                  placeholder="https://mpago.la/1HfK5w8"
+                  placeholder="https://mpago.la/32Qtynr"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
                 />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300 block">
-                  Link MercadoPago QR — Plan Editorial (S/ 59)
+                  Link MercadoPago QR — Editorial Mensual (S/ {payments.business_monthly_price_pen ?? 59})
                 </label>
                 <input
                   type="text"
@@ -833,7 +1094,25 @@ export default function ColorearAdminClient({
                       payments: { ...payments, mercadopago_pro_annual_url: e.target.value },
                     })
                   }
-                  placeholder="https://mpago.la/2EJNTrd"
+                  placeholder="https://mpago.la/2VEfsvU"
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 block">
+                  Link MercadoPago QR — Editorial Anual Opcional (S/ {payments.business_annual_price_pen ?? 564})
+                </label>
+                <input
+                  type="text"
+                  value={payments.mercadopago_business_annual_url || ''}
+                  onChange={(e) =>
+                    setConfig({
+                      ...config,
+                      payments: { ...payments, mercadopago_business_annual_url: e.target.value },
+                    })
+                  }
+                  placeholder="Opcional (usa el mensual si está vacío)"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-cyan-300 font-mono text-xs focus:border-cyan-500 outline-none"
                 />
               </div>
@@ -847,6 +1126,21 @@ export default function ColorearAdminClient({
                 <Phone size={15} className="text-emerald-400" />
                 <span>WhatsApp / Yape Directo & Notificaciones</span>
               </h3>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-300 block">Titular Yape / Plin (Mostrado al cliente)</label>
+                <input
+                  type="text"
+                  value={payments.yape_holder || 'Percy Acha Taipe (ATP Dev Perú)'}
+                  onChange={(e) =>
+                    setConfig({
+                      ...config,
+                      payments: { ...payments, yape_holder: e.target.value },
+                    })
+                  }
+                  className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:border-emerald-500 outline-none"
+                />
+              </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-300 block">Número WhatsApp / Yape / Plin</label>
@@ -986,6 +1280,50 @@ export default function ColorearAdminClient({
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono text-emerald-300"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-300 mb-1">Subtítulo / Tagline</label>
+              <input
+                type="text"
+                value={config.branding?.site_tagline || ''}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    branding: { ...config.branding, site_tagline: e.target.value },
+                  })
+                }
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-300">Barra de Anuncio Superior</label>
+              <input
+                type="text"
+                value={config.branding?.announcement_text || ''}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    branding: { ...config.branding, announcement_text: e.target.value },
+                  })
+                }
+                className="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white"
+              />
+              <label className="inline-flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.branding?.announcement_enabled ?? true}
+                  onChange={(e) =>
+                    setConfig({
+                      ...config,
+                      branding: { ...config.branding, announcement_enabled: e.target.checked },
+                    })
+                  }
+                  className="rounded bg-slate-950 border-slate-700"
+                />
+                <span>Mostrar anuncio activo</span>
+              </label>
             </div>
 
             <div>

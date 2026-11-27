@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { ColorearPlanId, WELCOME_FREE_CREDITS } from '../plans';
+import { ColorearPlanId } from '../plans';
+import { getColorearPaymentsConfig } from './ecosystemPayments';
 import { generateId, generateOrderCode } from './crypto';
 
 export interface StoredUser {
@@ -128,6 +129,7 @@ export function createUser(input: {
     throw new Error('EMAIL_EXISTS');
   }
   const now = new Date().toISOString();
+  const welcomeCredits = getColorearPaymentsConfig().welcomeCredits;
   const user: StoredUser = {
     id: generateId('usr'),
     name: input.name.trim().slice(0, 80) || 'Creador KDP',
@@ -136,7 +138,7 @@ export function createUser(input: {
     salt: input.salt,
     role: 'user',
     plan: 'free',
-    credits: WELCOME_FREE_CREDITS,
+    credits: welcomeCredits,
     totalGenerated: 0,
     authProviders: ['email'],
     createdAt: now,
@@ -147,7 +149,7 @@ export function createUser(input: {
     id: generateId('aud'),
     userId: user.id,
     action: 'auth.register',
-    meta: { welcomeCredits: WELCOME_FREE_CREDITS },
+    meta: { welcomeCredits },
     createdAt: now,
   });
   writeDb(db);
@@ -200,6 +202,7 @@ export function upsertGoogleOAuthUser(input: {
     return { user, isNew: false };
   }
 
+  const welcomeCredits = getColorearPaymentsConfig().welcomeCredits;
   user = {
     id: generateId('usr'),
     name: input.name.trim().slice(0, 80) || 'Usuario Google',
@@ -208,7 +211,7 @@ export function upsertGoogleOAuthUser(input: {
     salt: input.salt,
     role: 'user',
     plan: 'free',
-    credits: WELCOME_FREE_CREDITS,
+    credits: welcomeCredits,
     totalGenerated: 0,
     avatarUrl: input.avatarUrl,
     authProviders: ['google'],
@@ -223,7 +226,7 @@ export function upsertGoogleOAuthUser(input: {
     id: generateId('aud'),
     userId: user.id,
     action: 'auth.oauth_register.google',
-    meta: { welcomeCredits: WELCOME_FREE_CREDITS },
+    meta: { welcomeCredits },
     createdAt: now,
   });
   writeDb(db);
@@ -409,6 +412,7 @@ export function redeemLicenseForUser(input: {
   }
 
   const now = new Date().toISOString();
+  const cfg = getColorearPaymentsConfig();
   const order: StoredOrder = {
     id: generateId('ord'),
     orderCode: generateOrderCode(),
@@ -417,8 +421,8 @@ export function redeemLicenseForUser(input: {
     planId: input.planId,
     billingCycle: input.planId === 'editorial' ? 'monthly' : 'one_time',
     credits: input.credits,
-    amountUsd: input.planId === 'editorial' ? 19 : 9,
-    amountPen: input.planId === 'editorial' ? 59 : 29,
+    amountUsd: input.planId === 'editorial' ? cfg.editorialPriceUsdMonthly : cfg.kdpPriceUsd,
+    amountPen: input.planId === 'editorial' ? cfg.editorialPricePenMonthly : cfg.kdpPricePen,
     method: 'yape',
     status: 'paid',
     operationCode: `LIC:${clean}`,

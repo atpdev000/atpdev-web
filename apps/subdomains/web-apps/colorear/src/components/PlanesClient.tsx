@@ -34,8 +34,12 @@ interface BillingConfigState {
   whatsappPhone: string;
   stripeMonthlyUrl: string;
   stripeAnnualUrl: string;
+  stripeEditorialAnnualUrl: string;
   mercadopagoMonthlyUrl: string;
   mercadopagoAnnualUrl: string;
+  mercadopagoEditorialAnnualUrl: string;
+  welcomeCredits: number;
+  annualDiscountPercent: number;
 }
 
 export default function PlanesClient() {
@@ -43,6 +47,7 @@ export default function PlanesClient() {
   const { user, refresh } = useAuth();
   const { isEn } = useLanguage();
 
+  const [plans, setPlans] = useState<ColorearPlan[]>(COLOREAR_PLANS);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [selectedPlan, setSelectedPlan] = useState<ColorearPlan | null>(null);
   const [payMethod, setPayMethod] = useState<'stripe' | 'yape' | 'license'>('yape');
@@ -59,10 +64,14 @@ export default function PlanesClient() {
     plinPhone: '987 006 572',
     yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
     whatsappPhone: '51987006572',
-    stripeMonthlyUrl: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
-    stripeAnnualUrl: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
-    mercadopagoMonthlyUrl: 'https://mpago.la/1HfK5w8',
-    mercadopagoAnnualUrl: 'https://mpago.la/2EJNTrd',
+    stripeMonthlyUrl: 'https://buy.stripe.com/test_6oUaEX1u63t25U1gJ51kA02',
+    stripeAnnualUrl: 'https://buy.stripe.com/test_9B69ATegS4x6fuB3Wj1kA03',
+    stripeEditorialAnnualUrl: 'https://buy.stripe.com/test_9B69ATegS4x6fuB3Wj1kA03',
+    mercadopagoMonthlyUrl: 'https://mpago.la/32Qtynr',
+    mercadopagoAnnualUrl: 'https://mpago.la/2VEfsvU',
+    mercadopagoEditorialAnnualUrl: 'https://mpago.la/2VEfsvU',
+    welcomeCredits: 15,
+    annualDiscountPercent: 20,
   });
   const [notice, setNotice] = useState<{
     tone: 'info' | 'warning' | 'error' | 'success';
@@ -84,9 +93,16 @@ export default function PlanesClient() {
             whatsappPhone: d.whatsappPhone || '51987006572',
             stripeMonthlyUrl: d.stripeMonthlyUrl || '',
             stripeAnnualUrl: d.stripeAnnualUrl || '',
+            stripeEditorialAnnualUrl: d.stripeEditorialAnnualUrl || d.stripeAnnualUrl || '',
             mercadopagoMonthlyUrl: d.mercadopagoMonthlyUrl || '',
             mercadopagoAnnualUrl: d.mercadopagoAnnualUrl || '',
+            mercadopagoEditorialAnnualUrl: d.mercadopagoEditorialAnnualUrl || d.mercadopagoAnnualUrl || '',
+            welcomeCredits: Number.isFinite(Number(d.welcomeCredits)) ? Number(d.welcomeCredits) : 15,
+            annualDiscountPercent: Number.isFinite(Number(d.annualDiscountPercent)) ? Number(d.annualDiscountPercent) : 20,
           });
+          if (Array.isArray(d.plans) && d.plans.length === 3) {
+            setPlans(d.plans);
+          }
         }
       })
       .catch(() => {});
@@ -106,15 +122,23 @@ export default function PlanesClient() {
     setPayMethod(isEn ? 'stripe' : 'yape');
   };
 
-  const getDirectStripeLink = (plan: ColorearPlan) =>
-    plan.mode === 'subscription' && billingCycle === 'annual'
-      ? billingCfg.stripeAnnualUrl
-      : billingCfg.stripeMonthlyUrl;
+  const getDirectStripeLink = (plan: ColorearPlan) => {
+    if (plan.id === 'editorial') {
+      return billingCycle === 'annual'
+        ? billingCfg.stripeEditorialAnnualUrl || billingCfg.stripeAnnualUrl
+        : billingCfg.stripeAnnualUrl;
+    }
+    return billingCfg.stripeMonthlyUrl;
+  };
 
-  const getDirectMercadoPagoLink = (plan: ColorearPlan) =>
-    plan.mode === 'subscription' && billingCycle === 'annual'
-      ? billingCfg.mercadopagoAnnualUrl
-      : billingCfg.mercadopagoMonthlyUrl;
+  const getDirectMercadoPagoLink = (plan: ColorearPlan) => {
+    if (plan.id === 'editorial') {
+      return billingCycle === 'annual'
+        ? billingCfg.mercadopagoEditorialAnnualUrl || billingCfg.mercadopagoAnnualUrl
+        : billingCfg.mercadopagoAnnualUrl;
+    }
+    return billingCfg.mercadopagoMonthlyUrl;
+  };
 
   const buildWhatsappDirectUrl = (plan: ColorearPlan, extra = '') => {
     const digits = billingCfg.whatsappPhone.replace(/[^\d]/g, '');
@@ -267,10 +291,14 @@ export default function PlanesClient() {
     }
   };
 
+  const freePlan = plans.find((p) => p.id === 'free') || COLOREAR_PLANS[0];
+  const kdpPlan = plans.find((p) => p.id === 'creador') || COLOREAR_PLANS[1];
+  const editorialPlan = plans.find((p) => p.id === 'editorial') || COLOREAR_PLANS[2];
+
   const comparisonRows = isEn
     ? [
         { name: 'Free 300 DPI PDF library & online coloring', free: true, creador: true, editorial: true },
-        { name: 'AI illustrations included', free: '15 signup + daily fair quota', creador: '120 non-expiring', editorial: '400 / month' },
+        { name: 'AI illustrations included', free: `${freePlan.credits} signup + daily fair quota`, creador: `${kdpPlan.credits} non-expiring`, editorial: `${editorialPlan.credits} / month` },
         { name: 'Bypass daily IP limit', free: false, creador: true, editorial: true },
         { name: 'Bulk upload own ChatGPT/Canva drawings', free: 'Up to 60/book', creador: 'Up to 60/book', editorial: 'Up to 60/book' },
         { name: '300 DPI Interior PDF + blank verso pages', free: true, creador: true, editorial: true },
@@ -280,7 +308,7 @@ export default function PlanesClient() {
       ]
     : [
         { name: 'Biblioteca 300 DPI PDF y coloreador online', free: true, creador: true, editorial: true },
-        { name: 'Créditos IA incluidos', free: '15 al crear cuenta + cuota diaria', creador: '120 sin caducidad', editorial: '400 cada mes' },
+        { name: 'Créditos IA incluidos', free: `${freePlan.credits} al crear cuenta + cuota diaria`, creador: `${kdpPlan.credits} sin caducidad`, editorial: `${editorialPlan.credits} cada mes` },
         { name: 'Sin tope diario por IP', free: false, creador: true, editorial: true },
         { name: 'Carga masiva de dibujos propios (ChatGPT/Canva)', free: 'Hasta 60/libro', creador: 'Hasta 60/libro', editorial: 'Hasta 60/libro' },
         { name: 'Compilador PDF Interior 300 DPI + reversos', free: true, creador: true, editorial: true },
@@ -293,7 +321,7 @@ export default function PlanesClient() {
     ? [
         {
           q: 'Do Creator Pack credits expire?',
-          a: 'Never. One-time credit packs stay in your account permanently until you use them across as many coloring books as you want.',
+          a: `Never. One-time credit packs ($${kdpPlan.priceUsdMonthly} / S/ ${kdpPlan.pricePenMonthly}) give you ${kdpPlan.credits} credits that stay in your account permanently until you use them.`,
         },
         {
           q: 'Can I still compile books for free using my own ChatGPT or Midjourney art?',
@@ -301,13 +329,13 @@ export default function PlanesClient() {
         },
         {
           q: 'How do payments work internationally and in Peru?',
-          a: 'You can pay via Stripe card checkout (USD), MercadoPago Yape/Plin QR, direct Yape/Plin transfer (987 006 572), WhatsApp VIP, or redeem an activation license code.',
+          a: `You can pay via Stripe card checkout (USD), MercadoPago Yape/Plin QR, direct Yape/Plin transfer (${billingCfg.yapePhone}), WhatsApp VIP, or redeem an activation license code.`,
         },
       ]
     : [
         {
-          q: '¿Los créditos del Pack Creador KDP caducan?',
-          a: 'Nunca. El Pack Creador (S/ 29 / $9) es un pago único y tus 120 créditos permanecen en tu cuenta sin fecha de vencimiento.',
+          q: `¿Los créditos de ${kdpPlan.es.name} caducan?`,
+          a: `Nunca. ${kdpPlan.es.name} (S/ ${kdpPlan.pricePenMonthly} / $${kdpPlan.priceUsdMonthly}) es un pago único y tus ${kdpPlan.credits} créditos permanecen en tu cuenta sin fecha de vencimiento.`,
         },
         {
           q: '¿Puedo armar libros gratis subiendo mis propios dibujos de ChatGPT o Midjourney?',
@@ -315,7 +343,7 @@ export default function PlanesClient() {
         },
         {
           q: '¿Cómo funcionan los pagos con Yape/Plin, MercadoPago QR y Tarjeta Stripe?',
-          a: 'Usamos la misma pasarela verificada de Descargador Pro y ATP Dev: paga al instante por MercadoPago QR (Yape/Plin/PagoEfectivo), Yape/Plin directo al 987 006 572, Tarjeta Stripe o canjea tu código de licencia.',
+          a: `Usamos la pasarela oficial de ATP Dev: paga al instante por MercadoPago QR (Yape/Plin/PagoEfectivo), Yape/Plin directo al ${billingCfg.yapePhone}, Tarjeta Stripe o canjea tu código de licencia.`,
         },
       ];
 
@@ -375,7 +403,7 @@ export default function PlanesClient() {
             >
               <span>{isEn ? 'Annual billing' : 'Pago Anual'}</span>
               <span className="px-2 py-0.5 rounded-full bg-yellow-300 text-zinc-950 text-[10px] font-black">
-                -20%
+                -{billingCfg.annualDiscountPercent}%
               </span>
             </button>
           </div>
@@ -421,7 +449,7 @@ export default function PlanesClient() {
 
       {/* 3 Plan Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-        {COLOREAR_PLANS.map((plan) => {
+        {plans.map((plan) => {
           const copy = isEn ? plan.en : plan.es;
           const isAnnualSub = plan.mode === 'subscription' && billingCycle === 'annual';
           const displayUsd = isAnnualSub ? Math.round((plan.priceUsdAnnual / 12) * 10) / 10 : plan.priceUsdMonthly;
@@ -468,8 +496,8 @@ export default function PlanesClient() {
                   <p className={`text-xs mt-1 ${plan.highlight ? 'text-zinc-400' : 'text-zinc-500 dark:text-slate-400'}`}>
                     {isAnnualSub
                       ? isEn
-                        ? `Billed $${plan.priceUsdAnnual}/yr (save 20%)`
-                        : `Facturado S/ ${plan.pricePenAnnual} / $${plan.priceUsdAnnual} al año (ahorras 20%)`
+                        ? `Billed $${plan.priceUsdAnnual}/yr (save ${billingCfg.annualDiscountPercent}%)`
+                        : `Facturado S/ ${plan.pricePenAnnual} / $${plan.priceUsdAnnual} al año (ahorras ${billingCfg.annualDiscountPercent}%)`
                       : copy.periodLabel}
                   </p>
                 </div>
@@ -604,8 +632,8 @@ export default function PlanesClient() {
             </h2>
             <p className="text-xs text-zinc-600 dark:text-slate-400 max-w-2xl leading-relaxed">
               {isEn
-                ? 'Pay securely via Stripe (USD), MercadoPago Yape/Plin QR, direct Yape/Plin (987 006 572), WhatsApp VIP, or redeem a license code.'
-                : 'Paga con Tarjeta (Stripe USD), QR oficial de MercadoPago (Yape/Plin/PagoEfectivo), Yape/Plin directo al 987 006 572 o canjea tu código de licencia.'}
+                ? `Pay securely via Stripe (USD), MercadoPago Yape/Plin QR, direct Yape/Plin (${billingCfg.yapePhone}), WhatsApp VIP, or redeem a license code.`
+                : `Paga con Tarjeta (Stripe USD), QR oficial de MercadoPago (Yape/Plin/PagoEfectivo), Yape/Plin directo al ${billingCfg.yapePhone} o canjea tu código de licencia.`}
             </p>
           </div>
         </div>

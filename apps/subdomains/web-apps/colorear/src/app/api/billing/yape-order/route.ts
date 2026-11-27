@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPlanById } from '@/lib/plans';
+import { getDynamicPlanById } from '@/lib/server/ecosystemPayments';
 import { getAuthenticatedUser } from '@/lib/server/session';
 import { createOrder } from '@/lib/server/store';
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const operationCode = String(body.operationCode || '').trim().slice(0, 40);
     const payerPhone = String(body.payerPhone || '').trim().slice(0, 30);
 
-    const plan = getPlanById(planId);
+    const plan = getDynamicPlanById(planId);
     if (!plan || plan.id === 'free') {
       return NextResponse.json({ error: 'Plan inválido.' }, { status: 400 });
     }

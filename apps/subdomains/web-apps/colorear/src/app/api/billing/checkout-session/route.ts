@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPlanById } from '@/lib/plans';
+import { getDynamicPlanById } from '@/lib/server/ecosystemPayments';
 import { getAuthenticatedUser } from '@/lib/server/session';
 import { createOrder } from '@/lib/server/store';
 
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const planId = String(body.planId || '').toLowerCase();
   const billingCycleRaw = String(body.billingCycle || 'monthly').toLowerCase();
-  const plan = getPlanById(planId);
+  const plan = getDynamicPlanById(planId);
 
   if (!plan || plan.id === 'free') {
     return NextResponse.json({ error: 'Selecciona un plan de pago válido.' }, { status: 400 });
