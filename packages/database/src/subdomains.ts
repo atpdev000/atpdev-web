@@ -248,7 +248,7 @@ export const DEFAULT_CHAMBA_CONFIG: SubdomainConfig = {
   },
   contact: {
     email: 'contacto@atpdev.dev',
-    whatsapp: '+51987654321',
+    whatsapp: '+51987006572',
     whatsapp_channel_url: 'https://whatsapp.com/channel/0029Vaexample',
     telegram_channel_url: 'https://t.me/chambapro_peru',
     support_url: 'https://atpdev.dev/contacto'
@@ -362,7 +362,7 @@ export const DEFAULT_SORTEOS_CONFIG: SubdomainConfig = {
   },
   contact: {
     email: 'contacto@atpdev.dev',
-    whatsapp: '+51987654321',
+    whatsapp: '+51987006572',
     support_url: 'https://sorteos.atpdev.dev/planes'
   },
   updated_at: new Date().toISOString()
@@ -436,7 +436,7 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
   },
   contact: {
     email: 'contacto@atpdev.dev',
-    whatsapp: '+51987654321',
+    whatsapp: '+51987006572',
     support_url: 'https://descargador.atpdev.dev/contact'
   },
   apk: {
@@ -480,7 +480,7 @@ export const DEFAULT_DESCARGADOR_CONFIG: SubdomainConfig = {
     stripe_business_annual_url: '',
     paypal_business_monthly_url: '',
     paypal_business_annual_url: '',
-    whatsapp_number: '+51987654321',
+    whatsapp_number: '+51987006572',
     whatsapp_message_pro: 'Hola ATP Dev, deseo activar el Plan Pro Creador para Descargador Pro. ¿Me brindas los datos de pago por Yape o Tarjeta?',
     whatsapp_message_business: 'Hola ATP Dev, deseo contratar el Plan Business VIP para mi agencia. ¿Me brindas la información de activación?',
     license_keys: ['VIP-ATP-2026', 'DESCARGADOR-PRO-VIP'],
@@ -494,8 +494,80 @@ function getDefaultConfig(id: string): SubdomainConfig {
   if (id === 'sorteos') return { ...DEFAULT_SORTEOS_CONFIG };
   if (id === 'descargador') return { ...DEFAULT_DESCARGADOR_CONFIG };
   if (id === 'magic') return { ...DEFAULT_MAGIC_CONFIG };
+  if (id === 'colorear') return { ...DEFAULT_COLOREAR_CONFIG };
   return { ...DEFAULT_CHAMBA_CONFIG };
 }
+
+export const DEFAULT_COLOREAR_CONFIG: SubdomainConfig = {
+  id: 'colorear',
+  name: 'Colorear Pro',
+  slug: 'colorear',
+  subdomain: 'colorear',
+  full_domain: 'colorear.atpdev.dev',
+  devPort: 3010,
+  category: 'Dibujos para Colorear PDF 300 DPI & Estudio Amazon KDP',
+  status: 'active',
+  theme: {
+    accent_color: '#2563eb',
+    accent_name: 'blue',
+    theme_mode: 'light',
+    radius_style: 'rounded-3xl',
+    radius_scale: 'medium',
+    seed_color: '#2563eb',
+    color_theme: 'studio',
+    primary_color: '#2563eb',
+    secondary_color: '#facc15',
+    tertiary_color: '#18181b',
+    neutral_color: '#64748b',
+    font_headline: 'Fredoka',
+    font_body: 'Plus Jakarta Sans',
+    font_label: 'Plus Jakarta Sans'
+  },
+  branding: {
+    site_title: 'Colorear Pro',
+    site_tagline: 'Láminas PDF 300 DPI Gratis & Estudio Amazon KDP',
+    hero_badge: '300 DPI Reales • Amazon KDP Ready',
+    hero_title_prefix: 'Crea dibujos para colorear y libros KDP con',
+    hero_title_highlight: 'Colorear Pro',
+    hero_description: 'Descarga láminas gratis a 300 DPI, pinta online o arma libros completos para Amazon KDP.',
+    logo_url: '/icon.svg',
+    favicon_url: '/icon.svg'
+  },
+  seo: {
+    meta_title: 'Colorear Pro — Dibujos para Colorear en PDF Gratis y Estudio Amazon KDP',
+    meta_description: 'Láminas PDF 300 DPI gratis y Estudio Amazon KDP.',
+    keywords: ['dibujos para colorear pdf', 'amazon kdp coloring book'],
+    canonical_url: 'https://colorear.atpdev.dev'
+  },
+  monetization: {
+    adsense_enabled: true,
+    adsense_client_id: 'ca-pub-5414009811868137'
+  },
+  modules: {
+    free_library_enabled: true,
+    kdp_studio_enabled: true
+  },
+  contact: {
+    email: 'contacto@atpdev.dev',
+    whatsapp: '+51987006572',
+    support_url: 'https://colorear.atpdev.dev/contacto'
+  },
+  payments: {
+    enabled: true,
+    provider: 'multi',
+    currency: 'USD',
+    pro_monthly_price: 9,
+    pro_annual_price: 19,
+    stripe_pro_monthly_url: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
+    stripe_pro_annual_url: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
+    mercadopago_pro_monthly_url: 'https://mpago.la/1HfK5w8',
+    mercadopago_pro_annual_url: 'https://mpago.la/2EJNTrd',
+    whatsapp_number: '+51987006572',
+    license_keys: ['VIP-ATP-2026', 'COLOREAR-KDP-120', 'COLOREAR-EDITORIAL-400'],
+    notification_email: 'contacto@atpdev.dev'
+  },
+  updated_at: new Date().toISOString()
+};
 
 export const DEFAULT_MAGIC_CONFIG: SubdomainConfig = {
   id: 'magic',
@@ -564,7 +636,7 @@ export const DEFAULT_MAGIC_CONFIG: SubdomainConfig = {
   },
   contact: {
     email: 'contacto@atpdev.dev',
-    whatsapp: '+51987654321',
+    whatsapp: '+51987006572',
     support_url: 'https://atpdev.dev/contacto'
   },
   updated_at: new Date().toISOString()
@@ -628,7 +700,7 @@ export const DEFAULT_DNI_CONFIG: SubdomainConfig = {
   },
   contact: {
     email: 'contacto@atpdev.dev',
-    whatsapp: '+51987654321',
+    whatsapp: '+51987006572',
     support_url: 'https://atpdev.dev/contacto'
   },
   updated_at: new Date().toISOString()
@@ -639,7 +711,8 @@ let inMemoryConfigs: Record<string, SubdomainConfig> = {
   sorteos: { ...DEFAULT_SORTEOS_CONFIG },
   descargador: { ...DEFAULT_DESCARGADOR_CONFIG },
   magic: { ...DEFAULT_MAGIC_CONFIG },
-  dni: { ...DEFAULT_DNI_CONFIG }
+  dni: { ...DEFAULT_DNI_CONFIG },
+  colorear: { ...DEFAULT_COLOREAR_CONFIG }
 };
 
 export function listSubdomains(): SubdomainConfig[] {

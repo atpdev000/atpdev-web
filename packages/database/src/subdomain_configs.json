@@ -67,7 +67,7 @@
     },
     "contact": {
       "email": "contacto@atpdev.dev",
-      "whatsapp": "+51987654321",
+      "whatsapp": "+51987006572",
       "whatsapp_channel_url": "https://whatsapp.com/channel/0029Vaexample",
       "telegram_channel_url": "https://t.me/chambapro_peru",
       "support_url": "https://atpdev.dev/contacto"
@@ -149,10 +149,38 @@
     },
     "contact": {
       "email": "contacto@atpdev.dev",
-      "whatsapp": "+51987654321",
+      "whatsapp": "+51987006572",
       "support_url": "https://sorteos.atpdev.dev/planes"
     },
-    "updated_at": "2026-10-03T17:04:06.545Z"
+    "payments": {
+      "enabled": true,
+      "provider": "multi",
+      "currency": "USD",
+      "pro_monthly_price": 9.99,
+      "pro_annual_price": 95.9,
+      "stripe_pro_monthly_url": "https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01",
+      "stripe_pro_annual_url": "https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00",
+      "mercadopago_pro_monthly_url": "https://mpago.la/1HfK5w8",
+      "mercadopago_pro_annual_url": "https://mpago.la/2EJNTrd",
+      "paypal_pro_monthly_url": "",
+      "paypal_pro_annual_url": "",
+      "business_monthly_price": 24.99,
+      "business_annual_price": 239.9,
+      "stripe_business_monthly_url": "",
+      "stripe_business_annual_url": "",
+      "paypal_business_monthly_url": "",
+      "paypal_business_annual_url": "",
+      "whatsapp_number": "+51987006572",
+      "whatsapp_message_pro": "Hola ATP Dev, deseo activar el Plan Pro Creador en Sorteos Pro. ¿Me brindas los datos de pago por Yape, Plin o Tarjeta?",
+      "whatsapp_message_business": "Hola ATP Dev, deseo contratar el Plan Business en Sorteos Pro. ¿Me brindas los datos de activación?",
+      "license_keys": [
+        "VIP-ATP-2026",
+        "SORTEOS-PRO-2026",
+        "SORTEOS-BUSINESS-2026"
+      ],
+      "notification_email": "contacto@atpdev.dev"
+    },
+    "updated_at": "2026-11-27T17:48:00.000Z"
   },
   "descargador": {
     "id": "descargador",
@@ -352,7 +380,7 @@
     },
     "contact": {
       "email": "contacto@atpdev.dev",
-      "whatsapp": "+51987654321",
+      "whatsapp": "+51987006572",
       "support_url": "https://atpdev.dev/contacto"
     },
     "updated_at": "2026-10-31T19:40:00.000Z"
@@ -427,7 +455,7 @@
     },
     "contact": {
       "email": "contacto@atpdev.dev",
-      "whatsapp": "+51987654321",
+      "whatsapp": "+51987006572",
       "support_url": "https://atpdev.dev/contacto"
     },
     "updated_at": "2026-11-09T12:00:00.000Z"
@@ -499,9 +527,107 @@
     },
     "contact": {
       "email": "contacto@atpdev.dev",
-      "whatsapp": "+51987654321",
+      "whatsapp": "+51987006572",
       "support_url": "https://atpdev.dev/contacto"
     },
     "updated_at": "2026-11-09T16:30:00.000Z"
+  },
+  "colorear": {
+    "id": "colorear",
+    "name": "Colorear Pro",
+    "slug": "colorear",
+    "subdomain": "colorear",
+    "full_domain": "colorear.atpdev.dev",
+    "devPort": 3010,
+    "category": "Dibujos para Colorear PDF 300 DPI & Estudio Amazon KDP",
+    "status": "active",
+    "theme": {
+      "accent_color": "#2563eb",
+      "accent_name": "blue",
+      "theme_mode": "light",
+      "radius_style": "rounded-3xl",
+      "radius_scale": "medium",
+      "seed_color": "#2563eb",
+      "color_theme": "studio",
+      "primary_color": "#2563eb",
+      "secondary_color": "#facc15",
+      "tertiary_color": "#18181b",
+      "neutral_color": "#64748b",
+      "font_headline": "Fredoka",
+      "font_body": "Plus Jakarta Sans",
+      "font_label": "Plus Jakarta Sans",
+      "glow_style": "none",
+      "neon_thickness": "2px",
+      "cursor_effect": "default",
+      "global_background_image": ""
+    },
+    "branding": {
+      "site_title": "Colorear Pro",
+      "site_tagline": "Láminas PDF 300 DPI Gratis & Estudio Amazon KDP",
+      "hero_badge": "300 DPI Reales • Sin Marcas de Agua • Amazon KDP Ready",
+      "hero_title_prefix": "Crea dibujos para colorear y libros KDP con",
+      "hero_title_highlight": "Colorear Pro",
+      "hero_description": "Descarga láminas infantiles y mandalas gratis a 300 DPI, pinta online o compila libros completos para Amazon KDP con limpieza blanco/negro puro y portada con lomo exacto.",
+      "logo_url": "/icon.svg",
+      "favicon_url": "/icon.svg",
+      "announcement_text": "🎨 Nuevo Estudio KDP 300 DPI con 15 créditos gratis al registrarte con Google.",
+      "announcement_enabled": true
+    },
+    "seo": {
+      "meta_title": "Colorear Pro — Dibujos para Colorear en PDF Gratis y Estudio Amazon KDP",
+      "meta_description": "Descarga dibujos para colorear gratis en PDF de 300 DPI, pinta online o arma libros completos listos para Amazon KDP con reversos en blanco y portada con lomo exacto.",
+      "keywords": [
+        "dibujos para colorear pdf",
+        "hojas para colorear imprimir gratis",
+        "crear libros para colorear amazon kdp",
+        "calculadora lomo amazon kdp"
+      ],
+      "canonical_url": "https://colorear.atpdev.dev"
+    },
+    "monetization": {
+      "adsense_enabled": true,
+      "adsense_client_id": "ca-pub-5414009811868137"
+    },
+    "modules": {
+      "free_library_enabled": true,
+      "interactive_coloring_enabled": true,
+      "kdp_studio_enabled": true,
+      "ai_generator_enabled": true,
+      "google_oauth_enabled": true
+    },
+    "contact": {
+      "email": "contacto@atpdev.dev",
+      "whatsapp": "+51987006572",
+      "support_url": "https://colorear.atpdev.dev/contacto"
+    },
+    "payments": {
+      "enabled": true,
+      "provider": "multi",
+      "currency": "USD",
+      "pro_monthly_price": 9,
+      "pro_annual_price": 19,
+      "stripe_pro_monthly_url": "https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01",
+      "stripe_pro_annual_url": "https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00",
+      "mercadopago_pro_monthly_url": "https://mpago.la/1HfK5w8",
+      "mercadopago_pro_annual_url": "https://mpago.la/2EJNTrd",
+      "paypal_pro_monthly_url": "",
+      "paypal_pro_annual_url": "",
+      "business_monthly_price": 19,
+      "business_annual_price": 182,
+      "stripe_business_monthly_url": "",
+      "stripe_business_annual_url": "",
+      "paypal_business_monthly_url": "",
+      "paypal_business_annual_url": "",
+      "whatsapp_number": "+51987006572",
+      "whatsapp_message_pro": "Hola ATP Dev, deseo activar el Pack Creador KDP (120 créditos) en Colorear Pro.",
+      "whatsapp_message_business": "Hola ATP Dev, deseo activar el Estudio Editorial Pro (400 créditos/mes) en Colorear Pro.",
+      "license_keys": [
+        "VIP-ATP-2026",
+        "COLOREAR-KDP-120",
+        "COLOREAR-EDITORIAL-400"
+      ],
+      "notification_email": "contacto@atpdev.dev"
+    },
+    "updated_at": "2026-11-27T17:48:00.000Z"
   }
 }

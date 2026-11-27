@@ -1,16 +1,20 @@
 import { NextResponse } from 'next/server';
+import { getColorearPaymentsConfig } from '@/lib/server/ecosystemPayments';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const yapePhone = (process.env.YAPE_PHONE || '').trim();
-  const plinPhone = (process.env.PLIN_PHONE || yapePhone).trim();
-  const yapeHolder = (process.env.YAPE_HOLDER || 'Percy Acha Taipe (ATP Dev Perú)').trim();
-  const whatsappPhone = (process.env.WHATSAPP_PHONE || yapePhone).replace(/[^\d]/g, '');
-
+  const cfg = getColorearPaymentsConfig();
   return NextResponse.json({
-    stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
-    yapePhone: yapePhone || null,
-    plinPhone: plinPhone || null,
-    yapeHolder,
-    whatsappPhone: whatsappPhone || null,
+    stripeConfigured: cfg.stripeApiConfigured,
+    yapePhone: cfg.yapePhoneDisplay,
+    plinPhone: cfg.yapePhoneDisplay,
+    yapeHolder: cfg.yapeHolder,
+    whatsappPhone: cfg.whatsappNumber,
+    stripeMonthlyUrl: cfg.stripeMonthlyUrl,
+    stripeAnnualUrl: cfg.stripeAnnualUrl,
+    mercadopagoMonthlyUrl: cfg.mercadopagoMonthlyUrl,
+    mercadopagoAnnualUrl: cfg.mercadopagoAnnualUrl,
+    licenseEnabled: true,
   });
 }

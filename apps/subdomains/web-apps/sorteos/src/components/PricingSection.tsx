@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Check, 
@@ -12,7 +12,14 @@ import {
   CheckCircle2, 
   ArrowRight,
   Loader2,
-  Sparkles
+  Sparkles,
+  CreditCard,
+  Smartphone,
+  KeyRound,
+  MessageCircle,
+  Copy,
+  ExternalLink,
+  X
 } from 'lucide-react';
 import { PRICING_PLANS, PricingPlan } from '@/lib/types';
 import { api, getToken } from '@/lib/api';
@@ -31,6 +38,33 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   const { t } = useLanguage();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [checkoutPlan, setCheckoutPlan] = useState<PricingPlan | null>(null);
+  const [payTab, setPayTab] = useState<'yape' | 'card' | 'license'>('yape');
+  const [licenseCode, setLicenseCode] = useState('');
+  const [licenseMsg, setLicenseMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [redeeming, setRedeeming] = useState(false);
+  const [copiedYape, setCopiedYape] = useState(false);
+  const [payCfg, setPayCfg] = useState({
+    stripeApiConfigured: false,
+    whatsappNumber: '51987006572',
+    yapePhoneDisplay: '987 006 572',
+    yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
+    stripeMonthlyUrl: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
+    stripeAnnualUrl: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
+    mercadopagoMonthlyUrl: 'https://mpago.la/1HfK5w8',
+    mercadopagoAnnualUrl: 'https://mpago.la/2EJNTrd',
+  });
+
+  useEffect(() => {
+    fetch('/api/v1/billing/config', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.ok) {
+          setPayCfg((prev) => ({ ...prev, ...d }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSelectPlan = async (plan: PricingPlan) => {
     if (plan.id === 'free') {
@@ -50,31 +84,54 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
     const token = getToken();
     if (!token) {
-      // Si el usuario no ha iniciado sesión, llevarlo a registro con el plan preseleccionado
       router.push(`/registro?plan=${plan.id}&cycle=${billingCycle}`);
       return;
     }
 
-    // Usuario autenticado: iniciar sesión de checkout
-    setLoadingPlan(plan.id);
-    try {
-      const res = await api<{ url: string }>('/api/v1/billing/checkout-session', {
-        method: 'POST',
-        body: {
-          planId: plan.id,
-          billingCycle
+    // Si Stripe API live está activo, redirige directo a Stripe Checkout Session
+    if (payCfg.stripeApiConfigured) {
+      setLoadingPlan(plan.id);
+      try {
+        const res = await api<{ url: string }>('/api/v1/billing/checkout-session', {
+          method: 'POST',
+          body: { planId: plan.id, billingCycle }
+        });
+        if (res?.url) {
+          window.location.href = res.url;
+          return;
         }
-      });
-      if (res?.url) {
-        window.location.href = res.url;
-      } else {
-        router.push(`/dashboard?payment=success&plan=${plan.id}`);
+      } catch {
+        // continúa al modal unificado
+      } finally {
+        setLoadingPlan(null);
       }
-    } catch {
-      // Fallback a dashboard con confirmación
-      router.push(`/dashboard?payment=success&plan=${plan.id}`);
+    }
+
+    // Abre el modal de pagos unificado de ATP Dev (MercadoPago Yape/Plin QR + Stripe + WhatsApp + Licencia)
+    setLicenseMsg(null);
+    setCheckoutPlan(plan);
+  };
+
+  const handleRedeemLicense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!licenseCode.trim()) return;
+    setRedeeming(true);
+    setLicenseMsg(null);
+    try {
+      const res = await api<{ message?: string; plan?: string }>('/api/v1/billing/redeem-license', {
+        method: 'POST',
+        body: { code: licenseCode.trim() },
+      });
+      setLicenseMsg({ type: 'ok', text: res?.message || '¡Licencia activada con éxito!' });
+      setLicenseCode('');
+      setTimeout(() => {
+        setCheckoutPlan(null);
+        router.push(`/dashboard?payment=success&plan=${res?.plan || 'pro'}`);
+      }, 1200);
+    } catch (err: any) {
+      setLicenseMsg({ type: 'err', text: err?.message || 'Código de licencia no válido.' });
     } finally {
-      setLoadingPlan(null);
+      setRedeeming(false);
     }
   };
 
@@ -278,6 +335,185 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
           );
         })}
       </div>
+
+      {/* Modal Unificado de Pagos ATP Dev (Yape / Plin / MercadoPago QR + Stripe + Licencia) */}
+      {checkoutPlan && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setCheckoutPlan(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border-2 border-[#d91a7a] shadow-2xl overflow-hidden text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 bg-gradient-to-r from-[#d91a7a] to-purple-700 text-white flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-wider text-pink-100">
+                  Pasarela Oficial ATP Dev
+                </p>
+                <h3 className="font-display font-black text-lg">
+                  Sorteos Pro — {checkoutPlan.name} ({billingCycle === 'annual' ? `$${checkoutPlan.priceAnnual}/año` : `$${checkoutPlan.priceMonthly}/mes`})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCheckoutPlan(null)}
+                aria-label="Cerrar"
+                className="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPayTab('yape')}
+                  className={`py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer ${
+                    payTab === 'yape'
+                      ? 'border-[#d91a7a] bg-pink-50 dark:bg-pink-950/40 text-[#d91a7a]'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  <Smartphone className="w-3.5 h-3.5" />
+                  <span>Yape / Plin</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayTab('card')}
+                  className={`py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer ${
+                    payTab === 'card'
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Tarjeta</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayTab('license')}
+                  className={`py-2 px-2 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer ${
+                    payTab === 'license'
+                      ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300'
+                      : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                  }`}
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Licencia</span>
+                </button>
+              </div>
+
+              {payTab === 'yape' && (
+                <div className="space-y-3 text-xs">
+                  <a
+                    href={billingCycle === 'annual' ? payCfg.mercadopagoAnnualUrl : payCfg.mercadopagoMonthlyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-[#009ee3] hover:bg-[#0089c7] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Pagar con MercadoPago QR (Yape / Plin)</span>
+                  </a>
+
+                  <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 space-y-2">
+                    <p className="text-purple-900 dark:text-purple-200 font-semibold">
+                      O yapea/plinea directo a <strong>{payCfg.yapeHolder}</strong>:
+                    </p>
+                    <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 rounded-xl border border-purple-200 dark:border-purple-700 px-3 py-2">
+                      <span className="font-mono font-black text-base text-slate-900 dark:text-white">
+                        {payCfg.yapePhoneDisplay}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(payCfg.yapePhoneDisplay.replace(/\s+/g, ''));
+                          setCopiedYape(true);
+                          setTimeout(() => setCopiedYape(false), 2000);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-bold text-[11px] inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        {copiedYape ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedYape ? 'Copiado' : 'Copiar'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`https://wa.me/${payCfg.whatsappNumber}?text=${encodeURIComponent(
+                      `Hola ATP Dev 👋, acabo de pagar el plan ${checkoutPlan.name} (${billingCycle}) en Sorteos Pro. ¿Me envías mi código de activación?`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Enviar comprobante por WhatsApp VIP</span>
+                  </a>
+                </div>
+              )}
+
+              {payTab === 'card' && (
+                <div className="space-y-3 text-xs">
+                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                    Paga con Visa, Mastercard, Amex o Apple/Google Pay en nuestra pasarela segura de Stripe. Al confirmar, recibirás tu licencia para activar tu cuenta al instante.
+                  </p>
+                  <a
+                    href={billingCycle === 'annual' ? payCfg.stripeAnnualUrl : payCfg.stripeMonthlyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3.5 px-4 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    <span>Ir a pago seguro con Tarjeta (Stripe)</span>
+                  </a>
+                  <a
+                    href={`https://wa.me/${payCfg.whatsappNumber}?text=${encodeURIComponent(
+                      `Hola ATP Dev 👋, deseo pagar el plan ${checkoutPlan.name} (${billingCycle}) en Sorteos Pro con tarjeta.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-500" />
+                    <span>Coordinar pago con tarjeta por WhatsApp</span>
+                  </a>
+                </div>
+              )}
+
+              {payTab === 'license' && (
+                <form onSubmit={handleRedeemLicense} className="space-y-3 text-xs">
+                  <p className="text-slate-600 dark:text-slate-300">
+                    Ingresa el código de licencia PRO entregado por ATP Dev para activar tu plan inmediatamente:
+                  </p>
+                  <input
+                    type="text"
+                    required
+                    value={licenseCode}
+                    onChange={(e) => setLicenseCode(e.target.value.toUpperCase())}
+                    placeholder="Ej. SORTEOS-PRO-2026"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 font-mono uppercase text-sm text-slate-900 dark:text-white"
+                  />
+                  {licenseMsg && (
+                    <p className={`font-bold ${licenseMsg.type === 'ok' ? 'text-emerald-600' : 'text-rose-500'}`}>
+                      {licenseMsg.text}
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={redeeming || !licenseCode.trim()}
+                    className="w-full py-3 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                  >
+                    {redeeming ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
+                    <span>Activar Licencia Ahora</span>
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

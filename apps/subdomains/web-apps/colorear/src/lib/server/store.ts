@@ -390,3 +390,56 @@ export function rejectOrderByCode(orderCode: string, reason?: string): StoredOrd
   return order;
 }
 
+export function redeemLicenseForUser(input: {
+  userId: string;
+  licenseCode: string;
+  planId: ColorearPlanId;
+  credits: number;
+}): { ok: true; user: StoredUser; order: StoredOrder } | { ok: false; error: string } {
+  const db = readDb();
+  const user = db.users.find((u) => u.id === input.userId);
+  if (!user) return { ok: false, error: 'Usuario no encontrado.' };
+
+  const clean = input.licenseCode.trim().toUpperCase();
+  const alreadyUsed = db.orders.some(
+    (o) => o.userId === user.id && o.operationCode?.toUpperCase() === `LIC:${clean}` && o.status === 'paid'
+  );
+  if (alreadyUsed) {
+    return { ok: false, error: 'Ya canjeaste este código de licencia en tu cuenta.' };
+  }
+
+  const now = new Date().toISOString();
+  const order: StoredOrder = {
+    id: generateId('ord'),
+    orderCode: generateOrderCode(),
+    userId: user.id,
+    userEmail: user.email,
+    planId: input.planId,
+    billingCycle: input.planId === 'editorial' ? 'monthly' : 'one_time',
+    credits: input.credits,
+    amountUsd: input.planId === 'editorial' ? 19 : 9,
+    amountPen: input.planId === 'editorial' ? 59 : 29,
+    method: 'yape',
+    status: 'paid',
+    operationCode: `LIC:${clean}`,
+    notes: 'Activación por código de licencia',
+    createdAt: now,
+    paidAt: now,
+  };
+  db.orders.unshift(order);
+  user.credits += input.credits;
+  if (input.planId === 'editorial' || user.plan === 'free') {
+    user.plan = input.planId;
+  }
+  user.updatedAt = now;
+  db.audit.push({
+    id: generateId('aud'),
+    userId: user.id,
+    action: 'billing.license_redeemed',
+    meta: { orderCode: order.orderCode, credits: input.credits },
+    createdAt: now,
+  });
+  writeDb(db);
+  return { ok: true, user, order };
+}
+
