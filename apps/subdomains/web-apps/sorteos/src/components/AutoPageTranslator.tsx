@@ -301,8 +301,14 @@ export const AutoPageTranslator: React.FC<{ lang: string }> = ({ lang }) => {
           if (translations.length !== batch.length) continue;
 
           for (let k = 0; k < batch.length; k++) {
-            const tr = (translations[k] || '').trim() || batch[k];
-            cache.set(batch[k], tr);
+            const src = batch[k];
+            const tr = (translations[k] || '').trim();
+            // Evitar envenenar caché si un fallo transitorio devolvió texto largo con tildes sin traducir
+            const looksUntranslatedSpanish =
+              tr === src && src.length > 18 && /[áéíóúñ¿¡]/i.test(src);
+            if (tr && !looksUntranslatedSpanish) {
+              cache.set(src, tr);
+            }
           }
           persistLangCache(lang, cache);
 
