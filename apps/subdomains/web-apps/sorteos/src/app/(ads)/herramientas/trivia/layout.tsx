@@ -1,35 +1,38 @@
 import type { Metadata } from 'next';
-import { SITE_NAME, SITE_URL } from '@/lib/siteConfig';
+import { buildToolJsonLd, buildToolMetadata, type ToolSeoConfig } from '@/lib/seoSchema';
 
-export const metadata: Metadata = {
-  title: 'Generador de Trivias Online — Crea Quiz y Cuestionarios Personalizados',
-  description: 'Crea tus quiz, cuestionarios y trivias online para capturar leads, entregar cupones de descuento y realizar sorteos automáticos 100% verificables.',
+const SEO: ToolSeoConfig = {
+  slug: '/herramientas/trivia',
+  shortName: 'Trivia Interactiva en Vivo',
+  title: 'Generador de Trivias Online Gratis con PIN — Quiz en Vivo',
+  description:
+    'Crea trivias y quizzes interactivos con PIN de sala tipo Kahoot para directos, clases, eventos y sorteos. Ranking en tiempo real y exportación de ganadores gratis.',
   keywords: [
-    'generador de trivias',
-    'crear trivia online',
-    'crear quiz online gratis',
-    'cuestionarios para sorteos',
-    'captura de leads trivia',
+    'generador de trivias online',
+    'crear trivia gratis con pin',
+    'quiz interactivo en vivo',
+    'trivia tipo kahoot gratis',
     'sorteo de preguntas y respuestas',
-    'trivia para tiendas online',
-    'widget trivia shopify'
+    'live trivia quiz maker free',
   ],
-  alternates: {
-    canonical: `${SITE_URL}/herramientas/trivia`,
-  },
-  openGraph: {
-    title: `Generador de Trivias Online | ${SITE_NAME}`,
-    description: 'Crea tus quiz y cuestionarios personalizados, captura leads y entrega premios con sorteos automáticos.',
-    url: `${SITE_URL}/herramientas/trivia`,
-    siteName: SITE_NAME,
-    type: 'website',
-  },
+  faqs: [
+    {
+      q: '¿Cómo jugar una trivia en vivo con amigos o audiencia?',
+      a: 'Crea tus preguntas en el editor, genera un PIN de sala y compártelo para que los participantes respondan desde su celular con ranking automático.',
+    },
+  ],
 };
 
-export default function TriviaLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return children;
+export const metadata: Metadata = buildToolMetadata(SEO);
+
+export default function TriviaLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildToolJsonLd(SEO)) }}
+      />
+      {children}
+    </>
+  );
 }

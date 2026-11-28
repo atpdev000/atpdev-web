@@ -40,20 +40,20 @@ import { BLOG_POSTS } from '@/lib/blog-data';
 type ToolCategory = 'all' | 'social' | 'games' | 'utilities';
 
 export default function HomePage() {
-  const { t } = useLanguage();
+  const { t, tUi } = useLanguage();
   const [toolFilter, setToolFilter] = useState<ToolCategory>('all');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const allTools = [
     {
-      title: 'Sorteo en Instagram',
-      desc: 'Elige ganadores verificables entre comentarios de posts y Reels con filtros de menciones y duplicados.',
+      title: tUi('item_sorteo_ig'),
+      desc: tUi('card_ig_desc'),
       href: '/apps/sorteo-instagram',
       icon: InstagramIcon,
       color: 'from-pink-600 via-rose-500 to-amber-500',
-      badge: 'Redes',
+      badge: tUi('badge_social'),
       category: 'social' as const,
-      action: 'Hacer sorteo Instagram',
+      action: tUi('card_ig_cta'),
     },
     {
       title: t('tool_roulette'),
@@ -61,7 +61,7 @@ export default function HomePage() {
       href: '/herramientas/ruleta',
       icon: Disc,
       color: 'from-pink-500 to-rose-600',
-      badge: 'Dinámica',
+      badge: tUi('badge_game'),
       category: 'games' as const,
       action: t('roulette_btn_spin'),
     },
@@ -71,39 +71,39 @@ export default function HomePage() {
       href: '/herramientas/lista',
       icon: ListOrdered,
       color: 'from-amber-400 to-orange-500',
-      badge: 'Gratis',
+      badge: tUi('badge_free'),
       category: 'games' as const,
       action: t('names_btn_draw'),
     },
     {
-      title: 'Sorteo Multi-Red',
-      desc: 'Combina comentarios de Instagram, TikTok, YouTube, Facebook, X y Threads en un solo sorteo certificado.',
+      title: tUi('item_sorteo_multi'),
+      desc: tUi('card_multi_desc'),
       href: '/sorteos/nuevo?mode=multi',
       icon: Layers,
       color: 'from-purple-600 to-indigo-600',
-      badge: 'Redes',
+      badge: tUi('badge_social'),
       category: 'social' as const,
-      action: 'Crear sorteo multi-red',
+      action: tUi('card_multi_cta'),
     },
     {
-      title: 'Trivia Interactiva en Vivo',
-      desc: 'Crea quizzes competitivos con PIN de sala para tus directos, eventos o dinámicas de comunidad.',
+      title: tUi('card_trivia_title'),
+      desc: tUi('card_trivia_desc'),
       href: '/herramientas/trivia',
       icon: HelpCircle,
       color: 'from-violet-500 to-fuchsia-600',
-      badge: 'Dinámica',
+      badge: tUi('badge_game'),
       category: 'games' as const,
-      action: 'Crear trivia gratis',
+      action: tUi('card_trivia_cta'),
     },
     {
-      title: 'Raspa y Gana Digital',
-      desc: 'Tarjetas interactivas de raspa y gana para premiar clientes, lanzamientos y campañas virales.',
+      title: tUi('card_scratch_title'),
+      desc: tUi('card_scratch_desc'),
       href: '/herramientas/raspa-gana',
       icon: Sparkles,
       color: 'from-yellow-500 to-amber-600',
-      badge: 'Dinámica',
+      badge: tUi('badge_game'),
       category: 'games' as const,
-      action: 'Crear raspa y gana',
+      action: tUi('card_scratch_cta'),
     },
     {
       title: t('tool_secret_santa'),
@@ -111,7 +111,7 @@ export default function HomePage() {
       href: '/herramientas/amigo-invisible',
       icon: Gift,
       color: 'from-rose-500 to-pink-600',
-      badge: 'Dinámica',
+      badge: tUi('badge_game'),
       category: 'games' as const,
       action: t('secret_santa_btn_generate'),
     },
@@ -121,7 +121,7 @@ export default function HomePage() {
       href: '/herramientas/equipos',
       icon: Users2,
       color: 'from-indigo-500 to-blue-600',
-      badge: 'Utilidad',
+      badge: tUi('badge_utility'),
       category: 'utilities' as const,
       action: t('teams_btn_generate'),
     },
@@ -131,39 +131,39 @@ export default function HomePage() {
       href: '/herramientas/numeros',
       icon: Hash,
       color: 'from-cyan-500 to-blue-600',
-      badge: 'Utilidad',
+      badge: tUi('badge_utility'),
       category: 'utilities' as const,
       action: t('numbers_btn_generate'),
     },
     {
-      title: 'Generador de Bases Legales',
-      desc: 'Redacta términos y condiciones claros para sorteos en Instagram, TikTok o Facebook en segundos.',
+      title: tUi('item_legal_bases'),
+      desc: tUi('card_legal_desc'),
       href: '/herramientas/bases-legales',
       icon: Scale,
       color: 'from-slate-700 to-slate-900',
-      badge: 'Utilidad Pro',
+      badge: tUi('badge_utility_pro'),
       category: 'utilities' as const,
-      action: 'Generar bases legales',
+      action: tUi('card_legal_cta'),
     },
     {
-      title: 'Calculadora de Engagement',
-      desc: 'Mide la tasa real de interacción de tus perfiles y publicaciones antes de lanzar un sorteo.',
+      title: tUi('item_engagement'),
+      desc: tUi('card_engagement_desc'),
       href: '/herramientas/engagement',
       icon: Heart,
       color: 'from-pink-600 to-purple-600',
-      badge: 'Utilidad Pro',
+      badge: tUi('badge_utility_pro'),
       category: 'utilities' as const,
-      action: 'Calcular engagement',
+      action: tUi('card_engagement_cta'),
     },
     {
-      title: 'Generador de Hashtags',
-      desc: 'Combina etiquetas de alto alcance por nicho para multiplicar la participación orgánica de tu sorteo.',
+      title: tUi('item_hashtags'),
+      desc: tUi('card_hashtags_desc'),
       href: '/herramientas/hashtags',
       icon: Zap,
       color: 'from-fuchsia-600 to-pink-600',
-      badge: 'Redes',
+      badge: tUi('badge_social'),
       category: 'social' as const,
-      action: 'Generar hashtags',
+      action: tUi('card_hashtags_cta'),
     },
   ];
 
@@ -171,13 +171,13 @@ export default function HomePage() {
     toolFilter === 'all' ? allTools : allTools.filter((item) => item.category === toolFilter);
 
   const quickPills = [
-    { label: 'Ruleta', href: '/herramientas/ruleta', icon: Disc },
-    { label: 'Lista de Nombres', href: '/herramientas/lista', icon: ListOrdered },
-    { label: 'Dados 3D', href: '/herramientas/dados', icon: Dices },
-    { label: 'Cara o Cruz', href: '/herramientas/moneda', icon: CircleDollarSign },
-    { label: 'Números', href: '/herramientas/numeros', icon: Hash },
-    { label: 'Equipos', href: '/herramientas/equipos', icon: Users2 },
-    { label: 'Amigo Secreto', href: '/herramientas/amigo-invisible', icon: Gift },
+    { label: t('tool_roulette'), href: '/herramientas/ruleta', icon: Disc },
+    { label: t('tool_names'), href: '/herramientas/lista', icon: ListOrdered },
+    { label: t('tool_dice'), href: '/herramientas/dados', icon: Dices },
+    { label: t('tool_coin'), href: '/herramientas/moneda', icon: CircleDollarSign },
+    { label: t('tool_numbers'), href: '/herramientas/numeros', icon: Hash },
+    { label: t('tool_teams'), href: '/herramientas/equipos', icon: Users2 },
+    { label: t('tool_secret_santa'), href: '/herramientas/amigo-invisible', icon: Gift },
   ];
 
   const faqs = [
@@ -269,16 +269,16 @@ export default function HomePage() {
       </section>
 
       {/* ─── VERIFIABLE TRUST METRICS BAR (REAL SPECS, ZERO FAKE CLAIMS) ── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section data-no-translate="true" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white dark:bg-[#0f172a] rounded-3xl p-6 sm:p-8 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center border border-slate-200 dark:border-white/10 shadow-sm">
           <div className="space-y-1">
             <p className="text-3xl sm:text-4xl font-black font-display text-slate-900 dark:text-white">13</p>
             <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
-              Herramientas Gratis
+              {tUi('metric_free_tools')}
             </p>
           </div>
           <div className="space-y-1">
-            <p className="text-3xl sm:text-4xl font-black font-display text-[#d91a7a]">6 Redes</p>
+            <p className="text-3xl sm:text-4xl font-black font-display text-[#d91a7a]">{tUi('metric_networks_value')}</p>
             <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
               IG, TikTok, YT, FB, X, Threads
             </p>
@@ -288,7 +288,7 @@ export default function HomePage() {
               SHA-256
             </p>
             <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
-              Aleatoriedad CSPRNG
+              {tUi('metric_randomness')}
             </p>
           </div>
           <div className="space-y-1">
@@ -296,7 +296,7 @@ export default function HomePage() {
               &lt; 3 min
             </p>
             <p className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
-              Certificado Público
+              {tUi('metric_public_cert')}
             </p>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── FULL 12-TOOL HUB WITH CATEGORY FILTER TABS ────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <section data-no-translate="true" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="text-center space-y-3 max-w-2xl mx-auto">
           <span className="text-xs font-bold text-[#d91a7a] dark:text-pink-400 uppercase tracking-wider flex items-center justify-center gap-1.5">
             <Zap className="w-4 h-4" />
@@ -324,10 +324,10 @@ export default function HomePage() {
           {/* Category Filter Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
             {[
-              { id: 'all' as const, label: `Todas (${allTools.length})` },
-              { id: 'social' as const, label: 'Redes Sociales' },
-              { id: 'games' as const, label: 'Juegos & Dinámicas' },
-              { id: 'utilities' as const, label: 'Utilidades Pro' },
+              { id: 'all' as const, label: `${tUi('filter_all')} (${allTools.length})` },
+              { id: 'social' as const, label: tUi('filter_social') },
+              { id: 'games' as const, label: tUi('filter_games') },
+              { id: 'utilities' as const, label: tUi('filter_utilities') },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -424,21 +424,21 @@ export default function HomePage() {
 
       {/* ─── BLOG GUIDES PREVIEW SECTION ───────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div data-no-translate="true" className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-left">
             <span className="text-xs font-bold text-[#d91a7a] dark:text-pink-400 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1.5">
               <BookOpen className="w-4 h-4" />
-              <span>Nuestras Guías y Tutoriales</span>
+              <span>{tUi('home_blog_badge')}</span>
             </span>
             <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
-              Aprende a Crear Sorteos Transparentes y Legales
+              {tUi('home_blog_title')}
             </h2>
           </div>
           <Link
             href="/blog"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-[#d91a7a] dark:text-pink-400 hover:underline"
           >
-            <span>Ver todas las guías ({BLOG_POSTS.length})</span>
+            <span>{tUi('home_blog_view_all')} ({BLOG_POSTS.length})</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -474,9 +474,10 @@ export default function HomePage() {
                 <span className="text-slate-400 text-[11px]">{post.date}</span>
                 <Link
                   href={`/blog/${post.slug}`}
+                  data-no-translate="true"
                   className="text-[#d91a7a] dark:text-pink-400 group-hover:translate-x-1 font-bold flex items-center gap-1 transition-all"
                 >
-                  <span>Leer guía</span>
+                  <span>{tUi('home_blog_read_guide')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -532,12 +533,12 @@ export default function HomePage() {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs text-slate-500 dark:text-zinc-400">
+        <div data-no-translate="true" className="flex flex-wrap items-center justify-center gap-4 pt-2 text-xs text-slate-500 dark:text-zinc-400">
           <span className="inline-flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" /> Verificación pública SHA-256
+            <ShieldCheck className="w-4 h-4 text-emerald-500" /> {tUi('home_faq_trust_sha')}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <CheckCircle2 className="w-4 h-4 text-[#d91a7a]" /> Sin tarjetas para empezar gratis
+            <CheckCircle2 className="w-4 h-4 text-[#d91a7a]" /> {tUi('home_faq_trust_nocard')}
           </span>
         </div>
       </section>

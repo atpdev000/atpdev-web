@@ -346,7 +346,7 @@ export default function RuletaPage() {
             </form>
 
             {/* Options List */}
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+            <div data-no-translate="true" className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
               {options.map((opt, idx) => (
                 <div
                   key={`${opt}-${idx}`}

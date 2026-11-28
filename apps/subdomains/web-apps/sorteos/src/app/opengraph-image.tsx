@@ -106,20 +106,20 @@ export default async function Image() {
               color: 'transparent',
             }}
           >
-            Sorteos Transparentes en Instagram, Facebook y YouTube
+            Sorteos Gratis en Instagram, TikTok, YouTube y Facebook
           </h1>
           <p style={{ fontSize: '22px', color: '#94a3b8', maxWidth: '800px', lineHeight: 1.4 }}>
-            Algoritmo CSPRNG no manipulable con emisión de certificados públicos inmutables y 6 herramientas interactivas gratuitas.
+            Algoritmo CSPRNG con certificado público SHA-256 y 13 herramientas gratis: Ruleta, Lista (Excel/OCR), Amigo Invisible y Equipos.
           </p>
         </div>
 
         {/* Bottom Footer Tags */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <span style={{ fontSize: '15px', color: '#cbd5e1' }}>✨ Ruleta, Dados, Moneda & Lista</span>
+          <span style={{ fontSize: '15px', color: '#cbd5e1' }}>✨ 13 Herramientas Gratis</span>
           <span style={{ fontSize: '15px', color: '#64748b' }}>•</span>
-          <span style={{ fontSize: '15px', color: '#cbd5e1' }}>⚡ 100% Sin sesgos</span>
+          <span style={{ fontSize: '15px', color: '#cbd5e1' }}>📋 Excel y Capturas Ctrl+V</span>
           <span style={{ fontSize: '15px', color: '#64748b' }}>•</span>
-          <span style={{ fontSize: '15px', color: '#fbbf24', fontWeight: 'bold' }}>ATP Dev Solutions</span>
+          <span style={{ fontSize: '15px', color: '#fbbf24', fontWeight: 'bold' }}>ATP Dev</span>
         </div>
       </div>
     )

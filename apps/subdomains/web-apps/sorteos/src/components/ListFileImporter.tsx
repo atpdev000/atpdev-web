@@ -18,6 +18,7 @@ import {
   extractParticipantsFromFile,
   parsePastedParticipantText,
 } from '@/lib/fileListExtractor';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ListFileImporterProps {
   onImport: (names: string[], mode: 'replace' | 'append', fileName: string) => void;
@@ -38,6 +39,7 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
   currentCount = 0,
   enableGlobalPaste = true,
 }) => {
+  const { tUi } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importMode, setImportMode] = useState<'replace' | 'append'>('replace');
   const [isDragging, setIsDragging] = useState(false);
@@ -326,15 +328,15 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
     <div className="space-y-2.5 pt-1">
       {/* Overlay Universal de Arrastrar y Soltar (estilo Lector QR Pro) */}
       {isDraggingGlobal && (
-        <div className="fixed inset-0 z-50 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-pink-500 dark:border-purple-400 p-6 pointer-events-none">
+        <div data-no-translate="true" className="fixed inset-0 z-50 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-pink-500 dark:border-purple-400 p-6 pointer-events-none">
           <div className="w-20 h-20 rounded-3xl bg-pink-500/15 text-pink-600 dark:text-purple-400 flex items-center justify-center animate-bounce mb-4 shadow-lg">
             <Upload className="w-10 h-10" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white font-display text-center">
-            Suelta tu captura o archivo aquí
+            {tUi('importer_drop_title')}
           </h2>
           <p className="text-sm text-slate-600 dark:text-zinc-300 font-medium mt-2 text-center max-w-md">
-            Extraeremos todos los nombres en orden automáticamente desde Excel, Word, PDF, CSV o captura de imagen (OCR).
+            {tUi('importer_drop_desc')}
           </p>
         </div>
       )}
@@ -350,10 +352,10 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
 
       {/* Selector compacto de modo al importar cuando ya existen elementos */}
       {currentCount > 0 && (
-        <div className="flex items-center justify-between gap-2 px-1">
+        <div data-no-translate="true" className="flex items-center justify-between gap-2 px-1">
           <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 flex items-center gap-1">
             <Sparkles className="w-3 h-3 text-pink-500 dark:text-purple-400" />
-            Al pegar o subir lista:
+            {tUi('importer_mode_label')}
           </span>
           <div className="inline-flex rounded-lg bg-slate-100 dark:bg-white/5 p-0.5 border border-slate-200 dark:border-white/10">
             <button
@@ -365,7 +367,7 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
               }`}
             >
-              Reemplazar
+              {tUi('importer_mode_replace')}
             </button>
             <button
               type="button"
@@ -376,7 +378,7 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'
               }`}
             >
-              Agregar al final
+              {tUi('importer_mode_append')}
             </button>
           </div>
         </div>
@@ -406,25 +408,25 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
             <div className="flex items-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin text-pink-600 dark:text-purple-400 shrink-0" />
               <span className="text-xs font-mono font-bold text-slate-800 dark:text-zinc-200 animate-pulse">
-                {statusText || 'Procesando captura o documento...'}
+                {statusText || tUi('importer_processing')}
               </span>
             </div>
           </div>
         ) : (
-          <>
+          <div data-no-translate="true" className="flex flex-col items-center justify-center gap-2 w-full">
             <div className="flex items-center gap-1.5 text-pink-600 dark:text-purple-400">
               <Upload className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
               <span className="text-xs font-bold font-display uppercase tracking-wider">
-                Subir o Pegar Captura, Excel, Word o PDF
+                {tUi('importer_title')}
               </span>
             </div>
 
             <p className="text-[11px] text-slate-500 dark:text-zinc-400 max-w-sm leading-relaxed">
-              Arrastra un archivo, haz clic o presiona{' '}
+              {tUi('importer_subtitle_before')}{' '}
               <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-mono font-bold shadow-2xs">
                 Ctrl + V
               </kbd>{' '}
-              para pegar una captura de pantalla o filas copiadas de Excel en orden.
+              {tUi('importer_subtitle_after')}
             </p>
 
             {/* Acción directa de Pegado desde Portapapeles */}
@@ -435,14 +437,14 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-600 hover:bg-pink-700 dark:bg-purple-600 dark:hover:bg-purple-500 text-white text-[11px] font-bold shadow-xs transition-all active:scale-95 cursor-pointer"
               >
                 <ClipboardPaste className="w-3.5 h-3.5" />
-                <span>Pegar captura o Excel (Ctrl+V)</span>
+                <span>{tUi('importer_btn_paste')}</span>
               </button>
             </div>
 
             {/* Badges de formatos soportados */}
             <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
               <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-900/30">
-                <Camera className="w-3 h-3" /> Captura Ctrl+V
+                <Camera className="w-3 h-3" /> {tUi('importer_badge_screenshot')}
               </span>
               <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/30">
                 <FileSpreadsheet className="w-3 h-3" /> Excel (.xlsx)
@@ -460,7 +462,7 @@ export const ListFileImporter: React.FC<ListFileImporterProps> = ({
                 CSV / TXT
               </span>
             </div>
-          </>
+          </div>
         )}
       </div>
 

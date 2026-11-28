@@ -37,7 +37,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   className = ''
 }) => {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { t, tUi } = useLanguage();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [checkoutPlan, setCheckoutPlan] = useState<PricingPlan | null>(null);
@@ -239,22 +239,22 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     <div className={`space-y-10 ${className}`}>
       {/* ─── Encabezado y Toggle de Facturación ───────────────────────────── */}
       {showTitle && (
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <div data-no-translate="true" className="text-center space-y-4 max-w-3xl mx-auto">
           <span className="text-xs font-bold text-pink-600 dark:text-purple-400 uppercase tracking-wider">
-            PLANES TRANSPARENTES
+            {t('home_pricing_badge')}
           </span>
           <h2 className="text-3xl sm:text-5xl font-black font-display text-slate-900 dark:text-white tracking-tight">
-            Escala tus Sorteos según tu Audiencia
+            {t('home_pricing_title')}
           </h2>
           <p className="text-sm sm:text-base text-slate-600 dark:text-zinc-400 font-medium max-w-2xl mx-auto">
-            Empieza gratis con herramientas standalone o desbloquea filtros avanzados y mayor volumen de comentarios para tus campañas de marca.
+            {t('home_pricing_desc')}
           </p>
         </div>
       )}
 
       {/* Chunky Segmented Billing Switch (solo si Facturación Anual está activa en Admin) */}
       {payCfg.annualBillingEnabled && (
-        <div className="flex flex-col items-center justify-center gap-2.5">
+        <div data-no-translate="true" className="flex flex-col items-center justify-center gap-2.5">
           <div className="inline-flex p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-800 shadow-inner">
             <button
               type="button"
@@ -265,7 +265,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Pago Mensual
+              {t('pricing_monthly')}
             </button>
             <button
               type="button"
@@ -276,7 +276,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <span>Pago Anual</span>
+              <span>{t('pricing_annual')}</span>
               <span className="px-2 py-0.5 rounded-full bg-white text-[#d91a7a] text-[10px] font-black uppercase tracking-wider shadow-xs">
                 -{payCfg.annualDiscountPercent}%
               </span>
@@ -284,7 +284,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
           </div>
           <p className="text-xs font-semibold text-pink-600 dark:text-pink-400 flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
-            <span>Ahorra {payCfg.annualDiscountPercent}% en facturación anual. Cancela en cualquier momento con 1 clic.</span>
+            <span>{tUi('pricing_save_note').replace('{pct}', String(payCfg.annualDiscountPercent))}</span>
           </p>
         </div>
       )}

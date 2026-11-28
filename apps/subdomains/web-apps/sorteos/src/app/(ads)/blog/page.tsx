@@ -4,7 +4,7 @@ import { BlogListingClient } from '@/components/blog/BlogListingClient';
 import { SITE_NAME, SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
-  title: `Blog y Guías Oficiales para Sorteos | ${SITE_NAME}`,
+  title: 'Blog y Guías Oficiales para Sorteos en Redes Sociales',
   description: 'Guías completas, tutoriales paso a paso y recursos técnicos sobre cómo realizar sorteos en Instagram, Facebook y TikTok con certificación criptográfica y cumplimiento de normas de Meta.',
   alternates: {
     canonical: `${SITE_URL}/blog`,

@@ -6,20 +6,24 @@ import { Gift, ShieldCheck, Heart } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export const Footer: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, tUi } = useLanguage();
 
   return (
-    <footer className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#070a12] text-slate-600 dark:text-zinc-400 text-sm relative transition-colors duration-200">
+    <footer
+      data-no-translate="true"
+      className="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-[#070a12] text-slate-600 dark:text-zinc-400 text-sm relative transition-colors duration-200"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-          
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-pink-600 to-rose-500 p-0.5 shadow-xs flex items-center justify-center text-white">
                 <Gift className="w-4 h-4" />
               </div>
-              <span className="text-xl font-extrabold font-display text-slate-900 dark:text-white">sorteos <span className="text-pink-600 dark:text-pink-400">pro</span></span>
+              <span className="text-xl font-extrabold font-display text-slate-900 dark:text-white">
+                sorteos <span className="text-pink-600 dark:text-pink-400">pro</span>
+              </span>
             </Link>
 
             <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed max-w-sm">
@@ -34,7 +38,9 @@ export const Footer: React.FC = () => {
 
           {/* Col 1: Herramientas Gratuitas */}
           <div className="space-y-3">
-            <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_tools_title')}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">
+              {t('footer_tools_title')}
+            </p>
             <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
               <li><Link href="/herramientas/lista" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_names')}</Link></li>
               <li><Link href="/herramientas/ruleta" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('tool_roulette')}</Link></li>
@@ -48,7 +54,9 @@ export const Footer: React.FC = () => {
 
           {/* Col 2: Sorteos Redes */}
           <div className="space-y-3">
-            <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_social_title')}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">
+              {t('footer_social_title')}
+            </p>
             <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
               <li><Link href="/sorteos/nuevo?platform=instagram" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_ig')}</Link></li>
               <li><Link href="/sorteos/nuevo?platform=tiktok" className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_tiktok')}</Link></li>
@@ -58,22 +66,23 @@ export const Footer: React.FC = () => {
               <li><Link href="/sorteos/nuevo?platform=threads" className="hover:text-purple-600 dark:hover:text-purple-400 transition-colors py-1.5 px-0.5 inline-block">{t('footer_sorteo_threads')}</Link></li>
               <li><Link href="/planes" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{t('nav_pricing')}</Link></li>
             </ul>
-
           </div>
 
           {/* Col 3: Legal & Seguridad */}
           <div className="space-y-3">
-            <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">{t('footer_legal_title')}</p>
+            <p className="text-xs font-mono uppercase tracking-wider text-slate-900 dark:text-white font-bold">
+              {t('footer_legal_title')}
+            </p>
             <ul className="space-y-1 text-xs text-slate-600 dark:text-zinc-400">
-              <li><Link href="/blog" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Blog y Recursos</Link></li>
-              <li><Link href="/quienes-somos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Quiénes Somos</Link></li>
-              <li><Link href="/contacto" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Contacto y Soporte</Link></li>
+              <li><Link href="/blog" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{tUi('footer_blog_resources')}</Link></li>
+              <li><Link href="/quienes-somos" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{tUi('footer_about')}</Link></li>
+              <li><Link href="/contacto" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{tUi('footer_contact')}</Link></li>
               <li><Link href="/terminos-y-condiciones" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_terms')}</Link></li>
               <li><Link href="/politica-de-privacidad" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{t('footer_privacy')}</Link></li>
-              <li><Link href="/politica-de-cookies" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">Política de Cookies</Link></li>
-              <li><a href="#cookies-config" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">Configurar Cookies</a></li>
+              <li><Link href="/politica-de-cookies" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{tUi('footer_cookies')}</Link></li>
+              <li><a href="#cookies-config" className="hover:text-slate-900 dark:hover:text-white transition-colors py-1.5 px-0.5 inline-block">{tUi('footer_cookies_settings')}</a></li>
               <li><Link href="/certificados/CERT-SP-98A41E8D" className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors py-1.5 px-0.5 inline-block">{t('nav_verify_cert')}</Link></li>
-              <li><Link href="/verificar" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">Verificador SHA-256</Link></li>
+              <li><Link href="/verificar" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors py-1.5 px-0.5 inline-block">{tUi('item_sha_verifier')}</Link></li>
             </ul>
           </div>
         </div>
@@ -81,7 +90,7 @@ export const Footer: React.FC = () => {
         <div className="pt-8 border-t border-slate-200 dark:border-white/10 space-y-4">
           <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 text-xs">
             <span className="font-mono uppercase tracking-wider text-[10px] font-bold text-slate-400 dark:text-zinc-500">
-              Ecosistema ATP Dev:
+              {tUi('footer_ecosystem')}
             </span>
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-slate-600 dark:text-zinc-400 font-medium">
               <a href="https://atpdev.dev" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Portal ATP Dev</a>

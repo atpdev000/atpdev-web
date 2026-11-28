@@ -67,7 +67,7 @@ export const Navbar: React.FC = () => {
   const toolsMenuRef = useRef<HTMLDivElement>(null);
   const helpDropdownRef = useRef<HTMLDivElement>(null);
   const userDropdownRef = useRef<HTMLDivElement>(null);
-  const { t } = useLanguage();
+  const { t, tUi } = useLanguage();
 
   const loadUser = async () => {
     const token = getToken();
@@ -147,46 +147,46 @@ export const Navbar: React.FC = () => {
 
   // ─── 4 COLUMNAS DEL MEGA-MENÚ ESTILO APPSORTEOS ─────────────────────────
   const megaColSorteos: NavAppItem[] = [
-    { name: 'Sorteo en Instagram', href: '/apps/sorteo-instagram', icon: InstagramIcon, iconBg: 'bg-gradient-to-tr from-amber-500 via-pink-600 to-purple-600 text-white' },
-    { name: 'Sorteo en Facebook', href: '/sorteos/nuevo?platform=facebook', icon: FacebookIcon, iconBg: 'bg-blue-600 text-white' },
-    { name: 'Listado de Nombres', href: '/herramientas/lista', icon: ListOrdered, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' },
-    { name: 'Sorteo en Twitter (X)', href: '/sorteos/nuevo?platform=x', icon: XIcon, iconBg: 'bg-slate-900 dark:bg-white text-white dark:text-black' },
-    { name: 'Sorteo Multi-Red', href: '/sorteos/nuevo?mode=multi', icon: Sparkles, iconBg: 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400', isNew: true },
-    { name: 'Sorteo en TikTok', href: '/sorteos/nuevo?platform=tiktok', icon: TikTokIcon, iconBg: 'bg-slate-950 text-cyan-400 border border-cyan-400/40' },
-    { name: 'Sorteo en YouTube', href: '/sorteos/nuevo?platform=youtube', icon: YoutubeIcon, iconBg: 'bg-red-600 text-white' },
-    { name: 'Sorteo en Threads', href: '/sorteos/nuevo?platform=threads', icon: ThreadsIcon, iconBg: 'bg-purple-900 text-white' },
+    { name: tUi('item_sorteo_ig'), href: '/apps/sorteo-instagram', icon: InstagramIcon, iconBg: 'bg-gradient-to-tr from-amber-500 via-pink-600 to-purple-600 text-white' },
+    { name: tUi('item_sorteo_fb'), href: '/sorteos/nuevo?platform=facebook', icon: FacebookIcon, iconBg: 'bg-blue-600 text-white' },
+    { name: t('tool_names'), href: '/herramientas/lista', icon: ListOrdered, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400' },
+    { name: tUi('item_sorteo_x'), href: '/sorteos/nuevo?platform=x', icon: XIcon, iconBg: 'bg-slate-900 dark:bg-white text-white dark:text-black' },
+    { name: tUi('item_sorteo_multi'), href: '/sorteos/nuevo?mode=multi', icon: Sparkles, iconBg: 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400', isNew: true },
+    { name: tUi('item_sorteo_tiktok'), href: '/sorteos/nuevo?platform=tiktok', icon: TikTokIcon, iconBg: 'bg-slate-950 text-cyan-400 border border-cyan-400/40' },
+    { name: tUi('item_sorteo_yt'), href: '/sorteos/nuevo?platform=youtube', icon: YoutubeIcon, iconBg: 'bg-red-600 text-white' },
+    { name: tUi('item_sorteo_threads'), href: '/sorteos/nuevo?platform=threads', icon: ThreadsIcon, iconBg: 'bg-purple-900 text-white' },
   ];
 
   const megaColPromociones: NavAppItem[] = [
-    { name: 'La Ruleta Aleatoria', href: '/herramientas/ruleta', icon: Disc, iconBg: 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400' },
-    { name: 'Trivia', href: '/herramientas/trivia', icon: HelpCircle, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400', isNew: true },
-    { name: 'Raspa y Gana', href: '/herramientas/raspa-gana', icon: Sparkles, iconBg: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400', isNew: true },
-    { name: 'Amigo Secreto', href: '/herramientas/amigo-invisible', icon: Gift, iconBg: 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' },
-    { name: 'Certificados Verificables', href: '/verificar', icon: ShieldCheck, iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' },
-    { name: 'Transmisión en Vivo', href: '/sorteos/nuevo?mode=live', icon: Radio, iconBg: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' },
+    { name: t('tool_roulette'), href: '/herramientas/ruleta', icon: Disc, iconBg: 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400' },
+    { name: tUi('item_trivia'), href: '/herramientas/trivia', icon: HelpCircle, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400', isNew: true },
+    { name: tUi('item_scratch'), href: '/herramientas/raspa-gana', icon: Sparkles, iconBg: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400', isNew: true },
+    { name: t('tool_secret_santa'), href: '/herramientas/amigo-invisible', icon: Gift, iconBg: 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' },
+    { name: tUi('item_certificates'), href: '/verificar', icon: ShieldCheck, iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' },
+    { name: tUi('item_live'), href: '/sorteos/nuevo?mode=live', icon: Radio, iconBg: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' },
   ];
 
   const megaColOtras: NavAppItem[] = [
-    { name: 'Dados Virtuales 3D', href: '/herramientas/dados', icon: Dices, iconBg: 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400' },
-    { name: 'Generador de Equipos', href: '/herramientas/equipos', icon: Users2, iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' },
-    { name: 'Números Aleatorios', href: '/herramientas/numeros', icon: Hash, iconBg: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400' },
-    { name: 'Lanza una Moneda', href: '/herramientas/moneda', icon: CircleDollarSign, iconBg: 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' },
-    { name: 'Verificador SHA-256', href: '/verificar', icon: Lock, iconBg: 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-300' },
+    { name: t('tool_dice'), href: '/herramientas/dados', icon: Dices, iconBg: 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400' },
+    { name: t('tool_teams'), href: '/herramientas/equipos', icon: Users2, iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' },
+    { name: t('tool_numbers'), href: '/herramientas/numeros', icon: Hash, iconBg: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-500/20 dark:text-cyan-400' },
+    { name: t('tool_coin'), href: '/herramientas/moneda', icon: CircleDollarSign, iconBg: 'bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400' },
+    { name: tUi('item_sha_verifier'), href: '/verificar', icon: Lock, iconBg: 'bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-zinc-300' },
   ];
 
   const megaColUtilidades: NavAppItem[] = [
-    { name: 'Generador de Bases Legales', href: '/herramientas/bases-legales', icon: Scale, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400', isNew: true },
-    { name: 'Calculadora de Engagement', href: '/herramientas/engagement', icon: Heart, iconBg: 'bg-pink-100 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400', isNew: true },
-    { name: 'Exportar Comentarios', href: '/sorteos/nuevo?action=export', icon: Download, iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' },
-    { name: 'Generador de Hashtags', href: '/herramientas/hashtags', icon: Hash, iconBg: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-400', isNew: true },
-    { name: 'Directorio de Sorteos', href: '/dashboard', icon: Calendar, iconBg: 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400' },
+    { name: tUi('item_legal_bases'), href: '/herramientas/bases-legales', icon: Scale, iconBg: 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400', isNew: true },
+    { name: tUi('item_engagement'), href: '/herramientas/engagement', icon: Heart, iconBg: 'bg-pink-100 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400', isNew: true },
+    { name: tUi('item_export_comments'), href: '/sorteos/nuevo?action=export', icon: Download, iconBg: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400' },
+    { name: tUi('item_hashtags'), href: '/herramientas/hashtags', icon: Hash, iconBg: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-500/20 dark:text-fuchsia-400', isNew: true },
+    { name: tUi('item_directory'), href: '/dashboard', icon: Calendar, iconBg: 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400' },
   ];
 
   const planLabel = (userProfile?.plan || 'free').toUpperCase();
 
   const renderAppItem = (item: NavAppItem) => (
     <Link
-      key={item.name}
+      key={item.href + item.name}
       href={item.href}
       onClick={() => setToolsOpen(false)}
       className="flex items-center gap-2.5 px-2 py-1.5 rounded-xl hover:bg-slate-100/70 dark:hover:bg-white/5 transition-all group cursor-pointer"
@@ -200,7 +200,7 @@ export const Navbar: React.FC = () => {
         </span>
         {item.isNew && (
           <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.5 rounded-md bg-pink-100 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400 shrink-0">
-            NEW
+            {tUi('nav_new_tag')}
           </span>
         )}
       </div>
@@ -213,7 +213,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16 sm:h-18">
           
           {/* Logo Brand Sorteos Pro */}
-          <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2.5 group shrink-0">
+          <Link href="/" onClick={handleLogoClick} data-no-translate="true" className="flex items-center gap-2.5 group shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-600 to-rose-500 p-0.5 shadow-md shadow-pink-500/20 group-hover:scale-105 transition-transform flex items-center justify-center text-white">
               <Gift className="w-5 h-5" />
             </div>
@@ -223,7 +223,7 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <nav data-no-translate="true" className="hidden lg:flex items-center gap-1 xl:gap-2">
             
             {/* ─── APLICACIONES MEGA-MENU TRIGGER ───────────────────────── */}
             <button
@@ -239,7 +239,7 @@ export const Navbar: React.FC = () => {
               aria-expanded={toolsOpen}
             >
               <LayoutGrid className="w-4 h-4 text-pink-600 dark:text-pink-400" />
-              <span>{t('nav_apps') || 'Aplicaciones'}</span>
+              <span>{t('nav_apps')}</span>
               <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${toolsOpen ? 'rotate-180 text-pink-600' : 'text-slate-400'}`} />
             </button>
 
@@ -248,9 +248,9 @@ export const Navbar: React.FC = () => {
               href="/sorteos/nuevo?mode=multi" 
               className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100/70 dark:hover:bg-white/5 transition-colors"
             >
-              <span>Automation</span>
+              <span>{tUi('nav_automation')}</span>
               <span className="text-[10px] font-mono font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-full">
-                NEW
+                {tUi('nav_new_tag')}
               </span>
             </Link>
 
@@ -259,7 +259,7 @@ export const Navbar: React.FC = () => {
               href="/planes" 
               className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100/70 dark:hover:bg-white/5 transition-colors"
             >
-              {t('nav_pricing') || 'Precios'}
+              {t('nav_pricing')}
             </Link>
 
             {/* Ayuda Dropdown */}
@@ -269,7 +269,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => setHelpOpen(!helpOpen)}
                 className="flex items-center gap-1 px-3 py-2 text-sm font-semibold text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-white rounded-xl hover:bg-slate-100/70 dark:hover:bg-white/5 transition-colors cursor-pointer"
               >
-                <span>{t('nav_help') || 'Ayuda'}</span>
+                <span>{t('nav_help')}</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${helpOpen ? 'rotate-180 text-pink-600' : 'text-slate-400'}`} />
               </button>
 
@@ -281,7 +281,7 @@ export const Navbar: React.FC = () => {
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <BookOpen className="w-4 h-4 text-pink-600" />
-                    <span>Blog y Guías</span>
+                    <span>{tUi('nav_blog_guides')}</span>
                   </Link>
                   <Link
                     href="/quienes-somos"
@@ -289,7 +289,7 @@ export const Navbar: React.FC = () => {
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Quiénes Somos & E-E-A-T</span>
+                    <span>{tUi('nav_about')}</span>
                   </Link>
                   <Link
                     href="/contacto"
@@ -297,7 +297,7 @@ export const Navbar: React.FC = () => {
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <HelpCircle className="w-4 h-4 text-blue-600" />
-                    <span>Contacto y Soporte</span>
+                    <span>{tUi('nav_contact')}</span>
                   </Link>
                   <Link
                     href="/verificar"
@@ -305,7 +305,7 @@ export const Navbar: React.FC = () => {
                     className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-50 dark:hover:bg-white/5"
                   >
                     <Lock className="w-4 h-4 text-purple-600" />
-                    <span>Verificador Oficial</span>
+                    <span>{tUi('nav_official_verifier')}</span>
                   </Link>
                 </div>
               )}
@@ -386,7 +386,7 @@ export const Navbar: React.FC = () => {
                         className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                       >
                         <Sparkles className="w-4 h-4 text-pink-600 dark:text-purple-400" />
-                        <span>Crear Sorteo</span>
+                        <span>{tUi('nav_create_draw')}</span>
                       </Link>
 
                       <Link
@@ -395,7 +395,7 @@ export const Navbar: React.FC = () => {
                         className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
                       >
                         <CreditCard className="w-4 h-4 text-slate-400 dark:text-zinc-500" />
-                        <span>Planes y Facturación</span>
+                        <span>{tUi('nav_plans_billing')}</span>
                       </Link>
                     </div>
 
@@ -406,26 +406,26 @@ export const Navbar: React.FC = () => {
                         className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors cursor-pointer text-left"
                       >
                         <LogOut className="w-4 h-4" />
-                        <span>{t('nav_logout') || 'Cerrar Sesión'}</span>
+                        <span>{t('nav_logout')}</span>
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <div data-no-translate="true" className="flex items-center gap-3">
                 <Link
                   href="/login"
                   className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-zinc-200 hover:text-slate-900 dark:hover:text-white px-2 py-1 transition-colors"
                 >
-                  {t('nav_login') || 'Ingresar'}
+                  {t('nav_login')}
                 </Link>
 
                 <Link
                   href="/registro"
                   className="btn-pro-primary text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md shadow-pink-500/20 transition-all cursor-pointer"
                 >
-                  <span>Crear cuenta</span>
+                  <span>{t('nav_create_account')}</span>
                 </Link>
               </div>
             )}
@@ -451,13 +451,14 @@ export const Navbar: React.FC = () => {
           <div 
             ref={toolsMenuRef}
             id="mega-menu-aplicaciones"
+            data-no-translate="true"
             className="hidden lg:block absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[940px] max-w-[calc(100vw-2rem)] bg-white dark:bg-[#0b0f19] rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 p-6 z-50 animate-in fade-in duration-150"
           >
             <div className="grid grid-cols-4 gap-5">
               {/* Columna 1: Sorteos */}
               <div className="space-y-1">
                 <h4 className="text-[11px] font-bold font-mono uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3 px-2">
-                  Sorteos
+                  {tUi('nav_col_giveaways')}
                 </h4>
                 <div className="space-y-0.5">
                   {megaColSorteos.map(renderAppItem)}
@@ -467,7 +468,7 @@ export const Navbar: React.FC = () => {
               {/* Columna 2: Promociones */}
               <div className="space-y-1">
                 <h4 className="text-[11px] font-bold font-mono uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3 px-2">
-                  Promociones
+                  {tUi('nav_col_promos')}
                 </h4>
                 <div className="space-y-0.5">
                   {megaColPromociones.map(renderAppItem)}
@@ -477,7 +478,7 @@ export const Navbar: React.FC = () => {
               {/* Columna 3: Otras Apps */}
               <div className="space-y-1">
                 <h4 className="text-[11px] font-bold font-mono uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3 px-2">
-                  Otras Apps
+                  {tUi('nav_col_other')}
                 </h4>
                 <div className="space-y-0.5">
                   {megaColOtras.map(renderAppItem)}
@@ -487,7 +488,7 @@ export const Navbar: React.FC = () => {
               {/* Columna 4: Utilidades */}
               <div className="space-y-1">
                 <h4 className="text-[11px] font-bold font-mono uppercase tracking-wider text-slate-400 dark:text-zinc-500 mb-3 px-2">
-                  Utilidades
+                  {tUi('nav_col_utilities')}
                 </h4>
                 <div className="space-y-0.5">
                   {megaColUtilidades.map(renderAppItem)}
@@ -499,14 +500,14 @@ export const Navbar: React.FC = () => {
             <div className="mt-6 pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Todos los sorteos y herramientas cuentan con certificación criptográfica inmutable SHA-256.</span>
+                <span>{tUi('nav_mega_footer_text')}</span>
               </div>
               <Link
                 href="/verificar"
                 onClick={() => setToolsOpen(false)}
                 className="font-bold text-pink-600 dark:text-pink-400 hover:underline flex items-center gap-1"
               >
-                <span>Verificar Certificado</span>
+                <span>{t('nav_verify_cert')}</span>
                 <span>→</span>
               </Link>
             </div>
@@ -536,9 +537,9 @@ export const Navbar: React.FC = () => {
           )}
 
           {/* Mobile Category Tabs */}
-          <div className="space-y-2">
+          <div data-no-translate="true" className="space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-zinc-400 px-1">
-              <span>APLICACIONES & HERRAMIENTAS</span>
+              <span>{tUi('nav_mobile_apps_header')}</span>
             </div>
 
             <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-white/5 text-[11px] font-bold">
@@ -547,28 +548,28 @@ export const Navbar: React.FC = () => {
                 onClick={() => setMobileTab('sorteos')}
                 className={`py-1.5 rounded-xl transition-all ${mobileTab === 'sorteos' ? 'bg-white dark:bg-[#1e293b] text-pink-600 shadow-xs' : 'text-slate-600 dark:text-zinc-400'}`}
               >
-                Sorteos
+                {tUi('nav_col_giveaways')}
               </button>
               <button
                 type="button"
                 onClick={() => setMobileTab('promociones')}
                 className={`py-1.5 rounded-xl transition-all ${mobileTab === 'promociones' ? 'bg-white dark:bg-[#1e293b] text-pink-600 shadow-xs' : 'text-slate-600 dark:text-zinc-400'}`}
               >
-                Promos
+                {tUi('nav_mobile_tab_promos')}
               </button>
               <button
                 type="button"
                 onClick={() => setMobileTab('otras')}
                 className={`py-1.5 rounded-xl transition-all ${mobileTab === 'otras' ? 'bg-white dark:bg-[#1e293b] text-pink-600 shadow-xs' : 'text-slate-600 dark:text-zinc-400'}`}
               >
-                Otras
+                {tUi('nav_mobile_tab_other')}
               </button>
               <button
                 type="button"
                 onClick={() => setMobileTab('utilidades')}
                 className={`py-1.5 rounded-xl transition-all ${mobileTab === 'utilidades' ? 'bg-white dark:bg-[#1e293b] text-pink-600 shadow-xs' : 'text-slate-600 dark:text-zinc-400'}`}
               >
-                Utilidades
+                {tUi('nav_col_utilities')}
               </button>
             </div>
 
@@ -633,14 +634,14 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Links generales */}
-          <div className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-1.5 text-xs font-semibold">
+          <div data-no-translate="true" className="pt-2 border-t border-slate-200 dark:border-white/10 flex flex-col gap-1.5 text-xs font-semibold">
             <Link
               href="/sorteos/nuevo"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 px-3 py-2 text-slate-800 dark:text-white hover:text-pink-600"
             >
               <Sparkles className="w-4 h-4 text-pink-600" />
-              <span>Crear Sorteo en Redes</span>
+              <span>{tUi('nav_mobile_create_social')}</span>
             </Link>
 
             <Link
@@ -649,7 +650,7 @@ export const Navbar: React.FC = () => {
               className="flex items-center gap-2 px-3 py-2 text-slate-800 dark:text-white hover:text-emerald-600"
             >
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
-              <span>Verificar Certificados</span>
+              <span>{t('nav_verify_cert')}</span>
             </Link>
 
             <Link
@@ -657,7 +658,7 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-slate-700 dark:text-zinc-300 hover:text-slate-900"
             >
-              {t('nav_pricing') || 'Precios'}
+              {t('nav_pricing')}
             </Link>
 
             <Link
@@ -665,7 +666,7 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-slate-700 dark:text-zinc-300 hover:text-slate-900"
             >
-              Blog y Guías
+              {tUi('nav_blog_guides')}
             </Link>
 
             <Link
@@ -673,7 +674,7 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-slate-700 dark:text-zinc-300 hover:text-slate-900"
             >
-              Quiénes Somos
+              {tUi('nav_about')}
             </Link>
 
             <Link
@@ -681,7 +682,7 @@ export const Navbar: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="px-3 py-2 text-slate-700 dark:text-zinc-300 hover:text-slate-900"
             >
-              Contacto y Soporte
+              {tUi('nav_contact')}
             </Link>
 
             {/* Auth Buttons */}
@@ -693,7 +694,7 @@ export const Navbar: React.FC = () => {
                   className="btn-pro-primary text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 text-white"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  <span>{t('nav_dashboard') || 'Dashboard'}</span>
+                  <span>{t('nav_dashboard')}</span>
                 </Link>
                 <button
                   type="button"
@@ -704,7 +705,7 @@ export const Navbar: React.FC = () => {
                   className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>{t('nav_logout') || 'Cerrar Sesión'}</span>
+                  <span>{t('nav_logout')}</span>
                 </button>
               </div>
             ) : (
@@ -715,14 +716,14 @@ export const Navbar: React.FC = () => {
                   className="w-full text-center py-2.5 rounded-xl font-bold text-xs text-slate-700 dark:text-zinc-200 bg-slate-100 dark:bg-white/5 flex items-center justify-center gap-2"
                 >
                   <LogIn className="w-4 h-4" />
-                  <span>{t('nav_login') || 'Ingresar'}</span>
+                  <span>{t('nav_login')}</span>
                 </Link>
                 <Link
                   href="/registro"
                   onClick={() => setMobileMenuOpen(false)}
                   className="btn-pro-primary w-full text-center py-2.5 rounded-xl font-bold text-xs text-white shadow-md flex items-center justify-center gap-2"
                 >
-                  <span>Crear cuenta</span>
+                  <span>{t('nav_create_account')}</span>
                 </Link>
               </div>
             )}

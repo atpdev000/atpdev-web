@@ -339,7 +339,7 @@ export default function AmigoInvisiblePage() {
             </form>
 
             {/* Participants pills */}
-            <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
+            <div data-no-translate="true" className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
               {participants.map((person, idx) => (
                 <div
                   key={`${person}-${idx}`}
