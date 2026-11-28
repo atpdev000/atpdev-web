@@ -26,6 +26,24 @@ export async function POST(req: Request) {
       message: `[Asunto: ${subjectLabel}]\n\n${String(message).trim()}`,
     });
 
+    // Notificación opcional a Telegram si está configurado
+    const tgToken = process.env.TELEGRAM_BOT_TOKEN;
+    const tgChat = process.env.TELEGRAM_CHAT_ID;
+    if (tgToken && tgChat) {
+      const text = [
+        `📩 Nuevo mensaje en Sorteos Pro`,
+        `Nombre: ${String(name).trim()}`,
+        `Email: ${String(email).trim().toLowerCase()}`,
+        `Asunto: ${subjectLabel}`,
+        `Mensaje: ${String(message).trim().slice(0, 600)}`,
+      ].join('\n');
+      fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: tgChat, text }),
+      }).catch(() => {});
+    }
+
     return NextResponse.json({
       success: true,
       message: "Tu consulta ha sido enviada al equipo de Sorteos Pro.",

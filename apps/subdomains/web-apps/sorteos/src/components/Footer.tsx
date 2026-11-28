@@ -78,13 +78,27 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-zinc-500">
-          <p>© {new Date().getFullYear()} Sorteos Pro. {t('footer_all_rights')}</p>
-          <div className="flex items-center gap-2">
-            <span>{t('footer_developed_with')}</span>
-            <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" />
-            <span>{t('footer_by')}</span>
-            <span className="text-slate-800 dark:text-white font-bold">ATP Dev</span>
+        <div className="pt-8 border-t border-slate-200 dark:border-white/10 space-y-4">
+          <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3 text-xs">
+            <span className="font-mono uppercase tracking-wider text-[10px] font-bold text-slate-400 dark:text-zinc-500">
+              Ecosistema ATP Dev:
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-slate-600 dark:text-zinc-400 font-medium">
+              <a href="https://atpdev.dev" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Portal ATP Dev</a>
+              <a href="https://colorear.atpdev.dev" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Colorear Pro</a>
+              <a href="https://descargador.atpdev.dev" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Descargador Pro</a>
+              <a href="https://chamba.atpdev.dev" target="_blank" rel="noopener noreferrer" className="hover:text-pink-600 dark:hover:text-pink-400 transition-colors">Chamba Pro</a>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-zinc-500 pt-2">
+            <p>© {new Date().getFullYear()} Sorteos Pro. {t('footer_all_rights')}</p>
+            <div className="flex items-center gap-2">
+              <span>{t('footer_developed_with')}</span>
+              <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500" />
+              <span>{t('footer_by')}</span>
+              <a href="https://atpdev.dev" target="_blank" rel="noopener noreferrer" className="text-slate-800 dark:text-white font-bold hover:text-pink-600 transition-colors">ATP Dev</a>
+            </div>
           </div>
         </div>
       </div>

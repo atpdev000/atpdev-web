@@ -38,14 +38,18 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 }) => {
   const router = useRouter();
   const { t } = useLanguage();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [checkoutPlan, setCheckoutPlan] = useState<PricingPlan | null>(null);
   const [payTab, setPayTab] = useState<'yape' | 'card' | 'license'>('yape');
+  const [yapeApp, setYapeApp] = useState<'yape' | 'plin'>('yape');
+  const [operationCode, setOperationCode] = useState('');
+  const [payerPhone, setPayerPhone] = useState('');
+  const [yapeSubmitting, setYapeSubmitting] = useState(false);
+  const [yapeFeedback, setYapeFeedback] = useState<{ type: 'ok' | 'err'; text: string; orderCode?: string } | null>(null);
   const [licenseCode, setLicenseCode] = useState('');
   const [licenseMsg, setLicenseMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
   const [redeeming, setRedeeming] = useState(false);
-  const [copiedYape, setCopiedYape] = useState(false);
   const [payCfg, setPayCfg] = useState({
     stripeApiConfigured: false,
     whatsappNumber: '51987006572',
@@ -70,6 +74,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     businessAnnualPricePen: 890,
     enterpriseMonthlyPrice: 79.99,
     enterpriseAnnualPrice: 769.9,
+    annualBillingEnabled: true,
     annualDiscountPercent: 20,
     demoModeEnabled: false,
     demoLicenseCode: null as string | null,
@@ -119,6 +124,9 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
       .then((d) => {
         if (d?.ok) {
           setPayCfg((prev) => ({ ...prev, ...d }));
+          if (d.annualBillingEnabled === false) {
+            setBillingCycle('monthly');
+          }
         }
       })
       .catch(() => {});
@@ -165,9 +173,43 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
       }
     }
 
-    // Abre el modal de pagos unificado de ATP Dev (MercadoPago Yape/Plin QR + Stripe + WhatsApp + Licencia)
+    // Abre el modal de pagos unificado de ATP Dev (MercadoPago Yape/Plin QR + Stripe + Comprobante + Licencia)
     setLicenseMsg(null);
+    setYapeFeedback(null);
+    setOperationCode('');
     setCheckoutPlan(plan);
+  };
+
+  const handleSubmitYapeOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!checkoutPlan || !operationCode.trim()) return;
+    setYapeSubmitting(true);
+    setYapeFeedback(null);
+    try {
+      const res = await api<{ order?: { orderCode?: string }; message?: string }>('/api/v1/billing/yape-order', {
+        method: 'POST',
+        body: {
+          planId: checkoutPlan.id,
+          billingCycle,
+          method: yapeApp,
+          operationCode: operationCode.trim(),
+          payerPhone: payerPhone.trim(),
+        },
+      });
+      setYapeFeedback({
+        type: 'ok',
+        text: res?.message || 'Comprobante registrado. Activaremos tu plan al instante.',
+        orderCode: res?.order?.orderCode,
+      });
+      setOperationCode('');
+    } catch (err: any) {
+      setYapeFeedback({
+        type: 'err',
+        text: err?.message || 'No pudimos registrar el comprobante. Verifica el N° de operación.',
+      });
+    } finally {
+      setYapeSubmitting(false);
+    }
   };
 
   const handleRedeemLicense = async (e: React.FormEvent) => {
@@ -210,40 +252,42 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
         </div>
       )}
 
-      {/* Chunky Segmented Billing Switch (Estilo Sorteos Pro Magenta / Hot Pink) */}
-      <div className="flex flex-col items-center justify-center gap-2.5">
-        <div className="inline-flex p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-800 shadow-inner">
-          <button
-            type="button"
-            onClick={() => setBillingCycle('monthly')}
-            className={`px-6 py-2.5 rounded-xl font-display font-black text-xs sm:text-sm transition-all cursor-pointer select-none ${
-              billingCycle === 'monthly'
-                ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md border-b-2 border-slate-300 dark:border-slate-700'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            Pago Mensual
-          </button>
-          <button
-            type="button"
-            onClick={() => setBillingCycle('annual')}
-            className={`px-6 py-2.5 rounded-xl font-display font-black text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-2 select-none ${
-              billingCycle === 'annual'
-                ? 'bg-[#d91a7a] hover:bg-[#c2186b] text-white shadow-lg shadow-pink-500/30 border-b-2 border-[#9f1239]'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <span>Pago Anual</span>
-            <span className="px-2 py-0.5 rounded-full bg-white text-[#d91a7a] text-[10px] font-black uppercase tracking-wider shadow-xs">
-              2 Meses Gratis
-            </span>
-          </button>
+      {/* Chunky Segmented Billing Switch (solo si Facturación Anual está activa en Admin) */}
+      {payCfg.annualBillingEnabled && (
+        <div className="flex flex-col items-center justify-center gap-2.5">
+          <div className="inline-flex p-1.5 rounded-2xl bg-slate-200/80 dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-800 shadow-inner">
+            <button
+              type="button"
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-6 py-2.5 rounded-xl font-display font-black text-xs sm:text-sm transition-all cursor-pointer select-none ${
+                billingCycle === 'monthly'
+                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md border-b-2 border-slate-300 dark:border-slate-700'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              Pago Mensual
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle('annual')}
+              className={`px-6 py-2.5 rounded-xl font-display font-black text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-2 select-none ${
+                billingCycle === 'annual'
+                  ? 'bg-[#d91a7a] hover:bg-[#c2186b] text-white shadow-lg shadow-pink-500/30 border-b-2 border-[#9f1239]'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>Pago Anual</span>
+              <span className="px-2 py-0.5 rounded-full bg-white text-[#d91a7a] text-[10px] font-black uppercase tracking-wider shadow-xs">
+                -{payCfg.annualDiscountPercent}%
+              </span>
+            </button>
+          </div>
+          <p className="text-xs font-semibold text-pink-600 dark:text-pink-400 flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
+            <span>Ahorra {payCfg.annualDiscountPercent}% en facturación anual. Cancela en cualquier momento con 1 clic.</span>
+          </p>
         </div>
-        <p className="text-xs font-semibold text-pink-600 dark:text-pink-400 flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5 text-pink-600 dark:text-pink-400" />
-          <span>Ahorra {payCfg.annualDiscountPercent}% en facturación anual. Cancela en cualquier momento con 1 clic.</span>
-        </p>
-      </div>
+      )}
 
       {/* ─── Grid de Tarjetas Táctiles 3D (Paleta de Marca Sorteos Pro) ───────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch pt-2">
@@ -510,16 +554,75 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
                     </div>
                   </div>
 
+                  {/* Registro de Comprobante Yape / Plin para aprobación 1 clic en Admin */}
+                  <form onSubmit={handleSubmitYapeOrder} className="space-y-2.5 pt-1">
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setYapeApp('yape')}
+                        className={`py-1.5 rounded-xl font-bold border cursor-pointer ${
+                          yapeApp === 'yape'
+                            ? 'bg-purple-600 text-white border-purple-600'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        Yape
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setYapeApp('plin')}
+                        className={`py-1.5 rounded-xl font-bold border cursor-pointer ${
+                          yapeApp === 'plin'
+                            ? 'bg-sky-600 text-white border-sky-600'
+                            : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        Plin
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        required
+                        minLength={4}
+                        value={operationCode}
+                        onChange={(e) => setOperationCode(e.target.value)}
+                        placeholder="N° de operación * (Ej. 084519)"
+                        className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      />
+                      <input
+                        type="text"
+                        value={payerPhone}
+                        onChange={(e) => setPayerPhone(e.target.value)}
+                        placeholder="Tu WhatsApp (opcional)"
+                        className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      />
+                    </div>
+                    {yapeFeedback && (
+                      <p className={`text-[11px] font-bold ${yapeFeedback.type === 'ok' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-500'}`}>
+                        {yapeFeedback.text}
+                      </p>
+                    )}
+                    <button
+                      type="submit"
+                      disabled={yapeSubmitting || !operationCode.trim()}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-extrabold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+                    >
+                      {yapeSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                      <span>Registrar comprobante y activar plan</span>
+                    </button>
+                  </form>
+
                   <a
                     href={`https://wa.me/${payCfg.whatsappNumber}?text=${encodeURIComponent(
-                      `Hola ATP Dev 👋, acabo de pagar el plan ${checkoutPlan.name} (${billingCycle}) en Sorteos Pro. ¿Me envías mi código de activación?`
+                      `Hola ATP Dev 👋, acabo de pagar el plan ${checkoutPlan.name} (${billingCycle}, S/ ${getCheckoutPenPrice(checkoutPlan)}) en Sorteos Pro.${yapeFeedback?.orderCode ? ` Orden: ${yapeFeedback.orderCode}.` : ''} ¿Me ayudas con la activación?`
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    <span>Enviar comprobante por WhatsApp VIP</span>
+                    <span>Enviar captura por WhatsApp Express</span>
                   </a>
                 </div>
               )}

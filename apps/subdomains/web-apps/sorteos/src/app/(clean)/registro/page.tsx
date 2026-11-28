@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Gift, ArrowRight, Lock, Mail, User, AlertCircle, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { FacebookIcon } from '@/components/SocialIcons';
 import { PRICING_PLANS } from '@/lib/types';
 import { api, setToken, getToken } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
@@ -21,7 +20,7 @@ function RegistroContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(initialPlan);
   const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState<'google' | 'facebook' | null>(null);
+  const [oauthLoading, setOauthLoading] = useState<'google' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Estados de validación en tiempo real
@@ -62,8 +61,8 @@ function RegistroContent() {
     if (!val) {
       return 'La contraseña es obligatoria.';
     }
-    if (val.length < 6) {
-      return 'La contraseña debe tener al menos 6 caracteres.';
+    if (val.length < 8) {
+      return 'La contraseña debe tener al menos 8 caracteres.';
     }
     return undefined;
   };
@@ -94,7 +93,7 @@ function RegistroContent() {
       });
       setToken(data.token);
       if (selectedPlan && selectedPlan !== 'free') {
-        router.push(`/dashboard?payment=success&plan=${selectedPlan}`);
+        router.push(`/planes?plan=${encodeURIComponent(selectedPlan)}`);
       } else {
         router.push('/dashboard');
       }
@@ -106,18 +105,18 @@ function RegistroContent() {
     }
   };
 
-  const handleOAuth = async (provider: 'google' | 'facebook') => {
-    setOauthLoading(provider);
+  const handleOAuth = async () => {
+    setOauthLoading('google');
     setError(null);
     try {
-      const data = await api<{ authorizeUrl: string }>(`/api/v1/auth/oauth/${provider}`, { auth: false });
+      const data = await api<{ authorizeUrl: string }>('/api/v1/auth/oauth/google', { auth: false });
       if (data?.authorizeUrl) {
         window.location.href = data.authorizeUrl;
       } else {
-        throw new Error(`No se pudo obtener la URL de ${provider}`);
+        throw new Error('No se pudo obtener la URL de Google');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : `Error al conectar con ${provider === 'google' ? 'Google' : 'Facebook'}`);
+      setError(err instanceof Error ? err.message : 'Error al conectar con Google');
       setOauthLoading(null);
     }
   };
@@ -148,7 +147,7 @@ function RegistroContent() {
             <button
               type="button"
               disabled={loading || oauthLoading !== null}
-              onClick={() => handleOAuth('google')}
+              onClick={handleOAuth}
               className={`w-full py-3 rounded-xl border text-xs font-mono transition-all flex items-center justify-center gap-2 font-bold cursor-pointer shadow-xs ${
                 oauthLoading === 'google'
                   ? 'bg-slate-100 dark:bg-white/10 border-slate-300 dark:border-white/20 text-slate-900 dark:text-white opacity-80 cursor-wait'
@@ -169,29 +168,6 @@ function RegistroContent() {
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.27 2.63 1.26 6.59l4.02 3.13c.95-2.83 3.6-4.97 6.72-4.97z"/>
                   </svg>
                   <span>{t('auth_google_continue')}</span>
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              disabled={loading || oauthLoading !== null}
-              onClick={() => handleOAuth('facebook')}
-              className={`w-full py-3 rounded-xl border text-xs font-mono transition-all flex items-center justify-center gap-2 font-bold cursor-pointer shadow-xs ${
-                oauthLoading === 'facebook'
-                  ? 'bg-blue-100 dark:bg-blue-600/20 border-blue-300 dark:border-blue-500/30 text-blue-900 dark:text-blue-100 opacity-80 cursor-wait'
-                  : 'bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-600/10 dark:hover:bg-blue-600/20 dark:border-blue-500/20 text-blue-700 dark:text-blue-300 active:scale-[0.99]'
-              }`}
-            >
-              {oauthLoading === 'facebook' ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
-                  <span>Iniciando con Facebook...</span>
-                </>
-              ) : (
-                <>
-                  <FacebookIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>{t('auth_facebook_continue')}</span>
                 </>
               )}
             </button>

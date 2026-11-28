@@ -80,7 +80,11 @@ import {
   resetUserCommentsAction,
   updateFeatureFlagAction,
   updateSorteosConfigAction,
-  syncSorteosPaymentsFromDescargadorAction
+  syncSorteosPaymentsFromDescargadorAction,
+  fetchSorteosOrdersAction,
+  approveSorteosOrderAction,
+  rejectSorteosOrderAction,
+  SorteosAdminOrder
 } from './actions';
 
 // ==========================================
@@ -167,6 +171,7 @@ interface SorteosAdminClientProps {
   initialFeatureFlags: FeatureFlagRecord[];
   initialMetrics: SorteosMetricsRecord;
   initialConfig?: SubdomainConfig;
+  initialOrders?: SorteosAdminOrder[];
 }
 
 export default function SorteosAdminClient({
@@ -174,10 +179,13 @@ export default function SorteosAdminClient({
   initialUsers,
   initialFeatureFlags,
   initialMetrics,
-  initialConfig
+  initialConfig,
+  initialOrders = []
 }: SorteosAdminClientProps) {
   const [giveaways, setGiveaways] = useState<GiveawayRecord[]>(initialGiveaways);
   const [users, setUsers] = useState<SorteosUserRecord[]>(initialUsers);
+  const [orders, setOrders] = useState<SorteosAdminOrder[]>(initialOrders);
+  const [busyOrderCode, setBusyOrderCode] = useState<string | null>(null);
   const [featureFlags, setFeatureFlags] = useState<FeatureFlagRecord[]>(initialFeatureFlags);
   const [metrics] = useState<SorteosMetricsRecord>(initialMetrics);
   const [siteConfig, setSiteConfig] = useState<SubdomainConfig>(initialConfig || DEFAULT_SORTEOS_CONFIG);
@@ -872,6 +880,11 @@ export default function SorteosAdminClient({
           >
             <DollarSign size={15} className="text-emerald-400" />
             <span>Pagos & Licencias</span>
+            {orders.filter(o => o.status === 'pending').length > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black">
+                {orders.filter(o => o.status === 'pending').length}
+              </span>
+            )}
           </button>
 
           <button
@@ -1615,6 +1628,123 @@ export default function SorteosAdminClient({
       {/* ========================================================= */}
       {activeTab === 'payments' && (
         <div className="space-y-6 max-w-5xl mx-auto">
+          {/* Órdenes Yape / Plin en vivo (Aprobación 1 clic) */}
+          <div className="p-5 rounded-2xl bg-slate-900/70 border border-amber-500/30 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-black text-white flex items-center gap-2">
+                  <CheckCircle size={16} className="text-amber-400" />
+                  <span>Órdenes Yape / Plin Reportadas ({orders.filter(o => o.status === 'pending').length} pendientes)</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Aprueba pagos reportados en <code className="text-amber-300">sorteos.atpdev.dev/planes</code> y activa automáticamente el plan Pro/Business en vivo.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  const fresh = await fetchSorteosOrdersAction();
+                  setOrders(fresh);
+                  notify('Órdenes de Sorteos Pro actualizadas.');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer shrink-0"
+              >
+                <RefreshCw size={12} />
+                <span>Refrescar Órdenes</span>
+              </button>
+            </div>
+
+            {orders.length === 0 ? (
+              <p className="text-xs text-slate-500 py-4 text-center border border-dashed border-slate-800 rounded-xl">
+                Aún no hay comprobantes Yape/Plin registrados en Sorteos Pro.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase">
+                      <th className="py-2 px-3">Orden</th>
+                      <th className="py-2 px-3">Usuario</th>
+                      <th className="py-2 px-3">Plan / Ciclo</th>
+                      <th className="py-2 px-3">Operación</th>
+                      <th className="py-2 px-3">Monto</th>
+                      <th className="py-2 px-3">Estado</th>
+                      <th className="py-2 px-3 text-right">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/70">
+                    {orders.slice(0, 30).map((ord) => (
+                      <tr key={ord.id} className="hover:bg-white/[0.02]">
+                        <td className="py-2.5 px-3 font-mono font-bold text-white">{ord.orderCode}</td>
+                        <td className="py-2.5 px-3 text-slate-300">{ord.userEmail}</td>
+                        <td className="py-2.5 px-3">
+                          <span className="px-2 py-0.5 rounded bg-pink-500/15 text-pink-300 font-bold uppercase text-[10px]">
+                            {ord.planId} ({ord.billingCycle})
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-cyan-300">
+                          {ord.method.toUpperCase()} {ord.operationCode || '—'}
+                        </td>
+                        <td className="py-2.5 px-3 font-mono text-slate-200">
+                          S/ {ord.amountPen} (${ord.amountUsd})
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            ord.status === 'paid'
+                              ? 'bg-emerald-500/15 text-emerald-300'
+                              : ord.status === 'pending'
+                              ? 'bg-amber-500/15 text-amber-300'
+                              : 'bg-rose-500/15 text-rose-300'
+                          }`}>
+                            {ord.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-right">
+                          {ord.status === 'pending' ? (
+                            <div className="inline-flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                disabled={busyOrderCode !== null}
+                                onClick={async () => {
+                                  setBusyOrderCode(ord.orderCode);
+                                  const res = await approveSorteosOrderAction(ord.orderCode);
+                                  if (res.orders) setOrders(res.orders);
+                                  notify(res.message, res.success ? 'success' : 'error');
+                                  setBusyOrderCode(null);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] cursor-pointer disabled:opacity-50"
+                              >
+                                Aprobar
+                              </button>
+                              <button
+                                type="button"
+                                disabled={busyOrderCode !== null}
+                                onClick={async () => {
+                                  setBusyOrderCode(ord.orderCode);
+                                  const res = await rejectSorteosOrderAction(ord.orderCode);
+                                  if (res.orders) setOrders(res.orders);
+                                  notify(res.message, res.success ? 'success' : 'error');
+                                  setBusyOrderCode(null);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 text-rose-300 border border-rose-500/30 font-bold text-[11px] cursor-pointer disabled:opacity-50"
+                              >
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              {ord.paidAt ? new Date(ord.paidAt).toLocaleDateString('es-PE') : '—'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
           <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-slate-900 to-cyan-950/40 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
               <h2 className="text-sm font-black text-white flex items-center gap-2">
@@ -1648,19 +1778,41 @@ export default function SorteosAdminClient({
                   Modifica los precios mostrados en <code className="text-violet-300">sorteos.atpdev.dev/planes</code> y el modal de pago Yape/Plin.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <label className="text-[11px] font-bold text-slate-400">Ahorro Anual (%):</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={80}
-                  value={siteConfig.payments?.annual_discount_percent ?? 20}
-                  onChange={e => setSiteConfig({
-                    ...siteConfig,
-                    payments: { ...(siteConfig.payments || {}), annual_discount_percent: Number(e.target.value) }
-                  })}
-                  className="w-16 px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs text-center"
-                />
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <label className="text-[11px] font-bold text-slate-400">Ciclo Anual:</label>
+                  <button
+                    type="button"
+                    onClick={() => setSiteConfig({
+                      ...siteConfig,
+                      payments: {
+                        ...(siteConfig.payments || {}),
+                        annual_billing_enabled: siteConfig.payments?.annual_billing_enabled === false ? true : false,
+                      }
+                    })}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border cursor-pointer ${
+                      siteConfig.payments?.annual_billing_enabled !== false
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}
+                  >
+                    {siteConfig.payments?.annual_billing_enabled !== false ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-[11px] font-bold text-slate-400">Ahorro Anual (%):</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={80}
+                    value={siteConfig.payments?.annual_discount_percent ?? 20}
+                    onChange={e => setSiteConfig({
+                      ...siteConfig,
+                      payments: { ...(siteConfig.payments || {}), annual_discount_percent: Number(e.target.value) }
+                    })}
+                    className="w-16 px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs text-center"
+                  />
+                </div>
               </div>
             </div>
 

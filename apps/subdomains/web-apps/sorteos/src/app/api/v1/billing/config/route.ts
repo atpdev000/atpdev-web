@@ -59,9 +59,17 @@ export async function GET() {
     fallbackPay.mercadopago_pro_annual_url ||
     'https://mpago.la/2EJNTrd';
 
+  const stripeKey = (process.env.STRIPE_SECRET_KEY || '').trim();
+  const hasRealStripeKey =
+    (stripeKey.startsWith('sk_live_') || stripeKey.startsWith('sk_test_')) &&
+    stripeKey.length > 24 &&
+    !/placeholder|dummy|xxx/i.test(stripeKey);
+  const proPriceId = (process.env.STRIPE_PRICE_PRO_MONTHLY || '').trim();
+  const stripeApiConfigured = hasRealStripeKey && proPriceId.startsWith('price_');
+
   return NextResponse.json({
     ok: true,
-    stripeApiConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
+    stripeApiConfigured,
     whatsappNumber,
     yapePhoneDisplay: formatPeruPhone(rawPhone),
     yapeHolder: (pay.yape_holder || 'Percy Acha Taipe (ATP Dev Perú)').trim(),
@@ -84,6 +92,7 @@ export async function GET() {
     businessAnnualPricePen,
     enterpriseMonthlyPrice,
     enterpriseAnnualPrice,
+    annualBillingEnabled: pay.annual_billing_enabled !== false,
     annualDiscountPercent,
     demoModeEnabled: Boolean(pay.demo_mode_enabled === true),
     demoLicenseCode: pay.demo_mode_enabled === true ? String(pay.demo_license_code || 'SORTEOS-DEMO-2026').trim().toUpperCase() : null,

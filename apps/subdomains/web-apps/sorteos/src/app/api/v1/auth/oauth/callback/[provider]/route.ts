@@ -21,13 +21,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
   const live = await exchangeOAuthCode(provider === 'google' ? 'google' : 'meta', code, redirectUri);
   const state = new URL(req.url).searchParams.get('state');
 
-  // Si no se obtuvo sesión oficial OAuth de Google/Meta y es código de desarrollo,
-  // redirigir al formulario de conexión real en popup para no fabricar usuarios ficticios
-  if (!live && code.startsWith('dev_')) {
-    return NextResponse.redirect(`${appUrl}/auth/login/${provider}?popup=true${state ? `&returnTo=${encodeURIComponent(state)}` : ''}`);
+  // Si no se obtuvo sesión oficial OAuth con correo real de Google/Meta, jamás fabricar un usuario ficticio con plan pagado
+  if (!live || !live.email) {
+    if (code.startsWith('dev_') && process.env.NODE_ENV !== 'production') {
+      return NextResponse.redirect(`${appUrl}/auth/login/${provider}?popup=true${state ? `&returnTo=${encodeURIComponent(state)}` : ''}`);
+    }
+    return NextResponse.redirect(`${appUrl}/login?oauth_error=1&provider=${encodeURIComponent(provider)}`);
   }
 
-  const mode = live ? 'live' : 'mock-verified';
+  const mode = 'live';
 
   const providerNames: Record<string, string> = {
     google: 'Google',
@@ -39,16 +41,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     threads: 'Threads',
   };
   const providerName = providerNames[provider] || provider;
-  const fallbackEmail = `cuenta.${provider === 'twitter' ? 'x' : provider}@atpdev.net`;
-  const email = (live?.email || fallbackEmail).toLowerCase();
+  const email = live.email.trim().toLowerCase();
   let id = db.usersByEmail.get(email);
   if (!id) {
     id = uid('usr');
     const { hash, salt } = hashPassword(`oauth-${provider}-${code}-${Date.now()}`);
     const now = new Date().toISOString();
-    db.users.set({ id, name: live?.name || `Usuario ${providerName}`, email, passwordHash: hash, salt,
-      role: 'user', status: 'active', plan: 'pro', language: 'es',
-      createdAt: now, updatedAt: now,
+    db.users.set({
+      id,
+      name: live.name || `Usuario ${providerName}`,
+      email,
+      passwordHash: hash,
+      salt,
+      role: 'user',
+      status: 'active',
+      plan: 'free',
+      language: 'es',
+      createdAt: now,
+      updatedAt: now,
     });
     db.usersByEmail.set(email, id);
   }

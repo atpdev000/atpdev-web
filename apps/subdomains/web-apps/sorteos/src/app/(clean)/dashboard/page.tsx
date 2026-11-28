@@ -105,8 +105,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [giveaways, setGiveaways] = useState<Giveaway[]>([]);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [usage, setUsage] = useState({ used: 0, limit: 2500, percent: 0, warn80: false });
-  const [planName, setPlanName] = useState('Pro Creador');
+  const [usage, setUsage] = useState({ used: 0, limit: 100, percent: 0, warn80: false });
+  const [planName, setPlanName] = useState('Free');
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [loadingSession, setLoadingSession] = useState(true);
@@ -143,7 +143,7 @@ export default function DashboardPage() {
       const payment = params.get('payment');
       const plan = params.get('plan');
       const sessionId = params.get('session_id');
-      if (payment === 'success' && plan) {
+      if (payment === 'success' && plan && sessionId) {
         api('/api/v1/billing/confirm', {
           method: 'POST',
           body: { planId: plan, sessionId },

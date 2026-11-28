@@ -182,7 +182,7 @@ export const Navbar: React.FC = () => {
     { name: 'Directorio de Sorteos', href: '/dashboard', icon: Calendar, iconBg: 'bg-teal-100 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400' },
   ];
 
-  const planLabel = (userProfile?.plan || 'pro').toUpperCase();
+  const planLabel = (userProfile?.plan || 'free').toUpperCase();
 
   const renderAppItem = (item: NavAppItem) => (
     <Link

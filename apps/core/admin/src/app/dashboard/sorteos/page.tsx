@@ -5,17 +5,19 @@ import {
   getSorteosMetrics, 
   getSubdomainConfig 
 } from '@atpdev/database';
+import { fetchSorteosOrdersAction } from './actions';
 import SorteosAdminClient from './SorteosAdminClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function SorteosAdminPage() {
-  const [giveaways, users, featureFlags, metrics, config] = await Promise.all([
+  const [giveaways, users, featureFlags, metrics, config, orders] = await Promise.all([
     getSorteosGiveaways(),
     getSorteosUsers(),
     getSorteosFeatureFlags(),
     getSorteosMetrics(),
-    getSubdomainConfig('sorteos')
+    getSubdomainConfig('sorteos'),
+    fetchSorteosOrdersAction(),
   ]);
 
   return (
@@ -25,6 +27,7 @@ export default async function SorteosAdminPage() {
       initialFeatureFlags={featureFlags}
       initialMetrics={metrics}
       initialConfig={config}
+      initialOrders={orders}
     />
   );
 }

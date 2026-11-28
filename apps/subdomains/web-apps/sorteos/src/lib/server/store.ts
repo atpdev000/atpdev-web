@@ -111,6 +111,25 @@ export interface AuditLogEntry {
   createdAt: string;
 }
 
+export interface SorteosOrderRecord {
+  id: string;
+  orderCode: string;
+  userId: string;
+  userEmail: string;
+  planId: 'pro' | 'business' | 'enterprise';
+  billingCycle: 'monthly' | 'annual';
+  amountUsd: number;
+  amountPen: number;
+  method: 'yape' | 'plin' | 'stripe';
+  status: 'pending' | 'paid' | 'rejected';
+  operationCode?: string;
+  payerPhone?: string;
+  stripeSessionId?: string;
+  notes?: string;
+  createdAt: string;
+  paidAt?: string;
+}
+
 export interface FeatureFlagsSnapshot {
   free: boolean;
   pro: boolean;
@@ -144,20 +163,34 @@ function getDatabaseFilePath(): string | null {
     const { fs: fsMod, path: pathMod } = getSafeNodeModules();
     if (!fsMod || !pathMod) return null;
 
+    if (process.env.SORTEOS_DATA_PATH) {
+      return process.env.SORTEOS_DATA_PATH;
+    }
+
+    // Producción VPS: almacenar fuera del repositorio git para no perder datos al desplegar
+    const vpsDataDir = '/opt/atpdev-web/data';
+    const vpsFile = '/opt/atpdev-web/data/sorteos-db.json';
+    if (fsMod.existsSync(vpsDataDir)) {
+      // Migración automática desde ruta legacy dentro del repo si el nuevo archivo aún no existe
+      const legacyVps = '/opt/atpdev-web/apps/subdomains/web-apps/sorteos/data/sorteos-db.json';
+      if (!fsMod.existsSync(vpsFile) && fsMod.existsSync(legacyVps)) {
+        try {
+          fsMod.copyFileSync(legacyVps, vpsFile);
+        } catch {}
+      }
+      return vpsFile;
+    }
+
     const cwd = process.cwd();
     const possiblePaths = [
-      pathMod.resolve(cwd, 'data/sorteos-db.json'),
-      pathMod.resolve(cwd, 'apps/subdomains/web-apps/sorteos/data/sorteos-db.json'),
-      pathMod.resolve(cwd, 'packages/database/src/sorteos_data.json'),
-      pathMod.resolve(cwd, '../packages/database/src/sorteos_data.json'),
-      pathMod.resolve(cwd, '../../packages/database/src/sorteos_data.json')
+      pathMod.resolve(/*turbopackIgnore: true*/ cwd, 'data/sorteos-db.json'),
+      pathMod.resolve(/*turbopackIgnore: true*/ cwd, 'apps/subdomains/web-apps/sorteos/data/sorteos-db.json'),
     ];
 
     for (const p of possiblePaths) {
       if (fsMod.existsSync(p)) return p;
     }
-    
-    // Default to data/sorteos-db.json in current directory
+
     const defaultTarget = possiblePaths[0];
     const dir = pathMod.dirname(defaultTarget);
     if (!fsMod.existsSync(dir)) {
@@ -174,6 +207,7 @@ interface DiskSnapshot {
   socialAccounts?: SocialAccountRecord[];
   giveaways?: GiveawayRecord[];
   certificates?: CertificateRecord[];
+  orders?: SorteosOrderRecord[];
   cms?: CmsPost[];
   flags?: FeatureFlags;
 }
@@ -262,6 +296,14 @@ interface WinnerRepo {
   list(): { id: string; giveawayId: string; rank: number; participantUsername: string; drawHash: string }[];
 }
 
+export interface OrderRepo {
+  get(id: string): SorteosOrderRecord | undefined;
+  findByCode(orderCode: string): SorteosOrderRecord | undefined;
+  list(): SorteosOrderRecord[];
+  listByUser(userId: string): SorteosOrderRecord[];
+  set(rec: SorteosOrderRecord): void;
+}
+
 export interface Store {
   users: UserRepo;
   usersByEmail: UserByEmailRepo;
@@ -269,6 +311,7 @@ export interface Store {
   giveaways: GiveawayRepo;
   usage: UsageRepo;
   certificates: { get(id: string): CertificateRecord | undefined; set(rec: CertificateRecord): void; listByUser(userId: string): CertificateRecord[] };
+  orders: OrderRepo;
   cms: CmsRepo;
   audit: AuditRepo;
   flags: FlagsRepo;
@@ -284,6 +327,7 @@ function newDb(): Store {
   const socialAccounts = new Map<string, SocialAccountRecord>();
   const giveaways = new Map<string, GiveawayRecord>();
   const certificates = new Map<string, CertificateRecord>();
+  const orders = new Map<string, SorteosOrderRecord>();
   const cms = new Map<string, CmsPost>();
   const audit = new Map<string, AuditLogEntry[]>();
   const flags = new Map<string, FeatureFlagsSnapshot>();
@@ -298,15 +342,26 @@ function newDb(): Store {
 
   for (const [id, v] of Object.entries(seedFlags)) flags.set(id, v);
 
-  function loadFromDisk(): boolean {
+  let lastDiskMtimeMs = 0;
+  let lastDiskCheckAt = 0;
+
+  function loadFromDisk(forceReplace = false): boolean {
     try {
       const { fs: fsMod } = getSafeNodeModules();
       if (!fsMod) return false;
       const filePath = getDatabaseFilePath();
       if (!filePath || !fsMod.existsSync(filePath)) return false;
 
+      const stat = fsMod.statSync(filePath);
+      lastDiskMtimeMs = stat.mtimeMs;
       const raw = fsMod.readFileSync(filePath, 'utf-8');
       const data: DiskSnapshot = JSON.parse(raw);
+
+      if (forceReplace) {
+        users.clear();
+        usersByEmail.clear();
+        orders.clear();
+      }
 
       if (Array.isArray(data.users)) {
         for (const u of data.users) {
@@ -327,8 +382,22 @@ function newDb(): Store {
         for (const c of data.certificates) certificates.set(c.id, c);
       }
 
+      if (Array.isArray(data.orders)) {
+        for (const o of data.orders) orders.set(o.id, o);
+      }
+
       if (Array.isArray(data.cms)) {
         for (const post of data.cms) cms.set(post.slug || post.id, post);
+      }
+
+      // En producción, purgar si existiera la cuenta backdoor legacy admin@sorteos.pro
+      if (process.env.NODE_ENV === 'production') {
+        if (users.has('usr_superadmin_seed')) {
+          users.delete('usr_superadmin_seed');
+        }
+        if (usersByEmail.get('admin@sorteos.pro') === 'usr_superadmin_seed') {
+          usersByEmail.delete('admin@sorteos.pro');
+        }
       }
 
       return true;
@@ -356,59 +425,81 @@ function newDb(): Store {
           socialAccounts: Array.from(socialAccounts.values()),
           giveaways: Array.from(giveaways.values()),
           certificates: Array.from(certificates.values()),
+          orders: Array.from(orders.values()),
           cms: Array.from(cms.values()),
         };
 
-        fsMod.writeFileSync(filePath, JSON.stringify(snapshot, null, 2), 'utf-8');
+        const tmpPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+        fsMod.writeFileSync(tmpPath, JSON.stringify(snapshot, null, 2), 'utf-8');
+        fsMod.renameSync(tmpPath, filePath);
+        try {
+          lastDiskMtimeMs = fsMod.statSync(filePath).mtimeMs;
+        } catch {}
       } catch (err) {
         console.error('[sorteos] Error persisting to disk:', err);
       }
-    }, 200);
+    }, 100);
+  }
+
+  function syncFromDiskIfStale(): void {
+    const now = Date.now();
+    if (saveTimer || now - lastDiskCheckAt < 1000) return;
+    lastDiskCheckAt = now;
+    try {
+      const { fs: fsMod } = getSafeNodeModules();
+      if (!fsMod) return;
+      const filePath = getDatabaseFilePath();
+      if (!filePath || !fsMod.existsSync(filePath)) return;
+      const mtime = fsMod.statSync(filePath).mtimeMs;
+      if (mtime > lastDiskMtimeMs + 1) {
+        loadFromDisk(true);
+      }
+    } catch {}
   }
 
   loadFromDisk();
 
   function seedIfEmpty(): void {
-    if (cms.has('guia-sorteo-instagram-2026')) return;
-    const now = new Date().toISOString();
-    cms.set('guia-sorteo-instagram-2026', {
-      id: 'cms-1',
-      slug: 'guia-sorteo-instagram-2026',
-      title: 'Cómo hacer un sorteo en Instagram legal y transparente',
-      excerpt: 'Normas de promoción de Meta y certificación de ganadores.',
-      body: '# Guía Instagram\n\nContenido editorial gestionado sin desplegar código (RF-035).',
-      category: 'Instagram & Meta',
-      status: 'published',
-      updatedAt: now,
-    });
+    if (!cms.has('guia-sorteo-instagram-2026')) {
+      const now = new Date().toISOString();
+      cms.set('guia-sorteo-instagram-2026', {
+        id: 'cms-1',
+        slug: 'guia-sorteo-instagram-2026',
+        title: 'Cómo hacer un sorteo en Instagram legal y transparente',
+        excerpt: 'Normas de promoción de Meta y certificación de ganadores.',
+        body: '# Guía Instagram\n\nContenido editorial gestionado sin desplegar código (RF-035).',
+        category: 'Instagram & Meta',
+        status: 'published',
+        updatedAt: now,
+      });
+    }
 
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { scryptSync } = require('node:crypto') as typeof import('node:crypto');
-      const salt = 'seed-admin-salt-01';
-      const passwordHash = scryptSync('Admin1234!', salt, 64).toString('hex');
-      const adminId = 'usr_superadmin_seed';
-      if (!users.has(adminId)) {
-        users.set(adminId, {
-          id: adminId,
-          name: 'Super Admin',
-          email: 'admin@sorteos.pro',
-          passwordHash,
-          salt,
-          role: 'super-admin',
-          status: 'active',
-          plan: 'enterprise',
-          language: 'es',
-          createdAt: now,
-          updatedAt: now,
-        });
-        usersByEmail.set('admin@sorteos.pro', adminId);
-        if (process.env.NODE_ENV === 'production') {
-          console.warn('[sorteos] Seed super-admin activo en producción: cambia admin@sorteos.pro de inmediato.');
+    // Seguridad estricta: jamás crear cuenta super-admin con clave fija en producción
+    if (process.env.NODE_ENV !== 'production') {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const { scryptSync } = require('node:crypto') as typeof import('node:crypto');
+        const salt = 'seed-admin-salt-01';
+        const passwordHash = scryptSync('Admin1234!', salt, 64).toString('hex');
+        const adminId = 'usr_superadmin_seed';
+        if (!users.has(adminId)) {
+          const now = new Date().toISOString();
+          users.set(adminId, {
+            id: adminId,
+            name: 'Super Admin Dev',
+            email: 'admin@sorteos.pro',
+            passwordHash,
+            salt,
+            role: 'super-admin',
+            status: 'active',
+            plan: 'enterprise',
+            language: 'es',
+            createdAt: now,
+            updatedAt: now,
+          });
+          usersByEmail.set('admin@sorteos.pro', adminId);
         }
-      }
-    } catch {
-      // Sin crypto disponible: se creará al primer login demo
+      } catch {}
     }
   }
 
@@ -419,20 +510,20 @@ function newDb(): Store {
   return {
     seeded: true,
     users: {
-      get(id: string) { return users.get(id); },
-      getByEmail(email: string) { return usersByEmail.get(email); },
+      get(id: string) { syncFromDiskIfStale(); return users.get(id); },
+      getByEmail(email: string) { syncFromDiskIfStale(); return usersByEmail.get(email); },
       set(rec: UserRecord) { users.set(rec.id, rec); persistToDisk(); },
-      has(id: string) { return users.has(id); },
-      list() { return Array.from(users.values()); },
-      count() { return users.size; },
+      has(id: string) { syncFromDiskIfStale(); return users.has(id); },
+      list() { syncFromDiskIfStale(); return Array.from(users.values()); },
+      count() { syncFromDiskIfStale(); return users.size; },
       delete(id: string) { const res = users.delete(id); persistToDisk(); return res; },
     },
     usersByEmail: {
-      get(id: string) { return usersByEmail.get(id); },
+      get(id: string) { syncFromDiskIfStale(); return usersByEmail.get(id); },
       set(email: string, userId: string) { usersByEmail.set(email, userId); },
-      has(id: string) { return usersByEmail.has(id); },
-      list() { return Array.from(usersByEmail.values()); },
-      count() { return usersByEmail.size; },
+      has(id: string) { syncFromDiskIfStale(); return usersByEmail.has(id); },
+      list() { syncFromDiskIfStale(); return Array.from(usersByEmail.values()); },
+      count() { syncFromDiskIfStale(); return usersByEmail.size; },
     },
     socialAccounts: {
       set(rec: SocialAccountRecord) { socialAccounts.set(rec.id, rec); persistToDisk(); },
@@ -463,6 +554,24 @@ function newDb(): Store {
       get(id: string) { return certificates.get(id); },
       set(rec: CertificateRecord) { certificates.set(rec.id, rec); persistToDisk(); },
       listByUser(userId: string) { return Array.from(certificates.values()).filter((c) => c.userId === userId); },
+    },
+    orders: {
+      get(id: string) { return orders.get(id); },
+      findByCode(orderCode: string) {
+        const clean = orderCode.trim().toUpperCase();
+        return Array.from(orders.values()).find((o) => o.orderCode.toUpperCase() === clean);
+      },
+      list() {
+        return Array.from(orders.values()).sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      },
+      listByUser(userId: string) {
+        return Array.from(orders.values())
+          .filter((o) => o.userId === userId)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      },
+      set(rec: SorteosOrderRecord) { orders.set(rec.id, rec); persistToDisk(); },
     },
     cms: {
       values() { return Array.from(cms.values()); },

@@ -1,5 +1,7 @@
 'use server';
 
+import fs from 'node:fs';
+import path from 'node:path';
 import { 
   getSorteosGiveaways,
   saveSorteosGiveaway,
@@ -15,6 +17,7 @@ import {
   getSorteosMetrics,
   getSubdomainConfig,
   saveSubdomainConfig,
+  syncRealSorteosUser,
   GiveawayRecord,
   SorteosUserRecord,
   FeatureFlagRecord,
@@ -22,6 +25,132 @@ import {
   SubdomainConfig
 } from '@atpdev/database';
 import { revalidatePath } from 'next/cache';
+
+export interface SorteosAdminOrder {
+  id: string;
+  orderCode: string;
+  userId: string;
+  userEmail: string;
+  planId: 'pro' | 'business' | 'enterprise';
+  billingCycle: 'monthly' | 'annual';
+  amountUsd: number;
+  amountPen: number;
+  method: 'yape' | 'plin' | 'stripe';
+  status: 'pending' | 'paid' | 'rejected';
+  operationCode?: string;
+  payerPhone?: string;
+  notes?: string;
+  createdAt: string;
+  paidAt?: string;
+}
+
+function resolveSorteosDbPath(): string {
+  if (process.env.SORTEOS_DATA_PATH) return process.env.SORTEOS_DATA_PATH;
+  const vpsPath = '/opt/atpdev-web/data/sorteos-db.json';
+  if (fs.existsSync(vpsPath) || fs.existsSync('/opt/atpdev-web/data')) return vpsPath;
+  const cwd = process.cwd();
+  const candidates = [
+    path.resolve(/*turbopackIgnore: true*/ cwd, '../../subdomains/web-apps/sorteos/data/sorteos-db.json'),
+    path.resolve(/*turbopackIgnore: true*/ cwd, '../../../apps/subdomains/web-apps/sorteos/data/sorteos-db.json'),
+    path.resolve(/*turbopackIgnore: true*/ cwd, 'apps/subdomains/web-apps/sorteos/data/sorteos-db.json'),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(c)) return c;
+  }
+  return candidates[0];
+}
+
+function readSorteosDiskDb(): { data: any; filePath: string } {
+  const filePath = resolveSorteosDbPath();
+  try {
+    if (!fs.existsSync(filePath)) return { data: { users: [], orders: [] }, filePath };
+    return { data: JSON.parse(fs.readFileSync(filePath, 'utf8')) || {}, filePath };
+  } catch {
+    return { data: { users: [], orders: [] }, filePath };
+  }
+}
+
+function writeSorteosDiskDb(filePath: string, data: any): void {
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  const tmp = `${filePath}.admin.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8');
+  fs.renameSync(tmp, filePath);
+}
+
+export async function fetchSorteosOrdersAction(): Promise<SorteosAdminOrder[]> {
+  const { data } = readSorteosDiskDb();
+  const list: SorteosAdminOrder[] = Array.isArray(data.orders) ? data.orders : [];
+  return [...list].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export async function approveSorteosOrderAction(orderCode: string): Promise<{
+  success: boolean;
+  message: string;
+  orders?: SorteosAdminOrder[];
+}> {
+  const clean = (orderCode || '').trim().toUpperCase();
+  const { data, filePath } = readSorteosDiskDb();
+  const orders: SorteosAdminOrder[] = Array.isArray(data.orders) ? data.orders : [];
+  const order = orders.find((o) => o.orderCode.toUpperCase() === clean);
+  if (!order) return { success: false, message: `Orden ${clean} no encontrada.` };
+  if (order.status === 'paid') {
+    return { success: true, message: `La orden ${clean} ya fue aprobada anteriormente.`, orders };
+  }
+
+  const now = new Date().toISOString();
+  order.status = 'paid';
+  order.paidAt = now;
+
+  const users: any[] = Array.isArray(data.users) ? data.users : [];
+  const user = users.find((u) => u.id === order.userId || (u.email || '').toLowerCase() === order.userEmail.toLowerCase());
+  if (user) {
+    user.plan = order.planId;
+    user.updatedAt = now;
+    try {
+      await syncRealSorteosUser({
+        id: user.id,
+        name: user.name || order.userEmail,
+        email: user.email || order.userEmail,
+        plan: order.planId as any,
+        status: user.status || 'active',
+      });
+    } catch {}
+  }
+
+  data.orders = orders;
+  data.users = users;
+  writeSorteosDiskDb(filePath, data);
+  revalidatePath('/dashboard/sorteos');
+  return {
+    success: true,
+    message: `Orden ${order.orderCode} aprobada — Plan ${order.planId.toUpperCase()} activo para ${order.userEmail}.`,
+    orders: [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+  };
+}
+
+export async function rejectSorteosOrderAction(orderCode: string): Promise<{
+  success: boolean;
+  message: string;
+  orders?: SorteosAdminOrder[];
+}> {
+  const clean = (orderCode || '').trim().toUpperCase();
+  const { data, filePath } = readSorteosDiskDb();
+  const orders: SorteosAdminOrder[] = Array.isArray(data.orders) ? data.orders : [];
+  const order = orders.find((o) => o.orderCode.toUpperCase() === clean);
+  if (!order) return { success: false, message: `Orden ${clean} no encontrada.` };
+  if (order.status === 'paid') return { success: false, message: 'No se puede rechazar una orden ya pagada.' };
+  order.status = 'rejected';
+  order.notes = 'Rechazada desde Panel Admin';
+  data.orders = orders;
+  writeSorteosDiskDb(filePath, data);
+  revalidatePath('/dashboard/sorteos');
+  return {
+    success: true,
+    message: `Orden ${order.orderCode} marcada como rechazada.`,
+    orders: [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+  };
+}
 
 export async function fetchSorteosGiveawaysAction(): Promise<GiveawayRecord[]> {
   try {
