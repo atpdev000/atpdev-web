@@ -5,6 +5,7 @@ import { Sparkles, Trophy, RotateCcw, Volume2, VolumeX, Gift, Check, Palette } f
 import { ToolSwitcher } from '@/components/ToolSwitcher';
 import ConfettiEffect from '@/components/ConfettiEffect';
 import { playCelebrationSound, isAudioMuted, toggleAudioMute } from '@/lib/soundEffects';
+import { parsePastedParticipantText } from '@/lib/fileListExtractor';
 
 const DEFAULT_PRIZES = [
   '🎉 ¡PRIMER PREMIO! $100 USD en efectivo',
@@ -167,8 +168,35 @@ export default function RaspaGanaPage() {
     scratch(x, y);
   };
 
+  const handleCustomPrizePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const plainText = e.clipboardData?.getData('text/plain') || '';
+    if (!plainText.trim()) return;
+    const { names, isBulkPaste } = parsePastedParticipantText(plainText);
+    if (isBulkPaste && names.length > 0) {
+      e.preventDefault();
+      setPrizesList((prev) => {
+        const isDefault =
+          prev.length === DEFAULT_PRIZES.length &&
+          prev.every((item, i) => item === DEFAULT_PRIZES[i]);
+        if (isDefault && names.length >= 2) return names;
+        const seen = new Set(prev.map((p) => p.toLowerCase()));
+        return [...prev, ...names.filter((n) => !seen.has(n.toLowerCase()))];
+      });
+      setCustomPrizeInput('');
+    }
+  };
+
   const handleAddCustomPrize = (e: React.FormEvent) => {
     e.preventDefault();
+    const { names, isBulkPaste } = parsePastedParticipantText(customPrizeInput);
+    if (isBulkPaste && names.length > 0) {
+      setPrizesList((prev) => {
+        const seen = new Set(prev.map((p) => p.toLowerCase()));
+        return [...prev, ...names.filter((n) => !seen.has(n.toLowerCase()))];
+      });
+      setCustomPrizeInput('');
+      return;
+    }
     if (!customPrizeInput.trim()) return;
     setPrizesList((prev) => [customPrizeInput.trim(), ...prev]);
     setCustomPrizeInput('');
@@ -272,7 +300,8 @@ export default function RaspaGanaPage() {
             type="text"
             value={customPrizeInput}
             onChange={(e) => setCustomPrizeInput(e.target.value)}
-            placeholder="Añadir nuevo premio (ej: 1x Camiseta Oficial)..."
+            onPaste={handleCustomPrizePaste}
+            placeholder="Añadir premio o pegar lista de Excel (Ctrl+V)..."
             className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
           />
           <button

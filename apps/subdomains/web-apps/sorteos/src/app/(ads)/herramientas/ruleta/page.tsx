@@ -24,6 +24,7 @@ import { isAudioMuted, toggleAudioMute, playCardFlip } from '@/lib/soundEffects'
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
 import { ListFileImporter } from '@/components/ListFileImporter';
+import { parsePastedParticipantText } from '@/lib/fileListExtractor';
 
 const DEFAULT_OPTIONS = [
   'Premio Mayor 🎁',
@@ -47,6 +48,7 @@ export default function RuletaPage() {
   const [muted, setMuted] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [ruletaNotice, setRuletaNotice] = useState<string | null>(null);
+  const [pasteFeedback, setPasteFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     setMuted(isAudioMuted());
@@ -77,8 +79,51 @@ export default function RuletaPage() {
     }
   };
 
+  const isUntouchedDefault = (list: string[]) =>
+    list.length === DEFAULT_OPTIONS.length &&
+    list.every((item, idx) => item === DEFAULT_OPTIONS[idx]);
+
+  const appendBulkOptions = (incoming: string[]) => {
+    if (incoming.length === 0) return;
+    setRuletaNotice(null);
+    let feedbackMsg = '';
+    if (isUntouchedDefault(options) && incoming.length >= 2) {
+      setOptions(incoming);
+      feedbackMsg = `✓ ${incoming.length} opciones pegadas en orden (opciones demo reemplazadas).`;
+    } else {
+      const seen = new Set(options.map((o) => o.toLowerCase()));
+      const additions = incoming.filter((o) => !seen.has(o.toLowerCase()));
+      if (additions.length === 0) {
+        feedbackMsg = 'Esas opciones ya estaban en la ruleta.';
+      } else {
+        setOptions([...options, ...additions]);
+        feedbackMsg = `✓ +${additions.length} opción${additions.length > 1 ? 'es' : ''} agregada${additions.length > 1 ? 's' : ''} en orden.`;
+      }
+    }
+    setWinner(null);
+    setNewOption('');
+    playCardFlip();
+    setPasteFeedback(feedbackMsg);
+    setTimeout(() => setPasteFeedback(null), 5000);
+  };
+
+  const handleOptionInputPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const plainText = e.clipboardData?.getData('text/plain') || '';
+    if (!plainText.trim()) return;
+    const { names, isBulkPaste } = parsePastedParticipantText(plainText);
+    if (isBulkPaste && names.length > 0) {
+      e.preventDefault();
+      appendBulkOptions(names);
+    }
+  };
+
   const handleAddOption = (e: React.FormEvent) => {
     e.preventDefault();
+    const { names, isBulkPaste } = parsePastedParticipantText(newOption);
+    if (isBulkPaste && names.length > 0) {
+      appendBulkOptions(names);
+      return;
+    }
     if (!newOption.trim()) return;
     setOptions([...options, newOption.trim()]);
     setNewOption('');
@@ -105,9 +150,13 @@ export default function RuletaPage() {
 
   const handleImportOptions = (newOptions: string[], mode: 'replace' | 'append') => {
     if (mode === 'append') {
-      setOptions((prev) => Array.from(new Set([...prev, ...newOptions])));
+      setOptions((prev) => {
+        const seen = new Set(prev.map((o) => o.toLowerCase()));
+        const additions = newOptions.filter((o) => !seen.has(o.toLowerCase()));
+        return [...prev, ...additions];
+      });
     } else {
-      setOptions(newOptions.length >= 2 ? newOptions : [...newOptions, 'Opción 2']);
+      setOptions(newOptions);
     }
     setWinner(null);
     playCardFlip();
@@ -264,44 +313,57 @@ export default function RuletaPage() {
             </div>
 
             {/* Add Option Form */}
-            <form onSubmit={handleAddOption} className="flex gap-2">
-              <label htmlFor="new-option-input" className="sr-only">
-                Escribe una nueva opción para la ruleta
-              </label>
-              <input
-                id="new-option-input"
-                name="newOption"
-                type="text"
-                value={newOption}
-                onChange={(e) => setNewOption(e.target.value)}
-                placeholder={t('roulette_placeholder')}
-                aria-label={t('roulette_placeholder')}
-                className="flex-1 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#d91a7a] dark:focus:border-purple-500 focus:ring-2 focus:ring-pink-50 dark:focus:ring-purple-900/30"
-              />
-              <button
-                type="submit"
-                disabled={!newOption.trim() || isSpinning}
-                aria-label="Agregar opción a la ruleta"
-                className="p-2.5 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] disabled:opacity-50 text-white font-bold transition-colors cursor-pointer shadow-xs"
-              >
-                <Plus className="w-5 h-5" aria-hidden="true" />
-              </button>
+            <form onSubmit={handleAddOption} className="space-y-1.5">
+              <div className="flex gap-2">
+                <label htmlFor="new-option-input" className="sr-only">
+                  Escribe una nueva opción o pega lista de Excel para la ruleta
+                </label>
+                <input
+                  id="new-option-input"
+                  name="newOption"
+                  type="text"
+                  value={newOption}
+                  onChange={(e) => setNewOption(e.target.value)}
+                  onPaste={handleOptionInputPaste}
+                  placeholder="Escribe una opción o pega lista de Excel (Ctrl+V)..."
+                  aria-label={t('roulette_placeholder')}
+                  className="flex-1 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#d91a7a] dark:focus:border-purple-500 focus:ring-2 focus:ring-pink-50 dark:focus:ring-purple-900/30"
+                />
+                <button
+                  type="submit"
+                  disabled={!newOption.trim() || isSpinning}
+                  aria-label="Agregar opción a la ruleta"
+                  className="p-2.5 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] disabled:opacity-50 text-white font-bold transition-colors cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+              {pasteFeedback && (
+                <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 px-1">
+                  {pasteFeedback}
+                </p>
+              )}
             </form>
 
             {/* Options List */}
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
               {options.map((opt, idx) => (
                 <div
-                  key={idx}
+                  key={`${opt}-${idx}`}
                   className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-800 dark:text-zinc-200"
                 >
-                  <span className="font-semibold truncate pr-2">{opt}</span>
+                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                    <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-lg bg-pink-100/80 dark:bg-pink-950/50 text-pink-700 dark:text-pink-300 text-[11px] font-mono font-bold shrink-0">
+                      {idx + 1}
+                    </span>
+                    <span className="font-semibold truncate">{opt}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => handleRemoveOption(idx)}
                     disabled={isSpinning}
                     aria-label={`Eliminar opción ${opt}`}
-                    className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 cursor-pointer"
+                    className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 cursor-pointer shrink-0"
                   >
                     <Trash2 className="w-4 h-4" aria-hidden="true" />
                   </button>

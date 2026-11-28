@@ -18,6 +18,15 @@ import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
 import { ListFileImporter } from '@/components/ListFileImporter';
 import { ExportResultHub } from '@/components/ExportResultHub';
+import { parsePastedParticipantText } from '@/lib/fileListExtractor';
+
+const DEFAULT_PARTICIPANTS = [
+  'Carlos Gómez',
+  'Lucía Fernández',
+  'Andrés Mendoza',
+  'Valeria Silva',
+  'Mateo Torres',
+];
 
 interface Match {
   giver: string;
@@ -27,13 +36,7 @@ interface Match {
 
 export default function AmigoInvisiblePage() {
   const { t } = useLanguage();
-  const [participants, setParticipants] = useState<string[]>([
-    'Carlos Gómez',
-    'Lucía Fernández',
-    'Andrés Mendoza',
-    'Valeria Silva',
-    'Mateo Torres'
-  ]);
+  const [participants, setParticipants] = useState<string[]>(DEFAULT_PARTICIPANTS);
   const [newPerson, setNewPerson] = useState<string>('');
   const [budget, setBudget] = useState<string>('$20.00');
   const [deadline, setDeadline] = useState<string>('24 de Diciembre');
@@ -46,6 +49,7 @@ export default function AmigoInvisiblePage() {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [showLiveStream, setShowLiveStream] = useState<boolean>(false);
   const [friendNotice, setFriendNotice] = useState<string | null>(null);
+  const [pasteFeedback, setPasteFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     setMuted(isAudioMuted());
@@ -63,8 +67,51 @@ export default function AmigoInvisiblePage() {
     }
   };
 
+  const isUntouchedDemo = (list: string[]) =>
+    list.length === DEFAULT_PARTICIPANTS.length &&
+    list.every((item, idx) => item === DEFAULT_PARTICIPANTS[idx]);
+
+  const appendBulkNames = (incoming: string[]) => {
+    if (incoming.length === 0) return;
+    setFriendNotice(null);
+    let feedbackMsg = '';
+    if (isUntouchedDemo(participants) && incoming.length >= 2) {
+      setParticipants(incoming);
+      feedbackMsg = `✓ ${incoming.length} participantes agregados en orden (lista demo reemplazada).`;
+    } else {
+      const seen = new Set(participants.map((p) => p.toLowerCase()));
+      const additions = incoming.filter((name) => !seen.has(name.toLowerCase()));
+      if (additions.length === 0) {
+        feedbackMsg = 'Esos participantes ya estaban en la lista.';
+      } else {
+        setParticipants([...participants, ...additions]);
+        feedbackMsg = `✓ +${additions.length} participante${additions.length > 1 ? 's' : ''} agregado${additions.length > 1 ? 's' : ''} automáticamente en orden.`;
+      }
+    }
+    setMatches([]);
+    setNewPerson('');
+    playCardFlip();
+    setPasteFeedback(feedbackMsg);
+    setTimeout(() => setPasteFeedback(null), 5000);
+  };
+
+  const handlePersonInputPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const plainText = e.clipboardData?.getData('text/plain') || '';
+    if (!plainText.trim()) return;
+    const { names, isBulkPaste } = parsePastedParticipantText(plainText);
+    if (isBulkPaste && names.length > 0) {
+      e.preventDefault();
+      appendBulkNames(names);
+    }
+  };
+
   const handleAddPerson = (e: React.FormEvent) => {
     e.preventDefault();
+    const { names, isBulkPaste } = parsePastedParticipantText(newPerson);
+    if (isBulkPaste && names.length > 0) {
+      appendBulkNames(names);
+      return;
+    }
     const clean = newPerson.trim();
     if (!clean) return;
     if (participants.some((p) => p.toLowerCase() === clean.toLowerCase())) {
@@ -89,9 +136,13 @@ export default function AmigoInvisiblePage() {
 
   const handleImportParticipants = (newParticipants: string[], mode: 'replace' | 'append') => {
     if (mode === 'append') {
-      setParticipants((prev) => Array.from(new Set([...prev, ...newParticipants])));
+      setParticipants((prev) => {
+        const seen = new Set(prev.map((p) => p.toLowerCase()));
+        const additions = newParticipants.filter((p) => !seen.has(p.toLowerCase()));
+        return [...prev, ...additions];
+      });
     } else {
-      setParticipants(newParticipants.length >= 3 ? newParticipants : [...newParticipants, 'Participante Extra']);
+      setParticipants(newParticipants);
     }
     setMatches([]);
     playCardFlip();
@@ -255,43 +306,56 @@ export default function AmigoInvisiblePage() {
             </div>
 
             {/* Add person form */}
-            <form onSubmit={handleAddPerson} className="flex gap-2">
-              <label htmlFor="person-name-input" className="sr-only">
-                Nombre de la persona
-              </label>
-              <input
-                id="person-name-input"
-                name="personName"
-                type="text"
-                value={newPerson}
-                onChange={(e) => setNewPerson(e.target.value)}
-                placeholder={t('secret_santa_placeholder_name')}
-                aria-label={t('secret_santa_placeholder_name')}
-                className="flex-1 rounded-xl bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-white/10 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#d91a7a] focus:ring-2 focus:ring-pink-50 dark:focus:ring-pink-900/20"
-              />
-              <button
-                type="submit"
-                disabled={!newPerson.trim()}
-                aria-label="Agregar participante a la lista"
-                className="p-2.5 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] disabled:opacity-50 text-white font-bold transition-colors cursor-pointer shadow-xs"
-              >
-                <Plus className="w-5 h-5" aria-hidden="true" />
-              </button>
+            <form onSubmit={handleAddPerson} className="space-y-1.5">
+              <div className="flex gap-2">
+                <label htmlFor="person-name-input" className="sr-only">
+                  Nombre de la persona o pega lista de Excel
+                </label>
+                <input
+                  id="person-name-input"
+                  name="personName"
+                  type="text"
+                  value={newPerson}
+                  onChange={(e) => setNewPerson(e.target.value)}
+                  onPaste={handlePersonInputPaste}
+                  placeholder="Nombre o pega lista de Excel (Ctrl+V)..."
+                  aria-label={t('secret_santa_placeholder_name')}
+                  className="flex-1 rounded-xl bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-white/10 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#d91a7a] focus:ring-2 focus:ring-pink-50 dark:focus:ring-pink-900/20"
+                />
+                <button
+                  type="submit"
+                  disabled={!newPerson.trim()}
+                  aria-label="Agregar participante a la lista"
+                  className="p-2.5 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] disabled:opacity-50 text-white font-bold transition-colors cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-5 h-5" aria-hidden="true" />
+                </button>
+              </div>
+              {pasteFeedback && (
+                <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 px-1">
+                  {pasteFeedback}
+                </p>
+              )}
             </form>
 
             {/* Participants pills */}
-            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[250px] overflow-y-auto pr-1">
               {participants.map((person, idx) => (
                 <div
-                  key={idx}
+                  key={`${person}-${idx}`}
                   className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm text-slate-800 dark:text-zinc-200"
                 >
-                  <span className="font-semibold truncate pr-2">👤 {person}</span>
+                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                    <span className="inline-flex items-center justify-center min-w-6 h-6 px-1.5 rounded-lg bg-pink-100/80 dark:bg-pink-950/50 text-pink-700 dark:text-pink-300 text-[11px] font-mono font-bold shrink-0">
+                      {idx + 1}
+                    </span>
+                    <span className="font-semibold truncate">{person}</span>
+                  </div>
                   <button
                     type="button"
                     onClick={() => handleRemovePerson(idx)}
                     aria-label={`Eliminar a ${person}`}
-                    className="text-slate-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 transition-colors p-1 cursor-pointer"
+                    className="text-slate-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 transition-colors p-1 cursor-pointer shrink-0"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

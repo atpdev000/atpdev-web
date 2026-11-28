@@ -29,13 +29,16 @@ import { playWheelTick, playWinnerFanfare } from '@/lib/soundEffects';
 import { generateSha256Hash } from '@/lib/randomEngine';
 import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
+import { cleanExtractedNames, parsePastedParticipantText } from '@/lib/fileListExtractor';
+
+const DEFAULT_LIST_TEXT =
+  'Valeria Gómez\nDiego Martínez\nCamila Rodríguez\nLucas Fernández\nElena Castillo\nJuan Pérez\nDaniela Sánchez\nRoberto Navarro';
 
 export default function SorteoListaPage() {
   const { t } = useLanguage();
   const [title, setTitle] = useState<string>('Sorteo por Nombres al Azar');
-  const [rawText, setRawText] = useState<string>(
-    'Valeria Gómez\nDiego Martínez\nCamila Rodríguez\nLucas Fernández\nElena Castillo\nJuan Pérez\nDaniela Sánchez\nRoberto Navarro'
-  );
+  const [rawText, setRawText] = useState<string>(DEFAULT_LIST_TEXT);
+  const [pasteFeedback, setPasteFeedback] = useState<string | null>(null);
   const [winnersCount, setWinnersCount] = useState<number>(1);
   const [substitutesCount, setSubstitutesCount] = useState<number>(2);
   const [removeDuplicates, setRemoveDuplicates] = useState<boolean>(true);
@@ -76,24 +79,56 @@ export default function SorteoListaPage() {
     }
   }, []);
 
-  // Parse lines into participants
+  // Parse lines into participants (preserva "APELLIDOS, Nombres" sin partir por la coma interna)
   const getCleanParticipants = (): string[] => {
-    let list = rawText
-      .split(/[\n,]+/)
-      .map((n) => n.trim())
-      .filter((n) => n.length > 0);
-
-    if (removeDuplicates) {
-      list = Array.from(new Set(list));
-    }
-    return list;
+    return cleanExtractedNames(rawText, { dedupe: removeDuplicates });
   };
 
   const participants = getCleanParticipants();
 
-  const handleImportedNames = (newNames: string[]) => {
-    setRawText(newNames.join('\n'));
+  const handleImportedNames = (newNames: string[], mode: 'replace' | 'append' = 'replace') => {
+    if (mode === 'append' && rawText.trim()) {
+      const existing = cleanExtractedNames(rawText, { dedupe: false });
+      const seen = new Set(existing.map((n) => n.toLowerCase()));
+      const additions = removeDuplicates
+        ? newNames.filter((n) => !seen.has(n.toLowerCase()))
+        : newNames;
+      setRawText([...existing, ...additions].join('\n'));
+    } else {
+      setRawText(newNames.join('\n'));
+    }
     playWheelTick();
+  };
+
+  const handleTextareaPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const plainText = e.clipboardData?.getData('text/plain') || '';
+    if (!plainText.trim()) return;
+
+    const { names, isBulkPaste } = parsePastedParticipantText(plainText);
+    if (!isBulkPaste || names.length === 0) return;
+
+    e.preventDefault();
+    const el = e.currentTarget;
+    const isUntouchedDemo = rawText.trim() === DEFAULT_LIST_TEXT.trim();
+    const hasFullSelection =
+      el.selectionStart === 0 && el.selectionEnd === rawText.length;
+
+    if (!rawText.trim() || isUntouchedDemo || hasFullSelection) {
+      setRawText(names.join('\n'));
+      setPasteFeedback(
+        `✓ ${names.length} participantes pegados y ordenados automáticamente.`
+      );
+    } else {
+      const before = rawText.slice(0, el.selectionStart).trimEnd();
+      const after = rawText.slice(el.selectionEnd).trimStart();
+      const merged = [before, names.join('\n'), after].filter(Boolean).join('\n');
+      setRawText(merged);
+      setPasteFeedback(
+        `✓ +${names.length} participantes limpios insertados en orden.`
+      );
+    }
+    playWheelTick();
+    setTimeout(() => setPasteFeedback(null), 5000);
   };
 
   const handleToggleSound = () => {
@@ -250,7 +285,8 @@ export default function SorteoListaPage() {
                 rows={6}
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
-                placeholder={t('names_participants_placeholder')}
+                onPaste={handleTextareaPaste}
+                placeholder="Pega aquí tu lista de Excel o escribe un nombre por línea..."
                 className="w-full p-4 pb-8 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:border-[#d91a7a] dark:focus:border-purple-500 focus:ring-4 focus:ring-pink-50 dark:focus:ring-purple-900/30 transition-all resize-none text-sm leading-relaxed shadow-xs"
               />
               {/* Bottom right counter */}
@@ -258,6 +294,11 @@ export default function SorteoListaPage() {
                 {participants.length}
               </span>
             </div>
+            {pasteFeedback && (
+              <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 px-1">
+                {pasteFeedback}
+              </p>
+            )}
 
             {/* Opciones Avanzadas Toggle */}
             <div className="flex items-center justify-end pt-1">

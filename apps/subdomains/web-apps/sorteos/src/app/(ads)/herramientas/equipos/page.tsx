@@ -19,6 +19,10 @@ import { useLanguage } from '@/context/LanguageContext';
 import { AdBanner } from '@/components/AdBanner';
 import { ListFileImporter } from '@/components/ListFileImporter';
 import { ExportResultHub } from '@/components/ExportResultHub';
+import { cleanExtractedNames, parsePastedParticipantText } from '@/lib/fileListExtractor';
+
+const DEFAULT_EQUIPOS_TEXT =
+  "Alejandro\nBeatriz\nCarlos\nDaniela\nEduardo\nFernanda\nGabriel\nHelena\nIgnacio\nJimena\nKevin\nLaura";
 
 interface TeamResult {
   teamNumber: number;
@@ -186,9 +190,8 @@ const NAMING_PRESETS: NamingPreset[] = [
 
 export default function EquiposPage() {
   const { t } = useLanguage();
-  const [inputText, setInputText] = useState<string>(
-    "Alejandro\nBeatriz\nCarlos\nDaniela\nEduardo\nFernanda\nGabriel\nHelena\nIgnacio\nJimena\nKevin\nLaura"
-  );
+  const [inputText, setInputText] = useState<string>(DEFAULT_EQUIPOS_TEXT);
+  const [pasteFeedback, setPasteFeedback] = useState<string | null>(null);
   
   // Modos de división: por número de equipos vs integrantes por equipo
   const [splitMode, setSplitMode] = useState<'by_teams' | 'by_members'>('by_teams');
@@ -234,11 +237,39 @@ export default function EquiposPage() {
   };
 
   const participantsList = useMemo(() => {
-    return inputText
-      .split('\n')
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+    return cleanExtractedNames(inputText, { dedupe: false });
   }, [inputText]);
+
+  const handleEquiposPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const plainText = e.clipboardData?.getData('text/plain') || '';
+    if (!plainText.trim()) return;
+
+    const { names, isBulkPaste } = parsePastedParticipantText(plainText);
+    if (!isBulkPaste || names.length === 0) return;
+
+    e.preventDefault();
+    const el = e.currentTarget;
+    const isUntouchedDemo = inputText.trim() === DEFAULT_EQUIPOS_TEXT.trim();
+    const hasFullSelection =
+      el.selectionStart === 0 && el.selectionEnd === inputText.length;
+
+    if (!inputText.trim() || isUntouchedDemo || hasFullSelection) {
+      setInputText(names.join('\n'));
+      setPasteFeedback(
+        `✓ ${names.length} participantes pegados y ordenados automáticamente.`
+      );
+    } else {
+      const before = inputText.slice(0, el.selectionStart).trimEnd();
+      const after = inputText.slice(el.selectionEnd).trimStart();
+      const merged = [before, names.join('\n'), after].filter(Boolean).join('\n');
+      setInputText(merged);
+      setPasteFeedback(
+        `✓ +${names.length} participantes limpios insertados en orden.`
+      );
+    }
+    playCardFlip();
+    setTimeout(() => setPasteFeedback(null), 5000);
+  };
 
   // Cálculo del número efectivo de equipos a crear
   const effectiveTeamCount = useMemo(() => {
@@ -516,9 +547,15 @@ export default function EquiposPage() {
               rows={7}
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Ingresa un nombre por línea:&#10;Carlos&#10;María&#10;Juan..."
+              onPaste={handleEquiposPaste}
+              placeholder="Pega aquí tu lista de Excel o ingresa un nombre por línea:&#10;Carlos&#10;María&#10;Juan..."
               className="w-full p-4 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/80 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 text-sm focus:outline-none focus:border-pink-500 dark:focus:border-purple-500 focus:ring-4 focus:ring-pink-500/10 resize-none transition-all shadow-inner font-mono leading-relaxed"
             />
+            {pasteFeedback && (
+              <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 px-1">
+                {pasteFeedback}
+              </p>
+            )}
 
             <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400 px-1 font-mono">
               <span>{participantsList.length} participantes detectados</span>
