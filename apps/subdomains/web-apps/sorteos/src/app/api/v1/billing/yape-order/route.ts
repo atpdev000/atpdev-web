@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getSubdomainConfig } from '@atpdev/database';
 import { db, uid, SorteosOrderRecord } from '@/lib/server/store';
-import { audit, fail, getAuthOrDemo, logEvent, ok } from '@/lib/server/http';
+import { audit, fail, getAuth, logEvent, ok } from '@/lib/server/http';
 import { cleanStr } from '@/lib/server/validators';
 
 function numOr(val: unknown, fallback: number): number {
@@ -14,10 +14,10 @@ function numOr(val: unknown, fallback: number): number {
  * Registra un comprobante Yape/Plin para validación y activación en 1 clic desde admin.atpdev.dev/dashboard/sorteos.
  */
 export async function POST(req: NextRequest) {
-  const auth = getAuthOrDemo(req);
-  const user = db.users.get(auth.userId);
+  const auth = getAuth(req);
+  const user = auth ? db.users.get(auth.userId) : undefined;
   if (!user) {
-    return fail('Inicia sesión antes de registrar tu comprobante de pago.', 401);
+    return fail('Inicia sesión con tu cuenta antes de registrar tu comprobante de pago.', 401);
   }
 
   const body = await req.json().catch(() => ({} as Record<string, unknown>));

@@ -324,7 +324,7 @@ function RegistroContent() {
                   >
                     <div className="capitalize">{p.name}</div>
                     <div className="text-[10px] text-slate-500 dark:text-zinc-500 mt-0.5">
-                      {p.priceMonthly === 0 ? 'Gratis' : `$${p.priceMonthly}/mes`}
+                      {p.priceMonthly === 0 ? 'Gratis' : `$${p.priceMonthly}${t('home_plan_per_month')}`}
                     </div>
                   </button>
                 ))}

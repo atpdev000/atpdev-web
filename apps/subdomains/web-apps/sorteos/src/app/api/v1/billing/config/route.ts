@@ -18,13 +18,24 @@ function numOr(val: unknown, fallback: number): number {
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
+function sanitizeStripeLink(raw: unknown, allowTest: boolean): string {
+  const url = String(raw || '').trim();
+  if (!url || !/^https:\/\/(buy|checkout)\.stripe\.com\//i.test(url)) return '';
+  if (!allowTest && /\/test_/i.test(url)) return '';
+  return url;
+}
+
+function sanitizeMpLink(raw: unknown): string {
+  const url = String(raw || '').trim();
+  if (!url || !/^https?:\/\//i.test(url)) return '';
+  return url;
+}
+
 export async function GET() {
   const sorteosCfg = getSubdomainConfig('sorteos');
-  const descargadorCfg = getSubdomainConfig('descargador');
   const pay = sorteosCfg.payments || {};
-  const fallbackPay = descargadorCfg.payments || {};
 
-  const rawPhone = pay.whatsapp_number || fallbackPay.whatsapp_number || '+51987006572';
+  const rawPhone = pay.whatsapp_number || '+51987006572';
   const digits = rawPhone.replace(/[^\d]/g, '');
   const whatsappNumber = digits.startsWith('51') ? digits : `51${digits}`;
 
@@ -41,27 +52,23 @@ export async function GET() {
   const enterpriseMonthlyPrice = numOr(pay.enterprise_monthly_price, 79.99);
   const enterpriseAnnualPrice = numOr(pay.enterprise_annual_price, 769.9);
   const annualDiscountPercent = Math.min(80, Math.max(0, Math.round(numOr(pay.annual_discount_percent, 20))));
+  const demoModeEnabled = Boolean(pay.demo_mode_enabled === true);
 
-  const stripeMonthlyUrl =
-    pay.stripe_pro_monthly_url ||
-    fallbackPay.stripe_pro_monthly_url ||
-    'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01';
-  const stripeAnnualUrl =
-    pay.stripe_pro_annual_url ||
-    fallbackPay.stripe_pro_annual_url ||
-    'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00';
-  const mercadopagoMonthlyUrl =
-    pay.mercadopago_pro_monthly_url ||
-    fallbackPay.mercadopago_pro_monthly_url ||
-    'https://mpago.la/1HfK5w8';
-  const mercadopagoAnnualUrl =
-    pay.mercadopago_pro_annual_url ||
-    fallbackPay.mercadopago_pro_annual_url ||
-    'https://mpago.la/2EJNTrd';
+  // Nunca exponer links Stripe de prueba (/test_) a usuarios reales cuando Modo Prueba está desactivado,
+  // y nunca reutilizar links de Pro para el plan Business (evita cobro con monto equivocado).
+  const stripeMonthlyUrl = sanitizeStripeLink(pay.stripe_pro_monthly_url, demoModeEnabled);
+  const stripeAnnualUrl = sanitizeStripeLink(pay.stripe_pro_annual_url, demoModeEnabled);
+  const stripeBusinessMonthlyUrl = sanitizeStripeLink(pay.stripe_business_monthly_url, demoModeEnabled);
+  const stripeBusinessAnnualUrl = sanitizeStripeLink(pay.stripe_business_annual_url, demoModeEnabled);
+
+  const mercadopagoMonthlyUrl = sanitizeMpLink(pay.mercadopago_pro_monthly_url);
+  const mercadopagoAnnualUrl = sanitizeMpLink(pay.mercadopago_pro_annual_url);
+  const mercadopagoBusinessMonthlyUrl = sanitizeMpLink(pay.mercadopago_business_monthly_url);
+  const mercadopagoBusinessAnnualUrl = sanitizeMpLink(pay.mercadopago_business_annual_url);
 
   const stripeKey = (process.env.STRIPE_SECRET_KEY || '').trim();
   const hasRealStripeKey =
-    (stripeKey.startsWith('sk_live_') || stripeKey.startsWith('sk_test_')) &&
+    (stripeKey.startsWith('sk_live_') || (demoModeEnabled && stripeKey.startsWith('sk_test_'))) &&
     stripeKey.length > 24 &&
     !/placeholder|dummy|xxx/i.test(stripeKey);
   const proPriceId = (process.env.STRIPE_PRICE_PRO_MONTHLY || '').trim();
@@ -76,12 +83,12 @@ export async function GET() {
     yapeQrUrl: (pay.yape_qr_url || '/yape-qr.jpg').trim(),
     stripeMonthlyUrl,
     stripeAnnualUrl,
-    stripeBusinessMonthlyUrl: pay.stripe_business_monthly_url || stripeMonthlyUrl,
-    stripeBusinessAnnualUrl: pay.stripe_business_annual_url || stripeAnnualUrl,
+    stripeBusinessMonthlyUrl,
+    stripeBusinessAnnualUrl,
     mercadopagoMonthlyUrl,
     mercadopagoAnnualUrl,
-    mercadopagoBusinessMonthlyUrl: pay.mercadopago_business_monthly_url || mercadopagoMonthlyUrl,
-    mercadopagoBusinessAnnualUrl: pay.mercadopago_business_annual_url || mercadopagoAnnualUrl,
+    mercadopagoBusinessMonthlyUrl,
+    mercadopagoBusinessAnnualUrl,
     proMonthlyPrice,
     proAnnualPrice,
     proMonthlyPricePen,
@@ -94,7 +101,9 @@ export async function GET() {
     enterpriseAnnualPrice,
     annualBillingEnabled: pay.annual_billing_enabled !== false,
     annualDiscountPercent,
-    demoModeEnabled: Boolean(pay.demo_mode_enabled === true),
-    demoLicenseCode: pay.demo_mode_enabled === true ? String(pay.demo_license_code || 'SORTEOS-DEMO-2026').trim().toUpperCase() : null,
+    demoModeEnabled,
+    demoLicenseCode: demoModeEnabled
+      ? String(pay.demo_license_code || 'SORTEOS-DEMO-2026').trim().toUpperCase()
+      : null,
   });
 }

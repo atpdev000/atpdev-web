@@ -56,12 +56,12 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     yapePhoneDisplay: '987 006 572',
     yapeHolder: 'Percy Acha Taipe (ATP Dev Perú)',
     yapeQrUrl: '/yape-qr.jpg',
-    stripeMonthlyUrl: 'https://buy.stripe.com/test_5kQdR94GigfOeqxgJ51kA01',
-    stripeAnnualUrl: 'https://buy.stripe.com/test_dRm8wPa0Cd3C2HPakH1kA00',
+    stripeMonthlyUrl: '',
+    stripeAnnualUrl: '',
     stripeBusinessMonthlyUrl: '',
     stripeBusinessAnnualUrl: '',
-    mercadopagoMonthlyUrl: 'https://mpago.la/1HfK5w8',
-    mercadopagoAnnualUrl: 'https://mpago.la/2EJNTrd',
+    mercadopagoMonthlyUrl: '',
+    mercadopagoAnnualUrl: '',
     mercadopagoBusinessMonthlyUrl: '',
     mercadopagoBusinessAnnualUrl: '',
     proMonthlyPrice: 9.99,
@@ -103,8 +103,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   const getCheckoutStripeUrl = (plan: PricingPlan) => {
     if (plan.id === 'business') {
       return billingCycle === 'annual'
-        ? payCfg.stripeBusinessAnnualUrl || payCfg.stripeAnnualUrl
-        : payCfg.stripeBusinessMonthlyUrl || payCfg.stripeMonthlyUrl;
+        ? payCfg.stripeBusinessAnnualUrl
+        : payCfg.stripeBusinessMonthlyUrl;
     }
     return billingCycle === 'annual' ? payCfg.stripeAnnualUrl : payCfg.stripeMonthlyUrl;
   };
@@ -112,8 +112,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   const getCheckoutMercadoPagoUrl = (plan: PricingPlan) => {
     if (plan.id === 'business') {
       return billingCycle === 'annual'
-        ? payCfg.mercadopagoBusinessAnnualUrl || payCfg.mercadopagoAnnualUrl
-        : payCfg.mercadopagoBusinessMonthlyUrl || payCfg.mercadopagoMonthlyUrl;
+        ? payCfg.mercadopagoBusinessAnnualUrl
+        : payCfg.mercadopagoBusinessMonthlyUrl;
     }
     return billingCycle === 'annual' ? payCfg.mercadopagoAnnualUrl : payCfg.mercadopagoMonthlyUrl;
   };
@@ -509,15 +509,17 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
               {payTab === 'yape' && (
                 <div className="space-y-3 text-xs">
-                  <a
-                    href={getCheckoutMercadoPagoUrl(checkoutPlan)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-3 px-4 rounded-xl bg-[#009ee3] hover:bg-[#0089c7] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Pagar S/ {getCheckoutPenPrice(checkoutPlan)} con MercadoPago QR (Yape / Plin)</span>
-                  </a>
+                  {getCheckoutMercadoPagoUrl(checkoutPlan) && (
+                    <a
+                      href={getCheckoutMercadoPagoUrl(checkoutPlan)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-3 px-4 rounded-xl bg-[#009ee3] hover:bg-[#0089c7] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Pagar S/ {getCheckoutPenPrice(checkoutPlan)} con MercadoPago QR (Yape / Plin)</span>
+                    </a>
+                  )}
 
                   <div className="p-4 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2.5 text-center">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
@@ -629,18 +631,39 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
               {payTab === 'card' && (
                 <div className="space-y-3 text-xs">
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                    Paga con Visa, Mastercard, Amex o Apple/Google Pay en nuestra pasarela segura de Stripe. Al confirmar, recibirás tu licencia para activar tu cuenta al instante.
-                  </p>
-                  <a
-                    href={getCheckoutStripeUrl(checkoutPlan)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-3.5 px-4 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    <span>Ir a pago seguro con Tarjeta (Stripe)</span>
-                  </a>
+                  {getCheckoutStripeUrl(checkoutPlan) ? (
+                    <>
+                      <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Paga con Visa, Mastercard, Amex o Apple/Google Pay en nuestra pasarela segura de Stripe. Al confirmar, recibirás tu licencia para activar tu cuenta al instante.
+                      </p>
+                      <a
+                        href={getCheckoutStripeUrl(checkoutPlan)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full py-3.5 px-4 rounded-xl bg-[#d91a7a] hover:bg-[#c2186b] text-white font-extrabold flex items-center justify-center gap-2 shadow-md"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Ir a pago seguro con Tarjeta (Stripe)</span>
+                      </a>
+                    </>
+                  ) : (
+                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                      <p className="font-bold text-slate-800 dark:text-white">
+                        Pago instantáneo disponible por Yape / Plin QR o enlace directo por WhatsApp
+                      </p>
+                      <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Si prefieres pagar con tarjeta internacional (Visa / Mastercard), solicítanos tu enlace seguro por WhatsApp o paga al instante con Yape / Plin QR.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setPayTab('yape')}
+                        className="w-full py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Smartphone className="w-4 h-4" />
+                        <span>Pagar ahora con Yape / Plin QR (S/ {getCheckoutPenPrice(checkoutPlan)})</span>
+                      </button>
+                    </div>
+                  )}
                   <a
                     href={`https://wa.me/${payCfg.whatsappNumber}?text=${encodeURIComponent(
                       `Hola ATP Dev 👋, deseo pagar el plan ${checkoutPlan.name} (${billingCycle}) en Sorteos Pro con tarjeta.`

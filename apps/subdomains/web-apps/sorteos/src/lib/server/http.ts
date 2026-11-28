@@ -51,7 +51,7 @@ export function getAuthOrDemo(req: NextRequest): AuthContext {
       salt: 'demo',
       role: 'user',
       status: 'active',
-      plan: 'pro',
+      plan: 'free',
       language: 'es',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
