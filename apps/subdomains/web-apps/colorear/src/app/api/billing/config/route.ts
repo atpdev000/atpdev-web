@@ -23,7 +23,10 @@ export async function GET() {
     mercadopagoAnnualUrl: cfg.mercadopagoAnnualUrl,
     mercadopagoEditorialAnnualUrl: cfg.mercadopagoEditorialAnnualUrl,
     welcomeCredits: cfg.welcomeCredits,
+    annualBillingEnabled: cfg.annualBillingEnabled,
     annualDiscountPercent: cfg.annualDiscountPercent,
+    demoModeEnabled: cfg.demoModeEnabled,
+    demoLicenseCode: cfg.demoModeEnabled ? cfg.demoLicenseCode : null,
     plans,
     licenseEnabled: true,
   });

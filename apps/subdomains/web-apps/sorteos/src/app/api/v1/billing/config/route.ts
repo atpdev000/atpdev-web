@@ -85,5 +85,7 @@ export async function GET() {
     enterpriseMonthlyPrice,
     enterpriseAnnualPrice,
     annualDiscountPercent,
+    demoModeEnabled: Boolean(pay.demo_mode_enabled === true),
+    demoLicenseCode: pay.demo_mode_enabled === true ? String(pay.demo_license_code || 'SORTEOS-DEMO-2026').trim().toUpperCase() : null,
   });
 }

@@ -184,11 +184,9 @@
       "whatsapp_number": "+51987006572",
       "whatsapp_message_pro": "Hola ATP Dev, deseo activar el Plan Pro Creador en Sorteos Pro. ¿Me brindas los datos de pago por Yape, Plin o Tarjeta?",
       "whatsapp_message_business": "Hola ATP Dev, deseo contratar el Plan Business en Sorteos Pro. ¿Me brindas los datos de activación?",
-      "license_keys": [
-        "VIP-ATP-2026",
-        "SORTEOS-PRO-2026",
-        "SORTEOS-BUSINESS-2026"
-      ],
+      "license_keys": [],
+      "demo_mode_enabled": false,
+      "demo_license_code": "SORTEOS-DEMO-2026",
       "notification_email": "contacto@atpdev.dev"
     },
     "updated_at": "2026-11-27T17:48:00.000Z"
@@ -616,6 +614,7 @@
       "provider": "multi",
       "currency": "USD",
       "welcome_credits": 15,
+      "annual_billing_enabled": false,
       "annual_discount_percent": 20,
       "pro_plan_name": "Pack Creador KDP",
       "pro_credits": 120,
@@ -646,11 +645,9 @@
       "whatsapp_number": "+51987006572",
       "whatsapp_message_pro": "Hola ATP Dev, deseo activar el Pack Creador KDP (120 créditos) en Colorear Pro.",
       "whatsapp_message_business": "Hola ATP Dev, deseo activar el Estudio Editorial Pro (400 créditos/mes) en Colorear Pro.",
-      "license_keys": [
-        "VIP-ATP-2026",
-        "COLOREAR-KDP-120",
-        "COLOREAR-EDITORIAL-400"
-      ],
+      "license_keys": [],
+      "demo_mode_enabled": false,
+      "demo_license_code": "COLOREAR-DEMO-2026",
       "notification_email": "contacto@atpdev.dev"
     },
     "updated_at": "2026-11-27T17:48:00.000Z"

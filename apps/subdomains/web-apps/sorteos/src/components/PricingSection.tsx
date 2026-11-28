@@ -71,6 +71,8 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
     enterpriseMonthlyPrice: 79.99,
     enterpriseAnnualPrice: 769.9,
     annualDiscountPercent: 20,
+    demoModeEnabled: false,
+    demoLicenseCode: null as string | null,
   });
 
   const dynamicPlans: PricingPlan[] = PRICING_PLANS.map((p) => {
@@ -553,14 +555,28 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
               {payTab === 'license' && (
                 <form onSubmit={handleRedeemLicense} className="space-y-3 text-xs">
                   <p className="text-slate-600 dark:text-slate-300">
-                    Ingresa el código de licencia PRO entregado por ATP Dev para activar tu plan inmediatamente:
+                    Ingresa el código privado de licencia PRO entregado por ATP Dev para activar tu plan inmediatamente:
                   </p>
+                  {payCfg.demoModeEnabled && payCfg.demoLicenseCode && (
+                    <div className="rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 px-3 py-2 flex items-center justify-between gap-2">
+                      <span className="text-amber-900 dark:text-amber-200 font-semibold">
+                        Modo Prueba: <code className="font-mono font-bold">{payCfg.demoLicenseCode}</code>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setLicenseCode(payCfg.demoLicenseCode || '')}
+                        className="px-2 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold text-[11px] cursor-pointer"
+                      >
+                        Usar
+                      </button>
+                    </div>
+                  )}
                   <input
                     type="text"
                     required
                     value={licenseCode}
                     onChange={(e) => setLicenseCode(e.target.value.toUpperCase())}
-                    placeholder="Ej. SORTEOS-PRO-2026"
+                    placeholder="XXXX-XXXX-XXXX"
                     className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 font-mono uppercase text-sm text-slate-900 dark:text-white"
                   />
                   {licenseMsg && (

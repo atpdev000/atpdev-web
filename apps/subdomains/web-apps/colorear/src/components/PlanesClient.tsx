@@ -41,7 +41,10 @@ interface BillingConfigState {
   mercadopagoAnnualUrl: string;
   mercadopagoEditorialAnnualUrl: string;
   welcomeCredits: number;
+  annualBillingEnabled: boolean;
   annualDiscountPercent: number;
+  demoModeEnabled: boolean;
+  demoLicenseCode: string | null;
 }
 
 export default function PlanesClient() {
@@ -50,7 +53,7 @@ export default function PlanesClient() {
   const { isEn } = useLanguage();
 
   const [plans, setPlans] = useState<ColorearPlan[]>(COLOREAR_PLANS);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [selectedPlan, setSelectedPlan] = useState<ColorearPlan | null>(null);
   const [payMethod, setPayMethod] = useState<'stripe' | 'yape' | 'license'>('yape');
   const [yapeApp, setYapeApp] = useState<'yape' | 'plin'>('yape');
@@ -74,7 +77,10 @@ export default function PlanesClient() {
     mercadopagoAnnualUrl: 'https://mpago.la/2VEfsvU',
     mercadopagoEditorialAnnualUrl: 'https://mpago.la/2VEfsvU',
     welcomeCredits: 15,
+    annualBillingEnabled: false,
     annualDiscountPercent: 20,
+    demoModeEnabled: false,
+    demoLicenseCode: null,
   });
   const [notice, setNotice] = useState<{
     tone: 'info' | 'warning' | 'error' | 'success';
@@ -102,8 +108,14 @@ export default function PlanesClient() {
             mercadopagoAnnualUrl: d.mercadopagoAnnualUrl || '',
             mercadopagoEditorialAnnualUrl: d.mercadopagoEditorialAnnualUrl || d.mercadopagoAnnualUrl || '',
             welcomeCredits: Number.isFinite(Number(d.welcomeCredits)) ? Number(d.welcomeCredits) : 15,
+            annualBillingEnabled: Boolean(d.annualBillingEnabled === true),
             annualDiscountPercent: Number.isFinite(Number(d.annualDiscountPercent)) ? Number(d.annualDiscountPercent) : 20,
+            demoModeEnabled: Boolean(d.demoModeEnabled === true),
+            demoLicenseCode: d.demoModeEnabled && d.demoLicenseCode ? String(d.demoLicenseCode) : null,
           });
+          if (!d.annualBillingEnabled) {
+            setBillingCycle('monthly');
+          }
           if (Array.isArray(d.plans) && d.plans.length === 3) {
             setPlans(d.plans);
           }
@@ -382,35 +394,37 @@ export default function PlanesClient() {
             : 'La biblioteca pública y el compilador PDF 300 DPI son gratis. Los paquetes de créditos desbloquean generación IA prioritaria sin límites diarios por IP.'}
         </p>
 
-        {/* Billing Cycle Toggle */}
+        {/* Billing Cycle Toggle (solo visible si Facturación Anual está habilitada en Admin) */}
         <div className="pt-2 flex flex-col items-center gap-2">
-          <div className="inline-flex p-1.5 rounded-2xl bg-zinc-200/80 dark:bg-slate-900 border border-zinc-300 dark:border-slate-700">
-            <button
-              type="button"
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors ${
-                billingCycle === 'monthly'
-                  ? 'bg-white dark:bg-slate-800 text-zinc-900 dark:text-white shadow-xs'
-                  : 'text-zinc-600 dark:text-slate-400'
-              }`}
-            >
-              {isEn ? 'Monthly billing' : 'Pago Mensual'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setBillingCycle('annual')}
-              className={`px-5 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-2 transition-colors ${
-                billingCycle === 'annual'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-zinc-600 dark:text-slate-400'
-              }`}
-            >
-              <span>{isEn ? 'Annual billing' : 'Pago Anual'}</span>
-              <span className="px-2 py-0.5 rounded-full bg-yellow-300 text-zinc-950 text-[10px] font-black">
-                -{billingCfg.annualDiscountPercent}%
-              </span>
-            </button>
-          </div>
+          {billingCfg.annualBillingEnabled && (
+            <div className="inline-flex p-1.5 rounded-2xl bg-zinc-200/80 dark:bg-slate-900 border border-zinc-300 dark:border-slate-700">
+              <button
+                type="button"
+                onClick={() => setBillingCycle('monthly')}
+                className={`px-5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-colors ${
+                  billingCycle === 'monthly'
+                    ? 'bg-white dark:bg-slate-800 text-zinc-900 dark:text-white shadow-xs'
+                    : 'text-zinc-600 dark:text-slate-400'
+                }`}
+              >
+                {isEn ? 'Monthly billing' : 'Pago Mensual'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setBillingCycle('annual')}
+                className={`px-5 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-2 transition-colors ${
+                  billingCycle === 'annual'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-zinc-600 dark:text-slate-400'
+                }`}
+              >
+                <span>{isEn ? 'Annual billing' : 'Pago Anual'}</span>
+                <span className="px-2 py-0.5 rounded-full bg-yellow-300 text-zinc-950 text-[10px] font-black">
+                  -{billingCfg.annualDiscountPercent}%
+                </span>
+              </button>
+            </div>
+          )}
           {user && (
             <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" />
@@ -871,15 +885,29 @@ export default function PlanesClient() {
                 <form onSubmit={handleRedeemLicense} className="space-y-4">
                   <p className="text-xs text-zinc-600 dark:text-slate-400 leading-relaxed">
                     {isEn
-                      ? 'Already received an ATP Dev license key via WhatsApp or email? Enter it below to add credits instantly.'
-                      : '¿Ya recibiste una clave de licencia ATP Dev por WhatsApp o correo? Ingrésala abajo para acreditar tus créditos al instante.'}
+                      ? 'Already received a private ATP Dev license key via WhatsApp or email? Enter it below to add credits instantly.'
+                      : '¿Ya recibiste una clave privada de licencia ATP Dev por WhatsApp o correo? Ingrésala abajo para acreditar tus créditos al instante.'}
                   </p>
+                  {billingCfg.demoModeEnabled && billingCfg.demoLicenseCode && (
+                    <div className="rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 px-3 py-2.5 flex items-center justify-between gap-2 text-xs">
+                      <span className="text-amber-900 dark:text-amber-200 font-semibold">
+                        Modo Prueba activo: <code className="font-mono font-bold">{billingCfg.demoLicenseCode}</code>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setLicenseCode(billingCfg.demoLicenseCode || '')}
+                        className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold text-[11px] cursor-pointer shrink-0"
+                      >
+                        Usar
+                      </button>
+                    </div>
+                  )}
                   <input
                     type="text"
                     required
                     value={licenseCode}
                     onChange={(e) => setLicenseCode(e.target.value.toUpperCase())}
-                    placeholder="Ej. COLOREAR-KDP-120"
+                    placeholder="XXXX-XXXX-XXXX"
                     className="w-full rounded-xl border border-zinc-300 dark:border-slate-700 bg-zinc-50 dark:bg-slate-950 px-3.5 py-2.5 text-sm font-mono uppercase tracking-wider text-zinc-900 dark:text-white"
                   />
                   <button

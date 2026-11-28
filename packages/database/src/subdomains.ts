@@ -138,6 +138,7 @@ export interface SubdomainPayments {
   enterprise_monthly_price?: number;
   enterprise_annual_price?: number;
   welcome_credits?: number;
+  annual_billing_enabled?: boolean;
   annual_discount_percent?: number;
   // WhatsApp VIP / Yape / Plin
   yape_holder?: string;
@@ -574,6 +575,7 @@ export const DEFAULT_COLOREAR_CONFIG: SubdomainConfig = {
     provider: 'multi',
     currency: 'USD',
     welcome_credits: 15,
+    annual_billing_enabled: false,
     annual_discount_percent: 20,
     pro_plan_name: 'Pack Creador KDP',
     pro_credits: 120,
@@ -596,7 +598,9 @@ export const DEFAULT_COLOREAR_CONFIG: SubdomainConfig = {
     whatsapp_number: '+51987006572',
     whatsapp_message_pro: 'Hola ATP Dev, deseo activar el Pack Creador KDP en Colorear Pro.',
     whatsapp_message_business: 'Hola ATP Dev, deseo activar el Estudio Editorial Pro en Colorear Pro.',
-    license_keys: ['VIP-ATP-2026', 'COLOREAR-KDP-120', 'COLOREAR-EDITORIAL-400'],
+    license_keys: [],
+    demo_mode_enabled: false,
+    demo_license_code: 'COLOREAR-DEMO-2026',
     notification_email: 'contacto@atpdev.dev'
   },
   updated_at: new Date().toISOString()

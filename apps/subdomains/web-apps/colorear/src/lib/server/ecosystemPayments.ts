@@ -17,9 +17,12 @@ export interface EcosystemPaymentsConfig {
   mercadopagoAnnualUrl: string;
   mercadopagoEditorialAnnualUrl: string;
   licenseKeys: string[];
+  demoModeEnabled: boolean;
+  demoLicenseCode: string;
   stripeApiConfigured: boolean;
   // Precios, créditos y nombres dinámicos editables desde admin.atpdev.dev
   welcomeCredits: number;
+  annualBillingEnabled: boolean;
   annualDiscountPercent: number;
   kdpPlanName: string;
   kdpCredits: number;
@@ -86,7 +89,13 @@ export function getColorearPaymentsConfig(): EcosystemPaymentsConfig {
 
   const jsonKeys = Array.isArray(colorearPay.license_keys)
     ? colorearPay.license_keys.map((k: string) => String(k).trim().toUpperCase()).filter(Boolean)
-    : ['VIP-ATP-2026', 'COLOREAR-KDP-120', 'COLOREAR-EDITORIAL-400'];
+    : [];
+
+  const demoModeEnabled = Boolean(colorearPay.demo_mode_enabled === true);
+  const demoLicenseCode = String(colorearPay.demo_license_code || 'COLOREAR-DEMO-2026')
+    .trim()
+    .toUpperCase();
+  const annualBillingEnabled = Boolean(colorearPay.annual_billing_enabled === true);
 
   const welcomeCredits = Math.max(0, Math.round(parsePositiveNumber(colorearPay.welcome_credits, WELCOME_FREE_CREDITS)));
   const annualDiscountPercent = Math.min(80, Math.max(0, Math.round(parsePositiveNumber(colorearPay.annual_discount_percent, 20))));
@@ -167,8 +176,11 @@ export function getColorearPaymentsConfig(): EcosystemPaymentsConfig {
     mercadopagoAnnualUrl: mpEditorialUrl,
     mercadopagoEditorialAnnualUrl: mpEditorialAnnualUrl,
     licenseKeys: Array.from(new Set([...jsonKeys, ...envKeys])),
+    demoModeEnabled,
+    demoLicenseCode,
     stripeApiConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
     welcomeCredits,
+    annualBillingEnabled,
     annualDiscountPercent,
     kdpPlanName: String(colorearPay.pro_plan_name || 'Pack Creador KDP').trim(),
     kdpCredits,
@@ -255,7 +267,11 @@ export function getDynamicColorearPlans(): ColorearPlan[] {
           periodLabel: `${cfg.editorialCredits} créditos IA prioritarios cada mes`,
           features: plan.es.features.map((f, idx) => {
             if (idx === 0) return `${cfg.editorialCredits} créditos IA prioritarios recargados cada mes`;
-            if (idx === 4) return `Cancela en cualquier momento • Ahorra ${cfg.annualDiscountPercent}% en plan anual`;
+            if (idx === 4) {
+              return cfg.annualBillingEnabled
+                ? `Cancela en cualquier momento • Ahorra ${cfg.annualDiscountPercent}% en plan anual`
+                : 'Cancela en cualquier momento • Sin permanencia ni cobros ocultos';
+            }
             return f;
           }),
         },
@@ -264,7 +280,11 @@ export function getDynamicColorearPlans(): ColorearPlan[] {
           periodLabel: `${cfg.editorialCredits} priority AI credits every month`,
           features: plan.en.features.map((f, idx) => {
             if (idx === 0) return `${cfg.editorialCredits} priority AI credits refilled every month`;
-            if (idx === 4) return `Cancel anytime • Save ${cfg.annualDiscountPercent}% with annual billing`;
+            if (idx === 4) {
+              return cfg.annualBillingEnabled
+                ? `Cancel anytime • Save ${cfg.annualDiscountPercent}% with annual billing`
+                : 'Cancel anytime • Zero lock-in or hidden fees';
+            }
             return f;
           }),
         },

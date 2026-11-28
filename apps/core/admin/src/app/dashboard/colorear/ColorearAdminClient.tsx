@@ -770,6 +770,30 @@ export default function ColorearAdminClient({
                     className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-amber-300 font-mono text-xs"
                   />
                 </div>
+                <div className="pt-1 flex items-center justify-between gap-2 border-t border-slate-800/80">
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-300 block">Mostrar Ciclo Anual</span>
+                    <span className="text-[10px] text-slate-500">
+                      {payments.annual_billing_enabled ? 'Visible en /planes' : 'Oculto (Solo S/ 29 y S/ 59)'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, annual_billing_enabled: !payments.annual_billing_enabled },
+                      })
+                    }
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition cursor-pointer ${
+                      payments.annual_billing_enabled
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-slate-800 text-slate-400 border-slate-700'
+                    }`}
+                  >
+                    {payments.annual_billing_enabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
               </div>
 
               {/* Pack Creador KDP */}
@@ -1201,12 +1225,108 @@ export default function ColorearAdminClient({
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Key size={15} className="text-amber-400" />
-                <span>Claves de Licencia / Activación Instantánea</span>
-              </h3>
-              <p className="text-xs text-slate-400">
-                Los clientes pueden canjear estas claves en <code className="text-amber-300">/planes</code>. Claves con <code className="text-amber-300">EDITORIAL</code> o <code className="text-amber-300">VIP</code> acreditan 400 créditos; el resto 120 créditos KDP.
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Key size={15} className="text-amber-400" />
+                    <span>Licencias & Modo Pruebas</span>
+                  </h3>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      payments.demo_mode_enabled
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    }`}
+                  >
+                    {payments.demo_mode_enabled ? '🧪 Modo Pruebas (Visible en Web)' : '🔒 Producción Estricta'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
+                      const code = `ATP-KDP-${rnd}`;
+                      const existing = payments.license_keys || [];
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, license_keys: [...existing, code] },
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold cursor-pointer"
+                  >
+                    + Clave KDP
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
+                      const code = `ATP-EDIT-${rnd}`;
+                      const existing = payments.license_keys || [];
+                      setConfig({
+                        ...config,
+                        payments: { ...payments, license_keys: [...existing, code] },
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 text-amber-300 border border-amber-500/30 text-[11px] font-bold cursor-pointer"
+                  >
+                    + Clave Editorial
+                  </button>
+                </div>
+              </div>
+
+              {/* Control de Modo Pruebas / Código Demo (igual a Descargador Pro) */}
+              <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-bold text-white">Código de Prueba Rápido en /planes (Solo Testing)</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      {payments.demo_mode_enabled
+                        ? '⚠️ ACTIVO: El código de prueba funciona y se muestra en /planes. Desactívalo al terminar tus pruebas.'
+                        : '✅ DESACTIVADO (Recomendado en Producción): No se acepta ni muestra ningún código de ejemplo.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setConfig({
+                        ...config,
+                        payments: {
+                          ...payments,
+                          demo_mode_enabled: !payments.demo_mode_enabled,
+                          demo_license_code: payments.demo_license_code || 'COLOREAR-DEMO-2026',
+                        },
+                      })
+                    }
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer shrink-0 ${
+                      payments.demo_mode_enabled
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                        : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                    }`}
+                  >
+                    {payments.demo_mode_enabled ? 'Desactivar Modo Prueba' : 'Activar para Pruebas'}
+                  </button>
+                </div>
+                {payments.demo_mode_enabled && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="text-[11px] text-amber-300 font-bold">Código Demo:</span>
+                    <input
+                      type="text"
+                      value={payments.demo_license_code || 'COLOREAR-DEMO-2026'}
+                      onChange={(e) =>
+                        setConfig({
+                          ...config,
+                          payments: { ...payments, demo_license_code: e.target.value.toUpperCase() },
+                        })
+                      }
+                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 text-amber-300 font-mono text-xs uppercase outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <p className="text-[11px] text-slate-400">
+                Claves privadas activas (nunca se muestran en la web). Claves con <code className="text-amber-300">EDIT</code> o <code className="text-amber-300">EDITORIAL</code> acreditan {payments.business_credits ?? 400} cr.; el resto {payments.pro_credits ?? 120} cr.
               </p>
 
               <div className="flex gap-2">
@@ -1214,7 +1334,7 @@ export default function ColorearAdminClient({
                   type="text"
                   value={newLicenseKey}
                   onChange={(e) => setNewLicenseKey(e.target.value.toUpperCase())}
-                  placeholder="EJ: COLOREAR-VIP-2026"
+                  placeholder="Clave privada manual (ej. ATP-KDP-9X2F)"
                   className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs focus:border-amber-500 outline-none"
                 />
                 <button
@@ -1228,22 +1348,28 @@ export default function ColorearAdminClient({
               </div>
 
               <div className="flex flex-wrap gap-2">
-                {(payments.license_keys || []).map((key) => (
-                  <span
-                    key={key}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold"
-                  >
-                    <span>{key}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveLicenseKey(key)}
-                      className="text-amber-400 hover:text-rose-400 cursor-pointer"
-                      aria-label={`Eliminar licencia ${key}`}
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                {(payments.license_keys || []).length === 0 ? (
+                  <span className="text-[11px] text-slate-500 italic">
+                    Sin claves activas. Genera una clave única arriba cuando quieras activar un cliente manualmente.
                   </span>
-                ))}
+                ) : (
+                  (payments.license_keys || []).map((key) => (
+                    <span
+                      key={key}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold"
+                    >
+                      <span>{key}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveLicenseKey(key)}
+                        className="text-amber-400 hover:text-rose-400 cursor-pointer"
+                        aria-label={`Eliminar licencia ${key}`}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </span>
+                  ))
+                )}
               </div>
             </div>
           </div>

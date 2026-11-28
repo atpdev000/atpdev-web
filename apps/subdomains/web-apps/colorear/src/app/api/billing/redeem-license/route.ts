@@ -19,17 +19,21 @@ export async function POST(req: NextRequest) {
   }
 
   const cfg = getColorearPaymentsConfig();
-  if (!cfg.licenseKeys.includes(rawCode)) {
+  const isValidProductionKey = cfg.licenseKeys.includes(rawCode);
+  const isValidDemoKey = cfg.demoModeEnabled && Boolean(cfg.demoLicenseCode) && rawCode === cfg.demoLicenseCode;
+
+  if (!isValidProductionKey && !isValidDemoKey) {
     return NextResponse.json(
       {
         error:
-          'Código de licencia no válido o expirado. Verifica tu clave o escríbenos por WhatsApp.',
+          'Código de licencia no válido o expirado. Verifica tu clave privada o escríbenos por WhatsApp.',
       },
       { status: 400 }
     );
   }
 
-  const isEditorial = rawCode.includes('EDITORIAL') || rawCode.includes('400') || rawCode.includes('VIP');
+  const isEditorial =
+    !isValidDemoKey && (rawCode.includes('EDITORIAL') || rawCode.includes('EDIT') || rawCode.includes('400'));
   const planId = isEditorial ? 'editorial' : 'creador';
   const credits = isEditorial ? cfg.editorialCredits : cfg.kdpCredits;
 

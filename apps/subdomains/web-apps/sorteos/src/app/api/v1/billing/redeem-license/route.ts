@@ -13,25 +13,25 @@ export async function POST(req: NextRequest) {
   }
 
   const sorteosCfg = getSubdomainConfig('sorteos');
-  const descargadorCfg = getSubdomainConfig('descargador');
-  const allowedKeys = Array.from(
-    new Set([
-      ...(sorteosCfg.payments?.license_keys || []),
-      ...(descargadorCfg.payments?.license_keys || []),
-      'VIP-ATP-2026',
-      'SORTEOS-PRO-2026',
-      'SORTEOS-BUSINESS-2026',
-    ])
-  ).map((k) => String(k).trim().toUpperCase());
+  const pay = sorteosCfg.payments || {};
+  const allowedKeys = Array.isArray(pay.license_keys)
+    ? pay.license_keys.map((k) => String(k).trim().toUpperCase()).filter(Boolean)
+    : [];
 
-  if (!allowedKeys.includes(rawCode)) {
-    return fail('Código de licencia no válido o expirado. Escríbenos por WhatsApp para soporte.', 400);
+  const demoModeEnabled = Boolean(pay.demo_mode_enabled === true);
+  const demoCode = String(pay.demo_license_code || 'SORTEOS-DEMO-2026').trim().toUpperCase();
+  const isValidProductionKey = allowedKeys.includes(rawCode);
+  const isValidDemoKey = demoModeEnabled && Boolean(demoCode) && rawCode === demoCode;
+
+  if (!isValidProductionKey && !isValidDemoKey) {
+    return fail('Código de licencia no válido o expirado. Verifica tu clave privada o escríbenos por WhatsApp.', 400);
   }
 
   const user = db.users.get(auth.userId);
   if (!user) return fail('Inicia sesión antes de activar tu licencia.', 401);
 
-  const grantedPlan: 'pro' | 'business' = rawCode.includes('BUSINESS') ? 'business' : 'pro';
+  const grantedPlan: 'pro' | 'business' =
+    !isValidDemoKey && (rawCode.includes('BUSINESS') || rawCode.includes('BIZ')) ? 'business' : 'pro';
   user.plan = grantedPlan;
   user.updatedAt = new Date().toISOString();
 

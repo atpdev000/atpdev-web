@@ -2044,16 +2044,108 @@ export default function SorteosAdminClient({
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-4">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Key size={15} className="text-amber-400" />
-                <span>Claves de Licencia (Canje en /planes)</span>
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Key size={15} className="text-amber-400" />
+                    <span>Licencias & Modo Pruebas</span>
+                  </h3>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      siteConfig.payments?.demo_mode_enabled
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    }`}
+                  >
+                    {siteConfig.payments?.demo_mode_enabled ? '🧪 Modo Pruebas' : '🔒 Producción Estricta'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
+                      const code = `ATP-PRO-${rnd}`;
+                      const existing = siteConfig.payments?.license_keys || [];
+                      setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), license_keys: [...existing, code] }
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-pink-600/20 hover:bg-pink-600/40 text-pink-300 border border-pink-500/30 text-[11px] font-bold cursor-pointer"
+                  >
+                    + Clave PRO
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
+                      const code = `ATP-BIZ-${rnd}`;
+                      const existing = siteConfig.payments?.license_keys || [];
+                      setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), license_keys: [...existing, code] }
+                      });
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30 text-[11px] font-bold cursor-pointer"
+                  >
+                    + Clave Business
+                  </button>
+                </div>
+              </div>
+
+              {/* Control de Modo Pruebas / Demo Code (igual a Descargador Pro) */}
+              <div className="p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-bold text-white">Código de Prueba Rápido en /planes</p>
+                    <p className="text-[11px] text-slate-400">
+                      {siteConfig.payments?.demo_mode_enabled
+                        ? '⚠️ ACTIVO: Visible y funcional en /planes solo para testing.'
+                        : '✅ DESACTIVADO (Producción): Ningún código de ejemplo es aceptado.'}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSiteConfig({
+                      ...siteConfig,
+                      payments: {
+                        ...(siteConfig.payments || {}),
+                        demo_mode_enabled: !siteConfig.payments?.demo_mode_enabled,
+                        demo_license_code: siteConfig.payments?.demo_license_code || 'SORTEOS-DEMO-2026',
+                      }
+                    })}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer shrink-0 ${
+                      siteConfig.payments?.demo_mode_enabled
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        : 'bg-slate-800 text-slate-300 border-slate-700'
+                    }`}
+                  >
+                    {siteConfig.payments?.demo_mode_enabled ? 'Desactivar Modo Prueba' : 'Activar para Pruebas'}
+                  </button>
+                </div>
+                {siteConfig.payments?.demo_mode_enabled && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="text-[11px] text-amber-300 font-bold">Código Demo:</span>
+                    <input
+                      type="text"
+                      value={siteConfig.payments?.demo_license_code || 'SORTEOS-DEMO-2026'}
+                      onChange={e => setSiteConfig({
+                        ...siteConfig,
+                        payments: { ...(siteConfig.payments || {}), demo_license_code: e.target.value.toUpperCase() }
+                      })}
+                      className="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-amber-500/40 text-amber-300 font-mono text-xs uppercase outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={newSorteosLicenseKey}
                   onChange={e => setNewSorteosLicenseKey(e.target.value.toUpperCase())}
-                  placeholder="EJ: SORTEOS-VIP-2026"
+                  placeholder="Clave privada manual (ej. ATP-PRO-9X2F)"
                   className="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-amber-300 font-mono text-xs"
                 />
                 <button
@@ -2076,24 +2168,30 @@ export default function SorteosAdminClient({
                 </button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {(siteConfig.payments?.license_keys || []).map(k => (
-                  <span key={k} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold">
-                    <span>{k}</span>
-                    <button
-                      type="button"
-                      onClick={() => setSiteConfig({
-                        ...siteConfig,
-                        payments: {
-                          ...(siteConfig.payments || {}),
-                          license_keys: (siteConfig.payments?.license_keys || []).filter(item => item !== k)
-                        }
-                      })}
-                      className="text-amber-400 hover:text-rose-400 cursor-pointer"
-                    >
-                      <Trash2 size={12} />
-                    </button>
+                {(siteConfig.payments?.license_keys || []).length === 0 ? (
+                  <span className="text-[11px] text-slate-500 italic">
+                    Sin claves activas. Genera una clave privada arriba para un cliente.
                   </span>
-                ))}
+                ) : (
+                  (siteConfig.payments?.license_keys || []).map(k => (
+                    <span key={k} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold">
+                      <span>{k}</span>
+                      <button
+                        type="button"
+                        onClick={() => setSiteConfig({
+                          ...siteConfig,
+                          payments: {
+                            ...(siteConfig.payments || {}),
+                            license_keys: (siteConfig.payments?.license_keys || []).filter(item => item !== k)
+                          }
+                        })}
+                        className="text-amber-400 hover:text-rose-400 cursor-pointer"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </span>
+                  ))
+                )}
               </div>
             </div>
           </div>
